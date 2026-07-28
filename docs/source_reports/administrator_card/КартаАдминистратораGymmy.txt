@@ -1,0 +1,8 @@
+  КартаАдминистратораGymmy  let
+    Источник = Odbc.Query("Driver={PostgreSQL Unicode};Server=virt207.worldclass.nnov.ru; Database=gymdb_test", "--РегистрСведений.ЖР_СКУД (Основная)#(lf)SELECT #(lf)#(tab)#(tab)_Period Период#(lf)#(tab)#(tab),encode(_Fld5837RRef,'hex') Терминал#(lf)#(tab)#(tab),encode(_Fld5838RRef,'hex') Клиент#(lf)#(tab)#(tab),encode(_Fld5840RRef,'hex') Событие#(lf)#(tab)#(tab),_Fld5841 Успех#(lf),cast(_Reference141X1._Description as varchar(1000)) ФИОКлиента#(lf)FROM _InfoRg5836#(lf)left join _Reference141X1 on#(lf)_Fld5838RRef = _Reference141X1._IDRRef#(lf)#(lf)#(lf)where#(lf)_Period>'01.01.2025'#(lf)and _Reference141X1._Code in ('И00134834','001365180','001365168','001365170','001365171','001365172','001365174','001365175','001365177','001365178','001365167','001365166') --КартаАдминистратора#(lf)and encode(_Fld5840RRef,'hex') in ('b2fad15d56e30d954d09c05642fff512','b414fbc9cd1b4ef1401cbe6978d40f7e')--ВходиВыход"),
+    #"Условный столбец добавлен" = Table.AddColumn(Источник, "Вход/Выход", each if [Событие] = "b2fad15d56e30d954d09c05642fff512" then "Выход" else if [Событие] = "b414fbc9cd1b4ef1401cbe6978d40f7e" then "Вход" else null),
+    #"Разделить столбец по разделителю" = Table.SplitColumn(#"Условный столбец добавлен", "ФИОКлиента", Splitter.SplitTextByEachDelimiter({" "}, QuoteStyle.Csv, true), {"ФИО", "Клуб"}),
+    #"Измененный тип" = Table.TransformColumnTypes(#"Разделить столбец по разделителю",{{"ФИО", type text}, {"Клуб", type text}, {"Период", type date}}),
+    #"Другие удаленные столбцы" = Table.SelectColumns(#"Измененный тип",{"Период", "Клуб", "Вход/Выход"})
+in
+    #"Другие удаленные столбцы"

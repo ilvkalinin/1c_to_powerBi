@@ -1,0 +1,199 @@
+
+
+Даты планирования  let    Source = List.Dates(DateTime.Date(DateTime.FixedLocalNow()), 365, #duration(-1,0,0,0)),
+#"Converted to Table" = Table.FromList(Source, Splitter.SplitByNothing(), null, null, ExtraValues.Error),
+    #"Измененный тип" = Table.TransformColumnTypes(#"Converted to Table",{{"Column1", type date}})
+in
+    #"Измененный тип"  Сотрудники  let
+    Источник = Odbc.Query("Driver={PostgreSQL Unicode};Server=virt207.worldclass.nnov.ru; Database=gymdb_test;Timeout=300;Fetch=10000;UseDeclareFetch=1;", "--РегистрСведений.НастройкиСотрудников (Основная)#(lf)SELECT #(lf)                     _Reference225._Description Сотрудник#(lf)                         ,_Reference101._Description Должность#(lf)#(tab)#(tab),_Fld6298 ДатаПриема#(lf)#(tab)#(tab),_Fld6299 ДатаУвольнения#(lf)#(lf)FROM _InfoRg6291#(lf)join _Reference225 on #(lf)_InfoRg6291._Fld6292RRef = _Reference225._IDRRef#(lf)join _Reference101 on#(lf)_InfoRg6291._Fld6296RRef = _Reference101._IDRRef#(lf)")
+in
+    Источник  Взаимодействия2026  let
+    Источник = Odbc.Query("Driver={PostgreSQL Unicode};Server=virt207.worldclass.nnov.ru; Database=gymdb_test;Timeout=300;Fetch=10000;UseDeclareFetch=1;", "--Справочник.Взаимодействия (Основная)#(lf)SELECT #(lf)#(tab)#(tab)encode(_Reference67._IDRRef,'hex') Ссылка#(lf)        ,_Reference141X1._Code КодКлиента#(lf)        ,_Reference141X1._Description ФИО_Клиента#(lf)        ,cast(_Reference141X1._Fld1531 as varchar(1000)) ТелефонКлиента#(lf)#(tab)#(tab),_Reference132._Description Клуб#(lf)        ,cast(_Reference106._Fld1200 as varchar(1000)) ОписаниеЗадания#(lf)        ,_Reference67._Description НаименованиеВзаимодействия#(lf)        ,CASE _Reference67._Fld831RRef#(lf)                WHEN decode('b538e5326d9fc9a943c11fd0e7a0e678','hex') THEN 'Встреча'#(lf)                WHEN decode('af240c30136a9c4e4c4d477d359e0f03','hex') THEN 'Заявка на обратный звонок'#(lf)                WHEN decode('8590e885ee4c688946c3e23782968752','hex') THEN 'Входящий звонок'#(lf)                WHEN decode('8d7225693e34b52f450fe5181ac00cb9','hex') THEN 'Исходящий звонок'#(lf)                WHEN decode('9db9fdbf6bd80f2044eb2835157b3bc8','hex') THEN 'Обратная связь'#(lf)                WHEN decode('8b888f0c4a5eb1724b77b72ebeffdf6b','hex') THEN 'Онлайн покупка'#(lf)                WHEN decode('8cdb19ca805f72d94dfd36278e121b82','hex') THEN 'Отмена гостевого визита'#(lf)                WHEN decode('8f6da46ad3a0c51b4bb9feb594cb3b9c','hex') THEN 'Оформление'#(lf)                WHEN decode('a991e34cdfd2527449f98fb5c998a54d','hex') THEN 'Переход по клику'#(lf)                WHEN decode('87c74245c038b6244d8f6f7169c0d545','hex') THEN 'Регистрация гостевого визита'#(lf)                WHEN decode('b70ab7149b54e8f240c0203b5ae78b63','hex') THEN 'Регистрация рекомендации'#(lf)                WHEN decode('8d375d1bd8b128d447da1f927d95614c','hex') THEN 'Уведомление'#(lf)                WHEN decode('952f4279216ec5844b0b165542d2d0d4','hex') THEN 'Чат'#(lf)                WHEN decode('811e1e78f495bbd940b19032400397a3','hex') THEN 'Входящее письмо'#(lf)                WHEN decode('b86111863fbaefeb42b967aaa9ae4ce2','hex') THEN 'Исходящее письмо'            #(lf)                ELSE null#(lf)        END as ВидСобытия#(lf)                ,case #(lf)                      when _InfoRg7146._Fld7150 is null#(lf)                      then _Fld820#(lf)                      else _InfoRg7146._Fld7150#(lf)                end as ДатаВзаимодействия#(lf)#(tab)#(tab),_Fld823 ДатаСоздания#(lf)#(tab)#(tab),_Fld820 ВремяНачалаВзаимодействия#(lf)#(tab)#(tab),_Fld821 ВремяОкончанияВзаимодействия#(lf)#(tab)#(tab),_Fld822 ДатаПлан#(lf)        ,_reference224._Description СостояниеВзаимодействия#(lf)        ,CASE _Reference67._Fld830RRef#(lf)                WHEN decode('b78f16cfde0c1e1f4f7c0ae8d942393d','hex') THEN 'Выполнено'#(lf)                WHEN decode('83b62b0bd3908a65448b72ca1ec17e94','hex') THEN 'Не выполнено'#(lf)                WHEN decode('aef6c17befe0705047f834208813539a','hex') THEN 'Отменено'#(lf)                ELSE null#(lf)        END as СтатусВзаимодействия#(lf)        ,_reference225._Description Менеджер#(lf)        ,CASE _Reference106._Fld1190RRef#(lf)                WHEN decode('bc06e4b21430ebfb44a67a65c46d41f9','hex') THEN 'New'#(lf)                WHEN decode('9e369ac955bf602149e17b549b0f1498','hex') THEN 'Ex'#(lf)                WHEN decode('91e4594e35ce15d847c4a3f32e1e18f2','hex') THEN 'Renew'#(lf)                ELSE null#(lf)        END as ВидСтажа#(lf)        ,CASE _Reference106._Fld1204RRef#(lf)                WHEN decode('a596b91e9b85de1a4f63e088902e2513','hex') THEN 'Действительный'#(lf)                WHEN decode('bc99c42e4b5499f4422c9a94b1a2c7bc','hex') THEN 'Бывший'#(lf)                WHEN decode('8b9747f5715f8b8f452e652aeaa55c8c','hex') THEN 'Потенциальный'#(lf)                ELSE null#(lf)        END as СтатусКлиента#(lf)        ,1 as Количество#(lf)        ,_Reference202._Description ПричинаОтмены#(lf)        ,_Reference89._Description Воронка#(lf)        ,_Reference89._Code КодВоронки#(lf)        ,_Reference145._Description МаркетинговаяКампания#(lf)        ,_Reference145._Code КодКампании#(lf)        ,_Reference122._Description Канал#(lf)        ,encode(_Reference106._Fld1194RRef,'hex') КаналСсылка#(lf)                ,case#(lf)                     when#(lf)                         case #(lf)                             when _InfoRg7146._Fld7148 is null#(lf)                             then '01.01.0001 0:00:00'#(lf)                             else _InfoRg7146._Fld7148#(lf)                         end <> '01.01.0001 0:00:00'#(lf)                     then 1 #(lf)                     else 0#(lf)                 end as КлиентВзялТрубку#(lf)#(lf)#(lf)FROM _Reference67#(lf)#(lf)left join _Reference106 on #(lf)_Reference67._OwnerIDRRef = _Reference106._IDRRef#(lf)left join _Reference141X1 on#(lf)_Reference106._Fld1196RRef = _Reference141X1._IDRRef#(lf)left join _Reference132 on #(lf)_Reference106._Fld1195RRef = _Reference132._IDRRef#(lf)left join _Reference225 on #(lf)_Reference67._Fld824RRef = _Reference225._IDRRef#(lf)left join _Reference89 on #(lf)_Reference106._Fld1191RRef = _Reference89._IDRRef#(lf)left join _Reference145 on #(lf)_Reference106._Fld1197RRef = _Reference145._IDRRef#(lf)left join _Reference202 on #(lf)_Reference67._Fld828RRef = _Reference202._IDRRef#(lf)left join _Reference224 on #(lf)_Reference67._Fld829RRef = _Reference224._IDRRef#(lf)left join _Reference122 on #(lf)_Reference106._Fld1194RRef = _Reference122._IDRRef#(lf)#(lf)left join  _InfoRg7146 on #(lf)_Reference67._IDRRef =  _InfoRg7146._Fld7151RRef #(lf)#(lf)where #(lf)case #(lf)                      when _InfoRg7146._Fld7150 is null#(lf)                      then _Fld820#(lf)                      else _InfoRg7146._Fld7150#(lf)                end >'01.01.2026' #(lf)and #(lf)case #(lf)                      when _InfoRg7146._Fld7150 is null#(lf)                      then _Fld820#(lf)                      else _InfoRg7146._Fld7150#(lf)                end <'01.01.2027'#(lf)and cast(_Reference89._Description as varchar(1000)) in ('Продажа клубной карты','Сервисная воронка ОП', 'Корпоративная продажа')#(lf)#(lf)"),
+    #"Добавлен пользовательский объект1" = Table.AddColumn(Источник, "Условие", each if ([Воронка] = "Сервисная воронка ОП" and ([МаркетинговаяКампания] = "Заявка c Jivo-site Физкульт" or [МаркетинговаяКампания] = "Заявка с Jivo-site (Пушкинский)"))
+then 1
+else 0),
+    #"Строки с примененным фильтром" = Table.SelectRows(#"Добавлен пользовательский объект1", each ([Условие] = 0)),
+    #"Удаленные столбцы" = Table.RemoveColumns(#"Строки с примененным фильтром",{"Условие"}),
+    #"Объединенные запросы" = Table.NestedJoin(#"Удаленные столбцы", {"Менеджер"}, Сотрудники, {"Сотрудник"}, "Сотрудники", JoinKind.LeftOuter),
+    #"Развернутый элемент Сотрудники" = Table.ExpandTableColumn(#"Объединенные запросы", "Сотрудники", {"Должность", "ДатаПриема", "ДатаУвольнения"}, {"Должность", "ДатаПриема", "ДатаУвольнения"}),
+    #"Замененное значение" = Table.ReplaceValue(#"Развернутый элемент Сотрудники",#datetime(1, 1, 1, 0, 0, 0),#datetime(2099, 12, 31, 0, 0, 0),Replacer.ReplaceValue,{"ДатаУвольнения"}),
+    #"Добавлен пользовательский объект" = Table.AddColumn(#"Замененное значение", "Фильтр по должности", each if [Должность] = null then 0 else 
+if List.AllTrue({
+    [ДатаПриема]<=[ДатаСоздания],
+    [ДатаУвольнения]>=[ДатаСоздания]}) then 1 else 0),
+    #"Строки с примененным фильтром1" = Table.SelectRows(#"Добавлен пользовательский объект", each ([Должность] = "Менеджер ОП" or [Должность] = "Старший менеджер ОП") and ([Фильтр по должности] = 1)),
+    #"Удаленные дубликаты1" = Table.Distinct(#"Строки с примененным фильтром1", {"КодКлиента", "ФИО_Клиента", "ТелефонКлиента", "Клуб", "НаименованиеВзаимодействия", "ВидСобытия", "ДатаВзаимодействия", "ВремяНачалаВзаимодействия", "ВремяОкончанияВзаимодействия", "СостояниеВзаимодействия", "ВидСтажа"}),
+    #"Вставлено: начало месяца" = Table.AddColumn(#"Удаленные дубликаты1", "Начало месяца", each Date.StartOfMonth([ДатаВзаимодействия]), type datetime),
+    #"Измененный тип" = Table.TransformColumnTypes(#"Вставлено: начало месяца",{{"Начало месяца", type date}, {"ВремяНачалаВзаимодействия", type time},{"ВремяОкончанияВзаимодействия", type time}})
+in
+    #"Измененный тип"  Норматив по заявкам  let
+    Источник = Excel.Workbook(File.Contents("K:\Корпоративный центр\Департамент маркетинга и продаж\Внутренние документы\Калинин\Отчеты\Прочее\2024\06\СД 0158127\данные для отчета по загрузке.xlsx"), null, true),
+    Лист1_Sheet = Источник{[Item="Лист1",Kind="Sheet"]}[Data],
+    #"Удаленные столбцы" = Table.RemoveColumns(Лист1_Sheet,{"Column3"}),
+    #"Повышенные заголовки" = Table.PromoteHeaders(#"Удаленные столбцы", [PromoteAllScalars=true]),
+    #"Переименованные столбцы" = Table.RenameColumns(#"Повышенные заголовки",{{"Column1", "Вид события"}}),
+    #"Измененный тип" = Table.TransformColumnTypes(#"Переименованные столбцы",{{"Время", type number}}),
+    #"Добавлен пользовательский объект" = Table.AddColumn(#"Измененный тип", "Время, дней", each [Время]/60/24),
+    #"Измененный тип1" = Table.TransformColumnTypes(#"Добавлен пользовательский объект",{{"Время, дней", type duration}}),
+    #"Добавлен пользовательский объект1" = Table.AddColumn(#"Измененный тип1", "Сеть", each "Физкульт"),
+    #"Добавленный запрос" = Table.Combine({#"Добавлен пользовательский объект1", #"Норматив по заявкам П"}),
+    #"Вставлено: объединенный столбец" = Table.AddColumn(#"Добавленный запрос", "СуперКлюч", each Text.Combine({[Сеть], [Вид события]}, ""), type text)
+in
+    #"Вставлено: объединенный столбец"  Норматив по заявкам П  let
+    Источник = Excel.Workbook(File.Contents("K:\Корпоративный центр\Департамент маркетинга и продаж\Внутренние документы\Калинин\Отчеты\Прочее\2024\06\СД 0158127\данные для отчета по загрузке Пушка.xlsx"), null, true),
+    Лист1_Sheet = Источник{[Item="Лист1",Kind="Sheet"]}[Data],
+    #"Повышенные заголовки" = Table.PromoteHeaders(Лист1_Sheet, [PromoteAllScalars=true]),
+    #"Переименованные столбцы" = Table.RenameColumns(#"Повышенные заголовки",{{"Column1", "Вид события"}}),
+    #"Измененный тип" = Table.TransformColumnTypes(#"Переименованные столбцы",{{"Время", type number}}),
+    #"Добавлен пользовательский объект" = Table.AddColumn(#"Измененный тип", "Время, дней", each [Время]/60/24),
+    #"Измененный тип1" = Table.TransformColumnTypes(#"Добавлен пользовательский объект",{{"Время, дней", type duration}}),
+    #"Добавлен пользовательский объект1" = Table.AddColumn(#"Измененный тип1", "Сеть", each "Пушкинский")
+in
+    #"Добавлен пользовательский объект1"  Треды  let
+    Источник = Odbc.Query("Driver={PostgreSQL Unicode};Server=virt207.worldclass.nnov.ru; Database=gymdb_test;Timeout=300;Fetch=10000;UseDeclareFetch=1;", "--РегистрСведений.ИсторияТредовEdna (Основная)#(lf)SELECT #(lf)#(tab)#(tab)_Period Период#(lf)#(tab)#(tab),_Fld6004 ИдентификаторТреда#(lf)#(tab)#(tab),_Reference225._Description Сотрудник#(lf)#(tab)#(tab),_Reference141X1._Description Клиент#(lf)#(tab)#(tab),_Fld6007 ДатаНачала#(lf)#(tab)#(tab),_Fld6008 ДатаОкончания#(lf)FROM _InfoRg6003#(lf)#(lf)#(tab)left join _Reference225#(lf)    on _Reference225._IDRRef = _InfoRg6003._Fld6005RRef#(lf)#(lf)#(tab)#(tab)left join _Reference141X1#(lf)    #(tab)on _Reference141X1._IDRRef = _InfoRg6003._Fld6006RRef"),
+    #"Вставлено: дата" = Table.AddColumn(Источник, "Дата", each DateTime.Date([Период]), type date)
+in
+    #"Вставлено: дата"  ЗапланированныеВзаимодействия	  let
+    Источник = Odbc.Query("Driver={PostgreSQL Unicode};Server=virt207.worldclass.nnov.ru; Database=gymdb_test;Timeout=300;Fetch=10000;UseDeclareFetch=1;", "--Справочник.Взаимодействия (Основная)#(lf)SELECT #(lf)#(tab)#(tab)encode(_Reference67._IDRRef,'hex') Ссылка#(lf)        ,_Reference141X1._Code КодКлиента#(lf)        ,_Reference141X1._Description ФИО_Клиента#(lf)        ,cast(_Reference141X1._Fld1531 as varchar(1000)) ТелефонКлиента#(lf)#(tab)#(tab),_Reference132._Description Клуб#(lf)        ,cast(_Reference106._Fld1200 as varchar(1000)) ОписаниеЗадания#(lf)        ,_Reference67._Description НаименованиеВзаимодействия#(lf)        ,CASE _Reference67._Fld831RRef#(lf)                WHEN decode('b538e5326d9fc9a943c11fd0e7a0e678','hex') THEN 'Встреча'#(lf)                WHEN decode('af240c30136a9c4e4c4d477d359e0f03','hex') THEN 'Заявка на обратный звонок'#(lf)                WHEN decode('8590e885ee4c688946c3e23782968752','hex') THEN 'Входящий звонок'#(lf)                WHEN decode('8d7225693e34b52f450fe5181ac00cb9','hex') THEN 'Исходящий звонок'#(lf)                WHEN decode('9db9fdbf6bd80f2044eb2835157b3bc8','hex') THEN 'Обратная связь'#(lf)                WHEN decode('8b888f0c4a5eb1724b77b72ebeffdf6b','hex') THEN 'Онлайн покупка'#(lf)                WHEN decode('8cdb19ca805f72d94dfd36278e121b82','hex') THEN 'Отмена гостевого визита'#(lf)                WHEN decode('8f6da46ad3a0c51b4bb9feb594cb3b9c','hex') THEN 'Оформление'#(lf)                WHEN decode('a991e34cdfd2527449f98fb5c998a54d','hex') THEN 'Переход по клику'#(lf)                WHEN decode('87c74245c038b6244d8f6f7169c0d545','hex') THEN 'Регистрация гостевого визита'#(lf)                WHEN decode('b70ab7149b54e8f240c0203b5ae78b63','hex') THEN 'Регистрация рекомендации'#(lf)                WHEN decode('8d375d1bd8b128d447da1f927d95614c','hex') THEN 'Уведомление'#(lf)                WHEN decode('952f4279216ec5844b0b165542d2d0d4','hex') THEN 'Чат'#(lf)                WHEN decode('811e1e78f495bbd940b19032400397a3','hex') THEN 'Входящее письмо'#(lf)                WHEN decode('b86111863fbaefeb42b967aaa9ae4ce2','hex') THEN 'Исходящее письмо'            #(lf)                ELSE null#(lf)        END as ВидСобытия#(lf)                ,case #(lf)                      when _InfoRg7146._Fld7150 is null#(lf)                      then _Fld820#(lf)                      else _InfoRg7146._Fld7150#(lf)                end as ДатаВзаимодействия#(lf)#(tab)#(tab),_Fld823 ДатаСоздания#(lf)#(tab)#(tab),_Fld820 ВремяНачалаВзаимодействия#(lf)#(tab)#(tab),_Fld821 ВремяОкончанияВзаимодействия#(lf)#(tab)#(tab),_Fld822 ДатаПлан#(lf)        ,_reference224._Description СостояниеВзаимодействия#(lf)        ,CASE _Reference67._Fld830RRef#(lf)                WHEN decode('b78f16cfde0c1e1f4f7c0ae8d942393d','hex') THEN 'Выполнено'#(lf)                WHEN decode('83b62b0bd3908a65448b72ca1ec17e94','hex') THEN 'Не выполнено'#(lf)                WHEN decode('aef6c17befe0705047f834208813539a','hex') THEN 'Отменено'#(lf)                ELSE null#(lf)        END as СтатусВзаимодействия#(lf)        ,_reference225._Description Менеджер#(lf)        ,CASE _Reference106._Fld1190RRef#(lf)                WHEN decode('bc06e4b21430ebfb44a67a65c46d41f9','hex') THEN 'New'#(lf)                WHEN decode('9e369ac955bf602149e17b549b0f1498','hex') THEN 'Ex'#(lf)                WHEN decode('91e4594e35ce15d847c4a3f32e1e18f2','hex') THEN 'Renew'#(lf)                ELSE null#(lf)        END as ВидСтажа#(lf)        ,CASE _Reference106._Fld1204RRef#(lf)                WHEN decode('a596b91e9b85de1a4f63e088902e2513','hex') THEN 'Действительный'#(lf)                WHEN decode('bc99c42e4b5499f4422c9a94b1a2c7bc','hex') THEN 'Бывший'#(lf)                WHEN decode('8b9747f5715f8b8f452e652aeaa55c8c','hex') THEN 'Потенциальный'#(lf)                ELSE null#(lf)        END as СтатусКлиента#(lf)        ,1 as Количество#(lf)        ,_Reference202._Description ПричинаОтмены#(lf)        ,_Reference89._Description Воронка#(lf)        ,_Reference89._Code КодВоронки#(lf)        ,_Reference145._Description МаркетинговаяКампания#(lf)        ,_Reference145._Code КодКампании#(lf)        ,_Reference122._Description Канал#(lf)        ,encode(_Reference106._Fld1194RRef,'hex') КаналСсылка#(lf)                ,case#(lf)                     when#(lf)                         case #(lf)                             when _InfoRg7146._Fld7148 is null#(lf)                             then '01.01.0001 0:00:00'#(lf)                             else _InfoRg7146._Fld7148#(lf)                         end <> '01.01.0001 0:00:00'#(lf)                     then 1 #(lf)                     else 0#(lf)                 end as КлиентВзялТрубку#(lf)#(lf)#(lf)FROM _Reference67#(lf)#(lf)left join _Reference106 on #(lf)_Reference67._OwnerIDRRef = _Reference106._IDRRef#(lf)left join _Reference141X1 on#(lf)_Reference106._Fld1196RRef = _Reference141X1._IDRRef#(lf)left join _Reference132 on #(lf)_Reference106._Fld1195RRef = _Reference132._IDRRef#(lf)left join _Reference225 on #(lf)_Reference67._Fld824RRef = _Reference225._IDRRef#(lf)left join _Reference89 on #(lf)_Reference106._Fld1191RRef = _Reference89._IDRRef#(lf)left join _Reference145 on #(lf)_Reference106._Fld1197RRef = _Reference145._IDRRef#(lf)left join _Reference202 on #(lf)_Reference67._Fld828RRef = _Reference202._IDRRef#(lf)left join _Reference224 on #(lf)_Reference67._Fld829RRef = _Reference224._IDRRef#(lf)left join _Reference122 on #(lf)_Reference106._Fld1194RRef = _Reference122._IDRRef#(lf)#(lf)left join  _InfoRg7146 on #(lf)_Reference67._IDRRef =  _InfoRg7146._Fld7151RRef #(lf)#(lf)where #(lf)_Fld822>'01.01.2025' #(lf)and #(lf)_Fld822<'01.01.2027'#(lf)and cast(_Reference89._Description as varchar(1000)) in ('Продажа клубной карты','Сервисная воронка ОП', 'Корпоративная продажа')#(lf)and _reference224._Description = 'Запланировано'#(lf)#(lf)"),
+    #"Добавлен пользовательский объект1" = Table.AddColumn(Источник, "Условие", each if ([Воронка] = "Сервисная воронка ОП" and ([МаркетинговаяКампания] = "Заявка c Jivo-site Физкульт" or [МаркетинговаяКампания] = "Заявка с Jivo-site (Пушкинский)"))
+then 1
+else 0),
+    #"Строки с примененным фильтром" = Table.SelectRows(#"Добавлен пользовательский объект1", each ([Условие] = 0)),
+    #"Удаленные столбцы" = Table.RemoveColumns(#"Строки с примененным фильтром",{"Условие"}),
+    #"Объединенные запросы" = Table.NestedJoin(#"Удаленные столбцы", {"Менеджер"}, Сотрудники, {"Сотрудник"}, "Сотрудники", JoinKind.LeftOuter),
+    #"Развернутый элемент Сотрудники" = Table.ExpandTableColumn(#"Объединенные запросы", "Сотрудники", {"Должность", "ДатаПриема", "ДатаУвольнения"}, {"Должность", "ДатаПриема", "ДатаУвольнения"}),
+    #"Замененное значение" = Table.ReplaceValue(#"Развернутый элемент Сотрудники",#datetime(1, 1, 1, 0, 0, 0),#datetime(2099, 12, 31, 0, 0, 0),Replacer.ReplaceValue,{"ДатаУвольнения"}),
+    #"Добавлен пользовательский объект" = Table.AddColumn(#"Замененное значение", "Фильтр по должности", each if [Должность] = null then 0 else 
+if List.AllTrue({
+    [ДатаПриема]<=[ДатаСоздания],
+    [ДатаУвольнения]>=[ДатаСоздания]}) then 1 else 0),
+    #"Строки с примененным фильтром1" = Table.SelectRows(#"Добавлен пользовательский объект", each ([Должность] = "Менеджер ОП" or [Должность] = "Старший менеджер ОП") and ([Фильтр по должности] = 1)),
+    #"Удаленные дубликаты1" = Table.Distinct(#"Строки с примененным фильтром1", {"КодКлиента", "ФИО_Клиента", "ТелефонКлиента", "Клуб", "НаименованиеВзаимодействия", "ВидСобытия", "ДатаВзаимодействия", "ВремяНачалаВзаимодействия", "ВремяОкончанияВзаимодействия", "СостояниеВзаимодействия", "ВидСтажа"}),
+    #"Вставлено: начало месяца" = Table.AddColumn(#"Удаленные дубликаты1", "Начало месяца", each Date.StartOfMonth([ДатаВзаимодействия]), type datetime),
+    #"Измененный тип" = Table.TransformColumnTypes(#"Вставлено: начало месяца",{{"Начало месяца", type date}, {"ВремяНачалаВзаимодействия", type time},{"ВремяОкончанияВзаимодействия", type time}})
+in
+    #"Измененный тип"  Дата взаимодействия = 'Взаимодействия'[ДатаВзаимодействия]
+ДатаКлюч = 'Взаимодействия'[Дата взаимодействия].[Date]
+Длительность звонка = 
+IF('Взаимодействия'[ВремяНачалаВзаимодействия]=TIME(0,0,0),BLANK(),
+    if(
+        'Взаимодействия'[ВремяОкончанияВзаимодействия]-'Взаимодействия'[ВремяНачалаВзаимодействия]>=0,
+        'Взаимодействия'[ВремяОкончанияВзаимодействия]-'Взаимодействия'[ВремяНачалаВзаимодействия]
+        )
+)
+Длительность звонка2 = 'Взаимодействия'[Длительность звонка]
+КлиентВзялТрубку2 = 
+IF(
+  'Взаимодействия'[КлиентВзялТрубку]=1&&'Взаимодействия'[ВидСобытия]="Входящий звонок",
+  0,
+  'Взаимодействия'[КлиентВзялТрубку]
+)
+Ключ = 'Взаимодействия'[КодКлиента]&'Взаимодействия'[Начало месяца]
+КлючСупер = 'Взаимодействия'[Сеть]&'Взаимодействия'[ВидСобытия]
+Нормативное время = 
+
+  RELATED('Норматив по заявкам'[Время, дней])
+ 
+НормативноеВремяИтог = 
+IF(
+    'Взаимодействия'[ВидСобытия]="Встреча",
+    IF(
+        'Взаимодействия'[Воронка] = "Сервисная воронка ОП",
+        TIME(0,5,0),
+        'Взаимодействия'[Нормативное время]
+    ),
+    IF(
+        'Взаимодействия'[Нормативное время]=BLANK(),
+        if(
+            'Взаимодействия'[КлиентВзялТрубку2]=0,
+            TIME(0,1,30),
+            if(
+            'Взаимодействия'[КлиентВзялТрубку2]=1,
+            TIME(0,3,0))),
+            'Взаимодействия'[Нормативное время]
+    )
+)
+Первое исходящее = SWITCH(true(),
+'Взаимодействия'[Предыдущий входящий контакт] = BLANK()&&'Взаимодействия'[Предыдущий исходящий контакт] = BLANK(), "Да",
+'Взаимодействия'[Предыдущий исходящий контакт] = BLANK()&&('Взаимодействия'[ДатаСоздания]-'Взаимодействия'[Предыдущий входящий контакт]>60),"Да",
+('Взаимодействия'[ДатаСоздания]-'Взаимодействия'[Предыдущий исходящий контакт]>30)&&('Взаимодействия'[ДатаСоздания]-'Взаимодействия'[Предыдущий входящий контакт]>60),"Да",
+'Взаимодействия'[Предыдущий входящий контакт] = BLANK()&&('Взаимодействия'[ДатаСоздания]-'Взаимодействия'[Предыдущий исходящий контакт]>60),"Да","Нет")
+Предыдущий входящий контакт = 
+var client = 'Взаимодействия'[КодКлиента]
+var contactdate = 'Взаимодействия'[ДатаСоздания]
+return 
+    maxx(
+        filter(
+            'Взаимодействия',
+            'Взаимодействия'[КодКлиента]=client&&
+            'Взаимодействия'[ДатаСоздания]<=contactdate&&
+            'Взаимодействия'[Тип взаимодействия]="Входящее"),
+        'Взаимодействия'[ДатаСоздания]
+        )
+Предыдущий исходящий контакт = 
+var client = 'Взаимодействия'[КодКлиента]
+var contactdate = 'Взаимодействия'[ДатаСоздания]
+return 
+    maxx(
+        filter(
+            'Взаимодействия',
+            'Взаимодействия'[КодКлиента]=client&&
+            'Взаимодействия'[ДатаСоздания]<contactdate&&
+            'Взаимодействия'[Тип взаимодействия]="Исходящее"),
+        'Взаимодействия'[ДатаСоздания]
+    )
+Сеть = IF('Взаимодействия'[Клуб] in {"Пушкинский", "Пушкинский VIP"}, "Пушкинский", "Физкульт")
+СостояниеВзаимодействияИтог = 
+IF(
+    'Взаимодействия'[ВидСобытия] in {"Входящий звонок", "Исходящий звонок"}
+    &&
+    'Взаимодействия'[СостояниеВзаимодействия] = "В процессе", 
+    "Закрыто",
+    'Взаимодействия'[СостояниеВзаимодействия]
+)
+Столбец = 1
+	Тип взаимодействия = 
+SWITCH('Взаимодействия'[ВидСобытия],
+    "Исходящий звонок", "Исходящее",
+    "Электронное письмо исходящее", "Исходящее", "Входящее")
+_Всего задач2 = count('Взаимодействия'[КодКлиента])+0
+_Выбранный период2 = format(max('_СпрДата'[Date])-min('_СпрДата'[Date]), "general number")+1
+_Загрузка = 
+DIVIDE(
+    SUM('Взаимодействия'[НормативноеВремяИтог]),
+    DISTINCTCOUNT('Взаимодействия'[Менеджер])*DISTINCTCOUNT('Взаимодействия'[ДатаКлюч])*(465/60/24)
+)
+_Общая продолжительность звонков2 = format(sum('Взаимодействия'[Длительность звонка]),"HH:MM:SS")
+_СрДлитЗвонка3 = format(AVERAGE('Взаимодействия'[Длительность звонка]),"HH:MM:SS")
+_СрДлитЗвонка4 = 
+format(
+    MEDIAN(
+        // filter(
+        //     'Взаимодействия',
+        //     'Взаимодействия'[Длительность звонка2]<>BLANK()
+        //     ),
+        'Взаимодействия'[Длительность звонка2])
+        ,
+    "HH:MM:SS")
+В среднем задач в день2 = 
+SUM('Взаимодействия'[Количество])
+/
+DISTINCTCOUNT('Взаимодействия'[ДатаКлюч])
+Всего норматив времени = 
+DIVIDE(
+    SUM('Взаимодействия'[НормативноеВремяИтог]),
+    DISTINCTCOUNT('Взаимодействия'[Менеджер])*DISTINCTCOUNT('Взаимодействия'[Дата взаимодействия])
+)
+__Все = 'ЗапланированныеВзаимодействия'[_НеПросрочено]+'ЗапланированныеВзаимодействия'[_просрочено]
+_НеПросрочено = 
+CALCULATE(
+    COUNT('ЗапланированныеВзаимодействия'[КодКлиента]),
+    'ЗапланированныеВзаимодействия'[ДатаПлан]>=TODAY()
+    )
+_просрочено = 
+CALCULATE(
+    COUNT('ЗапланированныеВзаимодействия'[КодКлиента]),
+    'ЗапланированныеВзаимодействия'[ДатаПлан]<TODAY()
+    )
+ДатаКлюч = 'ЗапланированныеВзаимодействия'[ДатаПлан].[Date]
+

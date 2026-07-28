@@ -1,0 +1,43 @@
+
+
+
+Десткие пакеты всего
+
+let
+    Источник = Odbc.Query("Driver={PostgreSQL Unicode};Server=virt207.worldclass.nnov.ru; Database=gymdb_test", "--Документ.ЧекККМ.ТабличнаяЧасть.ДополнительныеПакеты (ТабличнаяЧасть)#(lf)WITH MAXData AS (#(lf)    SELECT #(lf)        _Document346._Date_Time ДатаЧека,#(lf)        _Document346._Fld4910RRef Статус,#(lf)        _Reference59._Fld670 ДатаАктивации,#(lf)        _Reference59._Fld674 ДатаПриобретения,#(lf)        cast(_Reference59._Code as varchar(1000)) КодАбонемента,#(lf)        cast(_Reference59._Description as varchar(1000)) as Абонемент,#(lf)    #(lf)        cast(_Reference132._Description as varchar(1000)) as Клуб,#(lf)#(lf)        cast(child._Code as varchar(1000)) AS КодРебенок,#(lf)        cast(child._Description as varchar(1000)) AS ФИОРебенка,#(lf)        child._Fld1507 AS ДатаРожденияРебенка,#(lf)#(lf)        cast(adult._Code as varchar(1000)) AS КодВзрослый,#(lf)        cast(adult._Description as varchar(1000)) AS ФИОВзрослого,#(lf)        adult._Fld1507 AS ДатаРожденияВзрослого,#(lf)        cast(adult._Fld1531 as varchar(1000)) ТелефонВзрослого,#(lf)        CASE #(lf)            WHEN adult._Fld1525 = false THEN 'Согласен на SMS'#(lf)            WHEN adult._Fld1525 = true THEN 'Отказ от SMS'#(lf)        ELSE 'Не определено'#(lf)        END AS СтатусSMS,#(lf)#(lf)        COALESCE(#(lf)            (#(lf)                select _AccumRg7739._Fld7749 --сумма#(lf)                from _AccumRg7739  #(lf)                left join _Reference163 #(lf)                        on _AccumRg7739._Fld7743RRef = _Reference163._IDRRef --номенклатура#(lf)                where  #(lf)                _AccumRg7739._RecordKind = 1 #(lf)                and#(lf)                encode(_Reference163._Fld1795RRef, 'hex') = 'b5fa1353811819464b0f3d2abc5a70de' --Дополнительный клиент #(lf)                and _AccumRg7739._Fld7742_RRRef = _Document346._IDRRef#(lf)                and _AccumRg7739._Fld7744RRef = child._IDRRef#(lf)                limit 1#(lf)            ),#(lf)            (#(lf)                select _Document346_VT4924._Fld4938#(lf)                from _Document346_VT4924#(lf)                left join _Reference163 #(lf)                        on _Document346_VT4924._Fld4932RRef = _Reference163._IDRRef --номенклатура#(lf)                where  #(lf)                encode(_Reference163._Fld1795RRef, 'hex') = 'b5fa1353811819464b0f3d2abc5a70de' --Дополнительный клиент #(lf)                and _Document346_VT4924._Document346_IDRRef = _Document346._IDRRef #(lf)                limit 1#(lf)            )#(lf)        ) #(lf)        as Сумма,#(lf)#(lf)        COALESCE(#(lf)            (#(lf)                select _Reference163._Description#(lf)                from _AccumRg7739  #(lf)                left join _Reference163 #(lf)                        on _AccumRg7739._Fld7743RRef = _Reference163._IDRRef --номенклатура#(lf)                where  #(lf)                _AccumRg7739._RecordKind = 1 #(lf)                and#(lf)                encode(_Reference163._Fld1795RRef, 'hex') = 'b5fa1353811819464b0f3d2abc5a70de' --Дополнительный клиент #(lf)                and _AccumRg7739._Fld7742_RRRef = _Document346._IDRRef#(lf)                and _AccumRg7739._Fld7744RRef = child._IDRRef#(lf)                limit 1#(lf)            ),#(lf)            (#(lf)                select _Reference163._Description#(lf)                from _Document346_VT4924#(lf)                left join _Reference163 #(lf)                        on _Document346_VT4924._Fld4932RRef = _Reference163._IDRRef --номенклатура#(lf)                where  #(lf)                encode(_Reference163._Fld1795RRef, 'hex') = 'b5fa1353811819464b0f3d2abc5a70de' --Дополнительный клиент #(lf)                and _Document346_VT4924._Document346_IDRRef = _Document346._IDRRef #(lf)                limit 1#(lf)            )#(lf)        ) AS Номенклатура,#(lf)#(lf)        RANK() OVER (#(lf)              PARTITION BY adult._IDRRef, child._IDRRef, _Reference59._IDRRef#(lf)              ORDER BY _Reference59._Fld674 DESC#(lf)        ) AS rnk#(lf)#(lf)FROM _Document346_VT4913#(lf)#(lf)left join _Document346 #(lf)            on _Document346_VT4913._Document346_IDRRef = _Document346._IDRRef  --документ ЧекККМ#(lf)left join _Reference59 #(lf)            on _Document346_VT4913._Fld4915RRef = _Reference59._IDRRef -- абонемент#(lf)left join _Reference132 #(lf)            on _Reference59._Fld687RRef = _Reference132._IDRRef --клуб#(lf)left join _Reference141X1 child #(lf)            on _Document346_VT4913._Fld4916RRef = child._IDRRef --контрагент ребенок#(lf)left join _Reference141X1 adult #(lf)            on _Reference59._Fld681RRef = adult._IDRRef --контрагент взрослый#(lf)#(lf)where _Document346._Date_Time >= '2025-06-01'#(lf)and _Document346._Fld4910RRef = decode('859cb45b51f9e02c4fb16764c804af3d', 'hex')#(lf)and _Reference59._Fld672 > _Reference59._Fld671 #(lf)and (_Reference59._Fld670 is not null or _Reference59._Fld670 <> '0001-01-01')#(lf)and _Reference59._Fld681RRef is not null#(lf)#(lf))#(lf)SELECT #(lf)    ДатаЧека,#(lf)    ДатаАктивации,#(lf)    ДатаПриобретения,#(lf)    КодАбонемента,#(lf)    Абонемент,#(lf)    Клуб,#(lf)    КодРебенок,#(lf)    ФИОРебенка,#(lf)    ДатаРожденияРебенка,#(lf)    КодВзрослый,#(lf)    ФИОВзрослого,#(lf)    ДатаРожденияВзрослого,#(lf)    ТелефонВзрослого,#(lf)    СтатусSMS,#(lf)    Сумма,#(lf)    Номенклатура#(lf)FROM MAXData#(lf)WHERE rnk = 1#(lf)ORDER BY ФИОВзрослого, ДатаПриобретения DESC"),
+    #"Вычисленный возраст" = Table.TransformColumns(Источник,{{"ДатаРожденияРебенка", each DateTime.LocalNow() - _, type duration}, {"ДатаРожденияВзрослого", each DateTime.LocalNow() - _, type duration}}),
+    #"Вычисленное общее число лет" = Table.TransformColumns(#"Вычисленный возраст",{{"ДатаРожденияРебенка", each Duration.TotalDays(_) / 365, type number}, {"ДатаРожденияВзрослого", each Duration.TotalDays(_) / 365, type number}}),
+    #"Округлено вниз" = Table.TransformColumns(#"Вычисленное общее число лет",{{"ДатаРожденияРебенка", Number.RoundDown, Int64.Type}, {"ДатаРожденияВзрослого", Number.RoundDown, Int64.Type}}),
+    #"Переименованные столбцы" = Table.RenameColumns(#"Округлено вниз",{{"ДатаРожденияРебенка", "ВозрастРебенка"}, {"ДатаРожденияВзрослого", "ВозрастВзрослого"}})
+in
+    #"Переименованные столбцы"  Переключатели = VALUES('Дет пакеты всего'[Сумма])
+  Количество пакетов = 
+VAR summa = SELECTEDVALUE('Переключатели'[Сумма])
+RETURN
+IF(
+    ISBLANK(summa),
+    // Если ничего не выбрано: считаем ВСЕ пакеты
+    COUNTROWS('Дет пакеты всего'), 
+    // Если выбрано значение: фильтруем по сумме и считаем
+    CALCULATE(
+        COUNTROWS('Дет пакеты всего'),
+        'Дет пакеты всего'[Сумма] = summa
+    )
+)
+ Переключатель названия кол-ва = 
+var kol = SELECTEDVALUE('Переключатели'[Сумма])
+return
+IF(
+    ISBLANK(kol),
+    "Кол-во дет.пакетов, всего шт.",
+    "Кол-во дет. пакетов за " & kol & " руб."
+)
+ Переключатель названия суммы = 
+var summa = SELECTEDVALUE('Переключатели'[Сумма])
+return
+IF(
+    ISBLANK(summa),
+    "Сумма дет. пакетов, всего руб.",
+    "Сумма дет. пакетов за " & summa & " руб."
+)
+ 

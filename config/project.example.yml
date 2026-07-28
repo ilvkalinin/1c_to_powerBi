@@ -1,0 +1,34 @@
+project:
+  name: analytics_1c_powerbi
+  status: bootstrap
+  timezone: Europe/Moscow
+
+environments:
+  source_access: read_only
+  source_host_role: raw_1c_registers
+  source_postgresql_version_reported: "19"
+  mart_host_role: analytical_marts
+  mart_postgresql_version_reported: "18.3"
+  mart_os: windows
+  mart_ram_gb: 8
+  mart_vcpu_count: 8
+  mart_disk_free_gb_observed: 172
+  mart_disk_free_observed_at: "2026-07-23"
+  legacy_test_exports_present: true
+  scheduler: windows_task_scheduler
+  same_virtual_machine: false
+  production_changes_require_explicit_approval: true
+
+schemas:
+  source: null
+  staging: null
+  core: null
+  mart: null
+  meta: null
+
+decisions:
+  inter_server_transport: null
+  late_change_recalculation_window: null
+  migration_tool: null
+  deployment_method: null
+  scheduling_method: null

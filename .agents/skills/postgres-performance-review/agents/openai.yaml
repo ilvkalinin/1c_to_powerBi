@@ -1,0 +1,4 @@
+interface:
+  display_name: "PostgreSQL Performance Review"
+  short_description: "Review marts using actual PostgreSQL plans"
+  default_prompt: "Review mart performance using safe factual plans and measured volumes."

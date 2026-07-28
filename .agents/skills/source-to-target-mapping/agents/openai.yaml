@@ -1,0 +1,4 @@
+interface:
+  display_name: "Source-to-Target Mapping"
+  short_description: "Trace mart columns to confirmed 1C sources"
+  default_prompt: "Build a source-to-target mapping from verified metadata and mark every uncertainty."

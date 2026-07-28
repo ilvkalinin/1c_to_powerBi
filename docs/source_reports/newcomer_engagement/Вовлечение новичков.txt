@@ -1,0 +1,662 @@
+
+
+
+
+Абонементы с посещениями
+let
+    Источник = Odbc.Query("Driver={PostgreSQL Unicode};Server=virt207.worldclass.nnov.ru; Database=gymdb_test", "WITH Abonements AS (#(lf)    SELECT #(lf)        _Reference59._IDRRef,#(lf)        encode(_Reference59._IDRRef, 'hex') AS Ссылка,#(lf)        CAST(_Reference59._Code AS varchar(1000)) AS Код,#(lf)        CAST(_Reference59._Description AS varchar(1000)) AS Наименование,#(lf)        encode(_Fld669RRef, 'hex') AS ВладелецАбонемента,#(lf)        _Fld670 AS ДатаАктивацииАбонемента,#(lf)        _Fld671 AS ДатаНачала,#(lf)        _Fld672 AS ДатаОкончания,#(lf)        encode(_Fld681RRef, 'hex') AS Клиент,#(lf)        encode(_Fld685RRef, 'hex') AS Номенклатура,#(lf)CAST(_Reference163._Description AS varchar(1000)) AS НоменклатураТекст,#(lf)        encode(_Fld687RRef, 'hex') AS ОсновнойКлубДоступа,#(lf)        encode(_Fld701RRef, 'hex') AS ОсновнойКлубПродажи,#(lf)        CAST(_Reference132._Description AS varchar(1000)) AS КлубДоступа,#(lf)        _Fld693 AS СрокДействия,#(lf)        encode(_Fld694RRef, 'hex') AS Стаж,#(lf)        encode(_Fld696RRef, 'hex') AS ТипКонтракта,#(lf)        encode(_Fld699RRef, 'hex') AS ТипОплаты,#(lf)        CAST(_Reference141X1._Code AS varchar(1000)) AS КодКлиента,#(lf)        _Reference141X1._Fld1507 AS ДатаРождения#(lf)    FROM _Reference59#(lf)    LEFT JOIN _Reference141X1 #(lf)        ON _Reference141X1._IDRRef = _Reference59._Fld681RRef#(lf)    LEFT JOIN _Reference132 #(lf)        ON _Reference132._IDRRef = _Reference59._Fld687RRef#(lf)LEFT JOIN _Reference163 #(lf)        ON _Reference163._IDRRef = _Reference59._Fld685RRef#(lf)    WHERE _Fld672 >= '2022-01-01' #(lf)          and encode(_Fld694RRef, 'hex') = 'bc06e4b21430ebfb44a67a65c46d41f9' --Стаж=New#(lf)),#(lf)Visits AS (#(lf)    SELECT #(lf)        ar._Period AS period,#(lf)        encode(ar._Fld7578_RRRef, 'hex') AS contractguid#(lf)        ,encode(_Fld7576RRef,'hex') as client#(lf)    FROM _AccumRg7575 ar#(lf)    left JOIN _Reference163 n#(lf)        ON ar._Fld7579RRef = n._IDRRef#(lf)left join _reference59 r on #(lf)ar._Fld7578_RRRef= r._IDRRef#(lf)    WHERE #(lf)        ar._Period >= '2021-12-01'#(lf)        AND CAST(n._Description AS varchar(1000)) = 'посещение клуба'#(lf)        AND CAST(n._Description AS varchar(1000)) NOT LIKE '%ИП%'#(lf)        AND CAST(n._Description AS varchar(1000)) NOT LIKE '%Контракт сотрудника%'#(lf)and encode(_Fld694RRef, 'hex') = 'bc06e4b21430ebfb44a67a65c46d41f9' --Стаж=New#(lf))#(lf)SELECT #(lf)    a.Ссылка,#(lf)    a.Код,#(lf)    a.Наименование,#(lf)    a.ВладелецАбонемента,#(lf)    a.ДатаАктивацииАбонемента,#(lf)    a.ДатаНачала,#(lf)    a.ДатаОкончания,#(lf)    a.Клиент,#(lf)    a.Номенклатура,#(lf)a.НоменклатураТекст,#(lf)    a.ОсновнойКлубДоступа,#(lf)    a.ОсновнойКлубПродажи,#(lf)    a.КлубДоступа,#(lf)    a.СрокДействия,#(lf)    a.Стаж,#(lf)    a.ТипКонтракта,#(lf)    a.ТипОплаты,#(lf)    a.КодКлиента,#(lf)    a.ДатаРождения,#(lf)    v.period AS ДатаПосещения,#(lf)    EXTRACT(DAY FROM (v.period - a.ДатаНачала)) AS РазницаНач#(lf)FROM Abonements a#(lf)JOIN Visits v #(lf)    ON a.Ссылка = v.contractguid#(lf)    and a.Клиент = v.client#(lf)#(lf)WHERE #(lf)    v.period >= a.ДатаНачала #(lf)    AND v.period <= a.ДатаНачала + INTERVAL '30 days';"),
+    #"Объединенные запросы" = Table.NestedJoin(Источник, {"КодКлиента"}, Сотрудники, {"КодКлиента"}, "Сотрудники", JoinKind.LeftAnti),
+    #"Удаленные столбцы1" = Table.RemoveColumns(#"Объединенные запросы",{"Сотрудники"}),
+    #"Строки с примененным фильтром" = Table.SelectRows(#"Удаленные столбцы1", each ([НоменклатураТекст] <> "Контракт ИП")),
+    #"Строки с примененным фильтром1" = Table.SelectRows(#"Строки с примененным фильтром", each not Text.Contains([НоменклатураТекст], "Контракт сотрудника")),
+    #"Удаленные столбцы" = Table.RemoveColumns(#"Строки с примененным фильтром1",{"НоменклатураТекст"}),
+    #"Сортированные строки" = Table.Sort(#"Удаленные столбцы",{{"ДатаПосещения", Order.Ascending}}),
+    #"Строки с примененным фильтром3" = Table.SelectRows(#"Сортированные строки", each ([Клиент] <> "00000000000000000000000000000000")),
+    #"Добавлен пользовательский объект" = Table.AddColumn(#"Строки с примененным фильтром3", "Выборка", each if [РазницаНач] <=7 then 7 else if [РазницаНач] <=14 then 14 else if [РазницаНач] <=21 then 21 else if [РазницаНач] <=28 then 28
+else if [РазницаНач] <=30 then 30 else 0),
+    #"Сгруппированные строки" = Table.Group(#"Добавлен пользовательский объект", {"Ссылка", "Выборка"}, {{"Количество", each Table.RowCount(_), Int64.Type}}),
+    #"Сведенный столбец" = Table.Pivot(Table.TransformColumnTypes(#"Сгруппированные строки", {{"Выборка", type text}}, "ru-RU"), List.Distinct(Table.TransformColumnTypes(#"Сгруппированные строки", {{"Выборка", type text}}, "ru-RU")[Выборка]), "Выборка", "Количество", List.Sum),
+    #"Замененное значение" = Table.ReplaceValue(#"Сведенный столбец",null,0,Replacer.ReplaceValue,{"7", "14","21","30","28"}),
+    #"Добавлен пользовательский объект1" = Table.AddColumn(#"Замененное значение", "14-", each [7]+[14]),
+    #"Добавлен пользовательский объект2" = Table.AddColumn(#"Добавлен пользовательский объект1", "21-", each [#"14-"]+[21]),
+    #"Добавлен пользовательский объект3" = Table.AddColumn(#"Добавлен пользовательский объект2", "28-", each [#"21-"]+[28]),
+    #"Добавлен пользовательский объект4" = Table.AddColumn(#"Добавлен пользовательский объект3", "30-", each [#"28-"]+[30])
+in
+    #"Добавлен пользовательский объект4"
+Абонементы
+
+let
+    Источник = Odbc.Query("Driver={PostgreSQL Unicode};Server=virt207.worldclass.nnov.ru; Database=gymdb_test", "--Справочник.Абонементы (Основная)#(lf)SELECT #(lf)#(tab)#(tab)encode(_Reference59._IDRRef,'hex') Ссылка#(tab)#(lf)#(tab)#(tab),cast(_Reference59._Code as varchar(1000)) Код#(lf)#(tab)#(tab),cast(_Reference59._Description as varchar(1000)) Наименование#(tab)#(lf),cast(_Reference163._Description as varchar(1000)) Номенклатура2#(tab)#(lf)#(tab)#(tab),encode(_Fld669RRef,'hex') ВладелецАбонемента#(tab)#(lf)                ,_Fld670 ДатаАктивацииАбонемент#(tab)#(lf)#(tab)#(tab),_Fld671 ДатаНачала#(lf)#(tab)#(tab),_Fld672 ДатаОкончания#(lf)#(tab)#(tab),encode(_Fld681RRef,'hex') Клиент#(lf)#(tab)#(tab),encode(_Fld685RRef,'hex') Номенклатура#(lf)#(tab)#(tab),encode(_Fld687RRef,'hex') ОсновнойКлубДоступа#(lf)#(tab)#(tab),encode(_Fld701RRef,'hex') ОсновнойКлубПродажи#(lf),cast(_Reference132._Description as varchar(1000)) КлубДоступа#(tab)#(lf)#(tab)#(tab),_Fld693 СрокДействия#(lf)#(tab)#(tab),encode(_Fld694RRef,'hex') Стаж#(lf)#(tab)#(tab),encode(_Fld696RRef,'hex') ТипКонтракта#(tab)#(tab)#(lf)#(tab)#(tab),encode(_Fld699RRef,'hex') ТипОплаты#(tab)#(lf)                ,cast(_Reference141X1._Code as varchar(1000)) КодКлиента#(lf)                ,_Reference141X1._Fld1507 ДатаРождения#(lf)FROM _Reference59#(lf)#(lf)left join _Reference141X1 on#(lf)_Reference141X1._IDRRef=_Reference59._Fld681RRef#(lf)#(lf)left join _Reference132 on #(lf)_Reference132._IDRRef=_Reference59._Fld687RRef#(lf)#(lf)left join _Reference163 on #(lf)_Reference163._IDRRef=_Reference59._Fld685RRef#(lf)#(lf)where _Fld672>='01.01.2022' #(lf)AND encode(_Fld694RRef,'hex') = 'bc06e4b21430ebfb44a67a65c46d41f9'#(lf)#(lf)"),
+    #"Строки с примененным фильтром3" = Table.SelectRows(Источник, each ([Клиент] <> "00000000000000000000000000000000") and ([Номенклатура2] <> "Контракт ИП" and [Номенклатура2] <> "Контракт сотрудника")),
+    #"Объединенные запросы1" = Table.NestedJoin(#"Строки с примененным фильтром3", {"КодКлиента"}, Сотрудники, {"КодКлиента"}, "Сотрудники", JoinKind.LeftAnti),
+    #"Удаленные столбцы" = Table.RemoveColumns(#"Объединенные запросы1",{"Номенклатура2", "Сотрудники"}),
+    #"Измененный тип" = Table.TransformColumnTypes(#"Удаленные столбцы",{{"ДатаНачала", type date}, {"ДатаОкончания", type date}, {"ДатаРождения", type date}, {"ДатаАктивацииАбонемент", type date}}),
+    #"Добавлен пользовательский объект1" = Table.AddColumn(#"Измененный тип", "ВозрастНаМоментАктивации", each [ДатаАктивацииАбонемент]-[ДатаРождения]),
+    #"Вычисленное общее число лет" = Table.TransformColumns(#"Добавлен пользовательский объект1",{{"ВозрастНаМоментАктивации", each Duration.TotalDays(_) / 365, type number}}),
+    #"Условный столбец добавлен" = Table.AddColumn(#"Вычисленное общее число лет", "Возраст", each if [ВозрастНаМоментАктивации] = null then "Взрослые" else if [ВозрастНаМоментАктивации] >= 14 then "Взрослые" else "Дети"),
+    #"Строки с примененным фильтром" = Table.SelectRows(#"Условный столбец добавлен", each not Text.Contains([Наименование], "сотруд") and not Text.Contains([Наименование], "ИП")),
+    #"Строки с примененным фильтром1" = Table.SelectRows(#"Строки с примененным фильтром", each ([ТипКонтракта] = "bf4b50662e88eb7b44046ebf4849976f") ),
+    #"Вставлено: объединенный столбец" = Table.AddColumn(#"Строки с примененным фильтром1", "Сведено", each Text.Combine({[КодКлиента], [Код]}, ""), type text),
+    #"Добавлен пользовательский объект" = Table.AddColumn(#"Вставлено: объединенный столбец", "СверкаДат", each [ДатаОкончания]-[ДатаНачала]),
+    #"Всего вычислено дней" = Table.TransformColumns(#"Добавлен пользовательский объект",{{"СверкаДат", Duration.TotalDays, type number}}),
+    #"Строки с примененным фильтром2" = Table.SelectRows(#"Всего вычислено дней", each [СверкаДат] >= 30),
+    #"Условный столбец добавлен1" = Table.AddColumn(#"Строки с примененным фильтром2", "Стаж слово", each if [Стаж] = "bc06e4b21430ebfb44a67a65c46d41f9" then "New" else if [Стаж] = "91e4594e35ce15d847c4a3f32e1e18f2" then "Renew" else if [Стаж] = "9e369ac955bf602149e17b549b0f1498" then "Ex" else null),
+    #"Строки с примененным фильтром4" = Table.SelectRows(#"Условный столбец добавлен1", each ([Стаж слово] <> null)),
+    #"Объединенные запросы" = Table.NestedJoin(#"Строки с примененным фильтром4", {"Ссылка"}, #"Абонементы с посещениями", {"Ссылка"}, "Абонементы с посещениями", JoinKind.LeftOuter),
+    #"Развернутый элемент Абонементы с посещениями1" = Table.ExpandTableColumn(#"Объединенные запросы", "Абонементы с посещениями", {"7", "14-", "21-", "28-", "30-"}, {"7", "14-", "21-", "28-", "30-"}),
+    #"Замененное значение" = Table.ReplaceValue(#"Развернутый элемент Абонементы с посещениями1",null,0,Replacer.ReplaceValue,{"7", "14-","21-","30-","28-"}),
+    #"Несвернутые столбцы" = Table.UnpivotOtherColumns(#"Замененное значение", {"Ссылка", "Код", "Наименование", "ВладелецАбонемента", "Номенклатура","ДатаАктивацииАбонемент", "ДатаНачала", "ДатаОкончания", "Клиент",  "ОсновнойКлубДоступа", "ОсновнойКлубПродажи", "КлубДоступа", "СрокДействия", "Стаж", "ТипКонтракта", "ТипОплаты", "КодКлиента", "ДатаРождения", "ВозрастНаМоментАктивации", "Возраст", "Сведено", "СверкаДат", "Стаж слово"}, "Атрибут", "Значение"),
+    #"Переименованные столбцы" = Table.RenameColumns(#"Несвернутые столбцы",{{"Атрибут", "ГруппаДни"}, {"Значение", "ГруппаПосещений"}}),
+    #"Замененное значение1" = Table.ReplaceValue(#"Переименованные столбцы","-","",Replacer.ReplaceText,{"ГруппаДни"}),
+    #"Измененный тип1" = Table.TransformColumnTypes(#"Замененное значение1",{{"ГруппаДни", Int64.Type}, {"ГруппаПосещений", Int64.Type}})
+in
+    #"Измененный тип1"
+
+let
+    Источник = Odbc.Query("Driver={PostgreSQL Unicode};Server=virt207.worldclass.nnov.ru; Database=gymdb_test", "--Справочник.Абонементы (Основная)#(lf)SELECT #(lf)#(tab)#(tab)encode(_Reference59._IDRRef,'hex') Ссылка#(tab)#(lf)#(tab)#(tab),cast(_Reference59._Code as varchar(1000)) Код#(lf)#(tab)#(tab),cast(_Reference59._Description as varchar(1000)) Наименование#(tab)#(lf),cast(_Reference163._Description as varchar(1000)) Номенклатура2#(tab)#(lf)#(tab)#(tab),encode(_Fld669RRef,'hex') ВладелецАбонемента#(tab)#(lf)                ,_Fld670 ДатаАктивацииАбонемент#(tab)#(lf)#(tab)#(tab),_Fld671 ДатаНачала#(lf)#(tab)#(tab),_Fld672 ДатаОкончания#(lf)#(tab)#(tab),encode(_Fld681RRef,'hex') Клиент#(lf)#(tab)#(tab),encode(_Fld685RRef,'hex') Номенклатура#(lf)#(tab)#(tab),encode(_Fld687RRef,'hex') ОсновнойКлубДоступа#(lf)#(tab)#(tab),encode(_Fld701RRef,'hex') ОсновнойКлубПродажи#(lf),cast(_Reference132._Description as varchar(1000)) КлубДоступа#(tab)#(lf)#(tab)#(tab),_Fld693 СрокДействия#(lf)#(tab)#(tab),encode(_Fld694RRef,'hex') Стаж#(lf)#(tab)#(tab),encode(_Fld696RRef,'hex') ТипКонтракта#(tab)#(tab)#(lf)#(tab)#(tab),encode(_Fld699RRef,'hex') ТипОплаты#(tab)#(lf)                ,cast(_Reference141X1._Code as varchar(1000)) КодКлиента#(lf)                ,_Reference141X1._Fld1507 ДатаРождения#(lf)FROM _Reference59#(lf)#(lf)left join _Reference141X1 on#(lf)_Reference141X1._IDRRef=_Reference59._Fld681RRef#(lf)#(lf)left join _Reference132 on #(lf)_Reference132._IDRRef=_Reference59._Fld687RRef#(lf)#(lf)left join _Reference163 on #(lf)_Reference163._IDRRef=_Reference59._Fld685RRef#(lf)#(lf)where _Fld672>='01.01.2022' #(lf)AND encode(_Fld694RRef,'hex') = 'bc06e4b21430ebfb44a67a65c46d41f9'#(lf)#(lf)"),
+    #"Строки с примененным фильтром3" = Table.SelectRows(Источник, each ([Клиент] <> "00000000000000000000000000000000") and ([Номенклатура2] <> "Контракт ИП" and [Номенклатура2] <> "Контракт сотрудника")),
+    #"Объединенные запросы1" = Table.NestedJoin(#"Строки с примененным фильтром3", {"КодКлиента"}, Сотрудники, {"КодКлиента"}, "Сотрудники", JoinKind.LeftAnti),
+    #"Удаленные столбцы" = Table.RemoveColumns(#"Объединенные запросы1",{"Номенклатура2", "Сотрудники"}),
+    #"Измененный тип" = Table.TransformColumnTypes(#"Удаленные столбцы",{{"ДатаНачала", type date}, {"ДатаОкончания", type date}, {"ДатаРождения", type date}, {"ДатаАктивацииАбонемент", type date}}),
+    #"Добавлен пользовательский объект1" = Table.AddColumn(#"Измененный тип", "ВозрастНаМоментАктивации", each [ДатаАктивацииАбонемент]-[ДатаРождения]),
+    #"Вычисленное общее число лет" = Table.TransformColumns(#"Добавлен пользовательский объект1",{{"ВозрастНаМоментАктивации", each Duration.TotalDays(_) / 365, type number}}),
+    #"Условный столбец добавлен" = Table.AddColumn(#"Вычисленное общее число лет", "Возраст", each if [ВозрастНаМоментАктивации] = null then "Взрослые" else if [ВозрастНаМоментАктивации] >= 14 then "Взрослые" else "Дети"),
+    #"Строки с примененным фильтром" = Table.SelectRows(#"Условный столбец добавлен", each not Text.Contains([Наименование], "сотруд") and not Text.Contains([Наименование], "ИП")),
+    #"Строки с примененным фильтром1" = Table.SelectRows(#"Строки с примененным фильтром", each ([ТипКонтракта] = "bf4b50662e88eb7b44046ebf4849976f") ),
+    #"Вставлено: объединенный столбец" = Table.AddColumn(#"Строки с примененным фильтром1", "Сведено", each Text.Combine({[КодКлиента], [Код]}, ""), type text),
+    #"Добавлен пользовательский объект" = Table.AddColumn(#"Вставлено: объединенный столбец", "СверкаДат", each [ДатаОкончания]-[ДатаНачала]),
+    #"Всего вычислено дней" = Table.TransformColumns(#"Добавлен пользовательский объект",{{"СверкаДат", Duration.TotalDays, type number}}),
+    #"Строки с примененным фильтром2" = Table.SelectRows(#"Всего вычислено дней", each [СверкаДат] >= 30),
+    #"Условный столбец добавлен1" = Table.AddColumn(#"Строки с примененным фильтром2", "Стаж слово", each if [Стаж] = "bc06e4b21430ebfb44a67a65c46d41f9" then "New" else if [Стаж] = "91e4594e35ce15d847c4a3f32e1e18f2" then "Renew" else if [Стаж] = "9e369ac955bf602149e17b549b0f1498" then "Ex" else null),
+    #"Строки с примененным фильтром4" = Table.SelectRows(#"Условный столбец добавлен1", each ([Стаж слово] <> null)),
+    #"Объединенные запросы" = Table.NestedJoin(#"Строки с примененным фильтром4", {"Ссылка"}, #"Абонементы с посещениями", {"Ссылка"}, "Абонементы с посещениями", JoinKind.LeftOuter),
+    #"Развернутый элемент Абонементы с посещениями1" = Table.ExpandTableColumn(#"Объединенные запросы", "Абонементы с посещениями", {"7", "14-", "21-", "28-", "30-"}, {"7", "14-", "21-", "28-", "30-"}),
+    #"Замененное значение" = Table.ReplaceValue(#"Развернутый элемент Абонементы с посещениями1",null,0,Replacer.ReplaceValue,{"7", "14-","21-","30-","28-"}),
+    #"Несвернутые столбцы" = Table.UnpivotOtherColumns(#"Замененное значение", {"Ссылка", "Код", "Наименование", "ВладелецАбонемента", "Номенклатура","ДатаАктивацииАбонемент", "ДатаНачала", "ДатаОкончания", "Клиент",  "ОсновнойКлубДоступа", "ОсновнойКлубПродажи", "КлубДоступа", "СрокДействия", "Стаж", "ТипКонтракта", "ТипОплаты", "КодКлиента", "ДатаРождения", "ВозрастНаМоментАктивации", "Возраст", "Сведено", "СверкаДат", "Стаж слово"}, "Атрибут", "Значение"),
+    #"Переименованные столбцы" = Table.RenameColumns(#"Несвернутые столбцы",{{"Атрибут", "ГруппаДни"}, {"Значение", "ГруппаПосещений"}}),
+    #"Замененное значение1" = Table.ReplaceValue(#"Переименованные столбцы","-","",Replacer.ReplaceText,{"ГруппаДни"}),
+    #"Измененный тип1" = Table.TransformColumnTypes(#"Замененное значение1",{{"ГруппаДни", Int64.Type}, {"ГруппаПосещений", Int64.Type}})
+in
+    #"Измененный тип1"
+
+let
+    Источник = Odbc.Query("Driver={PostgreSQL Unicode};Server=virt207.worldclass.nnov.ru; Database=gymdb_test", "SELECT #(lf)#(tab)#(tab)encode(_Fld6016RRef,'hex') Календарь#(lf)#(tab)#(tab),_Fld6017 Год#(lf)#(tab)#(tab),_Fld6018 ДатаГрафика#(lf)#(tab)#(tab),_Fld6019 ДеньВключенВГрафик#(lf)#(tab)#(tab),_Fld6020 КоличествоДнейВГрафикеСНачалаГода#(lf)#(tab)#(tab),_Fld6021 Праздник#(lf)#(tab)#(tab),encode(_Fld644RRef,'hex') Автор#(lf)FROM _InfoRg6015#(lf)where _Fld6018 >= '01.01.2024'#(lf)"),
+    #"Условный столбец добавлен" = Table.AddColumn(Источник, "Статус дня", each if [ДеньВключенВГрафик] = "1" then "Рабочий" else "Выходной"),
+    #"Вставлено: начало месяца" = Table.AddColumn(#"Условный столбец добавлен", "Начало месяца", each Date.StartOfMonth([ДатаГрафика]), type datetime),
+    #"Вставленное название месяца" = Table.AddColumn(#"Вставлено: начало месяца", "Название месяца", each Date.MonthName([ДатаГрафика]), type text),
+    #"Вставленное название дня" = Table.AddColumn(#"Вставленное название месяца", "Название дня", each Date.DayOfWeekName([ДатаГрафика]), type text),
+    #"Вставлено: конец месяца" = Table.AddColumn(#"Вставленное название дня", "Конец месяца", each Date.EndOfMonth([ДатаГрафика]), type datetime),
+    #"Удаленные столбцы" = Table.RemoveColumns(#"Вставлено: конец месяца",{"Календарь", "ДеньВключенВГрафик", "КоличествоДнейВГрафикеСНачалаГо", "Праздник", "Автор"}),
+    #"Переупорядоченные столбцы" = Table.ReorderColumns(#"Удаленные столбцы",{"ДатаГрафика", "Год", "Статус дня", "Начало месяца", "Название месяца", "Название дня", "Конец месяца"}),
+    #"Переименованные столбцы" = Table.RenameColumns(#"Переупорядоченные столбцы",{{"ДатаГрафика", "Date"}}),
+    #"Измененный тип" = Table.TransformColumnTypes(#"Переименованные столбцы",{{"Начало месяца", type date}}),
+    #"Добавленный запрос" = Table.Combine({#"Измененный тип", #"_Даты 2023"}),
+    #"Измененный тип1" = Table.TransformColumnTypes(#"Добавленный запрос",{{"Date", type datetime}})
+in
+    #"Измененный тип1"
+
+_Группы контрактов
+
+let
+    Источник = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("i45WMleK1YlWMjQBU0aGEMoCTBkbKMXGAgA=", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [Группа = _t]),
+    #"Измененный тип" = Table.TransformColumnTypes(Источник,{{"Группа", Int64.Type}})
+in
+    #"Измененный тип"
+
+Заморозки 2021
+let
+    Источник = Odbc.Query("Driver={PostgreSQL Unicode};Server=virt207.worldclass.nnov.ru; Database=gymdb_test", "#(lf)--РегистрНакопления.Заморозки (Основная)#(lf)SELECT #(lf)#(tab)#(tab)_AccumRg7478._Period Период#(lf)#(tab)#(tab),_AccumRg7478._Active Активность#(lf)#(tab)#(tab),_AccumRg7478._RecordKind ВидДвижения#(lf)#(tab)#(tab),encode(_Fld7479RRef,'hex') Абонемент#(lf)#(tab)#(tab),encode(_Fld7480RRef,'hex') Клиент#(lf)#(tab)#(tab),_InfoRg5859._Fld5862 ДатаНачалаЗаморозки#(lf)#(tab)#(tab),_InfoRg5859._Fld5863 ДатаОкончанияЗаморозки#(lf)#(tab)#(tab),_AccumRg7478._Fld7481 КоличествоДней#(lf)#(tab)#(tab),_Reference59._Code КодКонтракта#(lf)#(tab)#(tab),_Reference59._Description Наименование#(lf)#(tab)#(tab),_Reference59._Fld671 ДатаНачала#(lf)#(tab)#(tab),_Reference59._Fld672 ДатаОкончания1#(lf)#(tab)#(tab),_Reference141X1._Code КодКлиента#(lf)#(tab)#(tab),_Reference141X1._Description ИмяКлиента#(tab)#(lf)                ,_Reference132._Description ОсновнойКлубДоступа#(lf)FROM _AccumRg7478#(lf)left join _Reference59#(lf)on _Reference59._IDRRef=_AccumRg7478._Fld7479RRef#(lf)left join _Reference141X1 on#(lf)_AccumRg7478._Fld7480RRef=_Reference141X1._IDRRef#(lf)left join _Reference132 on#(lf)_Reference132._IDRRef=_Reference59._Fld687RRef#(lf)left join _InfoRg5859 on#(lf)_InfoRg5859._RecorderRRef=_AccumRg7478._RecorderRRef and#(lf)_InfoRg5859._Fld5860RRef=_AccumRg7478._Fld7479RRef#(lf)where #(lf)_AccumRg7478._Period>'01.01.2021' and _AccumRg7478._Period<'01.01.2022'#(lf)and _RecordKind='1'#(lf)"),
+    #"Сгруппированные строки" = Table.Group(Источник, {"КодКонтракта", "ДатаНачалаЗаморозки"}, {{"МаксПериод", each List.Max([Период]), type nullable datetime}, {"Все", each _, type table [Период=nullable datetime, Активность=nullable logical, ВидДвижения=nullable number, Абонемент=nullable text, Клиент=nullable text, ДатаНачалаЗаморозки=nullable datetime, ДатаОкончанияЗаморозки=nullable datetime, КоличествоДней=nullable number, КодКонтракта=nullable text, Наименование=nullable text, КодКлиента=nullable text, ИмяКлиента=nullable text, ОсновнойКлубДоступа=nullable text, ДатаНачала = nullable datetime, ДатаОкончания1 = nullable datetime]}}),
+    #"Развернутый элемент Все" = Table.ExpandTableColumn(#"Сгруппированные строки", "Все", {"Период", "ДатаОкончанияЗаморозки", "Наименование", "КодКлиента", "ИмяКлиента", "ОсновнойКлубДоступа", "ДатаНачала", "ДатаОкончания1"}, {"Период", "ДатаОкончанияЗаморозки", "Наименование", "КодКлиента", "ИмяКлиента", "ОсновнойКлубДоступа", "ДатаНачала", "ДатаОкончания1"}),
+    #"Добавлен пользовательский объект" = Table.AddColumn(#"Развернутый элемент Все", "Проверка", each [МаксПериод]=[Период]),
+    #"Строки с примененным фильтром1" = Table.SelectRows(#"Добавлен пользовательский объект", each ([Проверка] = true) and ([ДатаНачалаЗаморозки] <> null)),
+    #"Добавлен пользовательский объект1" = Table.AddColumn(#"Строки с примененным фильтром1", "Пользовательский", each [ДатаОкончанияЗаморозки]-[ДатаНачалаЗаморозки]),
+    #"Всего вычислено дней" = Table.TransformColumns(#"Добавлен пользовательский объект1",{{"Пользовательский", Duration.TotalDays, type number}}),
+    #"Строки с примененным фильтром" = Table.SelectRows(#"Всего вычислено дней", each ([Пользовательский] <> 0)),
+    #"Переименованные столбцы" = Table.RenameColumns(#"Строки с примененным фильтром",{{"ДатаНачала", "ДатаНачала1"}})
+in
+    #"Переименованные столбцы"
+
+Выпускники план
+
+let
+    Источник = Excel.Workbook(File.Contents("K:\Корпоративный центр\Департамент маркетинга и продаж\Внутренние документы\Калинин\Отчеты\ДПФУ\Доля выпускников с целевой регулярностью.xlsx"), null, true),
+    #"Доля выпускников с целевой регу_Sheet" = Источник{[Item="Доля выпускников с целевой регу",Kind="Sheet"]}[Data],
+    #"Измененный тип" = Table.TransformColumnTypes(#"Доля выпускников с целевой регу_Sheet",{{"Column1", type any}, {"Column2", type text}, {"Column3", type text}, {"Column4", Int64.Type}, {"Column5", type any}, {"Column6", type any}, {"Column7", type any}, {"Column8", type any}, {"Column9", type any}, {"Column10", type any}, {"Column11", type any}, {"Column12", type text}, {"Column13", type any}, {"Column14", type any}}),
+    #"Другие удаленные столбцы" = Table.SelectColumns(#"Измененный тип",{"Column1", "Column10", "Column3"}),
+    #"Повышенные заголовки" = Table.PromoteHeaders(#"Другие удаленные столбцы", [PromoteAllScalars=true]),
+    #"Измененный тип1" = Table.TransformColumnTypes(#"Повышенные заголовки",{{"Год", Int64.Type}, {"Доля план", type number}, {"Клуб", type text}}),
+    #"Удаленные дубликаты" = Table.Distinct(#"Измененный тип1"),
+    #"Строки с примененным фильтром" = Table.SelectRows(#"Удаленные дубликаты", each ([Клуб] <> null and [Клуб] <> "Пушкинский" and [Клуб] <> "Пушкинский VIP"))
+in
+    #"Строки с примененным фильтром"
+
+_Даты 2023
+
+let
+    Источник = Odbc.Query("Driver={PostgreSQL Unicode};Server=virt207.worldclass.nnov.ru; Database=gymdb_test", "SELECT #(lf)#(tab)#(tab)encode(_Fld6016RRef,'hex') Календарь#(lf)#(tab)#(tab),_Fld6017 Год#(lf)#(tab)#(tab),_Fld6018 ДатаГрафика#(lf)#(tab)#(tab),_Fld6019 ДеньВключенВГрафик#(lf)#(tab)#(tab),_Fld6020 КоличествоДнейВГрафикеСНачалаГода#(lf)#(tab)#(tab),_Fld6021 Праздник#(lf)#(tab)#(tab),encode(_Fld644RRef,'hex') Автор#(lf)FROM _InfoRg6015#(lf)where _Fld6018 >= '01.01.2024' and _Fld6018 < '01.01.2025'#(lf)"),
+    #"Условный столбец добавлен" = Table.AddColumn(Источник, "Статус дня", each if [ДеньВключенВГрафик] = "1" then "Рабочий" else "Выходной"),
+    #"Добавлен пользовательский объект" = Table.AddColumn(#"Условный столбец добавлен", "Пользовательский", each Date.AddDays([ДатаГрафика],-365)),
+    #"Удаленные столбцы1" = Table.RemoveColumns(#"Добавлен пользовательский объект",{"ДатаГрафика"}),
+    #"Переименованные столбцы1" = Table.RenameColumns(#"Удаленные столбцы1",{{"Пользовательский", "ДатаГрафика"}}),
+    #"Вставлено: начало месяца" = Table.AddColumn(#"Переименованные столбцы1", "Начало месяца", each Date.StartOfMonth([ДатаГрафика]), type datetime),
+    #"Вставленное название месяца" = Table.AddColumn(#"Вставлено: начало месяца", "Название месяца", each Date.MonthName([ДатаГрафика]), type text),
+    #"Вставленное название дня" = Table.AddColumn(#"Вставленное название месяца", "Название дня", each Date.DayOfWeekName([ДатаГрафика]), type text),
+    #"Вставлено: конец месяца" = Table.AddColumn(#"Вставленное название дня", "Конец месяца", each Date.EndOfMonth([ДатаГрафика]), type datetime),
+    #"Удаленные столбцы" = Table.RemoveColumns(#"Вставлено: конец месяца",{"Календарь", "ДеньВключенВГрафик", "КоличествоДнейВГрафикеСНачалаГо", "Праздник", "Автор"}),
+    #"Переупорядоченные столбцы" = Table.ReorderColumns(#"Удаленные столбцы",{"ДатаГрафика", "Год", "Статус дня", "Начало месяца", "Название месяца", "Название дня", "Конец месяца"}),
+    #"Переименованные столбцы" = Table.RenameColumns(#"Переупорядоченные столбцы",{{"ДатаГрафика", "Date"}}),
+    #"Измененный тип" = Table.TransformColumnTypes(#"Переименованные столбцы",{{"Начало месяца", type date}}),
+    #"Замененное значение" = Table.ReplaceValue(#"Измененный тип",2024,2023,Replacer.ReplaceValue,{"Год"}),
+    #"Сортированные строки" = Table.Sort(#"Замененное значение",{{"Date", Order.Descending}}),
+    #"Удаленные верхние строки" = Table.Skip(#"Сортированные строки",1),
+    #"Сортированные строки1" = Table.Sort(#"Удаленные верхние строки",{{"Date", Order.Ascending}})
+in
+    #"Сортированные строки1"
+
+Сотрудники
+
+let
+    Источник = Odbc.Query("Driver={PostgreSQL Unicode};Server=virt207.worldclass.nnov.ru; Database=gymdb_test;Timeout=300;Fetch=10000;UseDeclareFetch=1;", "--РегистрСведений.НастройкиСотрудников (Основная)#(lf)SELECT #(lf)                _Reference225._Description Сотрудник#(lf),cast(_Reference225._Fld2502 as varchar(1000)) КодКлиента#(lf),_Reference225._Code СотрудникКод#(lf)                ,_Reference101._Description Должность#(lf)#(tab)#(tab),_Fld6298 ДатаПриема#(lf)#(tab)#(tab),_Fld6299 ДатаУвольнения#(lf)#(lf)FROM _InfoRg6291#(lf)join _Reference225 on #(lf)_InfoRg6291._Fld6292RRef = _Reference225._IDRRef#(lf)join _Reference101 on#(lf)_InfoRg6291._Fld6296RRef = _Reference101._IDRRef#(lf)"),
+    #"Строки с примененным фильтром" = Table.SelectRows(Источник, each ([ДатаУвольнения] = #datetime(1, 1, 1, 0, 0, 0)))
+in
+    #"Строки с примененным фильтром"
+
+_Группы = DATATABLE("Группа",STRING,{{"0"},{"1-3"},{"4"}})
+_Фильтр = sum('_Даты'[Фильтр])
+Фильтр = if('_Даты'[Date]<TODAY(),1,0)
+
+Это конец = IF('_Даты'[Date]='_Даты'[Конец месяца]-1,1,0)
+
+__Абонементы с заморозкой = 
+        COUNTROWS(
+                FILTER(
+                    NATURALLEFTOUTERJOIN(
+                        'Абонементы','Заморозки'
+                    ),
+                    [ДатаНачалаЗаморозки]<[ДатаНачала]+30&&[ДатаНачалаЗаморозки]>[ДатаНачала])
+            
+        )
+
+__КоличествоАбонементовФ = 
+if(
+    SELECTEDVALUE('_Группы'[Группа])="0",
+        CALCULATE(
+            '_Меры фитнес'[_Контракты30дней],
+            'Абонементы'[ГруппаПосещений]="0 посещений"
+        ),
+    IF(
+        SELECTEDVALUE('_Группы'[Группа])="1-3",
+            CALCULATE(
+                '_Меры фитнес'[_Контракты30дней],
+                'Абонементы'[ГруппаПосещений]="1-3 посещений"
+            ),
+            CALCULATE(
+                '_Меры фитнес'[_Контракты30дней],
+                'Абонементы'[ГруппаПосещений]="4+ посещений"
+            )
+        )
+    )
+
+_4+ ПГ (НИ) = 
+COUNTrows(
+    FILTER(
+        filter(
+            NATURALLEFTOUTERJOIN(
+                filter('Абонементы',
+                    'Абонементы'[ДатаНачала]<=ENDOFMONTH(DATEADD('_Даты'[Date],-1,YEAR))-30&&'Абонементы'[ДатаОкончания]>=STARTOFMONTH(DATEADD('_Даты'[Date],-1,YEAR))&&'Абонементы'[ДатаНачала]>=STARTOFMONTH(DATEADD('_Даты'[Date],-1,YEAR))-30&&'Абонементы'[ДатаОкончания] >= 'Абонементы'[ДатаНачала]+30&&'Абонементы'[ГруппаДни]=30),
+                filter('Заморозки',
+                'Заморозки'[ДатаНачалаЗаморозки]<='Заморозки'[ДатаНачала1]+30&&'Заморозки'[ДатаОкончанияЗаморозки]>='Заморозки'[ДатаНачала1]+30
+                )
+            ),
+            [ДатаНачалаЗаморозки]=BLANK()
+        ),
+        'Абонементы'[_ГруппаПос]="4+"
+
+    )   
+)
+
+_4+Посещений(НИ) = 
+var checkdate = ENDOFMONTH('_Даты'[Date])
+return
+COUNTrows(
+    FILTER(
+        filter(
+            NATURALLEFTOUTERJOIN(
+                filter('Абонементы',
+                    'Абонементы'[ДатаНачала]<=checkdate-30&&'Абонементы'[ДатаОкончания]>=STARTOFMONTH('_Даты'[Date])&&'Абонементы'[ДатаНачала]>=STARTOFMONTH('_Даты'[Date])-30&&'Абонементы'[ДатаОкончания] >= 'Абонементы'[ДатаНачала]+30&&'Абонементы'[ГруппаДни]=30),
+                filter('Заморозки',
+                'Заморозки'[ДатаНачалаЗаморозки]<='Заморозки'[ДатаНачала1]+30&&'Заморозки'[ДатаОкончанияЗаморозки]>='Заморозки'[ДатаНачала1]+30
+                )
+            ),
+            [ДатаНачалаЗаморозки]=BLANK()
+        )
+
+        ,
+        'Абонементы'[_ГруппаПос]="4+"
+ 
+))
+
+_4+ПосещенийФитнес = 
+CALCULATE(
+    '_Меры фитнес'[_Контракты30дней],
+    'Абонементы'[ГруппаПосещений]="4+ посещений"
+)
+
+
+_АктивныхФитнес = 
+var days = SELECTEDVALUE('_Группы контрактов'[Группа])
+var groupp = 
+if (
+    SELECTEDVALUE('_Группы контрактов'[Группа])=7,
+    "Группа7",
+    IF(
+        SELECTEDVALUE('_Группы контрактов'[Группа])=14,
+        "Группа14", 
+        IF(
+            SELECTEDVALUE('_Группы контрактов'[Группа])=21,
+            "Группа21", 
+            IF(
+                SELECTEDVALUE('_Группы контрактов'[Группа])=30,
+                "Группа30"
+            )
+        )
+    )
+)
+return 
+countrows(
+    filter(
+        NATURALLEFTOUTERJOIN(
+            filter('Абонементы',
+                'Абонементы'[ДатаНачала]=SELECTEDVALUE('_Даты'[Date])-days&&'Абонементы'[ДатаОкончания]>=SELECTEDVALUE('_Даты'[Date])&&'Абонементы'[ГруппаДни]=groupp),
+            filter('Заморозки',
+                'Заморозки'[ДатаНачалаЗаморозки]<=SELECTEDVALUE('_Даты'[Date])&&'Заморозки'[ДатаОкончанияЗаморозки]>=SELECTEDVALUE('_Даты'[Date])
+            )
+        ),
+        [ДатаНачалаЗаморозки]=BLANK()
+    )
+)
+
+_АктивныхФитнес(3м) = 
+countrows(
+        filter(
+            NATURALLEFTOUTERJOIN(
+                filter('Абонементы',
+                    'Абонементы'[ДатаОкончания]=SELECTEDVALUE('_Даты'[Date])+90&&'Абонементы'[Длительность]>=120),
+                filter('Заморозки',
+                    'Заморозки'[ДатаНачалаЗаморозки]<=SELECTEDVALUE('_Даты'[Date])&&'Заморозки'[ДатаОкончанияЗаморозки]>=SELECTEDVALUE('_Даты'[Date])
+                )
+            ),
+            [ДатаНачалаЗаморозки]=BLANK()
+    )
+)
+
+_ВсегоЗамороженныхФитнес = 
+var days = SELECTEDVALUE('_Группы контрактов'[Группа])
+var groupp = 
+if (
+    SELECTEDVALUE('_Группы контрактов'[Группа])=7,
+    "Группа7",
+    IF(
+        SELECTEDVALUE('_Группы контрактов'[Группа])=14,
+        "Группа14", 
+        IF(
+            SELECTEDVALUE('_Группы контрактов'[Группа])=21,
+            "Группа21", 
+            IF(
+                SELECTEDVALUE('_Группы контрактов'[Группа])=30,
+                "Группа30"
+            )
+        )
+    )
+)
+return 
+countrows(
+    filter(
+        NATURALLEFTOUTERJOIN(
+            filter('Абонементы',
+                'Абонементы'[ДатаНачала]=SELECTEDVALUE('_Даты'[Date])-days&&'Абонементы'[ДатаОкончания]>=SELECTEDVALUE('_Даты'[Date])&&'Абонементы'[ГруппаДни]=groupp),
+            filter('Заморозки',
+                'Заморозки'[ДатаНачалаЗаморозки]<=SELECTEDVALUE('_Даты'[Date])&&'Заморозки'[ДатаОкончанияЗаморозки]>=SELECTEDVALUE('_Даты'[Date])
+            )
+        ),
+        [ДатаНачалаЗаморозки]<>BLANK()
+    )
+)
+
+_ВсегоЗамороженныхФитнес(3м) = 
+countrows(
+        filter(
+            NATURALLEFTOUTERJOIN(
+                filter('Абонементы',
+                    'Абонементы'[ДатаОкончания]=SELECTEDVALUE('_Даты'[Date])+90&&'Абонементы'[Длительность]>=120),
+                filter('Заморозки',
+                    'Заморозки'[ДатаНачалаЗаморозки]<=SELECTEDVALUE('_Даты'[Date])&&'Заморозки'[ДатаОкончанияЗаморозки]>=SELECTEDVALUE('_Даты'[Date])
+                )
+        ),
+        [ДатаНачалаЗаморозки]<>BLANK()
+    )
+)
+
+_ВсегоКонтрактов6дней = 
+countrows(
+    filter(
+        NATURALLEFTOUTERJOIN(
+            filter('Абонементы',
+                'Абонементы'[ДатаНачала]+5=SELECTEDVALUE('_Даты'[Date])&&'Абонементы'[ДатаОкончания]>=SELECTEDVALUE('_Даты'[Date])),
+            filter('Заморозки',
+                'Заморозки'[ДатаНачалаЗаморозки]<=SELECTEDVALUE('_Даты'[Date])&&'Заморозки'[ДатаОкончанияЗаморозки]>=SELECTEDVALUE('_Даты'[Date])
+            )
+        ),
+        [ДатаНачалаЗаморозки]=BLANK()
+    )
+)
+_ВсегоКонтрактовФитнес = 
+var days = SELECTEDVALUE('_Группы контрактов'[Группа])
+var groupp = 
+if (
+    SELECTEDVALUE('_Группы контрактов'[Группа])=7,
+    "Группа7",
+    IF(
+        SELECTEDVALUE('_Группы контрактов'[Группа])=14,
+        "Группа14", 
+        IF(
+            SELECTEDVALUE('_Группы контрактов'[Группа])=21,
+            "Группа21", 
+            IF(
+                SELECTEDVALUE('_Группы контрактов'[Группа])=30,
+                "Группа30"
+            )
+        )
+    )
+)
+return 
+CALCULATE(
+    DISTINCTCOUNT('Абонементы'[Код]),
+    'Абонементы'[ДатаНачала]=SELECTEDVALUE('_Даты'[Date])-days&&'Абонементы'[ДатаОкончания]>=SELECTEDVALUE('_Даты'[Date])&&'Абонементы'[ГруппаДни]=groupp
+    )
+
+_ВсегоКонтрактовФитнес(3м) = 
+CALCULATE(
+    DISTINCTCOUNT('Абонементы'[Код]),
+        'Абонементы'[ДатаОкончания]=SELECTEDVALUE('_Даты'[Date])+90
+        &&
+        'Абонементы'[Длительность]>=120)
+
+_ГруппаКонтрактовПоНАчалу = 
+IF(
+    SELECTEDVALUE('Абонементы'[ДатаНачала])<=SELECTEDVALUE('_Даты'[Date])-7,7,
+    IF(
+    SELECTEDVALUE('Абонементы'[ДатаНачала])<=SELECTEDVALUE('_Даты'[Date])-14,14))
+_Доля4+Фитнес = DIVIDE([_4+ПосещенийФитнес],[_АктивныхФитнес])
+
+_Контракты ПГ (3м-НИ) = 
+COUNTrows(
+    filter(
+        NATURALLEFTOUTERJOIN(
+            filter('Абонементы',
+                'Абонементы'[ДатаОкончания]<=ENDOFMONTH(DATEADD('_Даты'[Date],-1,YEAR))+90&&'Абонементы'[ДатаОкончания]>=STARTOFMONTH(DATEADD('_Даты'[Date],-1,YEAR))+90&&'Абонементы'[Длительность]>=120),
+            filter(
+                'Заморозки',
+                'Заморозки'[ДатаНачалаЗаморозки]<='Заморозки'[ДатаОкончания1]-90&&'Заморозки'[ДатаОкончанияЗаморозки]>='Заморозки'[ДатаОкончания1]-90
+            )
+        ),
+        [ДатаНачалаЗаморозки]=BLANK()
+    )
+)
+
+_Контракты ПГ (НИ) = 
+COUNTrows(
+
+                        filter(
+                            NATURALLEFTOUTERJOIN(
+                                filter('Абонементы',
+                                    'Абонементы'[ДатаНачала]<=ENDOFMONTH(DATEADD('_Даты'[Date],-1,YEAR))-30&&'Абонементы'[ДатаОкончания]>=STARTOFMONTH(DATEADD('_Даты'[Date],-1,YEAR))&&'Абонементы'[ДатаНачала]>=STARTOFMONTH(DATEADD('_Даты'[Date],-1,YEAR))-30&&'Абонементы'[ДатаОкончания] >= 'Абонементы'[ДатаНачала]+30&&'Абонементы'[ГруппаДни]=30),
+                                filter('Заморозки',
+                                'Заморозки'[ДатаНачалаЗаморозки]<='Заморозки'[ДатаНачала1]+30&&'Заморозки'[ДатаОкончанияЗаморозки]>='Заморозки'[ДатаНачала1]+30
+                            )
+                        ),
+                        [ДатаНачалаЗаморозки]=BLANK()
+                        )
+
+)
+
+_Контракты(3м-НИ) = 
+var checkdate = if(ENDOFMONTH('_Даты'[Date])<=TODAY()-1,ENDOFMONTH('_Даты'[Date]),TODAY()-1)
+return
+COUNTrows(
+    filter(
+        NATURALLEFTOUTERJOIN(
+            filter('Абонементы',
+                'Абонементы'[ДатаОкончания]<=checkdate+90&&'Абонементы'[ДатаОкончания]>=STARTOFMONTH('_Даты'[Date])+90&&'Абонементы'[Длительность]>=120),
+            filter('Заморозки',
+            'Заморозки'[ДатаНачалаЗаморозки]<='Заморозки'[ДатаОкончания1]-90&&'Заморозки'[ДатаОкончанияЗаморозки]>='Заморозки'[ДатаОкончания1]-90
+        )
+    ),
+    [ДатаНачалаЗаморозки]=BLANK()
+    )
+)
+
+_Контракты(НИ) = 
+COUNTrows(
+    filter(
+        NATURALLEFTOUTERJOIN(
+            filter(
+                'Абонементы',
+                'Абонементы'[ДатаНачала]<=ENDOFMONTH('_Даты'[Date])-30
+                &&
+                'Абонементы'[ДатаОкончания]>=STARTOFMONTH('_Даты'[Date])
+                &&
+                'Абонементы'[ДатаНачала]>=STARTOFMONTH('_Даты'[Date])-30
+                &&
+                'Абонементы'[ДатаОкончания] >= 'Абонементы'[ДатаНачала]+30
+                ),
+                filter(
+                    'Заморозки',
+                    'Заморозки'[ДатаНачалаЗаморозки]<='Заморозки'[ДатаНачала1]+30
+                    &&
+                    'Заморозки'[ДатаОкончанияЗаморозки]>='Заморозки'[ДатаНачала1]+30
+                )
+        ),
+    [ДатаНачалаЗаморозки]=BLANK()
+    )
+)
+
+_Контракты07 = 
+//IF(SELECTEDVALUE('_Группы контрактов'[Группа])=7,
+var currentdate = SELECTEDVALUE('_Даты'[Date])
+return
+sumx(
+    filter(
+        NATURALLEFTOUTERJOIN(
+            filter('Абонементы',
+                -'Абонементы'[ДатаНачала]+currentdate=7&&'Абонементы'[ДатаОкончания]>=currentdate&&'Абонементы'[ГруппаДни]=7),
+            filter('Заморозки',
+                'Заморозки'[ДатаНачалаЗаморозки]<=currentdate&&'Заморозки'[ДатаОкончанияЗаморозки]>=currentdate
+            )
+        ),
+        [ДатаНачалаЗаморозки]=BLANK()
+    ),
+    'Абонементы'[ГруппаПосещений]
+)
+
+_Контракты14 = 
+//IF(SELECTEDVALUE('_Группы контрактов'[Группа])=14,
+var currentdate = SELECTEDVALUE('_Даты'[Date])
+return
+sumx(
+    filter(
+        NATURALLEFTOUTERJOIN(
+            filter('Абонементы',
+                -'Абонементы'[ДатаНачала]+currentdate=14&&'Абонементы'[ДатаОкончания]>=currentdate&&'Абонементы'[ГруппаДни]=14),
+            filter('Заморозки',
+                'Заморозки'[ДатаНачалаЗаморозки]<=currentdate&&'Заморозки'[ДатаОкончанияЗаморозки]>=currentdate
+            )
+        ),
+        [ДатаНачалаЗаморозки]=BLANK()
+    ),
+    'Абонементы'[ГруппаПосещений]
+)
+//)
+
+_Контракты21 = 
+var currentdate = SELECTEDVALUE('_Даты'[Date])
+return
+sumx(
+    filter(
+        NATURALLEFTOUTERJOIN(
+            filter('Абонементы',
+                -'Абонементы'[ДатаНачала]+currentdate=21&&'Абонементы'[ДатаОкончания]>=currentdate&&'Абонементы'[ГруппаДни]=21),
+            filter('Заморозки',
+                'Заморозки'[ДатаНачалаЗаморозки]<=currentdate&&'Заморозки'[ДатаОкончанияЗаморозки]>=currentdate
+            )
+        ),
+        [ДатаНачалаЗаморозки]=BLANK()
+    ),
+    'Абонементы'[ГруппаПосещений]
+)
+
+_Контракты28 = 
+var currentdate = SELECTEDVALUE('_Даты'[Date])
+return
+sumx(
+    filter(
+        NATURALLEFTOUTERJOIN(
+            filter('Абонементы',
+                -'Абонементы'[ДатаНачала]+currentdate=28&&'Абонементы'[ДатаОкончания]>=currentdate&&'Абонементы'[ГруппаДни]=28),
+            filter('Заморозки',
+                'Заморозки'[ДатаНачалаЗаморозки]<=currentdate&&'Заморозки'[ДатаОкончанияЗаморозки]>=currentdate
+            )
+        ),
+        [ДатаНачалаЗаморозки]=BLANK()
+    ),
+    'Абонементы'[ГруппаПосещений]
+)
+
+_Контракты30 = 
+COUNTrows(
+    filter(
+        NATURALLEFTOUTERJOIN(
+            filter('Абонементы',
+                'Абонементы'[ДатаНачала]+30>=STARTOFMONTH('_Даты'[Date])&&'Абонементы'[ДатаНачала]+30<=endOFMONTH('_Даты'[Date])&&'Абонементы'[ДатаОкончания]-'Абонементы'[ДатаНачала]>=30
+                ),
+            filter('Заморозки',
+                'Заморозки'[ДатаНачалаЗаморозки]<='Заморозки'[ДатаНачала1]+30&&'Заморозки'[ДатаОкончанияЗаморозки]>='Заморозки'[ДатаНачала1]+30
+                )
+            ),
+        [ДатаНачалаЗаморозки]=BLANK()
+    )
+)
+
+_Контракты30дней = 
+var days = SELECTEDVALUE('_Группы контрактов'[Группа])
+var groupp = 
+    SELECTEDVALUE('_Группы контрактов'[Группа])
+return 
+COUNTrows(
+                    filter(
+                        NATURALLEFTOUTERJOIN(
+                            filter('Абонементы',
+                                'Абонементы'[ДатаНачала]=SELECTEDVALUE('_Даты'[Date])-days&&'Абонементы'[ДатаОкончания]>=SELECTEDVALUE('_Даты'[Date])&&'Абонементы'[ГруппаДни]=groupp),
+                            filter('Заморозки',
+                                'Заморозки'[ДатаНачалаЗаморозки]<=SELECTEDVALUE('_Даты'[Date])&&'Заморозки'[ДатаОкончанияЗаморозки]>=SELECTEDVALUE('_Даты'[Date])
+                            )
+                        ),
+                        [ДатаНачалаЗаморозки]=BLANK()
+                    )
+)
+
+_Контракты30дней(НИ) = 
+var checkdate = eNDOFMONTH('_Даты'[Date])
+return
+COUNTrows(
+    filter(
+        NATURALLEFTOUTERJOIN(
+            filter('Абонементы',
+                'Абонементы'[ДатаНачала]<=checkdate-30&&'Абонементы'[ДатаОкончания]>=STARTOFMONTH('_Даты'[Date])&&'Абонементы'[ДатаНачала]>=STARTOFMONTH('_Даты'[Date])-30&&'Абонементы'[ДатаОкончания] >= 'Абонементы'[ДатаНачала]+30&&'Абонементы'[ГруппаДни]=30),
+            filter('Заморозки',
+            'Заморозки'[ДатаНачалаЗаморозки]<='Заморозки'[ДатаНачала1]+30&&'Заморозки'[ДатаОкончанияЗаморозки]>='Заморозки'[ДатаНачала1]+30
+        )
+    ),
+    [ДатаНачалаЗаморозки]=BLANK()
+    )
+)
+
+
+_Контракты90дней = 
+COUNTrows(
+                    filter(
+                        NATURALLEFTOUTERJOIN(
+                            filter('Абонементы',
+                                'Абонементы'[ДатаОкончания]=SELECTEDVALUE('_Даты'[Date])+90&&'Абонементы'[Длительность]>=120),
+                            filter('Заморозки',
+                                'Заморозки'[ДатаНачалаЗаморозки]<=SELECTEDVALUE('_Даты'[Date])&&'Заморозки'[ДатаОкончанияЗаморозки]>=SELECTEDVALUE('_Даты'[Date])
+                            )
+                        ),
+                        [ДатаНачалаЗаморозки]=BLANK()
+    )
+)
+
+_Контракты90дней(НИ) = 
+var checkdate = if(ENDOFMONTH('_Даты'[Date])<=TODAY()-1,ENDOFMONTH('_Даты'[Date]),TODAY()-1)
+return
+COUNTrows(
+    filter(
+        NATURALLEFTOUTERJOIN(
+            filter('Абонементы',
+                'Абонементы'[ДатаОкончания]<=checkdate+90&&'Абонементы'[ДатаОкончания]>=STARTOFMONTH('_Даты'[Date])+90&&'Абонементы'[Длительность]>=120),
+            filter('Заморозки',
+            'Заморозки'[ДатаНачалаЗаморозки]<='Заморозки'[ДатаОкончания1]-90&&'Заморозки'[ДатаОкончанияЗаморозки]>='Заморозки'[ДатаОкончания1]-90
+            )
+        ),
+    [ДатаНачалаЗаморозки]=BLANK()
+    )
+)
+
+_ПланШт = ROUNDUP('_Меры фитнес'[_Контракты30дней(НИ)]*SUM('Выпускники план'[Доля план]),0)
+
+Доля 4+ Динамика ПГ = 
+'_Меры фитнес'[Доля 4+(НИ)]-'_Меры фитнес'[Доля 4+ПГ(НИ)]
+
+Доля 4+(НИ) = DIVIDE('_Меры фитнес'[_4+Посещений(НИ)],'_Меры фитнес'[_Контракты30дней(НИ)])
+
+Доля 4+ПГ(НИ) = 
+DIVIDE(
+    '_Меры фитнес'[_4+ ПГ (НИ)],
+    '_Меры фитнес'[_Контракты ПГ (НИ)]
+)
+_СпрКонтракты = values('Абонементы'[Код])
+
+_ГруппаПос = 
+ SWITCH('Абонементы'[ГруппаПосещений],
+  0,"0",
+  1,"1",
+  2,"2",
+  3,"3","4+")
+
+-90 = 'Абонементы'[ДатаОкончания]-90
+
+-90месяцев = DATEDIFF('Абонементы'[ДатаНачала], 'Абонементы'[-90],MONTH)
+
+ДатаНачала30 = 'Абонементы'[ДатаНачала]+30
+
+Длительность = DATEDIFF('Абонементы'[ДатаНачала],'Абонементы'[ДатаОкончания],DAY)
+
+Возраст = DATATABLE("Возраст",STRING,{{"Взрослые"},{"Дети"}})
+
+Заморозки = 
+UNION(
+    'Заморозки 2021',
+    'Заморозки 2022',
+    'Заморозки 2023',
+    'Заморозки 2024',
+    'Заморозки 2025',
+    'Заморозки 2026'
+    )
+
+Контракты = VALUES('Абонементы'[Код])
+
+Стаж = 
+DATATABLE("Стаж",STRING,{{"New"},{"Renew"},{"Ex"}})
+
+

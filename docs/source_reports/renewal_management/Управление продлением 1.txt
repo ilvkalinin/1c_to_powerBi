@@ -1,0 +1,105 @@
+  посещения  let
+    Источник = Odbc.Query("Driver={PostgreSQL Unicode};Server=virt207.worldclass.nnov.ru; Database=gymdb_test;Timeout=300;Fetch=10000;UseDeclareFetch=1;", "WITH contracts AS (#(lf)    SELECT #(lf)        cast(_Code as varchar(1000)) AS id#(lf)    FROM _Reference59#(lf)    WHERE _Fld672 > '2024-01-01'#(lf)      AND encode(_Fld696RRef, 'hex') <> '9b656ee141a764e44de79e83cd30c1b2'#(lf))#(lf)#(lf)SELECT #(lf)    c.id AS КодКонтракта,#(lf)    COUNT(ar._Fld7578_RRRef) AS ""Количество посещений""#(lf)FROM _AccumRg7575 ar#(lf)LEFT JOIN _Reference59 as r59 ON ar._Fld7578_RRRef = r59._IDRRef#(lf)INNER JOIN contracts as c ON c.id = cast(r59._Code as varchar(1000))#(lf)LEFT JOIN _Document325 as d325 ON ar._RecorderRRef = d325._IDRRef#(lf)LEFT JOIN _Reference132 as r132 ON ar._Fld7577RRef = r132._IDRRef#(lf)LEFT JOIN _Reference141X1 as r141 ON d325._Fld4171RRef = r141._IDRRef#(lf)#(lf)#(lf)WHERE #(lf)    encode(d325._Fld4164RRef, 'hex') = '9a5a4c90d2b1aede4b91dcd1abe84c43'#(lf)    AND r132._Description NOT IN ('Детский развивающий центр', 'Управляющая компания')#(lf)    AND ar._Period >= timestamp '2026-01-01'#(lf)    AND ar._Period < timestamp '2027-01-01'#(lf)    AND r141._Fld1532RRef = decode('9e8eaa7b2e77c19f4a1c22a8d9c3efa1','hex') #(lf)GROUP BY #(lf)    c.id;")
+in
+    Источник  абонементы  let
+    Источник = Odbc.Query("Driver={PostgreSQL Unicode};Server=virt207.worldclass.nnov.ru; Database=gymdb_test;Timeout=300;Fetch=10000;UseDeclareFetch=1;", "SELECT #(lf)    encode(a._IDRRef, 'hex') AS Ссылка,#(lf)    a._Code AS Код,#(lf)    a._Description  AS Наименование,#(lf)    r163._Description AS Номенклатура,#(lf)    a._Fld670 AS ДатаАктивацииАбонемента,#(lf)    a._Fld671 AS ДатаНачала,#(lf)    a._Fld672 AS ДатаОкончания,#(lf)    r225._Description AS ФИОМенеджера,#(lf)    r141x1._Description  AS Клиент,#(lf)    r141x1._Code AS КодКлиента,#(lf)    r141x1._Fld1507 AS ДатаРождения,#(lf)    r141x1._Fld1503  AS EMail,#(lf)    r141x1._Fld1531  AS Телефон,#(lf)    r132._Description AS КлубДоступа,#(lf)    a._Fld693 AS СрокДействия,#(lf)#(lf)    CASE encode(a._Fld694RRef, 'hex')#(lf)        WHEN 'bc06e4b21430ebfb44a67a65c46d41f9' THEN 'New'#(lf)        WHEN '9e369ac955bf602149e17b549b0f1498' THEN 'Ex'#(lf)        WHEN '91e4594e35ce15d847c4a3f32e1e18f2' THEN 'Renew'#(lf)        ELSE null#(lf)    END AS СтажКонтракта,#(lf)#(lf)    case encode(r163._Fld1741RRef, 'hex') #(lf)           when '80d300505681013811e4d84b6c6561d9' then 'Взрослые'#(lf)           when '80d300505681013811e4d85d67cfb97d' then 'Дети'#(lf)           when '80d300505681013811e4d85d6e92a534' then 'Юниоры'#(lf)           else 'Взрослые'#(lf)     end AS ВозрастнаяКатегорияНоменклатуры,#(lf)#(lf)    case encode(a._Fld700RRef, 'hex') #(lf)           when '8f5394c89929b17443f6475c6586399a' then 'Индивидуальный'#(lf)           when 'a5ffdc6d54b74e8b484868c37b0dd1a2' then 'Корпоративный'#(lf)           else null#(lf)     end AS ТипПланаПродаж,#(lf)#(lf)    encode(a._Fld699RRef, 'hex') AS ТипОплаты,#(lf)#(lf)    -- Поля из LATERAL JOIN#(lf)    next_a.Дата_начала_следующего,#(lf)    next_a.Код_абонемента_продления,#(lf)    next_a.ДатаАктивации_следующего,#(lf)    next_a._Fld693 СрокДействия_следующего,#(lf)    CASE #(lf)        WHEN encode(next_a._Fld699RRef_следующего, 'hex') = '96976725cebf51f7461429d74d3f6cbe' and next_a._Fld693>=90  THEN 'Бесплатное длинное продление'#(lf)        WHEN encode(next_a._Fld699RRef_следующего, 'hex') = '96976725cebf51f7461429d74d3f6cbe' and next_a._Fld693<90  THEN 'Бесплатное короткое продление'        #(lf)        when encode(next_a._Fld699RRef_следующего, 'hex') is null then 'Не продлен'#(lf)        ELSE 'Платное продление'#(lf)    END AS ТипПродления#(lf)    ,_Fld690 ПереданС#(lf)#(lf)FROM _Reference59 a#(lf)LEFT JOIN _Reference163 r163 ON encode(a._Fld685RRef,'hex') = encode(r163._IDRRef,'hex')#(lf)LEFT JOIN _Reference141X1 r141x1 ON r141x1._IDRRef = a._Fld681RRef#(lf)LEFT JOIN _Reference132 r132 ON r132._IDRRef = a._Fld687RRef#(lf)LEFT JOIN _Reference132 sales_club ON sales_club._IDRRef = a._Fld701RRef#(lf)LEFT JOIN _Reference225 r225 ON r225._IDRRef = a._Fld683RRef#(lf)LEFT JOIN _Document332 d332 on a._IDRRef = d332._Fld4422RRef and d332._Posted = true#(lf)LEFT JOIN _Document287 d287 on a._IDRRef = d287._Fld3379RRef#(lf)-- Подзапрос LATERAL JOIN для поиска следующего абонемента#(lf)LEFT JOIN LATERAL (#(lf)    SELECT #(lf)        encode(inner_a._IDRRef, 'hex') AS ссылка,#(lf)        inner_a._Fld671 AS Дата_начала_следующего,#(lf)        inner_a._Code  AS Код_абонемента_продления,#(lf)        inner_a._Fld670 AS ДатаАктивации_следующего,#(lf)        inner_a._Fld699RRef AS _Fld699RRef_следующего,#(lf)        inner_a._Fld693#(lf)    FROM _Reference59 inner_a#(lf)    WHERE #(lf)        inner_a._Fld681RRef = a._Fld681RRef -- тот же клиент#(lf)        AND inner_a._Fld671 > a._Fld671 -- дата начала следующего > дата начала текущего#(lf)#(tab)#(tab)AND inner_a._Fld672 > a._Fld672 -- дата окончания следующего > дата окончания текущего#(lf)#(tab)#(tab)AND inner_a._Fld672 > inner_a._Fld671 -- дата окончания следующего > дата начала следующего#(lf)        AND encode(inner_a._Fld696RRef, 'hex') <> '9b656ee141a764e44de79e83cd30c1b2' -- исключаем тип контракта ""клип-карта""#(lf)        AND encode(inner_a._Fld699RRef, 'hex') <> '9bd3ea4748457ee94b2011de6d9687d7'-- исключаем тип оплаты ""подписка""#(lf)        AND #(lf)(#(lf)(#(lf)inner_a._Fld693 >= 30 -- срок действия не меньше 30 дней#(lf)AND #(lf)encode(inner_a._Fld699RRef, 'hex') not in ('96976725cebf51f7461429d74d3f6cbe') -- исключаем тип оплаты ""бесплатный""#(lf))#(lf)or#(lf)(inner_a._Fld693 >= 1 -- срок действия не меньше 1 дней#(lf)AND #(lf)encode(inner_a._Fld699RRef, 'hex') in ('96976725cebf51f7461429d74d3f6cbe') -- тип оплаты ""бесплатный""#(lf))#(lf))#(lf)        AND inner_a._Description NOT LIKE '%ИП%'#(lf)        AND inner_a._Description NOT LIKE '%сотрудн%'#(lf)    ORDER BY inner_a._Fld671 ASC#(lf)    LIMIT 1#(lf)) AS next_a ON TRUE#(lf)#(lf)WHERE #(lf)    encode(a._Fld696RRef, 'hex') <> '9b656ee141a764e44de79e83cd30c1b2' -- исключаем тип контракта ""клип-карта""#(lf)    AND encode(a._Fld699RRef, 'hex') not in ('96976725cebf51f7461429d74d3f6cbe','9bd3ea4748457ee94b2011de6d9687d7') -- исключаем тип оплаты ""бесплатный"" и ""подписка""#(lf)    AND a._Fld672 > '01.01.2024' #(lf)    AND a._Fld672 <= date_trunc('month', current_date) + interval '6 month' - interval '1 day'#(lf)    AND a._Fld693 >= 30#(lf)    AND a._Description NOT LIKE '%ИП%'#(lf)    AND a._Description NOT LIKE '%сотрудн%'#(lf)    AND extract(day from (a._Fld672 - a._Fld671)) >= 30#(lf)    AND r141x1._Code IS NOT NULL#(lf)    AND _Fld690= '01.01.0001'#(lf)    AND encode(d332._IDRRef,'hex') is null#(lf)    AND encode(d287._IDRRef,'hex') is null")
+in
+    Источник  МаксВзаимодействие (2)
+
+let
+    Источник = Odbc.Query("Driver={PostgreSQL Unicode};Server=virt207.worldclass.nnov.ru; Database=gymdb_test;Timeout=300;Fetch=10000;UseDeclareFetch=1;", "SELECT#(lf)    client_code,#(lf)    stardate,#(lf)    connection_type,#(lf)    task_stage,#(lf)    fail_reason,#(lf)    task_code#(lf)FROM (#(lf)    SELECT#(lf)        _Reference141X1._Code AS client_code,#(lf)        _Reference67._Fld820 AS stardate,#(lf)        CASE encode(_Reference67._Fld831RRef, 'hex')#(lf)            WHEN 'b538e5326d9fc9a943c11fd0e7a0e678' THEN 'Встреча'#(lf)            WHEN 'af240c30136a9c4e4c4d477d359e0f03' THEN 'Заявка на обратный звонок'#(lf)            WHEN '8590e885ee4c688946c3e23782968752' THEN 'Входящий звонок'#(lf)            WHEN '8d7225693e34b52f450fe5181ac00cb9' THEN 'Исходящий звонок'#(lf)            WHEN '9db9fdbf6bd80f2044eb2835157b3bc8' THEN 'Обратная связь'#(lf)            WHEN '8b888f0c4a5eb1724b77b72ebeffdf6b' THEN 'Онлайн покупка'#(lf)            WHEN '8cdb19ca805f72d94dfd36278e121b82' THEN 'Отмена гостевого визита'#(lf)            WHEN '8f6da46ad3a0c51b4bb9feb594cb3b9c' THEN 'Оформление'#(lf)            WHEN 'a991e34cdfd2527449f98fb5c998a54d' THEN 'Переход по клику'#(lf)            WHEN '87c74245c038b6244d8f6f7169c0d545' THEN 'Регистрация гостевого визита'#(lf)            WHEN 'b70ab7149b54e8f240c0203b5ae78b63' THEN 'Регистрация рекомендации'#(lf)            WHEN '8d375d1bd8b128d447da1f927d95614c' THEN 'Уведомление'#(lf)            WHEN '952f4279216ec5844b0b165542d2d0d4' THEN 'Чат'#(lf)            WHEN '811e1e78f495bbd940b19032400397a3' THEN 'Входящее письмо'#(lf)            WHEN 'b86111863fbaefeb42b967aaa9ae4ce2' THEN 'Исходящее письмо'#(lf)            ELSE NULL#(lf)        END AS connection_type,#(lf)        _Reference264._Description AS task_stage,#(lf)        _Reference201._Description AS fail_reason,#(lf)        _Reference106._Code AS task_code,#(lf)        ROW_NUMBER() OVER (PARTITION BY _Reference141X1._Code ORDER BY _Reference67._Fld820 DESC) AS rn#(lf)    FROM _Reference67#(lf)    LEFT JOIN _Reference106 ON _Reference67._OwnerIDRRef = _Reference106._IDRRef#(lf)    LEFT JOIN _Reference141X1 ON _Reference106._Fld1196RRef = _Reference141X1._IDRRef#(lf)    LEFT JOIN _Reference89 ON _Reference106._Fld1191RRef = _Reference89._IDRRef#(lf)    LEFT JOIN _Reference264 ON _Reference106._Fld1205RRef = _Reference264._IDRRef#(lf)    LEFT JOIN _Reference201 ON _Reference106._Fld1201RRef = _Reference201._IDRRef#(lf)    LEFT JOIN _Reference202 ON _Reference67._Fld828RRef = _Reference202._IDRRef#(lf)    LEFT JOIN _Reference224 ON _Reference67._Fld829RRef = _Reference224._IDRRef#(lf)    WHERE#(lf)        _Reference67._Fld823 >= '2023-11-01'#(lf)        AND _Reference89._Description = 'Продажа клубной карты'#(lf)        AND encode(_Reference67._Fld831RRef, 'hex') <> '8f6da46ad3a0c51b4bb9feb594cb3b9c'#(lf)        AND _Reference224._Description IS DISTINCT FROM 'Запланировано'#(lf)        AND _Reference202._Description IS DISTINCT FROM 'Авто'#(lf)        AND _Reference141X1._Code IS NOT NULL#(lf)        AND _Reference67._Fld820 <> '0001-01-01'#(lf)) ranked#(lf)WHERE rn = 1;")
+in
+    Источник
+рейтинг
+let
+    Источник = Odbc.Query("Driver={PostgreSQL Unicode};Server=virt207.worldclass.nnov.ru; Database=gymdb_test;Timeout=300;Fetch=10000;UseDeclareFetch=1;", "WITH max_periods AS (#(lf)        SELECT #(lf)            _Fld6862RRef,#(lf)            MAX(_Period) AS max_period#(lf)        FROM _InfoRg6861 t#(lf)        WHERE _Fld6862RRef IS NOT NULL#(lf)        GROUP BY _Fld6862RRef#(lf)    ),#(lf)    latest_ratings AS (#(lf)        SELECT#(lf)            t._Period,#(lf)            r._Code AS client_code,#(lf)            CASE ENCODE(t._Fld6863RRef, 'hex')#(lf)                WHEN '00000000000000000000000000000000' THEN 'Без рейтинга'#(lf)                WHEN 'b791f8238f1e0a07497e01ff5e6b3532' THEN 'Базовый'#(lf)                WHEN 'b7fa39fc5ea14fd944082fbb2e478d08' THEN 'Бронзовый'#(lf)                WHEN '81393529f530e03347f3d3af2ad0c881' THEN 'Серебряный'#(lf)                WHEN 'a3a43b03aacf38194d50cd7806f9a1d4' THEN 'Золотой'#(lf)                WHEN 'a86b00b8cfac31254f8290bb111da2fb' THEN 'Черный'#(lf)                ELSE NULL#(lf)            END AS rating#(lf)        FROM _InfoRg6861 t#(lf)        INNER JOIN max_periods mp #(lf)            ON t._Fld6862RRef = mp._Fld6862RRef #(lf)            AND t._Period = mp.max_period#(lf)        LEFT JOIN _Reference141X1 r #(lf)            ON r._IDRRef = t._Fld6862RRef#(lf)        WHERE r._Code IS NOT NULL#(lf)    )#(lf)    SELECT #(lf)        _Period AS period,#(lf)        client_code,#(lf)        rating#(lf)    FROM latest_ratings#(lf)")
+in
+    Источник
+Стаж
+let
+    Источник = Odbc.Query("Driver={PostgreSQL Unicode};Server=virt207.worldclass.nnov.ru; Database=gymdb_test;Timeout=300;Fetch=10000;UseDeclareFetch=1;", "    WITH max_periods AS (#(lf)        SELECT #(lf)            _Fld5655RRef AS client_ref,#(lf)            MAX(_Period) AS max_period#(lf)        FROM _InfoRg5654#(lf)        WHERE _Fld5655RRef IS NOT NULL#(lf)        GROUP BY _Fld5655RRef#(lf)    ),#(lf)    latest_categories AS (#(lf)        SELECT#(lf)            t._Period,#(lf)            r._Code AS client_code,#(lf)            CASE ENCODE(t._Fld5656RRef, 'hex')#(lf)                WHEN 'bc06e4b21430ebfb44a67a65c46d41f9' THEN 'New'#(lf)                WHEN '91e4594e35ce15d847c4a3f32e1e18f2' THEN 'Renew'#(lf)                WHEN '9e369ac955bf602149e17b549b0f1498' THEN 'Ex'#(lf)                ELSE 'Неизвестный стаж'#(lf)            END AS category#(lf)        FROM _InfoRg5654 t#(lf)        INNER JOIN max_periods mp #(lf)            ON t._Fld5655RRef = mp.client_ref #(lf)            AND t._Period = mp.max_period#(lf)        LEFT JOIN _Reference141X1 r #(lf)            ON r._IDRRef = t._Fld5655RRef#(lf)        WHERE r._Code IS NOT NULL#(lf)    )#(lf)    SELECT #(lf)        _Period,#(lf)        client_code,#(lf)        category#(lf)    FROM latest_categories")
+in
+    Источник
+Цены
+let
+    Источник = Odbc.Query("Driver={PostgreSQL Unicode};Server=virt207.worldclass.nnov.ru; Database=gymdb_test;Timeout=300;Fetch=10000;UseDeclareFetch=1;", "SELECT #(lf)        encode(_Reference59._IDRRef, 'hex') id#(lf)        ,sum(_Fld7749) price#(lf)FROM _AccumRg7739#(lf)inner join _Reference59 on _AccumRg7739._Fld7741RRef=_Reference59._IDRRef#(lf)where #(tab)#(lf)        _AccumRg7739._Period >'01.01.2015' and#(lf)        _AccumRg7739._RecordKind = 0#(lf)        #(lf)group by #(lf)        _Reference59._IDRRef")
+in
+    Источник
+Клубы
+let
+    Источник = Odbc.Query("Driver={PostgreSQL Unicode};Server=virt207.worldclass.nnov.ru; Database=gymdb_test", "--Справочник.Клубы (Основная)#(lf)SELECT #(lf)#(tab)#(tab)encode(_IDRRef,'hex') Ссылка#(lf)#(tab)#(tab),cast(_Description as varchar(1000)) Наименование#(lf)FROM _Reference132"),
+    #"Строки с примененным фильтром" = Table.SelectRows(Источник, each ([Наименование] <> "World Class" and [Наименование] <> "_Архив" and [Наименование] <> "Ворлд Класс" and [Наименование] <> "Детский развивающий центр" and [Наименование] <> "Детский развивающий центр 1" and [Наименование] <> "ДРЦ ""Деловёнок""" and [Наименование] <> "КЦ" and [Наименование] <> "Управляющая компания" and [Наименование] <> "Физкульт")),
+    #"Другие удаленные столбцы" = Table.SelectColumns(#"Строки с примененным фильтром",{"Наименование"}),
+    #"Переименованные столбцы" = Table.RenameColumns(#"Другие удаленные столбцы",{{"Наименование", "Клуб"}}),
+    #"Сортированные строки" = Table.Sort(#"Переименованные столбцы",{{"Клуб", Order.Ascending}})
+in
+    #"Сортированные строки"
+%Renew = 
+DIVIDE(
+    '_Меры'[Продлено],
+    '_Меры'[Кол-воАбонементов]
+)
+%Renew(ПГ) = 
+DIVIDE(
+    '_Меры'[Продлено(ПГ)],
+    '_Меры'[Кол-воАбонементов(ПГ)]
+)
+Дефицит = 
+'_Меры'[Продлено]-'_Меры'[ЦельПродлений]
+Кол-воАбонементов = 
+DISTINCTCOUNT('Абонементы'[Код])
+Кол-воАбонементов(ПГ) = 
+CALCULATE('_Меры'[Кол-воАбонементов],SAMEPERIODLASTYEAR('_Даты'[Date]))
+Продлено = 
+COUNTROWS(
+    DISTINCT(
+        SELECTCOLUMNS(
+            FILTER(
+                'Абонементы',
+                'Абонементы'[Продлен] = "Продлен"  
+            ),
+            "Код",'Абонементы'[Код]
+        )
+    )
+)
+ЦельПродлений = 
+ROUNDUP(
+'_Меры'[Кол-воАбонементов]*'_Меры'[%Renew(ПГ)],
+0
+)
+
+Продлено(ПГ) = 
+CALCULATE('_Меры'[Продлено],SAMEPERIODLASTYEAR('_Даты'[Date]))
+
+ВидСобытия = RELATED('МаксВзаимодействие (2)'[connection_type])
+Возраст = DATEDIFF('Абонементы'[ДатаРождения],TODAY(),YEAR)
+ГруппаПосещений = 
+IF(
+    RELATED('Посещения'[Посещений]) = BLANK(), 
+    "1.Прогульщик (0)",
+    RELATED('Посещения'[ГруппаПосещений])
+)
+ДатаВзаимодействия = RELATED('МаксВзаимодействие (2)'[stardate]) 
+КодЗадания = RELATED('МаксВзаимодействие (2)'[task_code])
+ПричинаНеуспешногоЗавершения = RELATED('МаксВзаимодействие (2)'[fail_reason])
+Продлен = 
+IF(
+    'Абонементы'[ТипПродления] in {"Платное продление","Бесплатное длинное продление"},
+    "Продлен",
+    "Не продлен"
+)
+Рейтинг = if (RELATED('Рейтинг'[rating]) = BLANK(),"Без Рейтинга",RELATED('Рейтинг'[rating]))
+Стаж = RELATED('Стаж'[category])
+ЦенаПокупки = RELATED('Цены'[price])
+ЭтапВоронки = RELATED('МаксВзаимодействие (2)'[task_stage])
+ГруппаПосещений = 
+SWITCH(
+    TRUE(),
+    'Посещения'[Посещений]< 13,"2.Лучше пойду поем (1-12)",
+    'Посещения'[Посещений]< 25,"3.Начну с понедельника (13-24)",
+    'Посещения'[Посещений]< 37,"4.Редкий гость (25-36)",
+    'Посещения'[Посещений]< 49,"5.Становится своим (37-48)",
+    'Посещения'[Посещений] < 61,"6.Стабильный (49-60)",
+    'Посещения'[Посещений]< 81,"7.Спортсмен (61-80)","8.Олимпийский трезерв (81+)"
+)
+

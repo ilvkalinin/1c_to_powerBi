@@ -1,0 +1,26 @@
+ РС_СостояниеПредЗаписи (ДОК_ПЗ)  let
+    Источник = Odbc.Query("Driver={PostgreSQL Unicode};Server=virt207.worldclass.nnov.ru; Database=gymdb_test", "SELECT #(lf)#(tab)#(tab)_Period Период#(lf)#(tab)#(tab),encode(_RecorderRRef,'hex') Регистратор#(lf)#(tab)#(tab),_Active Активность#(lf)#(tab)#(tab),encode(_Fld7007_RRRef,'hex') ГрупповоеЗанятие#(lf)#(tab)#(tab),cast(_Reference141X1._Description as varchar(1000)) Контрагент#(lf),cast(_Reference141X1._Code as varchar(1000)) КодКлиента#(lf)#(tab)#(tab),cast(_Reference132._Description as varchar(1000)) Клуб#(lf)#(tab)#(tab),encode(_Fld7010RRef,'hex') Услуга#(lf)#(tab)#(tab),_Enum448._EnumOrder Состояние#(lf)#(tab)#(tab),cast(_Reference225._Description as varchar(1000)) Сотрудник#(lf)#(tab)#(tab),encode(_Fld4358RRef,'hex') ТипВзаиморасчетов#(lf),cast(_Reference163._Description as varchar(1000)) НаименованиеУслуги#(lf)#(tab)#(tab),_Fld4306 ВремяНачала#(lf)#(tab)#(tab),_Fld4307 ВремяОкончания#(lf)#(tab)#(tab),_Date_Time Дата#(lf)#(lf)FROM _InfoRg7006#(lf)#(tab)INNER join _Reference141X1 on#(lf)#(tab)encode(_InfoRg7006._Fld7008RRef,'hex') = encode(_Reference141X1._IDRRef,'hex')#(lf)#(tab)INNER join _Reference132 on #(lf)#(tab)encode(_Reference132._IDRRef,'hex') = encode(_InfoRg7006._Fld7009RRef,'hex')#(lf)#(tab)INNER join _Document329 on #(lf)#(tab)encode(_Document329._IDRRef,'hex') = encode(_InfoRg7006._Fld7007_RRRef,'hex')#(lf)#(tab)INNER join _Reference225 on #(lf)#(tab)encode(_Reference225._IDRRef,'hex') = encode(_Document329._Fld4322RRef,'hex')#(lf)#(tab)INNER join _Enum448 on #(lf)#(tab)encode(_Enum448._IDRRef,'hex') = encode(_InfoRg7006._Fld7013RRef,'hex')#(lf)left join _Document329_VT4352 on#(lf)encode(_Document329_IDRRef,'hex') = encode(_Document329._IDRRef,'hex')#(lf)left join _Reference163 on#(lf)encode(_Reference163._IDRRef,'hex')=encode(_Fld7010RRef,'hex')#(lf)#(lf)WHERE #(lf)_Period >= '01.01.2024'#(lf)AND#(lf)(#(lf)encode(_Fld7010RRef,'hex') = 'bcd000505688c8b011ee0a8ba155d4a1' --Услуга равно спец.услуга для ИП#(lf)or encode(_Fld4358RRef,'hex') = 'a0f1524d502e0d5d4c1dfeb9d5bbb3fe'  -- ТипВзаиморасчетов равно с сотрудником#(lf))"),
+    #"Строки с примененным фильтром" = Table.SelectRows(Источник, each [Состояние] <> 2 and [Состояние] <> 3)
+in
+    #"Строки с примененным фильтром"  РС_СостояниеПредЗаписи (ДОК_ГП)  let
+    Источник = Odbc.Query("Driver={PostgreSQL Unicode};Server=virt207.worldclass.nnov.ru; Database=gymdb_test", "--РегистрСведений.СостояниеПредварительнойЗаписи (ДОК_ГП)#(lf)SELECT #(lf)#(tab)#(tab)_Period Период#(lf)#(tab)#(tab),encode(_RecorderRRef,'hex') Регистратор#(lf)#(tab)#(tab),_Active Активность#(lf)#(tab)#(tab),encode(_Fld7007_RRRef,'hex') ГрупповоеЗанятие#(lf)#(tab)#(tab),cast(_Reference141X1._Description as varchar(1000)) Контрагент#(lf),cast(_Reference141X1._Code as varchar(1000)) КодКлиента#(lf)#(tab)#(tab),cast(_Reference132._Description as varchar(1000)) Клуб#(lf)#(tab)#(tab),encode(_Fld7010RRef,'hex') Услуга#(lf)#(tab)#(tab),_Enum448._EnumOrder Состояние#(lf)#(tab)#(tab),cast(_Reference225._Description as varchar(1000)) Сотрудник#(lf),cast(_Reference163._Description as varchar(1000)) НаименованиеУслуги#(lf)#(tab)#(tab),_Fld3218 ВремяНачала#(lf)#(tab)#(tab),_Fld3219 ВремяОкончания#(lf)#(tab)#(tab),_Date_Time Дата#(lf)#(lf)FROM _InfoRg7006#(lf)#(tab)INNER join _Reference141X1 on#(lf)#(tab)encode(_InfoRg7006._Fld7008RRef,'hex') = encode(_Reference141X1._IDRRef,'hex')#(lf)#(tab)#(tab)INNER join _Reference132 on #(lf)#(tab)#(tab)encode(_Reference132._IDRRef,'hex') = encode(_InfoRg7006._Fld7009RRef,'hex')#(lf)#(tab)#(tab)#(tab)INNER join _Document279 on #(lf)#(tab)#(tab)#(tab)encode(_Document279._IDRRef,'hex') = encode(_InfoRg7006._Fld7007_RRRef,'hex')#(lf)#(tab)#(tab)#(tab)#(tab)INNER join _Reference225 on #(lf)#(tab)#(tab)#(tab)#(tab)encode(_Reference225._IDRRef,'hex') = encode(_Document279._Fld3223RRef,'hex')#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)INNER join _Enum448 on #(lf)#(tab)#(tab)#(tab)#(tab)#(tab)encode(_Enum448._IDRRef,'hex') = encode(_InfoRg7006._Fld7013RRef,'hex')#(lf)left join _Reference163 on#(lf)encode(_Reference163._IDRRef,'hex')=encode(_Fld7010RRef,'hex')#(lf)WHERE #(lf)_Period >= '01.01.2024'#(lf)AND#(lf)encode(_Fld7010RRef,'hex') = 'bcd000505688c8b011ee0a8ba155d4a1' --Услуга равно спец.услуга для ИП#(lf)"),
+    #"Строки с примененным фильтром" = Table.SelectRows(Источник, each [Состояние] <> 2 and [Состояние] <> 3),
+    #"Добавлен пользовательский объект" = Table.AddColumn(#"Строки с примененным фильтром", "ТипВзаиморасчетов", each "Неприменимо для группового занятия"),
+    #"Переупорядоченные столбцы" = Table.ReorderColumns(#"Добавлен пользовательский объект",{"Период", "Регистратор", "Активность", "ГрупповоеЗанятие", "Контрагент", "КодКлиента", "Клуб", "Услуга", "Состояние", "Сотрудник", "ТипВзаиморасчетов", "НаименованиеУслуги", "ВремяНачала", "ВремяОкончания", "Дата"})
+in
+    #"Переупорядоченные столбцы"  Общая = UNION('РС_СостояниеПредЗаписи (ДОК_ГП)','РС_СостояниеПредЗаписи (ДОК_ПЗ)')
+  _УслугНа1тренера = 
+DIVIDE(
+    'Меры'[Count],
+    DISTINCTCOUNT('Общая'[Сотрудник])
+    )
+Count = COUNT('Общая'[Контрагент])
+ dCount = DISTINCTCOUNT('Общая'[Контрагент])
+RegC = 
+DIVIDE(
+    'Меры'[Count],
+    'Меры'[dCount]
+    )
+    // /
+    // DISTINCTCOUNT('Общая'[_НачалоМесяца])
+

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Data Quality Reconciliation"
+  short_description: "Reconcile marts against confirmed source data"
+  default_prompt: "Create evidence-based reconciliation checks with explicit expected results."

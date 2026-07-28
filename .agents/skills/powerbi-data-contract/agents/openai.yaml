@@ -1,0 +1,4 @@
+interface:
+  display_name: "Power BI Data Contract"
+  short_description: "Define stable Power BI mart contracts"
+  default_prompt: "Create a Power BI-ready data contract for the mapped mart."

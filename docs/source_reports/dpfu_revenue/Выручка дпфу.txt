@@ -1,0 +1,300 @@
+
+
+
+
+
+Сотрудники
+
+let
+    Источник = Odbc.Query("Driver={PostgreSQL Unicode};Server=virt207.worldclass.nnov.ru; Database=gymdb_test", "#(lf)--РегистрСведений.НастройкиСотрудников (Основная)#(lf)SELECT #(lf)#(tab)#(tab)encode(_Fld6292RRef,'hex') Сотрудник#(lf),cast(_Reference225._Description as varchar(1000)) ИмяСотрудника#(lf)#(tab)#(tab),encode(_Fld6293RRef,'hex') Клуб#(lf)#(tab)#(tab),encode(_Fld6294RRef,'hex') Организация#(lf)#(tab)#(tab),encode(_Fld6295RRef,'hex') ВидДеятельности#(lf)#(tab)#(tab),encode(_Fld6296RRef,'hex') Должность#(lf)#(tab)#(tab),encode(_Fld6297RRef,'hex') ДокументРегистратор#(lf)#(tab)#(tab),_Fld6298 ДатаПриема#(lf)#(tab)#(tab),_Fld6299 ДатаУвольнения#(lf)#(tab)#(tab),_Fld6300 ИспользоватьПредварительнуюЗапись#(lf)#(tab)#(tab),_Fld6301 ОсновонойВидДеятельности#(lf)#(tab)#(tab),_Fld6302 Ставка#(lf)#(tab)#(tab),encode(_Reference101._Fld644RRef,'hex') Автор#(lf),cast(_Reference101._Description as varchar(1000)) Наименование#(lf)FROM _InfoRg6291#(lf)left join _Reference101 on#(lf)#(lf)encode(_InfoRg6291._Fld6296RRef,'hex')=encode(_Reference101._IDRRef,'hex')#(lf)left join _Reference225 on#(lf)encode(_Reference225._IDRRef,'hex')=encode(_InfoRg6291._Fld6292RRef,'hex')"),
+    #"Замененное значение" = Table.ReplaceValue(Источник,#datetime(1, 1, 1, 0, 0, 0),#datetime(2099, 1, 1, 0, 0, 0),Replacer.ReplaceValue,{"ДатаУвольнения"}),
+    #"Строки с примененным фильтром" = Table.SelectRows(#"Замененное значение", each Text.Contains([Наименование], "Тренер") or Text.Contains([Наименование], "тренер")),
+    #"Строки с примененным фильтром1" = Table.SelectRows(#"Строки с примененным фильтром", each [ДатаУвольнения] > #datetime(2020, 12, 31, 0, 0, 0)),
+    #"Другие удаленные столбцы" = Table.SelectColumns(#"Строки с примененным фильтром1",{"ИмяСотрудника"}),
+    #"Удаленные дубликаты" = Table.Distinct(#"Другие удаленные столбцы"),
+    #"Переименованные столбцы" = Table.RenameColumns(#"Удаленные дубликаты",{{"ИмяСотрудника", "ФИО Тренера"}})
+in
+    #"Переименованные столбцы"
+
+Дневное планирование для Power BI
+let
+    Источник = Odbc.Query("Driver={PostgreSQL Unicode};Server=virt207.worldclass.nnov.ru; Database=gymdb_test", "#(lf)--РегистрСведений.ПланПродажПоСотрудникамДопУслуги (Основная)#(lf)SELECT #(lf)#(tab)#(tab)-- _RecorderTRef Регистратор#(lf)#(tab)#(tab)-- ,encode(_RecorderRRef,'hex') Регистратор#(lf)#(tab)#(tab)-- ,_LineNo НомерСтроки#(lf)#(tab)#(tab)-- ,_Active Активность#(lf)#(tab)#(tab)_Fld6613 as date_plan#(lf)#(tab)#(tab),cast(_Reference217._Description as varchar(1000)) as direct#(lf)#(tab)#(tab),cast(_Reference132._Description as varchar(1000)) as club#(lf)#(tab)#(tab),cast(_Reference225._Description as varchar(1000)) as empl#(lf)#(tab)#(tab)-- ,encode(_Fld6617RRef,'hex') as client#(lf)#(tab)#(tab)-- ,cast(_Reference141._Description as varchar(1000)) as client_name#(lf)#(tab)#(tab),cast(_Reference183._Description as varchar(1000)) as period_plan#(lf)#(tab)#(tab)-- ,_Fld6619 Уник#(lf)#(tab)#(tab)-- ,_Fld6620 as summa#(lf)#(tab)#(tab)-- ,_Fld6621 as count_count#(lf)#(tab)#(tab),COUNT(encode(_Fld6619,'hex')) as count_less#(lf)#(tab)#(tab),SUM (_Fld6620) as sum_rev#(lf)FROM _InfoRg6612#(lf)#(lf)LEFT JOIN _Reference225#(lf)on _InfoRg6612._Fld6616RRef = _Reference225._IDRRef#(lf)    LEFT JOIN _Reference132#(lf)    on _InfoRg6612._Fld6615RRef = _Reference132._IDRRef#(lf)#(tab)#(tab)LEFT JOIN _Reference183#(lf)#(tab)#(tab)on _InfoRg6612._Fld6618RRef = _Reference183._IDRRef#(lf)#(tab)#(tab)#(tab)LEFT JOIN _Reference217#(lf)#(tab)#(tab)#(tab)on _InfoRg6612._Fld6614RRef = _Reference217._IDRRef#(lf)#(tab)#(tab)#(tab)#(tab)LEFT JOIN _Reference141#(lf)#(tab)#(tab)#(tab)#(tab)on _InfoRg6612._Fld6617RRef = _Reference141._IDRRef#(lf)#(lf)GROUP BY#(lf)period_plan,#(lf)club,#(lf)direct,#(lf)empl,#(lf)date_plan#(lf)-- client,#(lf)-- client_name,#(lf)-- period_plan#(lf)#(lf)#(lf)"),
+    #"Переименованные столбцы" = Table.RenameColumns(Источник,{{"period_plan", "Source.Name"}, {"empl", "ФИО Тренера"}, {"club", "Клуб"}, {"direct", "Подразделение"}, {"date_plan", "Дата тренировки"}, {"count_less", "Количество"}, {"sum_rev", "Сумма"}}),
+    #"Измененный тип" = Table.TransformColumnTypes(#"Переименованные столбцы",{{"Source.Name", type date}}),
+    #"Добавленный запрос" = Table.Combine({#"Измененный тип", #"Дневное планирование для Power BI (3)"}),
+    #"Измененный тип1" = Table.TransformColumnTypes(#"Добавленный запрос",{{"Дата тренировки", type date}}),
+    #"Замененное значение" = Table.ReplaceValue(#"Измененный тип1","Тренажёрный зал","Тренажёрный зал (Штат)",Replacer.ReplaceText,{"Подразделение"}),
+    #"Замененное значение1" = Table.ReplaceValue(#"Замененное значение","Тренажёрный зал (Штат) (Штат)","Тренажёрный зал (Штат)",Replacer.ReplaceText,{"Подразделение"}),
+    #"Замененное значение2" = Table.ReplaceValue(#"Замененное значение1","тренажёрный зал","Тренажёрный зал (Штат)",Replacer.ReplaceText,{"Подразделение"}),
+    #"Строки с примененным фильтром" = Table.SelectRows(#"Замененное значение2", each ([Подразделение] <> "Подразделение"))
+in
+    #"Строки с примененным фильтром"
+
+Дневное планирование для Power BI (2)
+let
+    Источник = Odbc.Query("Driver={PostgreSQL Unicode};Server=virt207.worldclass.nnov.ru; Database=gymdb_test", "#(lf)--РегистрСведений.ПланПродажПоСотрудникамДопУслуги (Основная)#(lf)SELECT #(lf)#(tab)#(tab)-- _RecorderTRef Регистратор#(lf)#(tab)#(tab)-- ,encode(_RecorderRRef,'hex') Регистратор#(lf)#(tab)#(tab)-- ,_LineNo НомерСтроки#(lf)#(tab)#(tab)-- ,_Active Активность#(lf)#(tab)#(tab)_Fld6613 as date_plan#(lf)#(tab)#(tab),cast(_Reference217._Description as varchar(1000)) as direct#(lf)#(tab)#(tab),cast(_Reference132._Description as varchar(1000)) as club#(lf)#(tab)#(tab),cast(_Reference225._Description as varchar(1000)) as empl#(lf)#(tab)#(tab),encode(_Fld6619,'hex') as client#(lf)#(tab)#(tab),cast(_Reference141X1._Description as varchar(1000)) as client_name#(lf)#(tab)#(tab),cast(_Reference141X1._Code as varchar(1000)) Код#(lf)#(tab)#(tab),cast(_Reference183._Description as varchar(1000)) as period_plan#(lf)#(tab)#(tab)-- ,_Fld6619 Уник#(lf)#(tab)#(tab),_Fld6620 as summa#(lf)#(tab)#(tab)-- ,_Fld6621 as count_count#(lf)FROM _InfoRg6612#(lf)#(lf)LEFT JOIN _Reference225#(lf)on _InfoRg6612._Fld6616RRef = _Reference225._IDRRef#(lf)    LEFT JOIN _Reference132#(lf)    on _InfoRg6612._Fld6615RRef = _Reference132._IDRRef#(lf)#(tab)#(tab)LEFT JOIN _Reference183#(lf)#(tab)#(tab)on _InfoRg6612._Fld6618RRef = _Reference183._IDRRef#(lf)#(tab)#(tab)#(tab)LEFT JOIN _Reference217#(lf)#(tab)#(tab)#(tab)on _InfoRg6612._Fld6614RRef = _Reference217._IDRRef#(lf)#(tab)#(tab)#(tab)#(tab)LEFT JOIN _Reference141X1#(lf)#(tab)#(tab)#(tab)#(tab)on _InfoRg6612._Fld6617RRef = _Reference141X1._IDRRef"),
+    #"Переименованные столбцы" = Table.RenameColumns(Источник,{{"date_plan", "Дата тренировки"}, {"direct", "Подразделение"}, {"club", "Клуб"}, {"empl", "ФИО Тренера"}, {"client", "Клиент"}, {"client_name", "ИмяКлиента"}, {"period_plan", "Source.Name"}, {"summa", "Стоимость тренировки"}}),
+    #"Измененный тип" = Table.TransformColumnTypes(#"Переименованные столбцы",{{"Source.Name", type date}}),
+    #"Удаленные столбцы" = Table.RemoveColumns(#"Измененный тип",{"ИмяКлиента"}),
+    #"Замененное значение" = Table.ReplaceValue(#"Удаленные столбцы","Тренажёрный зал","Тренажёрный зал (Штат)",Replacer.ReplaceText,{"Подразделение"}),
+    #"Добавленный запрос" = Table.Combine({#"Замененное значение", #"Дневное планирование для Power BI (4)"}),
+    #"Измененный тип1" = Table.TransformColumnTypes(#"Добавленный запрос",{{"Дата тренировки", type date}}),
+    #"Замененное значение1" = Table.ReplaceValue(#"Измененный тип1","тренажёрный зал","Тренажёрный зал (Штат)",Replacer.ReplaceText,{"Подразделение"}),
+    #"Строки с примененным фильтром" = Table.SelectRows(#"Замененное значение1", each ([Подразделение] <> "Подразделение"))
+in
+    #"Строки с примененным фильтром"
+_СправочникУслуг
+let
+    Источник = Folder.Files("K:\Корпоративный центр\Аналитический отдел\Данные для отчетов\Структура услуг фитнес"),
+    #"Отфильтрованные скрытые файлы1" = Table.SelectRows(Источник, each [Attributes]?[Hidden]? <> true),
+    #"Вызвать настраиваемую функцию1" = Table.AddColumn(#"Отфильтрованные скрытые файлы1", "Преобразовать файл (2)", each #"Преобразовать файл (2)"([Content])),
+    #"Переименованные столбцы1" = Table.RenameColumns(#"Вызвать настраиваемую функцию1", {"Name", "Source.Name"}),
+    #"Другие удаленные столбцы1" = Table.SelectColumns(#"Переименованные столбцы1", {"Source.Name", "Преобразовать файл (2)"}),
+    #"Столбец расширенной таблицы1" = Table.ExpandTableColumn(#"Другие удаленные столбцы1", "Преобразовать файл (2)", Table.ColumnNames(#"Преобразовать файл (2)"(#"Пример файла"))),
+    #"Выполнена капитализация каждого слова" = Table.TransformColumns(#"Столбец расширенной таблицы1",{{"Раздел услуги", Text.Proper, type text}}),
+    #"Замененное значение" = Table.ReplaceValue(#"Выполнена капитализация каждого слова","Мероприятие Фд","Мероприятие",Replacer.ReplaceText,{"Раздел услуги"}),
+    #"Выполнена капитализация каждого слова1" = Table.TransformColumns(#"Замененное значение",{{"Номенклатура", Text.Proper, type text}}),
+    #"Удаленные дубликаты" = Table.Distinct(#"Выполнена капитализация каждого слова1")
+in
+    #"Удаленные дубликаты"
+ИП база
+let
+    Источник = Odbc.Query("Driver={PostgreSQL Unicode};Server=virt207.worldclass.nnov.ru; Database=gymdb_test", "SELECT #(lf)                date_trunc('month',_AccumRg7370._Period) as ""Период""#(lf)#(tab)#(tab),cast(_Reference132._Description as varchar(1000)) Клуб#(lf)                ,cast(_Reference163._Description as varchar(1000)) Услуга#(lf)                ,sum(_Fld7377) Поступления#(tab)#(lf)FROM _AccumRg7370#(lf)left join _Reference59#(lf)                      on _AccumRg7370._Fld7371RRef= _Reference59._IDRRef#(lf)left join _Reference163#(lf)                      on _Reference59._Fld685RRef=_Reference163._IDRRef#(lf)left join _Reference132 on #(lf)encode(_Fld7372RRef,'hex')=encode(_Reference132._IDRRef,'hex')#(lf)#(lf)where _AccumRg7370._Period>='01.05.2024'#(lf)and    cast(_Reference163._Description as varchar(1000)) like '%ИП%'#(lf)and _RecordKind =0#(lf)#(lf)group by#(lf)                date_trunc('month',_AccumRg7370._Period)#(lf)#(tab)#(tab),cast(_Reference132._Description as varchar(1000))#(lf)                ,cast(_Reference163._Description as varchar(1000))"),
+    #"Добавлен пользовательский объект" = Table.AddColumn(Источник, "Вид занятий", each "Тренажёрный зал (ИП)"),
+    #"Измененный тип" = Table.TransformColumnTypes(#"Добавлен пользовательский объект",{{"Период", type date}})
+in
+    #"Измененный тип"
+
+	let
+    Источник = Odbc.Query("Driver={PostgreSQL Unicode};Server=virt207.worldclass.nnov.ru; Database=gymdb_test;Timeout=300;Fetch=10000;UseDeclareFetch=1;", "SELECT #(lf)#(tab)#(tab)cast(_Reference132._Description as varchar(1000)) Клуб#(lf)#(tab)#(tab),_Period Период#(lf)                ,cast(_Reference163._Description as varchar(1000)) Услуга#(lf)#(tab)#(tab),cast(_Reference225._Description as varchar(1000)) Сотрудник#(lf)                ,0 as Поступления#(lf)                ,'Прочая услуга' as Пользовательский#(lf)                ,'Тренажёрный зал (ИП)' as ""Вид занятий""#(lf)                ,'Тренажёрный зал (ИП)' as ""ВидДеятельности""#(lf)#(lf)                ,cast(_Reference141X1._Code as varchar(1000)) КодКлиента#(lf)#(tab)#(tab),cast(_Reference141X1._Description as varchar(1000)) ФИО_Клиента#(lf)#(tab)#(tab),_Reference141X1._Fld1507 ДР_Клиента#(lf)                ,1 as Количество#(lf)#(tab)        ,case#(lf)#(tab)#(tab)when encode(_Reference141X1._Fld1532RRef,'hex')= '8e3e8dea66a1d5454387ceb554c10615' -- ТипКлиента = Сотрудник#(lf)#(tab)#(tab)then 'Сотрудник'#(lf)#(tab)#(tab)else 'Клиент'#(lf)#(tab)        end as ПризнакКлиента#(lf)#(lf)#(lf)FROM _InfoRg7006#(lf)#(tab)INNER join _Reference141X1 on#(lf)#(tab)_InfoRg7006._Fld7008RRef = _Reference141X1._IDRRef#(lf)#(tab)INNER join _Reference132 on #(lf)#(tab)_Reference132._IDRRef = _InfoRg7006._Fld7009RRef#(lf)#(tab)INNER join _Document329 on #(lf)#(tab)_Document329._IDRRef = _InfoRg7006._Fld7007_RRRef#(lf)#(tab)INNER join _Reference225 on #(lf)#(tab)_Reference225._IDRRef = _Document329._Fld4322RRef#(lf)#(tab)INNER join _Enum448 on #(lf)#(tab)_Enum448._IDRRef = _InfoRg7006._Fld7013RRef#(lf)left join _Document329_VT4352 on#(lf)_Document329_IDRRef = _Document329._IDRRef#(lf)left join _Reference163 on#(lf)_Reference163._IDRRef=_Fld7010RRef#(lf)#(lf)WHERE #(lf)_Period >= '01.01.2024'#(lf)AND#(lf)(#(lf)encode(_Fld7010RRef,'hex') = 'bcd000505688c8b011ee0a8ba155d4a1' --Услуга равно спец.услуга для ИП#(lf)or encode(_Fld4358RRef,'hex') = 'a0f1524d502e0d5d4c1dfeb9d5bbb3fe'  -- ТипВзаиморасчетов равно с сотрудником#(lf))#(lf)and _Enum448._EnumOrder not in (2,3) -- Состояние не отмена и не отмена со штрафом#(lf)#(lf)union all#(lf)#(lf)--РегистрСведений.СостояниеПредварительнойЗаписи (ДОК_ГП)#(lf)SELECT #(lf)#(tab)#(tab)cast(_Reference132._Description as varchar(1000)) Клуб#(lf)#(tab)#(tab),_Period Период#(lf)                ,cast(_Reference163._Description as varchar(1000)) Услуга#(lf)#(tab)#(tab),cast(_Reference225._Description as varchar(1000)) Сотрудник#(lf)                ,0 as Поступления#(lf)                ,'Прочая услуга' as Пользовательский#(lf)                ,'Тренажёрный зал (ИП)' as ""Вид занятий""#(lf)                ,'Тренажёрный зал (ИП)' as ""ВидДеятельности""#(lf)#(lf)                ,cast(_Reference141X1._Code as varchar(1000)) КодКлиента#(lf)#(tab)#(tab),cast(_Reference141X1._Description as varchar(1000)) ФИО_Клиента#(lf)#(tab)#(tab),_Reference141X1._Fld1507 ДР_Клиента#(lf)                ,1 as Количество#(lf)#(tab)        ,case#(lf)#(tab)#(tab)when encode(_Reference141X1._Fld1532RRef,'hex')= '8e3e8dea66a1d5454387ceb554c10615' -- ТипКлиента = Сотрудник#(lf)#(tab)#(tab)then 'Сотрудник'#(lf)#(tab)#(tab)else 'Клиент'#(lf)#(tab)        end as ПризнакКлиента#(lf)#(lf)#(lf)FROM _InfoRg7006#(lf)#(tab)INNER join _Reference141X1 on#(lf)#(tab)_InfoRg7006._Fld7008RRef = _Reference141X1._IDRRef#(lf)#(tab)#(tab)INNER join _Reference132 on #(lf)#(tab)#(tab)_Reference132._IDRRef = _InfoRg7006._Fld7009RRef#(lf)#(tab)#(tab)#(tab)INNER join _Document279 on #(lf)#(tab)#(tab)#(tab)_Document279._IDRRef = _InfoRg7006._Fld7007_RRRef#(lf)#(tab)#(tab)#(tab)#(tab)INNER join _Reference225 on #(lf)#(tab)#(tab)#(tab)#(tab)_Reference225._IDRRef = _Document279._Fld3223RRef#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)INNER join _Enum448 on #(lf)#(tab)#(tab)#(tab)#(tab)#(tab)_Enum448._IDRRef = _InfoRg7006._Fld7013RRef#(lf)left join _Reference163 on#(lf)_Reference163._IDRRef=_Fld7010RRef#(lf)WHERE #(lf)_Period >= '01.01.2024'#(lf)AND#(lf)encode(_Fld7010RRef,'hex') = 'bcd000505688c8b011ee0a8ba155d4a1' --Услуга равно спец.услуга для ИП#(lf)and #(lf)_Enum448._EnumOrder not in (2,3)-- Состояние не отмена и не отмена со штрафом#(lf)"),
+    #"Условный столбец добавлен1" = Table.AddColumn(Источник, "ГруппаТренировки", each if Text.Contains([Услуга], "Персональная тренировка") then "Персональная тренировка" else if Text.Contains([Услуга], "персональная тренировка") then "Персональная тренировка" else if Text.Contains([Услуга], "Индивидуальная тренировка") then "Персональная тренировка" else if Text.Contains([Услуга], "Сплит") then "Сплит" else if Text.Contains([Услуга], "сплит") then "Сплит" else if Text.Contains([Услуга], "Малая группа") then "Малая группа" else if Text.Contains([Услуга], "малая группа") then "Малая группа" else if Text.Contains([Услуга], "Платный урок") then "Платный урок" else if Text.Contains([Услуга], "платный урок") then "Платный урок" else if Text.Contains([Услуга], "СЕКЦИЯ") then "Секция" else if Text.Contains([Услуга], "Секция") then "Секция" else if Text.Contains([Услуга], "секция") then "Секция" else if Text.Contains([Услуга], "ИП") then "Контракт ИП" else if Text.Contains([Услуга], "Sport-уровень") then "Секция" else if Text.Contains([Услуга], "NEW-уровень") then "Секция" else if Text.Contains([Услуга], "PRO-уровень") then "Секция" else "Прочее"),
+    #"Добавлен пользовательский объект" = Table.AddColumn(#"Условный столбец добавлен1", "Возраст", each [Период]-[ДР_Клиента]),
+    #"Вычисленное общее число лет" = Table.TransformColumns(#"Добавлен пользовательский объект",{{"Возраст", each Duration.TotalDays(_) / 365, type number}}),
+        #"Добавлен пользовательский объект2" = Table.AddColumn(#"Вычисленное общее число лет", "Возрастная группа", each if [Возраст]=null then "Без возраста" else
+if [Возраст]<4 then "00-03" else
+if [Возраст]<6 then "04-05" else 
+if [Возраст]<10 then "06-09" else
+if [Возраст]<14 then "10-13" else
+if [Возраст]<18 then "14-17" else
+if [Возраст]<25 then "18-25" else
+if [Возраст]<35 then "26-35" else
+if [Возраст]<45 then "36-45" else
+if [Возраст]<55 then "46-55" else "56+"),
+    #"Добавлен пользовательский объект5" = Table.AddColumn(#"Добавлен пользовательский объект2", "КодКонтракта", each null),
+    #"Добавлен пользовательский объект4" = Table.AddColumn(#"Добавлен пользовательский объект5", "Контракт", each null),
+    #"Добавлен пользовательский объект3" = Table.AddColumn(#"Добавлен пользовательский объект4", "ОсновнойКлубДоступа", each null),
+    #"Добавлен пользовательский объект1" = Table.AddColumn(#"Добавлен пользовательский объект3", "ТипОплаты", each null),
+    #"Переупорядоченные столбцы" = Table.ReorderColumns(#"Добавлен пользовательский объект1",{"Клуб", "Период", "Услуга", "Сотрудник", "Поступления", "ГруппаТренировки", "Пользовательский", "Вид занятий", "Возраст", "Возрастная группа", "ВидДеятельности", "КодКлиента", "ФИО_Клиента", "ДР_Клиента", "Количество", "ПризнакКлиента", "ТипОплаты", "КодКонтракта", "Контракт", "ОсновнойКлубДоступа"}),
+    #"Измененный тип" = Table.TransformColumnTypes(#"Переупорядоченные столбцы",{{"Период", type date}, {"ДР_Клиента", type date}})
+in
+    #"Измененный тип"
+
+ДПФУ факт
+
+let
+Источник = Odbc.Query("Driver={PostgreSQL Unicode};Server=virt207.worldclass.nnov.ru;Database=gymdb_test;Timeout=300;Fetch=10000;UseDeclareFetch=1;", "#(lf)WITH clients AS (#(lf)    SELECT #(lf)        _IDRRef AS id,#(lf)        _Description AS name1,#(lf)        _Code AS code,#(lf)        _Fld1532RRef AS client_type,#(lf)        _Fld1507 AS birthday#(lf)    FROM _Reference141X1#(lf)),#(lf)empl AS (#(lf)    SELECT #(lf)        _IDRRef AS id,#(lf)        _Description AS name1#(lf)    FROM _Reference225#(lf)),#(lf)main_club AS (#(lf)    SELECT #(lf)        _Reference141X1._Code AS client,#(lf)        _Reference132._Description AS club,#(lf)        _Fld671 AS startdate,#(lf)        _Fld672 AS enddate#(lf)    FROM _Reference59#(lf)    LEFT JOIN _Reference141X1 ON _Reference141X1._IDRRef = _Reference59._Fld681RRef#(lf)    LEFT JOIN _Reference132 ON _Reference132._IDRRef = _Reference59._Fld687RRef#(lf)    WHERE _Reference132._Description IS NOT NULL#(lf)        -- Тип контракта = контракт (bf4b50662e88eb7b44046ebf4849976f)#(lf)        AND _Reference59._Fld696RRef = '\xbf4b50662e88eb7b44046ebf4849976f'::bytea#(lf)),#(lf)tab1 AS (#(lf)    SELECT #(lf)        _Period AS period,#(lf)        _Reference132._Description AS club,#(lf)        CAST(_Reference163._Fld1761 AS VARCHAR(1000)) AS service,#(lf)        _Reference70._Description AS division,#(lf)#(lf)#(tab)#(tab)ft._Description AS ФорматТренировки,#(lf)#(lf)        empl.name1 AS trainer,#(lf)        clients.code AS client_code,#(lf)        clients.name1 AS client_name,#(lf)        clients.birthday AS client_birthday,#(lf)        CASE#(lf)            WHEN _Fld7583 = '1' THEN 'Прочие' -- Гость = Да#(lf)            WHEN clients.client_type = '\x8e3e8dea66a1d5454387ceb554c10615'::bytea THEN 'Сотрудник' -- ТипКлиента = Сотрудник#(lf)            ELSE 'Клиент'#(lf)        END AS client_type,#(lf)        CASE#(lf)            WHEN _Reference59._Code IS NOT NULL THEN#(lf)                CASE #(lf)                    -- Тип контракта = контракт#(lf)                    WHEN _Reference59._Fld696RRef = '\xbf4b50662e88eb7b44046ebf4849976f'::bytea THEN 'Купон'#(lf)                    ELSE 'Клип-Карта'#(lf)                END#(lf)            ELSE 'Чек'#(lf)        END AS paiment_type,#(lf)        _Reference59._Code AS contract_code,#(lf)        _Reference59._Description AS contract,#(lf)        SUM(_Fld7585) AS number,#(lf)        SUM(_Fld7586) AS equity#(lf)    FROM _AccumRg7575#(lf)    LEFT JOIN clients ON _Fld7576RRef = clients.id#(lf)    LEFT JOIN empl ON _Fld7582RRef = empl.id#(lf)    LEFT JOIN _Reference132 ON _Fld7577RRef = _Reference132._IDRRef#(lf)    LEFT JOIN _Reference163 ON _Fld7579RRef = _Reference163._IDRRef#(lf)    LEFT JOIN _Reference70 ON _Reference163._Fld1733RRef = _Reference70._IDRRef#(lf)#(tab)#(lf)#(tab)LEFT JOIN _Reference248 ft ON ft._IDRRef = _Reference163._Fld1803RRef --формат тренировки#(lf)#(lf)#(tab)LEFT JOIN _Reference59 ON _Fld7578_RRRef = _Reference59._IDRRef#(lf)    WHERE #(lf)        _AccumRg7575._Period >= DATE_TRUNC('year', CURRENT_DATE) - INTERVAL '2 year'#(lf)        AND _AccumRg7575._Period < DATE_TRUNC('year', CURRENT_DATE) + INTERVAL '1 year'#(lf)        -- ТипНоменклатуры = ""Услуга"" (9f007d77d46892dc47058346701d3bb6)#(lf)        AND _Fld1795RRef = '\x9f007d77d46892dc47058346701d3bb6'::bytea#(lf)        -- Бизнес направление не равно ""Прочие членство"" (9e10e872e49a551b4968a66b95c28905)#(lf)        AND _Reference70._Fld843RRef <> '\x9e10e872e49a551b4968a66b95c28905'::bytea#(lf)        -- Бизнес направление не равно ""Членство"" (ac626c95655c992a471b27ca8f8812cd)#(lf)        AND _Reference70._Fld843RRef <> '\xac626c95655c992a471b27ca8f8812cd'::bytea#(lf)        AND CAST(_Reference163._Description AS VARCHAR(1000)) <> 'посещение клуба'#(lf)        AND _Reference70._Description IN ('Игровой зал','Восстановительный фитнес','Боевые искусства','Детский клуб','Водные программы','Групповые программы','Тренажёрный зал','Тренажерный зал')#(lf)    GROUP BY#(lf)        _Period,#(lf)        _Reference132._Description,#(lf)        CAST(_Reference163._Fld1761 AS VARCHAR(1000)),#(lf)        _Reference70._Description,#(lf)#(tab)#(tab)ft._Description,#(lf)        empl.name1,#(lf)        clients.code,#(lf)        clients.name1,#(lf)        clients.birthday,#(lf)        CASE#(lf)            WHEN _Fld7583 = '1' THEN 'Прочие'#(lf)            WHEN clients.client_type = '\x8e3e8dea66a1d5454387ceb554c10615'::bytea THEN 'Сотрудник'#(lf)            ELSE 'Клиент'#(lf)        END,#(lf)        CASE#(lf)            WHEN _Reference59._Code IS NOT NULL THEN#(lf)                CASE #(lf)                    WHEN _Reference59._Fld696RRef = '\xbf4b50662e88eb7b44046ebf4849976f'::bytea THEN 'Купон'#(lf)                    ELSE 'Клип-Карта'#(lf)                END#(lf)            ELSE 'Чек'#(lf)        END,#(lf)        _Reference59._Code,#(lf)        _Reference59._Description#(lf)),#(lf)tab2 AS (#(lf)    SELECT #(lf)        _Period AS period,#(lf)        _Reference132._Description AS club,#(lf)        CAST(_Reference163._Fld1761 AS VARCHAR(1000)) AS service,#(lf)        _Reference70._Description AS division,#(lf)#(lf)ft._Description AS ФорматТренировки,#(lf)#(lf)        empl.name1 AS trainer,#(lf)        clients.code AS client_code,#(lf)        clients.name1 AS client_name,#(lf)        clients.birthday AS client_birthday,#(lf)        CASE#(lf)            WHEN _Fld7656 = '1' THEN 'Прочие' -- Гость = Да#(lf)            WHEN clients.client_type = '\x8e3e8dea66a1d5454387ceb554c10615'::bytea THEN 'Сотрудник' -- ТипКлиента = Сотрудник#(lf)            ELSE 'Клиент'#(lf)        END AS client_type,#(lf)        'Чек' AS paiment_type,#(lf)        _Reference59._Code AS contract_code,#(lf)        _Reference59._Description AS contract,#(lf)        SUM(_Fld7657) AS number,#(lf)        SUM(_Fld7659) AS equity#(lf)    FROM _AccumRg7646#(lf)    LEFT JOIN clients ON _Fld7648RRef = clients.id#(lf)    LEFT JOIN empl ON _Fld7652RRef = empl.id#(lf)    LEFT JOIN _Reference132 ON _Fld7653RRef = _Reference132._IDRRef#(lf)    LEFT JOIN _Reference163 ON _Fld7649RRef = _Reference163._IDRRef#(lf)    LEFT JOIN _Reference70 ON _Reference163._Fld1733RRef = _Reference70._IDRRef#(lf)#(lf)#(tab)LEFT JOIN _Reference248 ft ON ft._IDRRef = _Reference163._Fld1803RRef --формат тренировки#(lf)#(lf)    LEFT JOIN _Reference59 ON _Fld7655RRef = _Reference59._IDRRef#(lf)    WHERE #(lf)        _AccumRg7646._Period >= DATE_TRUNC('year', CURRENT_DATE) - INTERVAL '2 year'#(lf)        AND _AccumRg7646._Period < DATE_TRUNC('year', CURRENT_DATE) + INTERVAL '1 year'#(lf)        -- ТипНоменклатуры не равно ""Услуга"" (9f007d77d46892dc47058346701d3bb6)#(lf)        AND _Fld1795RRef <> '\x9f007d77d46892dc47058346701d3bb6'::bytea#(lf)        -- Тип Номенклатуры не равно ""Абонемент"" (89de5e634e304b1a44efac5ab7088373)#(lf)        AND _Fld1795RRef <> '\x89de5e634e304b1a44efac5ab7088373'::bytea#(lf)        -- Тип номенклатуры не равно ""ПодарочныйСертификат"" (baad3eba9d9fe9b441d2a1a897435c33)#(lf)        AND _Fld1795RRef <> '\xbaad3eba9d9fe9b441d2a1a897435c33'::bytea#(lf)        -- Бизнес направление не равно ""Прочие членство"" (9e10e872e49a551b4968a66b95c28905)#(lf)        AND _Reference70._Fld843RRef <> '\x9e10e872e49a551b4968a66b95c28905'::bytea#(lf)        -- Бизнес направление не равно ""Членство"" (ac626c95655c992a471b27ca8f8812cd)#(lf)        AND _Reference70._Fld843RRef <> '\xac626c95655c992a471b27ca8f8812cd'::bytea#(lf)        AND CAST(_Reference163._Description AS VARCHAR(1000)) <> 'посещение клуба'#(lf)        AND _Reference70._Description IN ('Игровой зал','Восстановительный фитнес','Боевые искусства','Детский клуб','Водные программы','Групповые программы','Тренажёрный зал','Тренажерный зал')#(lf)    GROUP BY#(lf)        _Period,#(lf)        _Reference132._Description,#(lf)        CAST(_Reference163._Fld1761 AS VARCHAR(1000)),#(lf)        _Reference70._Description,#(lf)#(tab)#(tab)ft._Description,#(lf)        empl.name1,#(lf)        clients.code,#(lf)        clients.name1,#(lf)        clients.birthday,#(lf)        CASE#(lf)            WHEN _Fld7656 = '1' THEN 'Прочие'#(lf)            WHEN clients.client_type = '\x8e3e8dea66a1d5454387ceb554c10615'::bytea THEN 'Сотрудник'#(lf)            ELSE 'Клиент'#(lf)        END,#(lf)        _Reference59._Code,#(lf)        _Reference59._Description#(lf)),#(lf)raw_union AS (#(lf)    SELECT #(lf)        tab1.period,#(lf)        tab1.club,#(lf)        tab1.service,#(lf)        tab1.division,#(lf)#(tab)#(tab)tab1.ФорматТренировки,#(lf)        tab1.trainer,#(lf)        tab1.client_code,#(lf)        tab1.client_name,#(lf)        tab1.client_birthday,#(lf)        tab1.number,#(lf)        tab1.equity,#(lf)        tab1.client_type,#(lf)        tab1.paiment_type,#(lf)        tab1.contract_code,#(lf)        tab1.contract,#(lf)        MAX(#(lf)            CASE#(lf)                WHEN main_club.startdate IS NULL THEN NULL#(lf)                WHEN main_club.startdate <= tab1.period AND main_club.enddate >= tab1.period THEN main_club.club#(lf)                ELSE NULL#(lf)            END#(lf)        ) AS ОсновнойКлубДоступа#(lf)    FROM tab1#(lf)    LEFT JOIN main_club ON tab1.client_code = main_club.client#(lf)    GROUP BY#(lf)        tab1.period,#(lf)        tab1.club,#(lf)        tab1.service,#(lf)        tab1.division,#(lf)#(tab)#(tab)tab1.ФорматТренировки,#(lf)        tab1.trainer,#(lf)        tab1.client_code,#(lf)        tab1.client_name,#(lf)        tab1.client_birthday,#(lf)        tab1.number,#(lf)        tab1.equity,#(lf)        tab1.client_type,#(lf)        tab1.paiment_type,#(lf)        tab1.contract_code,#(lf)        tab1.contract#(lf)#(lf)    UNION ALL#(lf)#(lf)    SELECT #(lf)        tab2.period,#(lf)        tab2.club,#(lf)        tab2.service,#(lf)        tab2.division,#(lf)#(tab)#(tab)tab2.ФорматТренировки,#(lf)        tab2.trainer,#(lf)        tab2.client_code,#(lf)        tab2.client_name,#(lf)        tab2.client_birthday,#(lf)        tab2.number,#(lf)        tab2.equity,#(lf)        tab2.client_type,#(lf)        tab2.paiment_type,#(lf)        tab2.contract_code,#(lf)        tab2.contract,#(lf)        MAX(#(lf)            CASE#(lf)                WHEN main_club.startdate IS NULL THEN NULL#(lf)                WHEN main_club.startdate <= tab2.period AND main_club.enddate >= tab2.period THEN main_club.club#(lf)                ELSE NULL#(lf)            END#(lf)        ) AS ОсновнойКлубДоступа#(lf)    FROM tab2#(lf)    LEFT JOIN main_club ON tab2.client_code = main_club.client#(lf)    GROUP BY#(lf)        tab2.period,#(lf)        tab2.club,#(lf)        tab2.service,#(lf)        tab2.division,#(lf)#(tab)#(tab)tab2.ФорматТренировки,#(lf)        tab2.trainer,#(lf)        tab2.client_code,#(lf)        tab2.client_name,#(lf)        tab2.client_birthday,#(lf)        tab2.number,#(lf)        tab2.equity,#(lf)        tab2.client_type,#(lf)        tab2.paiment_type,#(lf)        tab2.contract_code,#(lf)        tab2.contract#(lf)),#(lf)filtered_division AS (#(lf)    SELECT * FROM raw_union#(lf)    WHERE division IN ('Боевые искусства', 'Водные программы', 'Восстановительный фитнес', #(lf)                       'Групповые программы', 'Детский клуб', 'Игровой зал', 'Тренажёрный зал')#(lf)),#(lf)replaced_division AS (#(lf)    SELECT#(lf)        period,#(lf)        club,#(lf)        service,#(lf)#(tab)#(tab)ФорматТренировки,#(lf)        CASE #(lf)            WHEN division = 'Тренажёрный зал' THEN 'Тренажёрный зал (Штат)'#(lf)            ELSE division#(lf)        END AS ВидДеятельности,#(lf)        trainer,#(lf)        client_code,#(lf)        client_name,#(lf)        client_birthday,#(lf)        number,#(lf)        equity,#(lf)        client_type,#(lf)        paiment_type,#(lf)        contract_code,#(lf)        contract,#(lf)        ОсновнойКлубДоступа#(lf)    FROM filtered_division#(lf)),#(lf)grouped_training AS (#(lf)    SELECT *,#(lf)        CASE#(lf)            WHEN service ILIKE '%Персональная тренировка%' THEN 'Персональная тренировка'#(lf)            WHEN service ILIKE '%Индивидуальная тренировка%' THEN 'Персональная тренировка'#(lf)            WHEN service ILIKE '%Сплит%' THEN 'Сплит'#(lf)            WHEN service ILIKE '%Малая группа%' THEN 'Малая группа'#(lf)            WHEN service ILIKE '%Платный урок%' THEN 'Платный урок'#(lf)            WHEN service ILIKE '%СЕКЦИЯ%' OR service ILIKE '%Секция%' THEN 'Секция'#(lf)            WHEN service ILIKE '%ИП%' THEN 'Контракт ИП'#(lf)            WHEN service ILIKE '%Sport-уровень%' OR service ILIKE '%NEW-уровень%' OR service ILIKE '%PRO-уровень%' THEN 'Секция'#(lf)            ELSE 'Прочее'#(lf)        END AS ГруппаТренировки#(lf)    FROM replaced_division#(lf)),#(lf)custom_service AS (#(lf)    SELECT *,#(lf)        CASE#(lf)            WHEN (service ILIKE '%Аренда%') #(lf)                 AND (club = 'Пушкинский' OR club = 'Пушкинский VIP') #(lf)            THEN 'Прочая услуга'#(lf)            WHEN service ILIKE '%Аренда%' #(lf)            THEN 'Аренда'#(lf)            ELSE 'Прочая услуга'#(lf)        END AS Пользовательский#(lf)    FROM grouped_training#(lf)),#(lf)activity_type AS (#(lf)    SELECT *,#(lf)        CASE#(lf)            WHEN Пользовательский = 'Аренда' THEN ВидДеятельности#(lf)            ELSE ВидДеятельности#(lf)        END AS ""Вид занятий""#(lf)    FROM custom_service#(lf)),#(lf)with_age AS (#(lf)    SELECT#(lf)        TRIM(club::TEXT) AS Клуб,#(lf)        period::DATE AS Период,#(lf)        service AS Услуга,#(lf)#(tab)#(tab)ФорматТренировки,#(lf)        trainer AS Сотрудник,#(lf)        equity AS Поступления,#(lf)        ГруппаТренировки,#(lf)        Пользовательский,#(lf)        ""Вид занятий"",#(lf)        ВидДеятельности,#(lf)        client_code AS ""КодКлиента"",#(lf)        client_name AS ""ФИО_Клиента"",#(lf)        client_birthday AS ""ДР_Клиента"",#(lf)        number AS Количество,#(lf)        client_type AS ""ПризнакКлиента"",#(lf)        paiment_type AS ""ТипОплаты"",#(lf)        contract_code AS ""КодКонтракта"",#(lf)        contract AS ""Контракт"",#(lf)        ОсновнойКлубДоступа,#(lf)        CASE#(lf)            WHEN client_birthday IS NULL THEN NULL#(lf)            ELSE (EXTRACT(EPOCH FROM (period - client_birthday)) / 86400.0) / 365.0#(lf)        END AS Возраст#(lf)    FROM activity_type#(lf)    WHERE equity IS NOT NULL AND equity <> 0#(lf)),#(lf)age_grouped AS (#(lf)    SELECT *,#(lf)        CASE#(lf)            WHEN Возраст IS NULL THEN 'Без возраста'#(lf)            WHEN Возраст < 4 THEN '00-03'#(lf)            WHEN Возраст < 6 THEN '04-05'#(lf)            WHEN Возраст < 10 THEN '06-09'#(lf)            WHEN Возраст < 14 THEN '10-13'#(lf)            WHEN Возраст < 18 THEN '14-17'#(lf)            WHEN Возраст < 25 THEN '18-25'#(lf)            WHEN Возраст < 35 THEN '26-35'#(lf)            WHEN Возраст < 45 THEN '36-45'#(lf)            WHEN Возраст < 55 THEN '46-55'#(lf)            ELSE '56+'#(lf)        END AS ""Возрастная группа""#(lf)    FROM with_age#(lf)),#(lf)-- =============== ДОБАВЛЯЕМ КЛАСТЕР И СЕТЬ ===============#(lf)enhanced_base AS (#(lf)    SELECT *,#(lf)        CASE#(lf)            WHEN Клуб IN ('Автозаводский', 'Южное', 'Парковая', 'Бурнаковский', 'Мещера', 'Корабли') THEN 'Физкульт (нижняя часть)'#(lf)            WHEN Клуб IN ('Родионова', 'Деловая', 'Советская', 'Старт', 'Спорт', 'Кстово', 'Гагаринский') THEN 'Физкульт (верхняя часть)'#(lf)            WHEN Клуб IN ('Пушкинский', 'Пушкинский VIP') THEN 'Комплекс Пушкинский'#(lf)            ELSE 'Прочее'#(lf)        END AS Кластер,#(lf)        CASE#(lf)            WHEN Клуб IN ('Пушкинский', 'Пушкинский VIP') THEN 'Комплекс Пушкинский'#(lf)            ELSE 'Физкульт'#(lf)        END AS ""_Сеть"",#(lf)        CASE#(lf)            WHEN (Клуб IN ('Пушкинский', 'Пушкинский VIP') AND (""Вид занятий"" IN ('Детский клуб', 'Аренда Детский клуб')))#(lf)            THEN 'Пушкинский'#(lf)            WHEN Клуб = 'Пушкинский VIP' THEN 'Пушкинский VIP'#(lf)            WHEN Клуб = 'Пушкинский' THEN 'Пушкинский'#(lf)            ELSE Клуб#(lf)        END AS ""Клуб для учета""#(lf)    FROM age_grouped#(lf)),#(lf)-- =============== ФИНАЛЬНЫЙ РАСЧЁТ СТОЛБЦОВ С ПРЕДЫДУЩИМИ ДАТАМИ ===============#(lf)final_with_flags AS (#(lf)    SELECT#(lf)        Клуб,#(lf)        Период,#(lf)        Услуга,#(lf)#(tab)#(tab)ФорматТренировки,#(lf)        Сотрудник,#(lf)        Поступления,#(lf)        ГруппаТренировки,#(lf)        Пользовательский,#(lf)        ""Вид занятий"",#(lf)        Возраст,#(lf)        ""Возрастная группа"",#(lf)        ВидДеятельности,#(lf)        ""КодКлиента"",#(lf)        ""ФИО_Клиента"",#(lf)        ""ДР_Клиента"",#(lf)        Количество,#(lf)        ""ПризнакКлиента"",#(lf)        ""ТипОплаты"",#(lf)        ""КодКонтракта"",#(lf)        ""Контракт"",#(lf)        ОсновнойКлубДоступа,#(lf)        Кластер,#(lf)        ""_Сеть"",#(lf)        ""Клуб для учета"",#(lf)        -- Только для строк, подходящих под фильтр для метрик#(lf)        CASE #(lf)            WHEN Пользовательский = 'Прочая услуга'#(lf)                 AND ""Клуб для учета"" <> 'Детский развивающий центр'#(lf)                 AND ""Вид занятий"" <> 'Тренажёрный зал (ИП)'#(lf)            THEN LAG(Период, 1) OVER (PARTITION BY ""КодКлиента"", Клуб ORDER BY Период)#(lf)            ELSE NULL#(lf)        END AS ПредПосещениеКлуб,#(lf)        #(lf)        CASE #(lf)            WHEN Пользовательский = 'Прочая услуга'#(lf)                 AND ""Клуб для учета"" <> 'Детский развивающий центр'#(lf)                 AND ""Вид занятий"" <> 'Тренажёрный зал (ИП)'#(lf)            THEN LAG(Период, 1) OVER (PARTITION BY ""КодКлиента"", ""_Сеть"" ORDER BY Период)#(lf)            ELSE NULL#(lf)        END AS ПредПосещениеСеть,#(lf)        #(lf)        CASE #(lf)            WHEN Пользовательский = 'Прочая услуга'#(lf)                 AND ""Клуб для учета"" <> 'Детский развивающий центр'#(lf)                 AND ""Вид занятий"" <> 'Тренажёрный зал (ИП)'#(lf)            THEN LAG(Период, 1) OVER (PARTITION BY ""КодКлиента"", Сотрудник, Клуб ORDER BY Период)#(lf)            ELSE NULL#(lf)        END AS ПредПосещениеТренер,#(lf)#(lf)        -- Разницы в днях#(lf)        CASE #(lf)            WHEN Пользовательский = 'Прочая услуга'#(lf)                 AND ""Клуб для учета"" <> 'Детский развивающий центр'#(lf)                 AND ""Вид занятий"" <> 'Тренажёрный зал (ИП)'#(lf)                 AND LAG(Период, 1) OVER (PARTITION BY ""КодКлиента"", Клуб ORDER BY Период) IS NOT NULL#(lf)            THEN (Период - LAG(Период, 1) OVER (PARTITION BY ""КодКлиента"", Клуб ORDER BY Период))#(lf)            ELSE NULL#(lf)        END AS РазницаКлуб,#(lf)#(lf)        CASE #(lf)            WHEN Пользовательский = 'Прочая услуга'#(lf)                 AND ""Клуб для учета"" <> 'Детский развивающий центр'#(lf)                 AND ""Вид занятий"" <> 'Тренажёрный зал (ИП)'#(lf)                 AND LAG(Период, 1) OVER (PARTITION BY ""КодКлиента"", ""_Сеть"" ORDER BY Период) IS NOT NULL#(lf)            THEN (Период - LAG(Период, 1) OVER (PARTITION BY ""КодКлиента"", ""_Сеть"" ORDER BY Период))#(lf)            ELSE NULL#(lf)        END AS РазницаСеть,#(lf)#(lf)        CASE #(lf)            WHEN Пользовательский = 'Прочая услуга'#(lf)                 AND ""Клуб для учета"" <> 'Детский развивающий центр'#(lf)                 AND ""Вид занятий"" <> 'Тренажёрный зал (ИП)'#(lf)                 AND LAG(Период, 1) OVER (PARTITION BY ""КодКлиента"", Сотрудник, Клуб ORDER BY Период) IS NOT NULL#(lf)            THEN (Период - LAG(Период, 1) OVER (PARTITION BY ""КодКлиента"", Сотрудник, Клуб ORDER BY Период))#(lf)            ELSE NULL#(lf)        END AS РазницаТренер,#(lf)#(lf)        -- Разницы в месяцах (календарных)#(lf)        CASE #(lf)            WHEN Пользовательский = 'Прочая услуга'#(lf)                 AND ""Клуб для учета"" <> 'Детский развивающий центр'#(lf)                 AND ""Вид занятий"" <> 'Тренажёрный зал (ИП)'#(lf)            THEN#(lf)                EXTRACT(YEAR FROM Период) * 12 + EXTRACT(MONTH FROM Период) -#(lf)                EXTRACT(YEAR FROM LAG(Период, 1) OVER (PARTITION BY ""КодКлиента"", Клуб ORDER BY Период)) * 12 -#(lf)                EXTRACT(MONTH FROM LAG(Период, 1) OVER (PARTITION BY ""КодКлиента"", Клуб ORDER BY Период))#(lf)            ELSE NULL#(lf)        END AS ФильтрExКлуб,#(lf)#(lf)        CASE #(lf)            WHEN Пользовательский = 'Прочая услуга'#(lf)                 AND ""Клуб для учета"" <> 'Детский развивающий центр'#(lf)                 AND ""Вид занятий"" <> 'Тренажёрный зал (ИП)'#(lf)            THEN#(lf)                EXTRACT(YEAR FROM Период) * 12 + EXTRACT(MONTH FROM Период) -#(lf)                EXTRACT(YEAR FROM LAG(Период, 1) OVER (PARTITION BY ""КодКлиента"", ""_Сеть"" ORDER BY Период)) * 12 -#(lf)                EXTRACT(MONTH FROM LAG(Период, 1) OVER (PARTITION BY ""КодКлиента"", ""_Сеть"" ORDER BY Период))#(lf)            ELSE NULL#(lf)        END AS ФильтрExСеть,#(lf)#(lf)        CASE #(lf)            WHEN Пользовательский = 'Прочая услуга'#(lf)                 AND ""Клуб для учета"" <> 'Детский развивающий центр'#(lf)                 AND ""Вид занятий"" <> 'Тренажёрный зал (ИП)'#(lf)            THEN#(lf)                EXTRACT(YEAR FROM Период) * 12 + EXTRACT(MONTH FROM Период) -#(lf)                EXTRACT(YEAR FROM LAG(Период, 1) OVER (PARTITION BY ""КодКлиента"", Сотрудник, Клуб ORDER BY Период)) * 12 -#(lf)                EXTRACT(MONTH FROM LAG(Период, 1) OVER (PARTITION BY ""КодКлиента"", Сотрудник, Клуб ORDER BY Период))#(lf)            ELSE NULL#(lf)        END AS ФильтрExТренер,#(lf)#(lf)        -- Флаги: было ли посещение ровно в прошлом месяце?#(lf)        CASE #(lf)            WHEN Пользовательский = 'Прочая услуга'#(lf)                 AND ""Клуб для учета"" <> 'Детский развивающий центр'#(lf)                 AND ""Вид занятий"" <> 'Тренажёрный зал (ИП)'#(lf)                 AND (#(lf)                    EXTRACT(YEAR FROM Период) * 12 + EXTRACT(MONTH FROM Период) -#(lf)                    EXTRACT(YEAR FROM LAG(Период, 1) OVER (PARTITION BY ""КодКлиента"", Клуб ORDER BY Период)) * 12 -#(lf)                    EXTRACT(MONTH FROM LAG(Период, 1) OVER (PARTITION BY ""КодКлиента"", Клуб ORDER BY Период))#(lf)                 ) = 1#(lf)            THEN 1 ELSE 0#(lf)        END AS ПосещениеПрошМесКлуб,#(lf)#(lf)        CASE #(lf)            WHEN Пользовательский = 'Прочая услуга'#(lf)                 AND ""Клуб для учета"" <> 'Детский развивающий центр'#(lf)                 AND ""Вид занятий"" <> 'Тренажёрный зал (ИП)'#(lf)                 AND (#(lf)                    EXTRACT(YEAR FROM Период) * 12 + EXTRACT(MONTH FROM Период) -#(lf)                    EXTRACT(YEAR FROM LAG(Период, 1) OVER (PARTITION BY ""КодКлиента"", ""_Сеть"" ORDER BY Период)) * 12 -#(lf)                    EXTRACT(MONTH FROM LAG(Период, 1) OVER (PARTITION BY ""КодКлиента"", ""_Сеть"" ORDER BY Период))#(lf)                 ) = 1#(lf)            THEN 1 ELSE 0#(lf)        END AS ПосещениеПрошМесСеть,#(lf)#(lf)        CASE #(lf)            WHEN Пользовательский = 'Прочая услуга'#(lf)                 AND ""Клуб для учета"" <> 'Детский развивающий центр'#(lf)                 AND ""Вид занятий"" <> 'Тренажёрный зал (ИП)'#(lf)                 AND (#(lf)                    EXTRACT(YEAR FROM Период) * 12 + EXTRACT(MONTH FROM Период) -#(lf)                    EXTRACT(YEAR FROM LAG(Период, 1) OVER (PARTITION BY ""КодКлиента"", Сотрудник, Клуб ORDER BY Период)) * 12 -#(lf)                    EXTRACT(MONTH FROM LAG(Период, 1) OVER (PARTITION BY ""КодКлиента"", Сотрудник, Клуб ORDER BY Период))#(lf)                 ) = 1#(lf)            THEN 1 ELSE 0#(lf)        END AS ПосещениеПрошМесТренер,#(lf)#(lf)        -- Тип клиента#(lf)        CASE WHEN ""КодКлиента"" = 'И00050639' THEN 'Новый' ELSE 'Действующий' END AS ""Тип клиента""#(lf)    FROM enhanced_base#(lf))#(lf)SELECT#(lf)    Клуб,#(lf)    Период,#(lf)    Услуга,#(lf)#(tab)ФорматТренировки,#(lf)    Сотрудник,#(lf)    Поступления,#(lf)    ГруппаТренировки,#(lf)    Пользовательский,#(lf)    ""Вид занятий"",#(lf)    Возраст,#(lf)    ""Возрастная группа"",#(lf)    ВидДеятельности,#(lf)    ""КодКлиента"",#(lf)    ""ФИО_Клиента"",#(lf)    ""ДР_Клиента"",#(lf)    Количество,#(lf)    ""ПризнакКлиента"",#(lf)    ""ТипОплаты"",#(lf)    ""КодКонтракта"",#(lf)    ""Контракт"",#(lf)    ОсновнойКлубДоступа,#(lf)    Кластер,#(lf)    ""_Сеть"",#(lf)    ""Клуб для учета"",#(lf)    ПредПосещениеКлуб,#(lf)    ПредПосещениеСеть,#(lf)    ПредПосещениеТренер,#(lf)    РазницаКлуб,#(lf)    РазницаСеть,#(lf)    РазницаТренер,#(lf)    ФильтрExКлуб,#(lf)    ФильтрExСеть,#(lf)    ФильтрExТренер,#(lf)    ПосещениеПрошМесКлуб,#(lf)    ПосещениеПрошМесСеть,#(lf)    ПосещениеПрошМесТренер,#(lf)    ""Тип клиента""#(lf)FROM final_with_flags#(lf)ORDER BY Период DESC"),
+    #"Замененное значение" = Table.ReplaceValue(Источник,"Платный урок","Групповое занятие",Replacer.ReplaceText,{"ФорматТренировки"}),
+    #"Добавленный запрос" = Table.Combine({#"Замененное значение", ИП}),
+    #"Выполнена капитализация каждого слова" = Table.TransformColumns(#"Добавленный запрос", {{"Услуга", Text.Proper, type text}}),
+    #"Объединенные запросы" = Table.NestedJoin(#"Выполнена капитализация каждого слова", {"Услуга"}, #"_Спр Услуги", {"Номенклатура"}, "_Спр Услуги", JoinKind.LeftOuter),
+    #"Развернутый элемент _Спр Услуги" = Table.ExpandTableColumn(#"Объединенные запросы", "_Спр Услуги", {"Раздел услуги"}, {"Раздел услуги"}),
+
+    // 4. Добавляем ГруппаУрока
+    #"Добавлен ГруппаУрока" = Table.AddColumn(#"Развернутый элемент _Спр Услуги", "ГруппаУрока", each 
+        if [Раздел услуги] = null then [ГруппаТренировки] else [Раздел услуги],
+        type text
+    ),
+
+    // 6. КлючКБ
+    #"Добавлен КлючКБ" = Table.AddColumn(#"Добавлен ГруппаУрока", "КлючКБ", each [Клуб] & Text.From([Период]), type text),
+
+    // 7. Конец месяца
+    #"Добавлен КонецПериода" = Table.AddColumn(#"Добавлен КлючКБ", "Конец периода (2)", each Date.EndOfMonth([Период]), type date),
+
+    // 8. Период (2) — копия
+    #"Добавлен Период2" = Table.AddColumn(#"Добавлен КонецПериода", "Период (2)", each [Период], type date),
+
+    // Больше НИЧЕГО не нужно — все расчёты уже в SQL!
+    #"Финал" = #"Добавлен Период2"
+in
+    #"Финал"
+
+_Поступления = sum('ДПФУ факт'[Поступления])
+_ВыручкаПлан = sum('Бюджет'[Выручка Всего])
+__Выполнение плана C, руб = '_Меры'[_Поступления] - 'Бюджет'[_ВыручкаПлан]
+__КоличествоУслугБюджет = 
+VAR SelectedCount = COUNTROWS(ALLSELECTED('_Спр Вид деятельности'[Вид деятельности]))
+VAR TotalCount = COUNTROWS(ALL('_Спр Вид деятельности'[Вид деятельности]))
+VAR IsAllSelected = SelectedCount >= TotalCount
+VAR IsNothingSelected = SelectedCount = 0
+
+RETURN
+SWITCH(
+    TRUE(),
+    SELECTEDVALUE('_Спр Вид деятельности'[Вид деятельности]) = "Тренажёрный зал (ИП)",0,
+    IsNothingSelected, SUM('Бюджет по клубам'[Кол-во услуг]),
+    IsAllSelected, SUM('Бюджет по клубам'[Кол-во услуг]),
+    SUM('Бюджет'[Кол-во проданных услуг])
+)
+mКолУслуг = 
+if (
+    SELECTEDVALUE('_Спр Вид деятельности'[Вид деятельности])="Тренажёрный зал (ИП)",
+    // DISTINCTCOUNT('ДПФУ 01 2019 - 2021 (2)'[КодКлиента]),
+    SUMx(
+    FILTER(
+        'ДПФУ факт',
+        'ДПФУ факт'[Пользовательский]="Прочая услуга"&&'ДПФУ факт'[Услуга]<>"Контракт ИП"
+    ),
+    'ДПФУ факт'[Количество]
+)
+    ,
+SUMx(
+    FILTER(
+        'ДПФУ факт',
+        'ДПФУ факт'[Пользовательский]="Прочая услуга"&&'ДПФУ факт'[Вид занятий]<>"Тренажёрный зал (ИП)"
+    ),
+    'ДПФУ факт'[Количество]
+)
+)
+
+mКолУслугВыполБюджета = 
+IF(
+    SELECTEDVALUE('_Спр Вид деятельности'[Вид деятельности]) = "Тренажёрный зал (ИП)",
+    BLANK(),
+    '_Меры'[mКолУслуг]-'_Меры'[__КоличествоУслугБюджет]
+)
+
+mСрЧек = 
+DIVIDE(
+SUMx(
+    FILTER(
+        'ДПФУ факт',
+        'ДПФУ факт'[Пользовательский]="Прочая услуга"&&'ДПФУ факт'[Услуга]<>"Контракт ИП"),
+        'ДПФУ факт'[Поступления]
+)
+    , 
+    '_Меры'[mКолУслуг])
+
+_ПоступленияПГ = CALCULATE('_Меры'[_Поступления],SAMEPERIODLASTYEAR('_Спр Дата'[Date]))
+mКолУслугПГ = CALCULATE('_Меры'[mКолУслуг],SAMEPERIODLASTYEAR('_Спр Дата'[Date]))
+mСрЧекПГ = 
+CALCULATE('_Меры'[mСрЧек],SAMEPERIODLASTYEAR('_Спр Дата'[Date]))
+Кластер = switch (true(),
+'_Спр Клуб'[Клуб] = "Спорт", "Физкульт верхняя часть",
+'_Спр Клуб'[Клуб] = "Старт", "Физкульт верхняя часть",
+'_Спр Клуб'[Клуб] = "Автозаводский", "Физкульт нижняя часть",
+'_Спр Клуб'[Клуб] = "Южное", "Физкульт нижняя часть",
+'_Спр Клуб'[Клуб] = "Парковая", "Физкульт нижняя часть",
+'_Спр Клуб'[Клуб] = "Мещера", "Физкульт нижняя часть",
+'_Спр Клуб'[Клуб] = "Корабли", "Физкульт нижняя часть",
+'_Спр Клуб'[Клуб] = "Бурнаковский", "Физкульт нижняя часть",
+'_Спр Клуб'[Клуб] = "Родионова", "Физкульт верхняя часть",
+'_Спр Клуб'[Клуб] = "Деловая", "Физкульт верхняя часть",
+'_Спр Клуб'[Клуб] = "Советская", "Физкульт верхняя часть",
+ '_Спр Клуб'[Клуб] = "Кстово", "Кстово",
+ '_Спр Клуб'[Клуб] = "Гагаринский", "Физкульт верхняя часть","Комплекс Пушкинский"
+)
+Сеть = 
+switch (true(),
+'_Спр Клуб'[Кластер] = "Физкульт верхняя часть", "Физкульт",
+'_Спр Клуб'[Кластер] = "Физкульт нижняя часть", "Физкульт",
+'_Спр Клуб'[Кластер] = "Кстово", "Физкульт","Комплекс Пушкинский"
+)
+mФА Аренда тренеров = 
+COALESCE(
+    [mФА Аренда тренеров факт] - [mФА Аренда тренеров план],
+    BLANK()
+)
+mФА Аренда тренеров план = 
+CALCULATE(
+    [_ВыручкаПлан],
+    KEEPFILTERS('Бюджет'[Подразделение] <> "Клуб"),
+    KEEPFILTERS(
+        '_Спр ВИд деятельности'[Вид деятельности] = "Тренажёрный зал (ИП)"
+    )
+)
+	mФА Отклонение фитнес = 
+[mФА Факт фитнес] - [mФА План фитнес]
+mФА План фитнес = 
+CALCULATE(
+    [_ВыручкаПлан],
+    KEEPFILTERS('Бюджет'[Подразделение] <> "Клуб")
+)
+mФА Подр Остаток = 
+IF(
+[mФА Отклонение фитнес] - [mФА Подр Сумма факторов] = 0,
+BLANK(),
+[mФА Отклонение фитнес] - [mФА Подр Сумма факторов])
+mФА Подр Фактор регулярности = 
+IF(
+SUMX(
+    CROSSJOIN(
+        VALUES('_Спр Клуб'[Клуб]),
+        VALUES('_Спр ВИд деятельности'[Вид деятельности])
+    ),
+    [mФА Подр Регулярность direct]
+)=0,BLANK(),
+SUMX(
+    CROSSJOIN(
+        VALUES('_Спр Клуб'[Клуб]),
+        VALUES('_Спр ВИд деятельности'[Вид деятельности])
+    ),
+    [mФА Подр Регулярность direct]
+))
+mФА Подр Фактор среднего чека = 
+IF(
+SUMX(
+    CROSSJOIN(
+        VALUES('_Спр Клуб'[Клуб]),
+        VALUES('_Спр ВИд деятельности'[Вид деятельности])
+    ),
+    [mФА Подр СрЧек direct]
+) = 0,BLANK(),
+SUMX(
+    CROSSJOIN(
+        VALUES('_Спр Клуб'[Клуб]),
+        VALUES('_Спр ВИд деятельности'[Вид деятельности])
+    ),
+    [mФА Подр СрЧек direct]
+))
+mФА Подр Фактор УЧК = 
+IF(
+SUMX(
+    CROSSJOIN(
+        VALUES('_Спр Клуб'[Клуб]),
+        VALUES('_Спр ВИд деятельности'[Вид деятельности])
+    ),
+    [mФА Подр УЧК direct]
+) = 0,BLANK(),
+SUMX(
+    CROSSJOIN(
+        VALUES('_Спр Клуб'[Клуб]),
+        VALUES('_Спр ВИд деятельности'[Вид деятельности])
+    ),
+    [mФА Подр УЧК direct]
+))
+mФА Факт фитнес = 
+[_Поступления]
+__Выполнение плана Т% = DIVIDE('_Меры'[_Поступления],'_Меры'[_ТекПлан(ОтчетПериод)])
+_ТекПлан(ОтчетПериод) = 
+IF(
+    SELECTEDVALUE('_Спр Вид деятельности'[ФильтрИП])="ИП",
+    CALCULATE('Бюджет'[_ВыручкаПлан], 'Бюджет'[Подразделение] = "Тренажёрный зал (ИП)"),
+    IF(
+        SELECTEDVALUE('_Спр Вид деятельности'[ФильтрИП])="Штат",
+        SUM('Дневное планирование для Power BI'[Сумма]),
+        CALCULATE('Бюджет'[_ВыручкаПлан], 'Бюджет'[Подразделение] = "Тренажёрный зал (ИП)")+SUM('Дневное планирование для Power BI'[Сумма])
+    )
+)
+Текущий план по выручке с ИП = 
+CALCULATE(
+    'Бюджет'[_ВыручкаПлан], 
+    'Бюджет'[Подразделение] = "Тренажёрный зал (ИП)"
+)
++
+sum('Текущий план по выручке'[План])
+__Выполнение ПГ% = DIVIDE('_Меры'[_Поступления],'_Меры'[_ПоступленияПГ])
+__Выполнение ПГруб = '_Меры'[_Поступления] - '_Меры'[_ПоступленияПГ]
+__Выполнение плана C, руб = '_Меры'[_Поступления] - 'Бюджет'[_ВыручкаПлан]
+__Выполнение плана C% = DIVIDE('_Меры'[_Поступления],'Бюджет'[_ВыручкаПлан])
+

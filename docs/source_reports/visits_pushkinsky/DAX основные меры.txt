@@ -1,0 +1,116 @@
+Всего КБ = 
+VAR CurrentDate = SELECTEDVALUE('СпрДата'[Date])
+RETURN
+IF(
+    ISBLANK(CurrentDate),
+    BLANK(),
+    CALCULATE(
+        DISTINCTCOUNT('Абонементы всего'[КодКлиента]),
+        'Абонементы всего'[ДатаНачала] <= CurrentDate,
+        'Абонементы всего'[ДатаОкончания] >= CurrentDate
+    )
+)
+
+Активная база = 
+VAR Current_Date = SELECTEDVALUE('СпрДата'[Date])
+VAR StartDate30 = Current_Date - 30
+
+VAR ActiveBeforeToday = 
+    CALCULATETABLE(
+        DISTINCT('Посещения всего'[КодКлиента]),
+        REMOVEFILTERS('СпрДата'),
+        'Посещения всего'[_period] >= StartDate30,
+        'Посещения всего'[_period] <= Current_Date
+    )
+
+VAR AbonementUsers = 
+    CALCULATETABLE(
+        DISTINCT('Абонементы всего'[КодКлиента]),
+        REMOVEFILTERS('СпрДата'),
+        'Абонементы всего'[ДатаНачала] <= Current_Date,
+        'Абонементы всего'[ДатаОкончания] >= Current_Date
+    )
+
+VAR DidNotVisitToday = 
+    EXCEPT(
+        AbonementUsers,
+        CALCULATETABLE(
+            DISTINCT('Посещения всего'[КодКлиента]),
+            REMOVEFILTERS('СпрДата'),
+            'Посещения всего'[_period] = Current_Date
+        )
+    )
+
+VAR FinalClients = 
+    INTERSECT(ActiveBeforeToday, DidNotVisitToday)
+
+RETURN
+IF(
+    ISBLANK(Current_Date),
+    BLANK(),
+    COUNTROWS(FinalClients)
+)
+
+Неактивная база = 
+[Всего КБ] - [Посетили ЧК на дату] - [Активная база]
+
+Посетили ЧК на дату = 
+VAR CurrentDate = SELECTEDVALUE('СпрДата'[Date])
+RETURN
+IF(
+    ISBLANK(CurrentDate),
+    BLANK(),
+    CALCULATE(
+        DISTINCTCOUNT('Посещения всего'[КодКлиента]),
+        REMOVEFILTERS('СпрДата'[Date]),
+        'Посещения всего'[_period] = CurrentDate
+    )
+)
+
+Посещения всего = 
+CALCULATE(
+    DISTINCTCOUNT('Посещения всего'[КодКлиента]),
+    'Посещения всего'[_period] IN VALUES('СпрДата'[Date])
+)
+
+Посещения проверка ДПФУ = 
+CALCULATE(
+    DISTINCTCOUNT('Посещения проверка ДПФУ'[КодКлиента]),
+    'Посещения проверка ДПФУ'[Период] IN VALUES('СпрДата'[Date])
+)
+
+Посещения Гостевой визит = 
+CALCULATE(
+    DISTINCTCOUNT('Посещения ГВ'[КодКлиента]),
+    'Посещения ГВ'[Период] IN VALUES('СпрДата'[Date])
+)
+
+Посещения ВИП = 
+CALCULATE(
+    DISTINCTCOUNT('Посещения ВИП'[КодКлиента]),
+    'Посещения ВИП'[Период] IN VALUES('СпрДата'[Date])
+)
+
+Посещения ДРЦ = 
+CALCULATE(
+    DISTINCTCOUNT('Посещения ДРЦ'[КодКлиента]),
+    'Посещения ДРЦ'[Период] IN VALUES('СпрДата'[Date])
+)
+
+Посещения Продленка = 
+CALCULATE(
+    DISTINCTCOUNT('Посещения продленка'[КодКлиента]),
+    'Посещения продленка'[Период] IN VALUES('СпрДата'[Date])
+)
+
+Посещения Умняшки = 
+CALCULATE(
+    DISTINCTCOUNT('Посещения умняши'[КодКлиента]),
+    'Посещения умняши'[Период] IN VALUES('СпрДата'[Date])
+)
+
+Без тренера = 
+[Посещения всего] - ([Посещения ГП] + [Посещения проверка ДПФУ] + [Посещения по купону])
+
+Итого посещения = 
+[Без тренера] + [Посещения ГП] + [Посещения по купону] + [Посещения проверка ДПФУ] + [Посещения Гостевой визит] + [Посещения ДРЦ] + [Посещения ВИП] + [Посещения Продленка] + [Посещения Умняшки]

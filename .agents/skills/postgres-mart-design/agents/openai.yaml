@@ -1,0 +1,4 @@
+interface:
+  display_name: "PostgreSQL Mart Design"
+  short_description: "Design minimal maintainable Power BI marts"
+  default_prompt: "Design the minimal PostgreSQL mart architecture from an approved source mapping."

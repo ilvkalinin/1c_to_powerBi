@@ -1,0 +1,10 @@
+sources:
+  - name: first_source
+    status: UNKNOWN
+    database: null
+    schema: null
+    access: read_only
+    metadata_received: false
+    tables: []
+    notes: "Заполняется только по фактическим метаданным."
+

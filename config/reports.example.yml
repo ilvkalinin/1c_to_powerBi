@@ -1,0 +1,21 @@
+reports:
+  - name: first_report
+    status: UNKNOWN
+    owner: null
+    users: []
+    business_question: null
+    row_grain: null
+    time_grain: null
+    refresh_frequency: null
+    refresh_sla: null
+    history_start: null
+    control_values: []
+
+default_history_policy:
+  april_through_december_start: previous_year_start
+  january_through_march_start: two_years_ago_start
+  upper_bound: next_year_start_exclusive
+
+late_change_policy:
+  reported_horizon: approximately_two_months
+  recalculation_window: null
