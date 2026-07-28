@@ -5,6 +5,17 @@ description: Review PostgreSQL mart performance using actual sizes, selectivity,
 
 # PostgreSQL performance review
 
+## Entry gate
+
+This skill is prohibited during `STAGE_1_LOCAL_ANALYSIS`. Until the user has
+explicitly authorized `STAGE_2_SERVER_VALIDATION`, do not connect to a server,
+read system catalogs, execute SQL or use `EXPLAIN`. If invoked before that
+authorization, return only a concise future measurement plan with status
+`VALIDATION_PENDING`.
+
+Actual performance review is allowed only after confirmed SQL or a real object
+exists for measurement.
+
 ## Safety
 
 Start with catalog facts and `EXPLAIN`. Use `EXPLAIN ANALYZE` only when execution is safe, read-only side effects are understood, expected cost is acceptable and the environment is authorized. Never run write statements under `EXPLAIN ANALYZE` in production.
