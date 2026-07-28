@@ -2,65 +2,61 @@
 
 Источник: изображение перечня из договора, предоставленное пользователем 2026-07-24.
 
-Статус: `CONFIRMED`. Этот перечень из 31 отчёта является основным scope договора. Более широкий список из `Список отчетов.xlsx` сохраняется как рабочая инвентаризация, но шесть дополнительных отчётов не считаются договорными без отдельного решения.
+Статус перечня: `CONFIRMED`. В договор входит 31 отчёт. Более широкий рабочий
+Excel-перечень не меняет договорный scope без отдельного решения.
 
-Правило прогресса: после завершения работы с каждым отчётом пользователю направляется полный актуальный перечень оставшихся договорных отчётов.
+Обозначения этапов:
 
-На 2026-07-28 завершён бизнес-разбор тринадцати отчётов:
+- `COMPLETE` — соответствующий артефакт существует;
+- `PROPOSED` / `DESIGNED` — артефакт существует, но техническая валидация или реализация отложены;
+- `NOT STARTED` — артефакта нет;
+- `DEFERRED` — работа сознательно не запускалась; это не завершение этапа.
 
-- № 2 «Вовлечение новичков»;
-- № 8 «Отчет по ИП»;
-- № 9 «Посещения Физкульт»;
-- № 12 «Загрузка ОП»;
-- № 15 «Продажа детских пакетов»;
-- № 16 «Управление продлением»;
-- № 17 «Отчет по %Renew»;
-- № 18 «Выручка рецепции»;
-- № 19 «Записи администраторов»;
-- № 23 «Посещения Пушкинский»;
-- № 25 «Карта администратора»;
-- № 28 «Клиентская база»;
-- № 29 «Выручка ДПФУ».
+На 2026-07-28 бизнес-анализ завершён по 15 из 31 отчёта. Реализованных
+витрин и завершённой технической валидации нет.
 
-Осталось: 18 из 31.
+| № | Блок | Наименование отчёта | Business analysis | Source mapping | Architecture | Data contract | Implementation | Validation |
+|---:|---|---|---|---|---|---|---|---|
+| 1 | Фитнес | KPI Фитнеса | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED |
+| 2 | Фитнес | Вовлечение новичков | COMPLETE | COMPLETE | DESIGNED — ADR-0008 | COMPLETE — `newcomer_engagement` | DEFERRED | DEFERRED — technical validation |
+| 3 | Фитнес | Вовлечение новичков Второй месяц | COMPLETE | COMPLETE — `newcomer_engagement_second_month` | DESIGNED — ADR-0009 | COMPLETE — `newcomer_engagement_second_month` | DEFERRED | DEFERRED — technical validation |
+| 4 | Фитнес | Подготовка к продлению | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED |
+| 5 | Фитнес | Воронка лиды фитнес | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED |
+| 6 | Фитнес | Загрузка сотрудников | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED |
+| 7 | Фитнес | Контроль предварительной записи | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED |
+| 8 | Фитнес | Отчет по ИП | COMPLETE | COMPLETE — `ip_training` | NOT STARTED | NOT STARTED | DEFERRED | DEFERRED — technical validation |
+| 9 | Фитнес | Посещения Физкульт | COMPLETE | COMPLETE — `visits_fizkult` | PROPOSED / REVISION REQUIRED — ADR-0003 | NOT STARTED | DEFERRED | DEFERRED — technical validation |
+| 10 | Фитнес | Уроки и расписание | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED |
+| 11 | Фитнес | Фитнес воронка | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED |
+| 12 | Продажи | Загрузка ОП | COMPLETE | COMPLETE — `sales_interactions` | NOT STARTED | NOT STARTED | DEFERRED | DEFERRED — technical validation |
+| 13 | Продажи | Отчет по поступлениям | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED |
+| 14 | Продажи | Отчет по промокодам | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED |
+| 15 | Продажи | Продажа детских пакетов | COMPLETE | COMPLETE — `children_package_sales` | NOT STARTED | NOT STARTED | DEFERRED | DEFERRED — technical validation |
+| 16 | Продажи | Управление продлением | COMPLETE | COMPLETE | PROPOSED — ADR-0007 | COMPLETE — `renewal_management` | DEFERRED | DEFERRED — technical validation |
+| 17 | Продажи | Отчет по %Renew | COMPLETE | COMPLETE | PROPOSED — ADR-0006 | COMPLETE — `renew_contract_usage` | DEFERRED | DEFERRED — technical validation |
+| 18 | Гостеприимство | Выручка рецепции | COMPLETE | COMPLETE | PROPOSED — ADR-0005 | COMPLETE — `reception_revenue` | DEFERRED | DEFERRED — technical validation |
+| 19 | Гостеприимство | Записи администраторов | COMPLETE | COMPLETE | PROPOSED — ADR-0004 | COMPLETE — `administrator_bookings` | DEFERRED | DEFERRED — technical validation |
+| 20 | Гостеприимство | Новички и гостевые визиты | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED |
+| 21 | Гостеприимство | Отчет по обращениям | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED |
+| 22 | Гостеприимство | Отчет по посещаемости клиентов с долгами | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED |
+| 23 | Гостеприимство | Посещения Пушкинский | COMPLETE | COMPLETE — `visits_pushkinsky` | PROPOSED / REVISION REQUIRED — ADR-0003 | NOT STARTED | DEFERRED | DEFERRED — technical validation |
+| 24 | Гостеприимство | Работа с посещаемостью | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED |
+| 25 | Гостеприимство | Карта администратора | COMPLETE | COMPLETE — `administrator_card` | NOT STARTED | NOT STARTED | DEFERRED | DEFERRED — technical verification |
+| 26 | Гостеприимство | Титульный лист | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED |
+| 27 | Маркетинг | Воронка | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED |
+| 28 | Маркетинг | Клиентская база | COMPLETE | COMPLETE — `client_base`, `client_base_retention` | COMPLETE — ADR-0002 | COMPLETE — `client_base` | DEFERRED | DEFERRED — DB tests |
+| 29 | Для правления | Выручка ДПФУ | COMPLETE | COMPLETE — `dpfu_revenue` | PROPOSED — shared direction ADR-0005; product identity unresolved | NOT STARTED | DEFERRED | DEFERRED — technical validation |
+| 30 | Для правления | Отчет членство для правления | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED |
+| 31 | Для правления | Свод выручка ГК | COMPLETE — `revenue_group_summary` | COMPLETE — `revenue_group_summary` | DESIGNED — ADR-0010 | COMPLETE — `revenue_group_summary` | DEFERRED | DEFERRED — technical validation |
 
-| № | Блок | Наименование отчёта | Статус |
-|---:|---|---|---|
-| 1 | Фитнес | KPI Фитнеса | осталось |
-| 2 | Фитнес | ~~Вовлечение новичков~~ | готов |
-| 3 | Фитнес | Вовлечение новичков Второй месяц | осталось |
-| 4 | Фитнес | Подготовка к продлению | осталось |
-| 5 | Фитнес | Воронка лиды фитнес | осталось |
-| 6 | Фитнес | Загрузка сотрудников | осталось |
-| 7 | Фитнес | Контроль предварительной записи | осталось |
-| 8 | Фитнес | ~~Отчет по ИП~~ | готов |
-| 9 | Фитнес | ~~Посещения Физкульт~~ | готов |
-| 10 | Фитнес | Уроки и расписание | осталось |
-| 11 | Фитнес | Фитнес воронка | осталось |
-| 12 | Продажи | ~~Загрузка ОП~~ | готов |
-| 13 | Продажи | Отчет по поступлениям | осталось |
-| 14 | Продажи | Отчет по промокодам | осталось |
-| 15 | Продажи | ~~Продажа детских пакетов~~ | готов |
-| 16 | Продажи | ~~Управление продлением~~ | готов |
-| 17 | Продажи | ~~Отчет по %Renew~~ | готов |
-| 18 | Гостеприимство | ~~Выручка рецепции~~ | готов |
-| 19 | Гостеприимство | ~~Записи администраторов~~ | готов |
-| 20 | Гостеприимство | Новички и гостевые визиты | осталось |
-| 21 | Гостеприимство | Отчет по обращениям | осталось |
-| 22 | Гостеприимство | Отчет по посещаемости клиентов с долгами | осталось |
-| 23 | Гостеприимство | ~~Посещения Пушкинский~~ | готов |
-| 24 | Гостеприимство | Работа с посещаемостью | осталось |
-| 25 | Гостеприимство | ~~Карта администратора~~ | готов |
-| 26 | Гостеприимство | Титульный лист | осталось |
-| 27 | Маркетинг | Воронка | осталось |
-| 28 | Маркетинг | ~~Клиентская база~~ | готов |
-| 29 | Для правления | ~~Выручка ДПФУ~~ | готов |
-| 30 | Для правления | Отчет членство для правления | осталось |
-| 31 | Для правления | Свод выручка ГК | осталось |
+Осталось начать бизнес-анализ 16 отчётов. После завершения каждого отчёта
+обновляются все шесть статусов его строки; `COMPLETE` нельзя ставить без
+соответствующего файла.
 
 ## Расхождение с рабочим Excel
 
-В `Список отчетов.xlsx` было 37 строк. Следующие шесть отчётов отсутствуют в договорном перечне и поэтому имеют статус `ВНЕ ДОГОВОРНОГО SCOPE`:
+В рабочем Excel было 37 строк. Следующие шесть отчётов отсутствуют в
+договорном перечне и имеют статус `ВНЕ ДОГОВОРНОГО SCOPE`:
 
 - Карты будущего периода;
 - Edna;
