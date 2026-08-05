@@ -14,7 +14,7 @@
 | Гранулярность | дата факта × клуб × статья | CONFIRMED — ADR-0010/mapping |
 | Логический ключ | `(revenue_date, club_id, revenue_article_code)` | ASSUMPTION pending uniqueness tests |
 | Хранение | BR-003 | CONFIRMED user decision |
-| Режим Power BI | `Import`, ежедневно | CONFIRMED current report; SLA UNKNOWN |
+| Режим Power BI | `Import`, ежедневно; данные доступны не позднее 08:30 по Москве | CONFIRMED current report; BR-014 |
 | Исправления/удаления | атомарный полный пересчёт горизонта | CONFIRMED design; states pending |
 | Таблица дат / поле | `Календарь` / `Дата` | CONFIRMED current DAX |
 | Инкрементальное поле | отсутствует | UNKNOWN — event date не watermark |

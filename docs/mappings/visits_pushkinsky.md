@@ -1,6 +1,6 @@
 # Source-to-target mapping: «Посещения Пушкинский»
 
-Статус: `BUSINESS MAPPING COMPLETE / TECHNICAL VALIDATION DEFERRED`. Grain, формулы, состав КБ, категории и единое правило снимка 00:00 подтверждены.
+Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0003 / TECHNICAL VALIDATION DEFERRED`. Grain, формулы, состав КБ, категории и единое правило снимка 00:00 подтверждены.
 
 ## Логические наборы
 
@@ -34,7 +34,7 @@ Client IDs используются только временно на VM-1 дл
 | `visit_date` | дата посещения | `AccumRg7575.Period` / `Document325` | `date` | CONFIRMED source |
 | `club_id` | фактический клуб Пушкинский | `Document325.Fld4167` / `AccumRg7575.Fld7577` | UNKNOWN | CONFIRMED |
 | `client_key` | стабильный обезличенный клиент | исходный client ID → утверждённое преобразование | UNKNOWN | implementation pending |
-| `home_club_group` | Пушкинский / VIP / ДРЦ / другое | активный абонемент и `Reference132` на дату | UNKNOWN | business rule pending |
+| `home_club_group` | Пушкинский / VIP / ДРЦ / другое | активный абонемент и `Reference132` на дату | `text` | CONFIRMED current classification / stable IDs VALIDATION_PENDING |
 | `has_member_visit` | посещение членом Пушкинского | фактический Пушкинский + active home membership | `boolean` | DAX / interval pending |
 | `has_coupon` | посещение по купону | общий coupon mapping | `boolean` | source confirmed / DAX pending |
 | `has_paid_service` | ДПФУ | правила `Посещения проверка ДПФУ` | `boolean` | CONFIRMED |

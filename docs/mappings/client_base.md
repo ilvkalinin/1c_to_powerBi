@@ -48,9 +48,9 @@
 | `club_id` | Стабильный клуб | `Reference132.ID`; NULL для network | UNKNOWN | по scope | CONFIRMED source | required iff club |
 | `club_name` | Название клуба | `Reference132.Description`; NULL для network | UNKNOWN | по scope | CONFIRMED source | ID → одно актуальное имя |
 | `age_years` | Полных лет на отчётную дату | `report_date`, `Reference141.Fld1507` | `smallint` | UNKNOWN | CONFIRMED rule | дни рождения/29 февраля |
-| `age_group` | Дети `<14`, Юниоры `14–17`, Взрослые `18+` | `age_years` | UNKNOWN | UNKNOWN | CONFIRMED current boundaries | 13/14/17/18 |
-| `gender` | Пол клиента | `Reference141.Fld1527` → enum | UNKNOWN | да | CONFIRMED source / values pending | enum coverage |
-| `membership_tenure` | `New`, `Renew`, `Ex` на дату снимка | latest `InfoRg5654` by client before snapshot | UNKNOWN | UNKNOWN | CONFIRMED categories | as-of control |
+| `age_group` | Дети `<14`, Юниоры `14–17`, Взрослые `18+`, `Не указано` | `age_years` | `NULL age_years → «Не указано»` | text | нет | CONFIRMED user decision 2026-07-30 | 13/14/17/18, NULL |
+| `gender` | Пол клиента либо `Не указано` | `Reference141.Fld1527` → enum | `NULL → «Не указано»`; нераспознанный enum требует технической валидации | text | нет | CONFIRMED user decision 2026-07-30 | enum coverage, NULL |
+| `membership_tenure` | `New`, `Renew`, `Ex` либо `Не указано` на дату снимка | latest `InfoRg5654` by client before snapshot | `NULL` результата latest-as-of → `Не указано`; нераспознанный GUID требует технической валидации | text | нет | CONFIRMED user decision 2026-07-30 | as-of control, NULL |
 | `activity_bucket` | Не ходил; 1; 2–3; 4–7; 8+ | network-wide `visit_count_30d` | UNKNOWN | нет | CONFIRMED | boundary tests |
 | `client_count` | Уникальные люди внутри scope/group | count после scope-specific dedupe | `integer`/`bigint` | нет | CONFIRMED | сумма vs distinct source отдельно по scope |
 
@@ -67,6 +67,53 @@
 | Прирост к прошлому году | DAX с подтверждённым mapping сравнительной даты | CONFIRMED concept |
 | Активная база, % | категории кроме `Не ходил` / вся база | CONFIRMED concept |
 | Retention | отдельная `mart.client_base_retention`; см. `docs/mappings/client_base_retention.md` | CONFIRMED semantics |
+
+## Дневное расширение для «Работы с посещаемостью»
+
+Статус: `CONFIRMED dependency / ARCHITECTURE DESIGNED — ADR-0012/0022 /
+TECHNICAL VALIDATION DEFERRED`.
+
+Решение пользователя от 2026-07-29: показатель «% посещений от КБ» обязан
+брать знаменатель из витрины клиентской базы, а не из текущей таблицы Power BI
+`КБфакт`.
+
+`mart.client_base_snapshot` нельзя использовать напрямую: его отчётные даты —
+только понедельники и первые числа месяцев, а показатель посещаемости делит
+число посещений на количество выбранных календарных дней. Поэтому предложено
+не менять контракт редких снимков, а расширить домен отдельным компактным
+дневным набором `mart.client_base_daily`.
+
+Гранулярность:
+
+> уровень охвата × календарная дата × клуб (только для `club`) × возраст ×
+> возрастная группа × пол.
+
+| Целевая колонка | Бизнес-описание | Источник / преобразование | Тип | NULL | Статус | Проверка |
+|---|---|---|---|---|---|---|
+| `scope_level` | `club` или `network` | те же source-side branches, что и у snapshot | `text` | нет | CONFIRMED by reuse | CBD-V01 |
+| `report_date` | каждый календарный день целевой истории; снимок на 00:00 | календарь дней вместо понедельников/первых чисел | `date` | нет | CONFIRMED — решение пользователя | CBD-V01, CBD-V02 |
+| `club_id` | основной клуб доступа; `NULL` для network | `Reference59.Fld687 → Reference132.ID` после membership dedupe | UNKNOWN | только `network` | CONFIRMED by reuse | CBD-V03 |
+| `age_years` | возраст на отчётную дату | `Reference141.Fld1507` и `report_date` | `smallint` | по правилу КБ | CONFIRMED by reuse | CBD-V04 |
+| `age_group` | дети `<14`, юниоры `14–17`, взрослые `18+`, `Не указано` | `age_years` | `NULL age_years → «Не указано»` | `text` | нет | CONFIRMED by reuse / user decision 2026-07-30 | CBD-V04 |
+| `gender` | пол клиента на отчётную дату либо `Не указано` | `Reference141.Fld1527` → enum | `NULL → «Не указано»`; нераспознанный enum требует технической валидации | `text` | нет | CONFIRMED by reuse / user decision 2026-07-30 | CBD-V05 |
+| `client_count` | уникальные действующие клиенты в scope и разрезах | тот же membership interval и scope-specific dedupe, что у `mart.client_base_snapshot` | `integer`/`bigint` | нет | CONFIRMED dependency / technical state pending | CBD-V03, CBD-V06 |
+
+Отдельные столбцы стажа и активности не включаются: у отчёта посещаемости нет
+таких фильтров, а их перенос увеличил бы grain без подтверждённого потребителя.
+Наборы `club` и `network` не суммируются. DAX метрики посещаемости выбирает
+`club` при фильтре клуба и `network` без фильтра клуба, затем считает среднее
+`client_count` по выбранным дням. Решение пользователя от 2026-07-29 задаёт
+общую семантику возрастного фильтра: `visit_count` использует возраст на дату
+посещения, `client_count` — возраст на ту же отчётную дату снимка.
+
+| ID | Проверка | Ожидаемый результат | Статус |
+|---|---|---|---|
+| CBD-V01 | покрытие календаря | ровно один дневной набор для каждого дня целевой истории и обоих scope | VALIDATION_PENDING — NOT_EXECUTED — ожидается подключение к корпоративной сети |
+| CBD-V02 | boundary 00:00 | начало в D исключается, окончание D−1 включается согласно BR-005 | VALIDATION_PENDING — NOT_EXECUTED — ожидается подключение к корпоративной сети |
+| CBD-V03 | ключи/дубли scope | `club` dedupe по `(date, club, client)`, `network` по `(date, client)`; итог не смешивает scope | VALIDATION_PENDING — NOT_EXECUTED — ожидается подключение к корпоративной сети |
+| CBD-V04 | возраст | контролируются дни рождения и границы 13/14/17/18 | VALIDATION_PENDING — NOT_EXECUTED — ожидается подключение к корпоративной сети |
+| CBD-V05 | пол | каждое значение enum однозначно отображается или разрешённо остаётся `NULL` | VALIDATION_PENDING — NOT_EXECUTED — ожидается подключение к корпоративной сети |
+| CBD-V06 | сверка знаменателя | среднее дневной КБ воспроизводит согласованный контрольный срез посещаемости | VALIDATION_PENDING — NOT_EXECUTED — ожидается подключение к корпоративной сети |
 
 ## Не переносить на VM-2
 

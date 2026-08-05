@@ -1,0 +1,1178 @@
+Посещения_2026
+let
+    Источник = Odbc.Query("Driver={PostgreSQL Unicode};Server=virt207.worldclass.nnov.ru; Database=gymdb_test;Timeout=300;Fetch=10000;UseDeclareFetch=1;", "SELECT #(lf)    _AccumRg7575._Period Период,#(lf)    _LineNo НомерСтроки,#(lf)#(lf)    cast(_Reference141X1._Code as varchar(1000)) Код,#(lf)    cast(_Reference132._Description as varchar(1000)) AS Клуб,#(lf)    cast(_Reference141X1._Description as varchar(1000)) AS Контрагенты,#(lf)    cast(_Reference163._Description as varchar(1000)) AS Номенклатура,#(lf)    -- cast(_Reference225._Description as varchar(1000)) AS Сотрудник, #(lf)    -- cast(_Reference234._Description as varchar(1000)) AS Терминал, #(lf)   #(lf)    #(lf)    _Document325._fld4172 AS НачалоПосещения,#(lf)    _Document325._Fld4174 AS ОкончаниеПосещения,#(lf)#(lf)    _Document325._fld4172 :: DATE AS ДатаНачала,#(lf)    -- _Document325._fld4172 :: TIME AS ВремяНачала,#(lf)#(lf)    _Document325._Fld4174 :: DATE AS ДатаОкончания,#(lf)    -- _Document325._Fld4174 :: TIME AS ВремяОкончания,#(lf)#(lf)    --_Fld7584 Время,#(lf)      _Fld7585 Количество#(lf)    --_Fld7586 Стоимость#(lf)        -- encode(_Document325._Fld4164RRef,'hex')#(lf)        #(lf)FROM _AccumRg7575#(lf)#(lf)    /*#(lf)        ,encode(_Fld7576RRef,'hex') Контрагент#(lf)#(tab)#(tab),encode(_Fld7577RRef,'hex') Клуб#(lf)#(tab)#(tab),encode(_Fld7578_RRRef,'hex') Основание#(lf)#(tab)#(tab),encode(_Fld7579RRef,'hex') Услуга#(lf)#(tab)#(tab),encode(_Fld7580RRef,'hex') Помещение#(lf)#(tab)#(tab),encode(_Fld7581_RRRef,'hex') ГрупповоеЗанятие#(lf)#(tab)#(tab),encode(_Fld7582RRef,'hex') Сотрудник#(lf)        ----------------------------------------------#(lf)        _Document325#(tab)Документ.Посещение#(lf)        ,encode(_Fld4164RRef,'hex') ВидОперации#(lf)#(tab)#(tab),encode(_Fld4165RRef,'hex') ДокументОснование#(lf)#(tab)#(tab),encode(_Fld4166RRef,'hex') Карта#(lf)#(tab)#(tab),encode(_Fld4167RRef,'hex') Клуб#(lf)#(tab)#(tab),encode(_Fld4168RRef,'hex') КлючШкафа#(lf)#(tab)#(tab),encode(_Fld4169RRef,'hex') КлючЯчейки#(lf)#(tab)#(tab),cast(_Fld4170 as varchar(1000)) Комментарий#(lf)#(tab)#(tab),encode(_Fld4171RRef,'hex') Контрагент#(lf)        ,encode(_Fld4176RRef,'hex') ТерминалВхода#(lf)#(tab)#(tab),encode(_Fld4177RRef,'hex') ТерминалВыхода#(lf)#(lf)        ,_Fld4172 НачалоПосещения#(lf)#(tab)#(tab),_Fld4174 ОкончаниеПосещения#(lf)    */#(lf)LEFT JOIN _Reference132 ON _AccumRg7575._Fld7577RRef = _Reference132._IDRRef  -- клуб#(lf)LEFT JOIN _Reference141X1 ON _AccumRg7575._Fld7576RRef = _Reference141X1._IDRRef  --контрагенты#(lf)LEFT JOIN _Reference163 ON _AccumRg7575._Fld7579RRef = _Reference163._IDRRef  --номенклатура#(lf)--LEFT JOIN _Reference225 ON _AccumRg7575._Fld7582RRef = _Reference225._IDRRef  -- сотрудник#(lf)LEFT JOIN _Document279 ON _AccumRg7575._Fld7581_RRRef = _Document279._IDRRef  --груп занятие#(lf)#(lf)LEFT JOIN _Document325 ON _AccumRg7575._RecorderRRef = _Document325._IDRRef#(lf)                   #(lf)WHERE _AccumRg7575._Period >= '01.01.2026' AND _AccumRg7575._Period < '01.01.2027' #(lf)AND #(lf)_Reference163._Description LIKE '%Посещение%'#(lf)-- ='9a5a4c90d2b1aede4b91dcd1abe84c43' --ВидПосещенияНовый = посещение#(lf)--limit 10000#(lf)"),
+    #"Обрезанный текст" = Table.TransformColumns(Источник,{{"Код", Text.Trim, type text}}),
+    #"Сортированные строки" = Table.Sort(#"Обрезанный текст",{{"Период", Order.Descending}})
+in
+    #"Сортированные строки"
+
+Неподтвержденные_услуги 2026
+let
+    Источник = Odbc.Query("Driver={PostgreSQL Unicode};Server=virt207.worldclass.nnov.ru; Database=gymdb_test;Timeout=300;Fetch=10000;UseDeclareFetch=1;", "--РегистрНакопления.НеподтвержденныеУслуги (Основная)#(lf)with tab as #(lf)(#(lf)SELECT #(lf)#(tab)_Period Период,#(lf)#(tab)-- ,_RecorderTRef Регистратор#(lf)#(tab)-- ,encode(_RecorderRRef,'hex') Регистратор,#(lf)#(tab)CASE #(lf)            WHEN SUBSTR(ENCODE(_RecorderTRef, 'hex'), 1, 8) = '00000149' THEN 'ПредварительнаяЗапись'#(lf)            WHEN SUBSTR(ENCODE(_RecorderTRef, 'hex'), 1, 8) = '00000139' THEN 'ОтменаПредварительнойЗаписи'#(lf)#(tab)    WHEN SUBSTR(ENCODE(_RecorderTRef, 'hex'), 1, 8) = '00000138' THEN 'ОтменаЗаписиНаГрупповоеЗанятие'#(lf)#(tab)    WHEN (SUBSTR(ENCODE(_RecorderTRef, 'hex'), 1, 8) = '00000145' and (_RecordKind = 1 and _Fld7516 = -1)) THEN 'Отмена'#(lf)            WHEN SUBSTR(ENCODE(_RecorderTRef, 'hex'), 1, 8) = '00000145' THEN 'Подтверждение'#(lf)            -- WHEN SUBSTR(ENCODE(_RecorderTRef, 'hex'), 1, 8) = '00000149' THEN 'РегистрНакопления.НеподтвержденныеУслуги'#(lf)            WHEN SUBSTR(ENCODE(_RecorderTRef, 'hex'), 1, 8) ILIKE '0000011b' THEN 'ЗаписьНаГрупповоеЗанятие'#(lf)            ELSE 'НеизвестныйТип.' || SUBSTR(ENCODE(_RecorderTRef, 'hex'), 1, 8)#(lf)        END AS РегистраторТип#(lf)#(lf)#(tab),_RecordKind ВидДвижения#(lf)#(tab),_LineNo НомерСтроки#(lf)#(tab),cast(_Reference141X1._Code as varchar(1000)) Код #(lf)#(tab),cast(_Reference132._Description as varchar(1000)) AS Клуб #(lf)#(tab),cast(_Reference141X1._Description as varchar(1000)) AS Контрагенты #(lf)#(tab),cast(_Reference163._Description as varchar(1000)) as Номенклатура#(lf)#(tab),cast(_Reference225._Description as varchar(1000)) as Сотрудник#(lf)#(tab),_Fld7514 ДатаНачала#(lf)#(tab),_Fld7515 ДатаОкончания#(lf)#(tab),_Fld7516 Количество#(lf)#(tab),_Fld7517 Сумма#(lf)        ,encode(_Fld7512_RRRef,'hex') ПредварительнаяЗапись#(lf)#(lf)FROM _AccumRg7509#(lf)#(lf)#(tab)LEFT JOIN _Document329 ON _AccumRg7509._Fld7512_RRRef = _Document329._IDRRef --329 предварительная запись#(lf)#(tab)LEFT JOIN _Reference132  ON _AccumRg7509._Fld7510RRef = _Reference132._IDRRef --клуб#(lf)#(tab)LEFT JOIN _Reference141X1 ON _AccumRg7509._Fld7511RRef = _Reference141X1._IDRRef-- контрагенты#(lf) #(tab)LEFT JOIN _Reference163 ON _AccumRg7509._Fld7513RRef = _Reference163._IDRRef-- номенклатур#(lf)#(tab)INNER JOIN _Reference225 ON _Document329._Fld4322RRef = _Reference225._IDRRef-- сотрудник#(lf)#(tab)#(lf)#(tab)-- Если 329 не найден, подключаем 313 по _Fld3810_RRRef#(lf)    LEFT JOIN _Document313 ON _AccumRg7509._Fld7512_RRRef = _Document313._IDRRef#(lf)                          AND _Document329._IDRRef IS NULL#(lf)#(lf)where  #(lf)_Period BETWEEN DATE '2026-01-01' AND DATE '2027-01-01'#(lf)AND cast(_Reference163._Description as varchar(1000)) NOT ILIKE 'Купон%'#(lf)-- _Reference141X1._Code = 'И00083174' #(lf)--AND _Reference132._Description = 'Автозаводский' #(lf)#(lf)UNION ALL#(lf)#(lf)SELECT #(lf)#(tab)_Period Период,#(lf)#(tab)-- ,_RecorderTRef Регистратор#(lf)#(tab)-- ,encode(_RecorderRRef,'hex') Регистратор,#(lf)#(tab)CASE #(lf)            WHEN SUBSTR(ENCODE(_RecorderTRef, 'hex'), 1, 8) = '00000149' THEN 'ПредварительнаяЗапись'#(lf)            WHEN SUBSTR(ENCODE(_RecorderTRef, 'hex'), 1, 8) = '00000139' THEN 'ОтменаПредварительнойЗаписи'#(lf)#(tab)    WHEN SUBSTR(ENCODE(_RecorderTRef, 'hex'), 1, 8) = '00000138' THEN 'ОтменаЗаписиНаГрупповоеЗанятие'#(lf)#(tab)    WHEN (SUBSTR(ENCODE(_RecorderTRef, 'hex'), 1, 8) = '00000145' and (_RecordKind = 1 and _Fld7516 = -1)) THEN 'Отмена'#(lf)            WHEN SUBSTR(ENCODE(_RecorderTRef, 'hex'), 1, 8) = '00000145' THEN 'Подтверждение'#(lf)            -- WHEN SUBSTR(ENCODE(_RecorderTRef, 'hex'), 1, 8) = '00000149' THEN 'РегистрНакопления.НеподтвержденныеУслуги'#(lf)            WHEN SUBSTR(ENCODE(_RecorderTRef, 'hex'), 1, 8) ILIKE '0000011b' THEN 'ЗаписьНаГрупповоеЗанятие'#(lf)            ELSE 'НеизвестныйТип.' || SUBSTR(ENCODE(_RecorderTRef, 'hex'), 1, 8)#(lf)        END AS РегистраторТип#(lf)#(lf)#(tab),_RecordKind ВидДвижения#(lf)#(tab),_LineNo НомерСтроки#(lf)#(tab),cast(_Reference141X1._Code as varchar(1000)) Код #(lf)#(tab),cast(_Reference132._Description as varchar(1000)) AS НаименованиеКлуб #(lf)#(tab),cast(_Reference141X1._Description as varchar(1000)) AS НаименованиеКонтрагенты #(lf)#(tab),cast(_Reference163._Description as varchar(1000)) as НаименованиеНоменклатура#(lf)#(tab),cast(_Reference225._Description as varchar(1000)) as Сотрудник#(lf)#(tab)#(tab)#(tab)#(lf)#(tab),_Fld7514 ДатаНачала#(lf)#(tab),_Fld7515 ДатаОкончания#(lf)#(tab),_Fld7516 Количество#(lf)#(tab),_Fld7517 Сумма#(lf)        ,encode(_Fld7512_RRRef,'hex') ПредварительнаяЗапись#(lf)#(lf)FROM _AccumRg7509#(lf)#(tab)LEFT JOIN _Reference132  ON _AccumRg7509._Fld7510RRef = _Reference132._IDRRef --клуб#(lf)#(tab)LEFT JOIN _Reference141X1 ON _AccumRg7509._Fld7511RRef = _Reference141X1._IDRRef-- контрагенты#(lf) #(tab)LEFT JOIN _Reference163 ON _AccumRg7509._Fld7513RRef = _Reference163._IDRRef-- номенклатура#(lf)#(tab)INNER JOIN _Document279 ON _AccumRg7509._Fld7512_RRRef = _Document279._IDRRef -- групповые занятия#(lf)#(tab)INNER JOIN _Reference225 ON _Document279._Fld3223RRef = _Reference225._IDRRef-- исполнитель (ГЗ)#(lf)#(lf)#(tab)-- LEFT JOIN _Document325._Fld4164RRef = _Document325._IDRRef -- вид операции из документа 325 (посещение)#(lf)#(lf)WHERE  #(lf)_Period BETWEEN DATE '2026-01-01' AND DATE '2027-01-01'#(lf)AND cast(_Reference163._Description as varchar(1000)) NOT ILIKE 'Купон%' #(lf)--_Reference141X1._Code = 'И00083174' AND _Reference132._Description = 'Автозаводский' #(lf))#(lf)select *#(lf)from tab#(lf)#(lf)-- limit 400#(lf)#(lf)#(lf)#(lf)#(lf)#(lf)"),
+    #"Обрезанный текст" = Table.TransformColumns(Источник,{{"Код", Text.Trim, type text}}),
+    #"Добавлен пользовательский объект" = Table.AddColumn(#"Обрезанный текст", "СуммаИтог", each if [ВидДвижения] = 1 
+then [Сумма] * (-1)
+else [Сумма]),
+    #"Измененный тип" = Table.TransformColumnTypes(#"Добавлен пользовательский объект",{{"СуммаИтог", Int64.Type}, {"Сумма", Int64.Type}})
+in
+    #"Измененный тип"
+
+СпрКлубы
+let
+    Источник = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("bZBBDoIwEEWvYlh7EXeu3JDeBXCjKzVxRUyUC5hKrAKGeoU/N/J3ihISF00z837//E6aJtijlgIeT1jUvO+So0ODNjFz4oOsJUNP2BHWU3iEwyu0YWUXWyU89RY3gia2zrTY6LN++vwPmK0Wywgr9XVSKPr5X0JEKj0z6eDBioosRhy1Fd4hjRRDyX/asbzioR4ulifO2vJkX8tScl0Ml5IY8wE=", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [Клуб = _t])
+in
+    Источник
+
+CurrentDate
+let
+    Источник = #table(
+    {"ProcessName", "LastRunUTC"},
+    {{"Актуальность", Date.From(DateTime.LocalNow())}}
+),
+    #"Измененный тип" = Table.TransformColumnTypes(Источник,{{"LastRunUTC", type date}})
+in
+    #"Измененный тип"
+
+%погашения = DIVIDE([Погашено долгов], [Долг])
+%погашения_всего = DIVIDE([Погашено долгов всего], [ВсеДолгиНаКонецДня])
+	ВсеДолгиНаКонецДня = 
+VAR CurrDate = SELECTEDVALUE('_СпрДата'[Date])
+// VAR visittoday = 
+//     // TREATAS(
+//         CALCULATETABLE(
+//         DISTINCT('Посещения_общий'[Код]),
+//         REMOVEFILTERS('_СпрДата'),
+//         'Посещения_общий'[период_без_time] = CurrDate
+//     )
+    // ,'НеподтвержденныеУслуги'[Код])
+-- записи до выбранной даты
+VAR DateBefore = 
+    FILTER(
+        'НеподтвержденныеУслуги',
+        'НеподтвержденныеУслуги'[Период] <= CurrDate --&& 'НеподтвержденныеУслуги'[Код] in visittoday
+    )
+  
+VAR grouped = 
+    GROUPBY(
+        DateBefore,
+        // columsnew,
+        [Код],
+        [ПредварительнаяЗапись],
+            
+        "СуммаИтог_ориг", SUMX(CURRENTGROUP(), [СуммаИтог]),
+        "БазовыеЗаписи", SUMX(CURRENTGROUP(),  IF([ВидДвижения]  = 0 && [Количество] = 1, [Количество], 0)), 
+        "Подтверждения", SUMX(CURRENTGROUP(), IF([ВидДвижения] = 1 && [Количество] = 1, [Количество], 0)),
+        "Отмены", SUMX(CURRENTGROUP(), IF(([ВидДвижения] = 1 || [ВидДвижения] = 0) && [Количество] = -1, [Количество], 0)),
+        
+        "Клуб", MAXX(CURRENTGROUP(), [Клуб]),
+        "Контрагенты", MAXX(CURRENTGROUP(), [Контрагенты]),
+        "Номенклатура", MAXX(CURRENTGROUP(), [Номенклатура]),
+        "Сотрудник", MAXX(CURRENTGROUP(), [Сотрудник]),
+        "ДатаНачала", MAXX(CURRENTGROUP(), [ДатаНачала]),
+        "Количество", SUMX(CURRENTGROUP(), [Количество])
+    )
+ -- если погашено — 0
+VAR sumnew = 
+    ADDCOLUMNS(
+        grouped,
+        "СуммаИтог",
+        VAR base = [БазовыеЗаписи]
+        VAR visits = [Подтверждения]
+        VAR absCancels = [Отмены] --ABS([Отмены])
+        
+        var unconfirmed = base + visits + absCancels
+        // VAR afterVisits = base - MIN(base, visits)
+        // VAR unconfirmed = afterVisits - MIN(afterVisits, absCancels)
+
+        RETURN
+            IF(
+                unconfirmed > 0,
+                [СуммаИтог_ориг],
+                0
+            )
+    )
+VAR itog = 
+    SELECTCOLUMNS(
+        sumnew,
+        "Код", [Код],
+        "Клуб", [Клуб],
+        "Контрагенты", [Контрагенты],
+        "Номенклатура", [Номенклатура],
+        "Сотрудник", [Сотрудник],
+        "ДатаНачала", [ДатаНачала],
+        "Количество", [Количество],
+        "СуммаИтог", [СуммаИтог],
+        "ПредварительнаяЗапись", [ПредварительнаяЗапись]
+    )
+
+// var visit = 
+//     FILTER(itog, [Код] in visittoday)
+VAR Result =
+        SUMX(itog, [СуммаИтог])
+RETURN
+        IF(ISBLANK(Result), 0, Result)
+
+// VAR CurrDate = SELECTEDVALUE('_СпрДата'[Date])
+// // VAR visittoday = 
+// //     // TREATAS(
+// //         CALCULATETABLE(
+// //         DISTINCT('Посещения_общий'[Код]),
+// //         REMOVEFILTERS('_СпрДата'),
+// //         'Посещения_общий'[период_без_time] = CurrDate
+// //     )
+//     // ,'НеподтвержденныеУслуги'[Код])
+// -- записи до выбранной даты
+// VAR DateBefore = 
+//     FILTER(
+//         'НУ_общая',
+//         'НУ_общая'[Период] <= CurrDate --&& 'НеподтвержденныеУслуги'[Код] in visittoday
+//     )
+  
+// VAR grouped = 
+//     GROUPBY(
+//         DateBefore,
+//         // columsnew,
+//         [Код],
+//         [ПредварительнаяЗапись],
+            
+//         "СуммаИтог_ориг", SUMX(CURRENTGROUP(), [СуммаИтог]),
+//         "БазовыеЗаписи", SUMX(CURRENTGROUP(),  IF([ВидДвижения]  = 0 && [Количество] = 1, [Количество], 0)), 
+//         "Подтверждения", SUMX(CURRENTGROUP(), IF([ВидДвижения] = 1 && [Количество] = 1, [Количество], 0)),
+//         "Отмены", SUMX(CURRENTGROUP(), IF(([ВидДвижения] = 1 || [ВидДвижения] = 0) && [Количество] = -1, [Количество], 0)),
+        
+//         "Клуб", MAXX(CURRENTGROUP(), [Клуб]),
+//         "Контрагенты", MAXX(CURRENTGROUP(), [Контрагенты]),
+//         "Номенклатура", MAXX(CURRENTGROUP(), [Номенклатура]),
+//         "Сотрудник", MAXX(CURRENTGROUP(), [Сотрудник]),
+//         "ДатаНачала", MAXX(CURRENTGROUP(), [ДатаНачала]),
+//         "Количество", SUMX(CURRENTGROUP(), [Количество])
+//     )
+//  -- если погашено — 0
+// VAR sumnew = 
+//     ADDCOLUMNS(
+//         grouped,
+//         "СуммаИтог",
+//         VAR base = [БазовыеЗаписи]
+//         VAR visits = [Подтверждения]
+//         VAR absCancels = [Отмены] --ABS([Отмены])
+        
+//         var unconfirmed = base + visits + absCancels
+//         // VAR afterVisits = base - MIN(base, visits)
+//         // VAR unconfirmed = afterVisits - MIN(afterVisits, absCancels)
+
+//         RETURN
+//             IF(
+//                 unconfirmed > 0,
+//                 [СуммаИтог_ориг],
+//                 0
+//             )
+//     )
+// VAR itog = 
+//     SELECTCOLUMNS(
+//         sumnew,
+//         "Код", [Код],
+//         "Клуб", [Клуб],
+//         "Контрагенты", [Контрагенты],
+//         "Номенклатура", [Номенклатура],
+//         "Сотрудник", [Сотрудник],
+//         "ДатаНачала", [ДатаНачала],
+//         "Количество", [Количество],
+//         "СуммаИтог", [СуммаИтог],
+//         "ПредварительнаяЗапись", [ПредварительнаяЗапись]
+//     )
+
+// // var visit = 
+// //     FILTER(itog, [Код] in visittoday)
+// VAR Result =
+//         SUMX(itog, [СуммаИтог])
+// RETURN
+//         IF(ISBLANK(Result), 0, Result)
+
+Долг = 
+VAR CurrDate = SELECTEDVALUE('_СпрДата'[Date])
+VAR visittoday = 
+    // TREATAS(
+        CALCULATETABLE(
+        DISTINCT('Посещения_общий'[Код]),
+        REMOVEFILTERS('_СпрДата'), --ALL('_СпрДата'),
+        'Посещения_общий'[период_без_time] = CurrDate
+    )
+    // ,'НеподтвержденныеУслуги'[Код])
+-- записи до выбранной даты
+VAR DateBefore = 
+    FILTER(
+        'НеподтвержденныеУслуги',
+        'НеподтвержденныеУслуги'[Период] < CurrDate && 'НеподтвержденныеУслуги'[Код] in visittoday
+    )
+  
+VAR grouped = 
+    GROUPBY(
+        DateBefore,
+        // columsnew,
+        [Код],
+        [ПредварительнаяЗапись],
+
+        "СуммаИтог_ориг", SUMX(CURRENTGROUP(), [СуммаИтог]),
+        "БазовыеЗаписи", SUMX(CURRENTGROUP(), IF([ВидДвижения]  = 0 && [Количество] = 1, [Количество], 0)), 
+        "Подтверждения", SUMX(CURRENTGROUP(), IF([ВидДвижения] = 1 && [Количество] = 1, [Количество], 0)), 
+        "Отмена",  SUMX(CURRENTGROUP(), IF([ВидДвижения] = 1  && [Количество] = -1, [Количество], 0)),
+        "ОтменаПЗГЗ", SUMX(CURRENTGROUP(), IF([ВидДвижения] = 0  && [Количество] = -1, [Количество], 0)),
+        
+        "Клуб", MAXX(CURRENTGROUP(), [Клуб]),
+        "Контрагенты", MAXX(CURRENTGROUP(), [Контрагенты]),
+        "Номенклатура", MAXX(CURRENTGROUP(), [Номенклатура]),
+        "Сотрудник", MAXX(CURRENTGROUP(), [Сотрудник]),
+        "ДатаНачала", MAXX(CURRENTGROUP(), [ДатаНачала]),
+        "Количество", SUMX(CURRENTGROUP(), [Количество])
+    )
+ -- если погашено — 0
+VAR sumnew = 
+    ADDCOLUMNS(
+        grouped,
+        "СуммаИтог",
+        VAR base = [БазовыеЗаписи]
+        VAR visits = [Подтверждения]*(-1)
+        VAR Cancel = [Отмена]*(-1)
+        VAR CancelPZGZ = [ОтменаПЗГЗ]
+        
+        var unconfirmed = base + visits + Cancel + CancelPZGZ
+
+        RETURN
+            IF(
+                unconfirmed > 0,
+                [СуммаИтог_ориг],
+                0
+            )
+    )
+VAR itog = 
+    SELECTCOLUMNS(
+        sumnew,
+        "Код", [Код],
+        "Клуб", [Клуб],
+        "Контрагенты", [Контрагенты],
+        "Номенклатура", [Номенклатура],
+        "Сотрудник", [Сотрудник],
+        "ДатаНачала", [ДатаНачала],
+        "Количество", [Количество],
+        "СуммаИтог", [СуммаИтог],
+        "ПредварительнаяЗапись", [ПредварительнаяЗапись]
+    )
+
+VAR Result =
+        SUMX(itog, [СуммаИтог])
+RETURN
+IF(ISBLANK(Result), 0, Result) 
+Долг по тренерам = 
+
+VAR CurrDate = SELECTEDVALUE('_СпрДата'[Date])
+
+-- записи до выбранной даты
+VAR DateBefore = 
+    FILTER(
+        'НеподтвержденныеУслуги',
+        'НеподтвержденныеУслуги'[Период] <= CurrDate 
+    )
+  
+VAR grouped = 
+    GROUPBY(
+        DateBefore,
+        // columsnew,
+        [Код],
+        [ПредварительнаяЗапись],
+            
+        "СуммаИтог_ориг", SUMX(CURRENTGROUP(), [СуммаИтог]),
+        "БазовыеЗаписи", SUMX(CURRENTGROUP(),  IF([ВидДвижения]  = 0 && [Количество] = 1, [Количество], 0)), 
+        "Подтверждения", SUMX(CURRENTGROUP(), IF([ВидДвижения] = 1 && [Количество] = 1, [Количество], 0)),
+        "Отмена",  SUMX(CURRENTGROUP(), IF([ВидДвижения] = 1  && [Количество] = -1, [Количество], 0)),
+        "ОтменаПЗГЗ", SUMX(CURRENTGROUP(), IF([ВидДвижения] = 0  && [Количество] = -1, [Количество], 0)),
+        
+        "Клуб", MAXX(CURRENTGROUP(), [Клуб]),
+        "Контрагенты", MAXX(CURRENTGROUP(), [Контрагенты]),
+        "Номенклатура", MAXX(CURRENTGROUP(), [Номенклатура]),
+        "Сотрудник", MAXX(CURRENTGROUP(), [Сотрудник]),
+        "ДатаНачала", MAXX(CURRENTGROUP(), [ДатаНачала]),
+        "Количество", SUMX(CURRENTGROUP(), [Количество])
+    )
+ -- если погашено — 0
+VAR sumnew = 
+    ADDCOLUMNS(
+        grouped,
+        "СуммаИтог",
+        VAR base = [БазовыеЗаписи]
+        VAR visits = [Подтверждения]*(-1)
+        VAR Cancel = [Отмена]*(-1)
+        VAR CancelPZGZ = [ОтменаПЗГЗ]
+        
+        var unconfirmed = base + visits + Cancel + CancelPZGZ
+
+        RETURN
+            IF(
+                unconfirmed > 0,
+                [СуммаИтог_ориг],
+                0
+            )
+    )
+VAR itog = 
+    SELECTCOLUMNS(
+        sumnew,
+        "Код", [Код],
+        "Клуб", [Клуб],
+        "Контрагенты", [Контрагенты],
+        "Номенклатура", [Номенклатура],
+        "Сотрудник", [Сотрудник],
+        "ДатаНачала", [ДатаНачала],
+        "Количество", [Количество],
+        "СуммаИтог", [СуммаИтог],
+        "ПредварительнаяЗапись", [ПредварительнаяЗапись]
+    )
+
+VAR Result =
+        SUMX(itog, [СуммаИтог])
+RETURN
+        IF(ISBLANK(Result), 0, Result)
+
+Долг_на_конец_дня = 
+VAR CurrDate = SELECTEDVALUE('_СпрДата'[Date])
+VAR visittoday = 
+    // TREATAS(
+        CALCULATETABLE(
+        DISTINCT('Посещения_общий'[Код]),
+        REMOVEFILTERS('_СпрДата'),
+        'Посещения_общий'[период_без_time] = CurrDate
+    )
+    // ,'НеподтвержденныеУслуги'[Код])
+-- записи до выбранной даты
+VAR DateBefore = 
+    FILTER(
+        'НеподтвержденныеУслуги',
+        'НеподтвержденныеУслуги'[Период] <= CurrDate && 'НеподтвержденныеУслуги'[Код] in visittoday
+    )
+  
+VAR grouped = 
+    GROUPBY(
+        DateBefore,
+        // columsnew,
+        [Код],
+        [ПредварительнаяЗапись],
+            
+        "СуммаИтог_ориг", SUMX(CURRENTGROUP(), [СуммаИтог]),
+        "БазовыеЗаписи", SUMX(CURRENTGROUP(),  IF([ВидДвижения]  = 0 && [Количество] = 1, [Количество], 0)), 
+        "Подтверждения", SUMX(CURRENTGROUP(), IF([ВидДвижения] = 1 && [Количество] = 1, [Количество], 0)),
+        "Отмена",  SUMX(CURRENTGROUP(), IF([ВидДвижения] = 1  && [Количество] = -1, [Количество], 0)),
+        "ОтменаПЗГЗ", SUMX(CURRENTGROUP(), IF([ВидДвижения] = 0  && [Количество] = -1, [Количество], 0)),
+        
+        "Клуб", MAXX(CURRENTGROUP(), [Клуб]),
+        "Контрагенты", MAXX(CURRENTGROUP(), [Контрагенты]),
+        "Номенклатура", MAXX(CURRENTGROUP(), [Номенклатура]),
+        "Сотрудник", MAXX(CURRENTGROUP(), [Сотрудник]),
+        "ДатаНачала", MAXX(CURRENTGROUP(), [ДатаНачала]),
+        "Количество", SUMX(CURRENTGROUP(), [Количество])
+    )
+ -- если погашено — 0
+VAR sumnew = 
+    ADDCOLUMNS(
+        grouped,
+        "СуммаИтог",
+        VAR base = [БазовыеЗаписи]
+        VAR visits = [Подтверждения]*(-1)
+        VAR Cancel = [Отмена]*(-1)
+        VAR CancelPZGZ = [ОтменаПЗГЗ]
+        
+        var unconfirmed = base + visits + Cancel + CancelPZGZ
+
+        RETURN
+            IF(
+                unconfirmed > 0,
+                [СуммаИтог_ориг], 
+                0
+            )
+    )
+VAR itog = 
+    SELECTCOLUMNS(
+        sumnew,
+        "Код", [Код],
+        "Клуб", [Клуб],
+        "Контрагенты", [Контрагенты],
+        "Номенклатура", [Номенклатура],
+        "Сотрудник", [Сотрудник],
+        "ДатаНачала", [ДатаНачала],
+        "Количество", [Количество],
+        "СуммаИтог", [СуммаИтог],
+        "ПредварительнаяЗапись", [ПредварительнаяЗапись]
+    )
+
+// var visit = 
+//     FILTER(itog, [Код] in visittoday)
+VAR Result =
+        SUMX(itog, [СуммаИтог])
+RETURN
+        IF(ISBLANK(Result), 0, Result)
+
+ДолгиВсе = 
+// VAR CurrDate = SELECTEDVALUE('_СпрДата'[Date])
+
+// RETURN
+
+//         SUMX(
+//             -- Группируем все ПЗ, которые имели записи до сегодня
+//             SUMMARIZE(
+//                 FILTER('НеподтвержденныеУслуги', 'НеподтвержденныеУслуги'[Период] < CurrDate),
+//                 'НеподтвержденныеУслуги'[Код],
+//                 'НеподтвержденныеУслуги'[ПредварительнаяЗапись]
+//             ),
+//             VAR CurrentCode = 'НеподтвержденныеУслуги'[Код]
+//             VAR CurrentPZ = 'НеподтвержденныеУслуги'[ПредварительнаяЗапись]
+
+//             -- Только движения по этой ПЗ до сегодня
+//             VAR History = 
+//                 CALCULATETABLE(
+//                     'НеподтвержденныеУслуги',
+//                     'НеподтвержденныеУслуги'[Код] = CurrentCode,
+//                     'НеподтвержденныеУслуги'[ПредварительнаяЗапись] = CurrentPZ,
+//                     'НеподтвержденныеУслуги'[Период] < CurrDate
+//                 )
+
+//             -- Расчёт по твоей логике
+//             VAR base = SUMX(History, IF([ВидДвижения] = 0 && [Количество] = 1, [Количество], 0))
+//             VAR visits = SUMX(History, IF([ВидДвижения] = 1 && [Количество] = 1, [Количество], 0))
+//             VAR cancels = SUMX(History, IF([Количество] = -1, [Количество], 0))
+//             VAR absCancels = ABS(cancels)
+
+//             VAR unconfirmed = base + visits + absCancels
+
+//             RETURN
+//                 IF(
+//                     unconfirmed > 0,
+//                     SUMX(History, [СуммаИтог]),
+//                     0
+//                 )
+//         )
+    
+// VAR CurrDate = SELECTEDVALUE('_СпрДата'[Date])
+// RETURN
+//     CALCULATE(
+//         SUM('НУ_общая'[СуммаИтог]),
+//         'НУ_общая'[Период] < CurrDate
+//     )
+
+VAR CurrDate = SELECTEDVALUE('_СпрДата'[Date])
+VAR DateBefore = 
+    FILTER(
+        'НеподтвержденныеУслуги',
+        'НеподтвержденныеУслуги'[Период] < CurrDate 
+    )
+VAR grouped = 
+    GROUPBY(
+        DateBefore,
+        // columsnew,
+        [Код],
+        [ПредварительнаяЗапись],
+
+        "СуммаИтог_ориг", SUMX(CURRENTGROUP(), [СуммаИтог]),
+        "БазовыеЗаписи", SUMX(CURRENTGROUP(), IF([ВидДвижения]  = 0 && [Количество] = 1, [Количество], 0)), 
+        "Подтверждения", SUMX(CURRENTGROUP(), IF([ВидДвижения] = 1 && [Количество] = 1, [Количество], 0)), 
+        "Отмены", SUMX(CURRENTGROUP(), IF(([ВидДвижения] = 1 || [ВидДвижения] = 0) && [Количество] = -1, [Количество], 0)), 
+        
+        "Клуб", MAXX(CURRENTGROUP(), [Клуб]),
+        "Сотрудник", MAXX(CURRENTGROUP(), [Сотрудник]),
+        "Количество", SUMX(CURRENTGROUP(), [Количество])
+    )
+ -- если погашено — 0
+VAR sumnew = 
+    ADDCOLUMNS(
+        grouped,
+        "СуммаИтог",
+        VAR base = [БазовыеЗаписи]
+        VAR visits = [Подтверждения]
+        VAR absCancels = [Отмены]
+        
+        var unconfirmed = base + visits + absCancels
+
+        RETURN
+            IF(
+                unconfirmed > 0,
+                [СуммаИтог_ориг],
+                0
+            )
+    )
+VAR itog = 
+    SELECTCOLUMNS(
+        sumnew,
+        "Код", [Код],
+        "Клуб", [Клуб],
+        "Сотрудник", [Сотрудник],
+        "Количество", [Количество],
+        "СуммаИтог", [СуммаИтог],
+        "ПредварительнаяЗапись", [ПредварительнаяЗапись]
+    )
+
+VAR Result =
+        SUMX(itog, [СуммаИтог])
+RETURN
+IF(ISBLANK(Result), 0, Result)
+Кол-во всех клиентов с долгами = 
+VAR CurrDate = SELECTEDVALUE('_СпрДата'[Date])
+
+-- записи до выбранной даты
+VAR DateBefore = 
+    FILTER(
+        'НеподтвержденныеУслуги',
+        'НеподтвержденныеУслуги'[Период] <= CurrDate
+    )
+  
+VAR grouped = 
+    GROUPBY(
+        DateBefore,
+        // columsnew,
+        [Код],
+        [ПредварительнаяЗапись],
+
+        "СуммаИтог_ориг", SUMX(CURRENTGROUP(), [СуммаИтог]),
+        "БазовыеЗаписи", SUMX(CURRENTGROUP(), IF([ВидДвижения]  = 0 && [Количество] = 1, [Количество], 0)), 
+        "Подтверждения", SUMX(CURRENTGROUP(), IF([ВидДвижения] = 1 && [Количество] = 1, [Количество], 0)), 
+        "Отмена",  SUMX(CURRENTGROUP(), IF([ВидДвижения] = 1  && [Количество] = -1, [Количество], 0)),
+        "ОтменаПЗГЗ", SUMX(CURRENTGROUP(), IF([ВидДвижения] = 0  && [Количество] = -1, [Количество], 0))
+    )
+ -- если погашено — 0
+VAR sumnew = 
+    ADDCOLUMNS(
+        grouped,
+        "СуммаИтог",
+        VAR base = [БазовыеЗаписи]
+        VAR visits = [Подтверждения]*(-1)
+        VAR Cancel = [Отмена]*(-1)
+        VAR CancelPZGZ = [ОтменаПЗГЗ]
+        
+        var unconfirmed = base + visits + Cancel + CancelPZGZ
+        RETURN
+            IF(unconfirmed > 0, [СуммаИтог_ориг], 0)
+    )
+
+var filterp = 
+SUMMARIZE(sumnew, [Код])
+VAR Result =
+        COUNTROWS(filterp)
+RETURN
+        IF(ISBLANK(Result), 0, Result)
+Кол-во клиентов с долгом = 
+VAR CurrDate = SELECTEDVALUE('_СпрДата'[Date])
+
+-- записи до выбранной даты
+VAR DateBefore = 
+    FILTER(
+        'НеподтвержденныеУслуги',
+        'НеподтвержденныеУслуги'[Период] < CurrDate
+    )
+VAR visittoday = 
+    TREATAS(
+        CALCULATETABLE(
+        DISTINCT('Посещения_общий'[Код]),
+        ALL('_СпрДата'),
+        'Посещения_общий'[период_без_time] = CurrDate
+    ),'НеподтвержденныеУслуги'[Код])
+  
+VAR grouped = 
+    GROUPBY(
+        DateBefore,
+        [Код],
+        [ПредварительнаяЗапись],
+
+        "СуммаИтог_ориг", SUMX(CURRENTGROUP(), [СуммаИтог]),
+        "БазовыеЗаписи", SUMX(CURRENTGROUP(), IF([ВидДвижения]  = 0 && [Количество] = 1, [Количество], 0)), 
+        "Подтверждения", SUMX(CURRENTGROUP(), IF([ВидДвижения] = 1 && [Количество] = 1, [Количество], 0)), 
+        "Отмена",  SUMX(CURRENTGROUP(), IF([ВидДвижения] = 1  && [Количество] = -1, [Количество], 0)),
+        "ОтменаПЗГЗ", SUMX(CURRENTGROUP(), IF([ВидДвижения] = 0  && [Количество] = -1, [Количество], 0))
+    )
+ -- если погашено — 0
+VAR sumnew = 
+    ADDCOLUMNS(
+        grouped,
+        "СуммаИтог",
+        VAR base = [БазовыеЗаписи]
+        VAR visits = [Подтверждения]*(-1)
+        VAR Cancel = [Отмена]*(-1)
+        VAR CancelPZGZ = [ОтменаПЗГЗ]
+        
+        var unconfirmed = base + visits + Cancel + CancelPZGZ
+
+        RETURN
+            IF(
+                unconfirmed > 0,
+                [СуммаИтог_ориг],
+                0
+            )
+    )
+    
+var visit = 
+    FILTER(sumnew, [Код] in visittoday)
+var filterp = 
+SUMMARIZE(FILTER(visit, [СуммаИтог] > 0), [Код])
+VAR Result =
+        COUNTROWS(filterp)
+RETURN
+        IF(ISBLANK(Result), 0, Result)
+
+// COUNTROWS(
+//         FILTER (
+//             VALUES ( 'НеподтвержденныеУслуги'[Код] ),
+//             CALCULATE([Долг_на_конец_дня]) <> 0 )
+//     ) +0
+Кол-во_посещений = 
+DISTINCTCOUNT('Посещения_общий'[Код])+0
+Новые долги за день = 
+[Долг_на_конец_дня] - ([Долг] - [Погашено долгов])
+
+Погашено долгов = 
+VAR CurrDate = SELECTEDVALUE('_СпрДата'[Date])
+
+VAR visittoday = 
+    CALCULATETABLE(
+        DISTINCT('Посещения_общий'[Код]),
+        REMOVEFILTERS('_СпрДата'),
+        'Посещения_общий'[период_без_time] = CurrDate
+    )
+
+//  ПЗ до сегодня
+VAR debtfilter = 
+        FILTER(
+            'НеподтвержденныеУслуги',
+            'НеподтвержденныеУслуги'[Период] < CurrDate &&
+            'НеподтвержденныеУслуги'[Код] IN visittoday 
+        )
+
+VAR groupedBefore = 
+    GROUPBY(
+        debtfilter,
+        [Код],
+        [ПредварительнаяЗапись],
+
+        "СуммаИтог_ориг", SUMX(CURRENTGROUP(), [СуммаИтог]),
+        "БазовыеЗаписи", SUMX(CURRENTGROUP(), IF([ВидДвижения] = 0 && [Количество] = 1, [Количество], 0)),
+        "Подтверждения", SUMX(CURRENTGROUP(), IF([ВидДвижения] = 1 && [Количество] = 1, [Количество], 0)),
+        "Отмена", SUMX(CURRENTGROUP(), IF([ВидДвижения] = 1 && [Количество] = -1, [Количество], 0)),
+        "ОтменаПЗГЗ", SUMX(CURRENTGROUP(), IF([ВидДвижения] = 0 && [Количество] = -1, [Количество], 0))
+            
+        )
+// был ли долг на начало дня 
+VAR debts = 
+        ADDCOLUMNS(
+            groupedBefore,
+            "БылДолг",
+            VAR base = [БазовыеЗаписи]
+            VAR visits = [Подтверждения] * (-1)
+            VAR Cancel = [Отмена] * (-1)
+            VAR CancelPZGZ = [ОтменаПЗГЗ]  
+            VAR debt = base + visits + Cancel + CancelPZGZ
+            RETURN
+                IF(debt > 0, TRUE, FALSE)
+        )
+
+//  ПЗ, которые были закрыты "сегодня"
+VAR filterToday = 
+    FILTER(
+        'НеподтвержденныеУслуги',
+        'НеподтвержденныеУслуги'[Период] = CurrDate &&
+        'НеподтвержденныеУслуги'[Код] IN visittoday &&
+        (
+        ([ВидДвижения] = 1 && [Количество] = 1) ||  --подтвержд
+        ([Количество] = -1)  --отмены
+        )
+    )
+VAR ClosedPZToday = 
+        SUMMARIZE(filterToday, 'НеподтвержденныеУслуги'[Код], 'НеподтвержденныеУслуги'[ПредварительнаяЗапись])
+
+// соединяем ПЗ, которые были в долге и "сегодня" закрылись
+VAR Matched = 
+INTERSECT(
+            SELECTCOLUMNS(FILTER(debts, [БылДолг] = TRUE), "Код", [Код], "ПредварительнаяЗапись", [ПредварительнаяЗапись]),
+            SELECTCOLUMNS(ClosedPZToday, "Код", [Код], "ПредварительнаяЗапись", [ПредварительнаяЗапись])
+        )
+
+VAR Result = 
+    SUMX(
+        Matched,
+        VAR currentCode = [Код]
+        VAR currentPZ = [ПредварительнаяЗапись]
+        RETURN
+        CALCULATE(
+            SUM('НеподтвержденныеУслуги'[СуммаИтог]),
+            'НеподтвержденныеУслуги'[Код] = currentCode,
+            'НеподтвержденныеУслуги'[ПредварительнаяЗапись] = currentPZ,
+            'НеподтвержденныеУслуги'[Период] < CurrDate
+            )
+    )
+
+RETURN
+    IF(ISBLANK(Result), 0, Result)
+ 
+// VAR DebtStart = 
+// -- записи до выбранной даты
+// VAR DateBefore = 
+//     FILTER(
+//         'НеподтвержденныеУслуги',
+//         'НеподтвержденныеУслуги'[Период] < CurrDate
+//     )
+// VAR grouped = 
+//     GROUPBY(
+//         DateBefore,
+//         [Код],
+//         [ПредварительнаяЗапись],
+
+//         "СуммаИтог_ориг", SUMX(CURRENTGROUP(), [СуммаИтог]),
+//         "БазовыеЗаписи", SUMX(CURRENTGROUP(), [БазовоеКол]), --IF([РегистраторТип] IN { "ПредварительнаяЗапись", "ЗаписьНаГрупповоеЗанятие" }, [Количество], 0)),
+//         "Подтверждения", SUMX(CURRENTGROUP(), [ПодтвержденияКол]), --IF([РегистраторТип] = "Подтверждение", [Количество], 0)),
+//         "Отмены", SUMX(CURRENTGROUP(), [ОтменаКол])--IF([РегистраторТип] IN { "ОтменаПредварительнойЗаписи", "ОтменаЗаписиНаГрупповоеЗанятие", "Отмена"}, [Количество], 0))
+//     )
+//  -- если погашено — 0
+// VAR sumnew = 
+//     ADDCOLUMNS(
+//         grouped,
+//         "СуммаИтог",
+//         VAR base = [БазовыеЗаписи]
+//         VAR visits = [Подтверждения]
+//         VAR absCancels = ABS([Отмены])
+        
+//         VAR afterVisits = base - MIN(base, visits)
+//         VAR unconfirmed = afterVisits - MIN(afterVisits, absCancels)
+
+//         RETURN
+//             IF(unconfirmed = 0, 0, [СуммаИтог_ориг])
+//     )
+// var visit = 
+//     FILTER(sumnew, [Код] in visittoday)
+
+// RETURN SUMX(visit, [СуммаИтог])
+// ------------------------------------------------------
+// VAR DebtEnd =
+// VAR FilterDate = 
+//     FILTER(
+//         'НеподтвержденныеУслуги',
+//         'НеподтвержденныеУслуги'[Период] <= CurrDate
+//     )
+// VAR grouped = 
+//     GROUPBY(
+//         FilterDate,
+//         [Код],
+//         [ПредварительнаяЗапись],
+
+//         "СуммаИтог_ориг", SUMX(CURRENTGROUP(), [СуммаИтог]),
+//         "БазовыеЗаписи", SUMX(CURRENTGROUP(), [БазовоеКол]), --IF([РегистраторТип] IN { "ПредварительнаяЗапись", "ЗаписьНаГрупповоеЗанятие" }, [Количество], 0)),
+//         "Подтверждения", SUMX(CURRENTGROUP(), [ПодтвержденияКол]), --IF([РегистраторТип] = "Подтверждение", [Количество], 0)),
+//         "Отмены", SUMX(CURRENTGROUP(), [ОтменаКол])--IF([РегистраторТип] IN { "ОтменаПредварительнойЗаписи", "ОтменаЗаписиНаГрупповоеЗанятие", "Отмена"}, [Количество], 0))
+//     )
+//  -- если погашено — 0
+// VAR sumnew = 
+//     ADDCOLUMNS(
+//         grouped,
+//         "СуммаИтог",
+//         VAR base = [БазовыеЗаписи]
+//         VAR visits = [Подтверждения]
+//         VAR absCancels = ABS([Отмены])
+        
+//         VAR afterVisits = base - MIN(base, visits)
+//         VAR unconfirmed = afterVisits - MIN(afterVisits, absCancels)
+
+//         RETURN
+//             IF(unconfirmed = 0, 0, [СуммаИтог_ориг])
+//     )
+
+// var visit = 
+//     FILTER(sumnew, [Код] in visittoday)
+// RETURN SUMX(visit, [СуммаИтог])
+// ---------------------------------------------------------------------
+// VAR Result = MAX(DebtStart - DebtEnd, 0)
+// RETURN IF(ISBLANK(Result), 0, Result)
+Погашено долгов всего = 
+VAR CurrDate = SELECTEDVALUE('_СпрДата'[Date])
+
+// VAR visittoday = 
+//     CALCULATETABLE(
+//         DISTINCT('Посещения_общий'[Код]),
+//         REMOVEFILTERS('_СпрДата'),
+//         'Посещения_общий'[период_без_time] = CurrDate
+//     )
+
+// старые ПЗ (до сегодня)
+VAR debtfilter = 
+        FILTER(
+            'НеподтвержденныеУслуги',
+            'НеподтвержденныеУслуги'[Период] < CurrDate &&
+            // 'НеподтвержденныеУслуги'[Код] IN visittoday &&
+            ([ВидДвижения]  = 0 && [Количество] = 1) 
+            // &&  --базовые
+            // ([ВидДвижения] = 1 && [Количество] = 1) && --подтвержд
+            // (([ВидДвижения] = 1 || [ВидДвижения] = 0) && [Количество] = -1) --отмены
+            // 'НеподтвержденныеУслуги'[БазовоеКол] = 1 &&
+            // 'НеподтвержденныеУслуги'[ПодтвержденияКол] = 0 &&
+            // 'НеподтвержденныеУслуги'[ОтменаКол] = 0
+        )
+
+//  список таких ПЗ
+VAR DebtPZ = 
+        ADDCOLUMNS(
+            SUMMARIZE(debtfilter, 'НеподтвержденныеУслуги'[Код], 'НеподтвержденныеУслуги'[ПредварительнаяЗапись]),
+            "Сумма", 
+            CALCULATE(SUM('НеподтвержденныеУслуги'[СуммаИтог]))
+        )
+
+// Смотрим, какие из этих ПЗ были закрыты СЕГОДНЯ
+VAR ClearedToday = 
+    FILTER(
+        'НеподтвержденныеУслуги',
+        'НеподтвержденныеУслуги'[Период] = CurrDate &&
+        // 'НеподтвержденныеУслуги'[Код] IN visittoday &&
+        (
+        ('НеподтвержденныеУслуги'[ВидДвижения] = 1 && [Количество] = 1) ||  --подтвержд
+        (('НеподтвержденныеУслуги'[ВидДвижения] = 0 || 'НеподтвержденныеУслуги'[ВидДвижения] = 1) && 'НеподтвержденныеУслуги'[Количество] = -1)  --отмены
+        )
+    )
+
+    // Соединяем: только те ПЗ, которые были в долге и сегодня закрылись
+VAR Matched = 
+    INTERSECT(
+        SUMMARIZE(DebtPZ, 'НеподтвержденныеУслуги'[Код], 'НеподтвержденныеУслуги'[ПредварительнаяЗапись]),
+        SUMMARIZE(ClearedToday, 'НеподтвержденныеУслуги'[Код], 'НеподтвержденныеУслуги'[ПредварительнаяЗапись])
+    )
+
+// Суммируем сумму долга по этим ПЗ
+VAR Result = 
+    SUMX(
+        Matched,
+        VAR currentCode = 'НеподтвержденныеУслуги'[Код]
+        VAR currentPZ = 'НеподтвержденныеУслуги'[ПредварительнаяЗапись]
+        RETURN
+        CALCULATE(
+            SUM('НеподтвержденныеУслуги'[СуммаИтог]),
+            'НеподтвержденныеУслуги'[Код] = currentCode,
+            'НеподтвержденныеУслуги'[ПредварительнаяЗапись] = currentPZ,
+            'НеподтвержденныеУслуги'[Период] < CurrDate
+            )
+    )
+
+RETURN
+    IF(ISBLANK(Result), 0, Result)
+
+разница = 
+// [Долг] - [Долг_на_конец_дня]
+
+VAR CurrDate = SELECTEDVALUE('_СпрДата'[Date])
+VAR visittoday = 
+    TREATAS(
+        CALCULATETABLE(
+        DISTINCT('Посещения_общий'[Код]),
+        ALL('_СпрДата'),
+        'Посещения_общий'[период_без_time] = CurrDate
+    )
+    ,'НеподтвержденныеУслуги'[Код])
+    
+VAR DebtStart = 
+-- записи до выбранной даты
+VAR DateBefore = 
+    FILTER(
+        'НеподтвержденныеУслуги',
+        'НеподтвержденныеУслуги'[Период] < CurrDate
+    )
+VAR grouped = 
+    GROUPBY(
+        DateBefore,
+        [Код],
+        [ПредварительнаяЗапись],
+
+        "СуммаИтог_ориг", SUMX(CURRENTGROUP(), [СуммаИтог]),
+        "БазовыеЗаписи", SUMX(CURRENTGROUP(), IF([ВидДвижения] = 0 && [Количество] = 1, [Количество], 0)),
+        "Подтверждения", SUMX(CURRENTGROUP(), IF([ВидДвижения] = 1 && [Количество] = 1, [Количество], 0)),
+        "Отмена", SUMX(CURRENTGROUP(), IF([ВидДвижения] = 1 && [Количество] = -1, [Количество], 0)),
+        "ОтменаПЗГЗ", SUMX(CURRENTGROUP(), IF([ВидДвижения] = 0 && [Количество] = -1, [Количество], 0))
+    )
+ -- если погашено — 0
+VAR sumnew = 
+    ADDCOLUMNS(
+        grouped,
+         "СуммаИтог",
+        VAR base = [БазовыеЗаписи]
+        VAR visits = [Подтверждения]*(-1)
+        VAR Cancel = [Отмена]*(-1)
+        VAR CancelPZGZ = [ОтменаПЗГЗ]
+        
+        var unconfirmed = base + visits + Cancel + CancelPZGZ
+
+        RETURN
+            IF(
+                unconfirmed > 0,
+                [СуммаИтог_ориг],
+                0
+            )
+    )
+var visit = 
+    FILTER(sumnew, [Код] in visittoday)
+
+RETURN SUMX(visit, [СуммаИтог])
+------------------------------------------------------
+VAR DebtEnd =
+VAR FilterDate = 
+    FILTER(
+        'НеподтвержденныеУслуги',
+        'НеподтвержденныеУслуги'[Период] <= CurrDate
+    )
+VAR grouped = 
+    GROUPBY(
+        FilterDate,
+        [Код],
+        [ПредварительнаяЗапись],
+
+        "СуммаИтог_ориг", SUMX(CURRENTGROUP(), [СуммаИтог]),
+        "БазовыеЗаписи", SUMX(CURRENTGROUP(), IF([ВидДвижения] = 0 && [Количество] = 1, [Количество], 0)),
+        "Подтверждения", SUMX(CURRENTGROUP(), IF([ВидДвижения] = 1 && [Количество] = 1, [Количество], 0)),
+        "Отмена", SUMX(CURRENTGROUP(), IF([ВидДвижения] = 1 && [Количество] = -1, [Количество], 0)),
+        "ОтменаПЗГЗ", SUMX(CURRENTGROUP(), IF([ВидДвижения] = 0 && [Количество] = -1, [Количество], 0))
+    )
+ -- если погашено — 0
+VAR sumnew = 
+    ADDCOLUMNS(
+        grouped,
+         "СуммаИтог",
+        VAR base = [БазовыеЗаписи]
+        VAR visits = [Подтверждения]*(-1)
+        VAR Cancel = [Отмена]*(-1)
+        VAR CancelPZGZ = [ОтменаПЗГЗ]
+        
+        var unconfirmed = base + visits + Cancel + CancelPZGZ
+
+        RETURN
+            IF(
+                unconfirmed > 0,
+                [СуммаИтог_ориг],
+                0
+            )
+    )
+
+var visit = 
+    FILTER(sumnew, [Код] in visittoday)
+RETURN SUMX(visit, [СуммаИтог])
+---------------------------------------------------------------------
+VAR Result = DebtStart - DebtEnd
+RETURN IF(ISBLANK(Result), 0, Result)
+Рейтинг_тренеров_с_долгами = 
+    RANKX (
+        ALLSELECTED ('НеподтвержденныеУслуги'[Сотрудник]),
+        [Долг],
+        ,
+        DESC,
+        DENSE
+    )
+
+ФильтрВизуализации = 
+VAR FilteredDate = MIN('_СпрДата'[Date])
+RETURN
+    IF(
+        ISBLANK(FilteredDate),
+        "Нет фильтра",
+        FORMAT(FilteredDate, "dd.mm.yyyy")
+    )
+ФильтрДолгов = IF(([Долг] = 0 && [Долг_на_конец_дня] = 0), 0, 1)
+Флаг_Долг = 
+VAR pz = SELECTEDVALUE('НеподтвержденныеУслуги'[ПредварительнаяЗапись])
+VAR code = SELECTEDVALUE('НеподтвержденныеУслуги'[Код])
+
+-- всё до выбранной даты
+VAR DataBefore = 
+    FILTER(
+        all('НеподтвержденныеУслуги'),
+        'НеподтвержденныеУслуги'[Период] < MAX('_СпрДата'[Date])
+    )
+
+-- сумма для группы код и пз
+VAR group1 = 
+    CALCULATE(
+        SUM('НеподтвержденныеУслуги'[СуммаИтог]),
+        DataBefore,
+        'НеподтвержденныеУслуги'[Код] = code,
+        'НеподтвержденныеУслуги'[ПредварительнаяЗапись] = pz
+    )
+
+RETURN
+    IF(
+        group1 <> 0, 
+        "Да", 
+        "Нет"
+        )
+НУ_2023_2024 = 
+var uniontable = 
+    UNION(
+        SELECTCOLUMNS(
+            'Неподтвержденные_услуги 2023',
+            "ВидДвижения", [ВидДвижения],
+            "НомерСтроки", [НомерСтроки],
+            "Код", [Код],
+            "Клуб", [Клуб],
+            "Контрагенты", [Контрагенты],
+            "Номенклатура", [Номенклатура],
+            "Сотрудник", [Сотрудник],
+            "ДатаНачала", [ДатаНачала],
+            "ДатаОкончания", [ДатаОкончания],
+            "Количество", [Количество],
+            "Сумма", [Сумма],
+            "РегистраторТип", [РегистраторТип],
+            "СуммаИтог", [СуммаИтог],
+            "ПредварительнаяЗапись", [ПредварительнаяЗапись]                
+        ),    
+        SELECTCOLUMNS(
+            'Неподтвержденные_услуги 2024',
+            "ВидДвижения", [ВидДвижения],
+            "НомерСтроки", [НомерСтроки],
+            "Код", [Код],
+            "Клуб", [Клуб],
+            "Контрагенты", [Контрагенты],
+            "Номенклатура", [Номенклатура],
+            "Сотрудник", [Сотрудник],
+            "ДатаНачала", [ДатаНачала],
+            "ДатаОкончания", [ДатаОкончания],
+            "Количество", [Количество],
+            "Сумма", [Сумма],
+            "РегистраторТип", [РегистраторТип],
+            "СуммаИтог", [СуммаИтог],
+            "ПредварительнаяЗапись", [ПредварительнаяЗапись]
+        )
+    )   
+-- Исключаем "НеизвестныйТип."
+// VAR filtered = FILTER(unionTable, [РегистраторТип] <> "НеизвестныйТип.")
+
+-- Добавляем виртуальные столбцы для расчётов
+VAR columsnew =
+    ADDCOLUMNS(
+        unionTable,
+        "БазовоеКол",
+            IF([ВидДвижения]  = 0 && [Количество] = 1, [Количество], 0),
+        "ПодтвержденияКол",
+            IF([ВидДвижения] = 1 && [Количество] = 1, [Количество], 0),
+        "ОтменаКол",
+            IF([ВидДвижения] = 1  && [Количество] = -1, [Количество], 0),
+        "ОтменаПЗГЗКол",
+            IF([ВидДвижения] = 0  && [Количество] = -1, [Количество], 0)
+    )
+-- группировка по код + ПЗ 
+VAR grouped = 
+    GROUPBY(
+        columsnew,
+        [Код],
+        [ПредварительнаяЗапись],
+
+        "СуммаИтог_ориг", SUMX(CURRENTGROUP(), [СуммаИтог]),
+        "БазовыеЗаписи", SUMX(CURRENTGROUP(), [БазовоеКол]),
+        "Подтверждения", SUMX(CURRENTGROUP(), [ПодтвержденияКол]),
+        "Отмена", SUMX(CURRENTGROUP(), [ОтменаКол]),
+        "ОтменаПЗГЗ", SUMX(CURRENTGROUP(), [ОтменаПЗГЗКол]),
+        
+        "ВидДвижения", MAXX(CURRENTGROUP(), [ВидДвижения]),
+        "НомерСтроки", MAXX(CURRENTGROUP(), [НомерСтроки]),
+        "Клуб", MAXX(CURRENTGROUP(), [Клуб]),
+        "Контрагенты", MAXX(CURRENTGROUP(), [Контрагенты]),
+        "Номенклатура", MAXX(CURRENTGROUP(), [Номенклатура]),
+        "Сотрудник", MAXX(CURRENTGROUP(), [Сотрудник]),
+        "ДатаНачала", MAXX(CURRENTGROUP(), [ДатаНачала]),
+        "ДатаОкончания", MAXX(CURRENTGROUP(), [ДатаОкончания]),
+        "Количество", SUMX(CURRENTGROUP(), [Количество]),
+        "Сумма", SUMX(CURRENTGROUP(), [Сумма]),
+        "РегистраторТип", MAXX(CURRENTGROUP(), [РегистраторТип])
+    )
+ -- если погашено — 0
+VAR sumnew = 
+    ADDCOLUMNS(
+        grouped,
+        "СуммаИтог",
+        VAR base = [БазовыеЗаписи]
+        VAR visits = [Подтверждения]*(-1)
+        VAR Cancel = [Отмена]*(-1)
+        VAR CancelPZGZ = [ОтменаПЗГЗ]
+        
+        var unconfirmed = base + visits + Cancel + CancelPZGZ
+
+        RETURN
+            IF(
+                unconfirmed > 0,
+                [СуммаИтог_ориг],
+                0
+            )
+    )
+VAR itog = 
+    SELECTCOLUMNS(
+        sumnew,
+        "ВидДвижения", [ВидДвижения],
+        "НомерСтроки", [НомерСтроки],
+        "Код", [Код],
+        "Клуб", [Клуб],
+        "Контрагенты", [Контрагенты],
+        "Номенклатура", [Номенклатура],
+        "Сотрудник", [Сотрудник],
+        "ДатаНачала", [ДатаНачала],
+        "ДатаОкончания", [ДатаОкончания],
+        "Количество", [Количество],
+        "Сумма", [Сумма],
+        "РегистраторТип", [РегистраторТип],
+        "СуммаИтог", [СуммаИтог],
+        "ПредварительнаяЗапись", [ПредварительнаяЗапись]
+    )
+-- только положительные
+var result = FILTER(itog, [СуммаИтог] > 0)
+RETURN
+    result
+
+НУ_2025 = 
+    SELECTCOLUMNS(
+            'Неподтвержденные_услуги 2025',
+            "Период", DATE(YEAR([Период]), MONTH([Период]), DAY([Период])),
+            "ВидДвижения", [ВидДвижения],
+            "НомерСтроки", [НомерСтроки],
+            "Код", [Код],
+            "Клуб", [Клуб],
+            "Контрагенты", [Контрагенты],
+            "Номенклатура", [Номенклатура],
+            "Сотрудник", [Сотрудник],
+            "ДатаНачала", [ДатаНачала],
+            "ДатаОкончания", [ДатаОкончания],
+            "Количество", [Количество],
+            "Сумма", [Сумма],
+            "РегистраторТип", [РегистраторТип],
+            "СуммаИтог", [СуммаИтог],
+            "ПредварительнаяЗапись", [ПредварительнаяЗапись]             
+        )
+НУ_2026 = 
+    SELECTCOLUMNS(
+            'Неподтвержденные_услуги 2026',
+            
+            "ВидДвижения", [ВидДвижения],
+            "НомерСтроки", [НомерСтроки],
+            "Код", [Код],
+            "Клуб", [Клуб],
+            "Контрагенты", [Контрагенты],
+            "Номенклатура", [Номенклатура],
+            "Сотрудник", [Сотрудник],
+            "ДатаНачала", [ДатаНачала],
+            "ДатаОкончания", [ДатаОкончания],
+            "Количество", [Количество],
+            "Сумма", [Сумма],
+            "РегистраторТип", [РегистраторТип],
+            "СуммаИтог", [СуммаИтог],
+            "ПредварительнаяЗапись", [ПредварительнаяЗапись]     
+                    ,"Период", DATE(YEAR([Период]), MONTH([Период]), DAY([Период]))
+        )
+Посещения_общий = UNION('Посещения_2025', 'Посещения_2026')
+Спр.Клиенты = 
+ DISTINCT(
+    UNION(
+        SELECTCOLUMNS('НеподтвержденныеУслуги', "Код", 'НеподтвержденныеУслуги'[Код]),
+        SELECTCOLUMNS('Посещения_общий', "Код", 'Посещения_общий'[Код])
+    )
+ )
+СпрСотрудники = 
+VAR Table1 = DISTINCT(SELECTCOLUMNS('Неподтвержденные_услуги 2023', "Сотрудник", 'Неподтвержденные_услуги 2023'[Сотрудник]))
+VAR Table2 = DISTINCT(SELECTCOLUMNS('Неподтвержденные_услуги 2024', "Сотрудник", 'Неподтвержденные_услуги 2024'[Сотрудник]))
+VAR Table3 = DISTINCT(SELECTCOLUMNS('Неподтвержденные_услуги 2025', "Сотрудник", 'Неподтвержденные_услуги 2025'[Сотрудник]))
+VAR Table4 = DISTINCT(SELECTCOLUMNS('Неподтвержденные_услуги 2026', "Сотрудник", 'Неподтвержденные_услуги 2026'[Сотрудник]))
+
+VAR UnionAll = UNION(Table1, Table2, Table3, Table4)
+var uniq = DISTINCT(UnionAll)
+
+RETURN
+    uniq
+

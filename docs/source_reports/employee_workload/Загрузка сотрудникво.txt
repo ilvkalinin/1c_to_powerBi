@@ -1,0 +1,805 @@
+
+
+
+Дневное планирование для Power BI (2)
+let
+    Источник = Odbc.Query("Driver={PostgreSQL Unicode};Server=virt207.worldclass.nnov.ru; Database=gymdb_test;Timeout=300;Fetch=10000;UseDeclareFetch=1;", "#(lf)--РегистрСведений.ПланПродажПоСотрудникамДопУслуги (Основная)#(lf)SELECT #(lf)#(tab)#(tab)-- _RecorderTRef Регистратор#(lf)#(tab)#(tab)-- ,encode(_RecorderRRef,'hex') Регистратор#(lf)#(tab)#(tab)-- ,_LineNo НомерСтроки#(lf)#(tab)#(tab)-- ,_Active Активность#(lf)#(tab)#(tab)_Fld6613 as date_plan#(lf)#(tab)#(tab),cast(_Reference217._Description as varchar(1000)) as direct#(lf)#(tab)#(tab),cast(_Reference132._Description as varchar(1000)) as club#(lf)#(tab)#(tab),cast(_Reference225._Description as varchar(1000)) as empl#(lf)#(tab)#(tab),encode(_Fld6619,'hex') as client#(lf)#(tab)#(tab),cast(_Reference141X1._Description as varchar(1000)) as client_name#(lf)#(tab)#(tab),cast(_Reference141X1._Code as varchar(1000)) Код#(lf)#(tab)#(tab),cast(_Reference183._Description as varchar(1000)) as period_plan#(lf)#(tab)#(tab)-- ,_Fld6619 Уник#(lf)#(tab)#(tab),_Fld6620 as summa#(lf)#(tab)#(tab)-- ,_Fld6621 as count_count#(lf)FROM _InfoRg6612#(lf)#(lf)LEFT JOIN _Reference225#(lf)on _InfoRg6612._Fld6616RRef = _Reference225._IDRRef#(lf)    LEFT JOIN _Reference132#(lf)    on _InfoRg6612._Fld6615RRef = _Reference132._IDRRef#(lf)#(tab)#(tab)LEFT JOIN _Reference183#(lf)#(tab)#(tab)on _InfoRg6612._Fld6618RRef = _Reference183._IDRRef#(lf)#(tab)#(tab)#(tab)LEFT JOIN _Reference217#(lf)#(tab)#(tab)#(tab)on _InfoRg6612._Fld6614RRef = _Reference217._IDRRef#(lf)#(tab)#(tab)#(tab)#(tab)LEFT JOIN _Reference141X1#(lf)#(tab)#(tab)#(tab)#(tab)on _InfoRg6612._Fld6617RRef = _Reference141X1._IDRRef"),
+    #"Переименованные столбцы" = Table.RenameColumns(Источник,{{"date_plan", "Дата тренировки"}, {"direct", "Подразделение"}, {"club", "Клуб"}, {"empl", "ФИО Тренера"}, {"client", "Клиент"}, {"client_name", "ИмяКлиента"}, {"period_plan", "Source.Name"}, {"summa", "Стоимость тренировки"}}),
+    #"Измененный тип" = Table.TransformColumnTypes(#"Переименованные столбцы",{{"Source.Name", type date}}),
+    #"Удаленные столбцы" = Table.RemoveColumns(#"Измененный тип",{"ИмяКлиента"}),
+    #"Замененное значение" = Table.ReplaceValue(#"Удаленные столбцы","Тренажёрный зал","Тренажёрный зал (Штат)",Replacer.ReplaceText,{"Подразделение"}),
+    #"Добавленный запрос" = Table.Combine({#"Замененное значение", #"Дневное планирование для Power BI (4)"}),
+    #"Измененный тип1" = Table.TransformColumnTypes(#"Добавленный запрос",{{"Дата тренировки", type date}}),
+    #"Замененное значение1" = Table.ReplaceValue(#"Измененный тип1","тренажёрный зал","Тренажёрный зал (Штат)",Replacer.ReplaceText,{"Подразделение"}),
+    #"Строки с примененным фильтром" = Table.SelectRows(#"Замененное значение1", each ([Подразделение] <> "Подразделение"))
+in
+    #"Строки с примененным фильтром"
+
+Сотрудники
+let
+    Источник = Odbc.Query("Driver={PostgreSQL Unicode};Server=virt207.worldclass.nnov.ru; Database=gymdb_test", "#(lf)--РегистрСведений.НастройкиСотрудников (Основная)#(lf)SELECT #(lf)#(tab)#(tab)encode(_Fld6292RRef,'hex') Сотрудник#(lf),cast(_Reference225._Description as varchar(1000)) ИмяСотрудника#(lf)#(tab)#(tab),encode(_Fld6293RRef,'hex') Клуб#(lf)#(tab)#(tab),encode(_Fld6294RRef,'hex') Организация#(lf)#(tab)#(tab),encode(_Fld6295RRef,'hex') ВидДеятельности#(lf)#(tab)#(tab),encode(_Fld6296RRef,'hex') Должность#(lf)#(tab)#(tab),encode(_Fld6297RRef,'hex') ДокументРегистратор#(lf)#(tab)#(tab),_Fld6298 ДатаПриема#(lf)#(tab)#(tab),_Fld6299 ДатаУвольнения#(lf)#(tab)#(tab),_Fld6300 ИспользоватьПредварительнуюЗапись#(lf)#(tab)#(tab),_Fld6301 ОсновонойВидДеятельности#(lf)#(tab)#(tab),_Fld6302 Ставка#(lf)#(tab)#(tab),encode(_Reference101._Fld644RRef,'hex') Автор#(lf),cast(_Reference101._Description as varchar(1000)) Наименование#(lf)FROM _InfoRg6291#(lf)left join _Reference101 on#(lf)#(lf)encode(_InfoRg6291._Fld6296RRef,'hex')=encode(_Reference101._IDRRef,'hex')#(lf)left join _Reference225 on#(lf)encode(_Reference225._IDRRef,'hex')=encode(_InfoRg6291._Fld6292RRef,'hex')"),
+    #"Замененное значение" = Table.ReplaceValue(Источник,#datetime(1, 1, 1, 0, 0, 0),#datetime(2099, 1, 1, 0, 0, 0),Replacer.ReplaceValue,{"ДатаУвольнения"}),
+    #"Строки с примененным фильтром" = Table.SelectRows(#"Замененное значение", each Text.Contains([Наименование], "Тренер") or Text.Contains([Наименование], "тренер") or Text.Contains([Наименование], "Премиум")),
+    #"Строки с примененным фильтром1" = Table.SelectRows(#"Строки с примененным фильтром", each [ДатаУвольнения] > #datetime(2020, 12, 31, 0, 0, 0)),
+    #"Другие удаленные столбцы" = Table.SelectColumns(#"Строки с примененным фильтром1",{"ИмяСотрудника"}),
+    #"Удаленные дубликаты" = Table.Distinct(#"Другие удаленные столбцы"),
+    #"Переименованные столбцы" = Table.RenameColumns(#"Удаленные дубликаты",{{"ИмяСотрудника", "ФИО Тренера"}})
+in
+    #"Переименованные столбцы"
+
+СотрудникиСДолжностями
+let
+    Источник = Odbc.Query("Driver={PostgreSQL Unicode};Server=virt207.worldclass.nnov.ru; Database=gymdb_test", "#(lf)--РегистрСведений.НастройкиСотрудников (Основная)#(lf)SELECT #(lf)#(tab)#(tab)encode(_Fld6292RRef,'hex') Сотрудник#(lf),cast(_Reference225._Description as varchar(1000)) ИмяСотрудника#(lf)#(tab)#(tab),encode(_Fld6293RRef,'hex') Клуб#(lf)#(tab)#(tab),encode(_Fld6294RRef,'hex') Организация#(lf)#(tab)#(tab),encode(_Fld6295RRef,'hex') ВидДеятельности#(lf)#(tab)#(tab),encode(_Fld6296RRef,'hex') Должность#(lf)#(tab)#(tab),encode(_Fld6297RRef,'hex') ДокументРегистратор#(lf)#(tab)#(tab),_Fld6298 ДатаПриема#(lf)#(tab)#(tab),_Fld6299 ДатаУвольнения#(lf)#(tab)#(tab),_Fld6300 ИспользоватьПредварительнуюЗапись#(lf)#(tab)#(tab),_Fld6301 ОсновонойВидДеятельности#(lf)#(tab)#(tab),_Fld6302 Ставка#(lf)#(tab)#(tab),encode(_Reference101._Fld644RRef,'hex') Автор#(lf),_Reference101._Description Должность#(lf),_Reference70._Description ВидДеятельности#(lf),_Reference132._Description Клуб#(lf)#(lf)FROM _InfoRg6291#(lf)left join _Reference101 on#(lf)_InfoRg6291._Fld6296RRef=_Reference101._IDRRef#(lf)#(lf)left join _Reference225 on#(lf)_Reference225._IDRRef=_InfoRg6291._Fld6292RRef#(lf)#(lf)left join _reference70 on#(lf)_Reference70._IDRRef=_InfoRg6291._Fld6295RRef#(lf)#(lf)left join _reference132 on#(lf)_Reference132._IDRRef=_InfoRg6291._Fld6293RRef"),
+    #"Замененное значение" = Table.ReplaceValue(Источник,#datetime(1, 1, 1, 0, 0, 0),#datetime(2099, 1, 1, 0, 0, 0),Replacer.ReplaceValue,{"ДатаУвольнения"}),
+    #"Строки с примененным фильтром2" = Table.SelectRows(#"Замененное значение", each ([ВидДеятельности2] <> null)),
+    #"Строки с примененным фильтром1" = Table.SelectRows(#"Строки с примененным фильтром2", each [ДатаУвольнения] > #datetime(2020, 12, 31, 0, 0, 0)),
+    #"Другие удаленные столбцы" = Table.SelectColumns(#"Строки с примененным фильтром1",{"Клуб2","ИмяСотрудника", "Должность2", "ВидДеятельности2", "ДатаПриема","ДатаУвольнения"}),
+    #"Удаленные дубликаты" = Table.Distinct(#"Другие удаленные столбцы"),
+    #"Переименованные столбцы" = Table.RenameColumns(#"Удаленные дубликаты",{{"ИмяСотрудника", "ФИО Тренера"}}),
+    #"Замененное значение1" = Table.ReplaceValue(#"Переименованные столбцы","Тренажёрный зал","Тренажёрный зал (Штат)",Replacer.ReplaceText,{"ВидДеятельности2"}),
+    #"Строки с примененным фильтром" = Table.SelectRows(#"Замененное значение1", each ([Должность2] = "Премиум" or [Должность2] = "Тренер мастер" or [Должность2] = "Тренер персональный" or [Должность2] = "Тренер фитнес" or [Должность2] = "Тренер элит")),
+    #"Условный столбец добавлен" = Table.AddColumn(#"Строки с примененным фильтром", "Ранг", each if [Должность2] = "Премиум" then 5 else if [Должность2] = "Тренер элит" then 4 else if [Должность2] = "Тренер мастер" then 3 else if [Должность2] = "Тренер персональный" then 2 else if [Должность2] = "Тренер фитнес" then 1 else null)
+in
+    #"Условный столбец добавлен"
+
+ИП база
+let
+    Источник = Odbc.Query("Driver={PostgreSQL Unicode};Server=virt207.worldclass.nnov.ru; Database=gymdb_test;Timeout=300;Fetch=10000;UseDeclareFetch=1;", "SELECT #(lf)                date_trunc('month',_AccumRg7370._Period) as ""Период""#(lf)#(tab)#(tab),cast(_Reference132._Description as varchar(1000)) Клуб#(lf)                ,cast(_Reference163._Description as varchar(1000)) Услуга#(lf)                ,sum(_Fld7377) Поступления#(lf)                ,count(distinct encode(_Fld7374RRef,'hex')) Количество#(lf)FROM _AccumRg7370#(lf)left join _Reference59#(lf)                      on _AccumRg7370._Fld7371RRef= _Reference59._IDRRef#(lf)left join _Reference163#(lf)                      on _Reference59._Fld685RRef=_Reference163._IDRRef#(lf)left join _Reference132 on #(lf)encode(_Fld7372RRef,'hex')=encode(_Reference132._IDRRef,'hex')#(lf)#(lf)where _AccumRg7370._Period>='01.05.2024'#(lf)and    cast(_Reference163._Description as varchar(1000)) like '%ИП%'#(lf)and _RecordKind =0#(lf)#(lf)group by#(lf)                date_trunc('month',_AccumRg7370._Period)#(lf)#(tab)#(tab),cast(_Reference132._Description as varchar(1000))#(lf)                ,cast(_Reference163._Description as varchar(1000))"),
+    #"Добавлен пользовательский объект" = Table.AddColumn(Источник, "Вид занятий", each "Тренажёрный зал (ИП)"),
+    #"Измененный тип" = Table.TransformColumnTypes(#"Добавлен пользовательский объект",{{"Период", type date}})
+in
+    #"Измененный тип"
+
+ПЗ ИП
+let
+    Источник = Odbc.Query("Driver={PostgreSQL Unicode};Server=virt207.worldclass.nnov.ru; Database=gymdb_test;Timeout=300;Fetch=10000;UseDeclareFetch=1;", "SELECT #(lf)#(tab)#(tab)_Reference132._Description Клуб#(lf)#(tab)#(tab),_Period Период#(lf)                ,_Reference163._Description Услуга#(lf)#(tab)#(tab),_Reference225._Description Сотрудник#(lf)                ,0 as Поступления#(lf)                ,'Прочая услуга' as Пользовательский#(lf)                ,'Тренажёрный зал (ИП)' as ""Вид занятий""#(lf)                ,'Тренажёрный зал (ИП)' as ""ВидДеятельности""#(lf)#(lf)                ,_Reference141X1._Code КодКлиента#(lf)#(tab)#(tab),_Reference141X1._Description ФИО_Клиента#(lf)#(tab)#(tab),_Reference141X1._Fld1507 ДР_Клиента#(lf)                ,1 as Количество#(lf)#(tab)        ,case#(lf)#(tab)#(tab)when _Reference141X1._Fld1532RRef= decode('8e3e8dea66a1d5454387ceb554c10615','hex') -- ТипКлиента = Сотрудник#(lf)#(tab)#(tab)then 'Сотрудник'#(lf)#(tab)#(tab)else 'Клиент'#(lf)#(tab)        end as ПризнакКлиента#(lf)#(lf)#(lf)FROM _InfoRg7006#(lf)#(tab)INNER join _Reference141X1 on#(lf)#(tab)_InfoRg7006._Fld7008RRef = _Reference141X1._IDRRef#(lf)#(tab)INNER join _Reference132 on #(lf)#(tab)_Reference132._IDRRef = _InfoRg7006._Fld7009RRef#(lf)#(tab)INNER join _Document329 on #(lf)#(tab)_Document329._IDRRef = _InfoRg7006._Fld7007_RRRef#(lf)#(tab)INNER join _Reference225 on #(lf)#(tab)_Reference225._IDRRef = _Document329._Fld4322RRef#(lf)#(tab)INNER join _Enum448 on #(lf)#(tab)_Enum448._IDRRef = _InfoRg7006._Fld7013RRef#(lf)left join _Document329_VT4352 on#(lf)_Document329_IDRRef = _Document329._IDRRef#(lf)left join _Reference163 on#(lf)_Reference163._IDRRef=_Fld7010RRef#(lf)#(lf)WHERE #(lf)_Period >= '01.01.2024'#(lf)AND#(lf)(#(lf)_Fld7010RRef = decode('bcd000505688c8b011ee0a8ba155d4a1','hex') --Услуга равно спец.услуга для ИП#(lf)or _Fld4358RRef = decode('a0f1524d502e0d5d4c1dfeb9d5bbb3fe','hex')  -- ТипВзаиморасчетов равно с сотрудником#(lf))#(lf)and _Enum448._EnumOrder not in (2,3) -- Состояние не отмена и не отмена со штрафом#(lf)#(lf)union all#(lf)#(lf)--РегистрСведений.СостояниеПредварительнойЗаписи (ДОК_ГП)#(lf)SELECT #(lf)#(tab)#(tab)_Reference132._Description Клуб#(lf)#(tab)#(tab),_Period Период#(lf)                ,_Reference163._Description Услуга#(lf)#(tab)#(tab),_Reference225._Description Сотрудник#(lf)                ,0 as Поступления#(lf)                ,'Прочая услуга' as Пользовательский#(lf)                ,'Тренажёрный зал (ИП)' as ""Вид занятий""#(lf)                ,'Тренажёрный зал (ИП)' as ""ВидДеятельности""#(lf)#(lf)                ,_Reference141X1._Code КодКлиента#(lf)#(tab)#(tab),_Reference141X1._Description ФИО_Клиента#(lf)#(tab)#(tab),_Reference141X1._Fld1507 ДР_Клиента#(lf)                ,1 as Количество#(lf)#(tab)        ,case#(lf)#(tab)#(tab)when _Reference141X1._Fld1532RRef= decode('8e3e8dea66a1d5454387ceb554c10615','hex') -- ТипКлиента = Сотрудник#(lf)#(tab)#(tab)then 'Сотрудник'#(lf)#(tab)#(tab)else 'Клиент'#(lf)#(tab)        end as ПризнакКлиента#(lf)#(lf)#(lf)FROM _InfoRg7006#(lf)#(tab)INNER join _Reference141X1 on#(lf)#(tab)_InfoRg7006._Fld7008RRef = _Reference141X1._IDRRef#(lf)#(tab)#(tab)INNER join _Reference132 on #(lf)#(tab)#(tab)_Reference132._IDRRef = _InfoRg7006._Fld7009RRef#(lf)#(tab)#(tab)#(tab)INNER join _Document279 on #(lf)#(tab)#(tab)#(tab)_Document279._IDRRef = _InfoRg7006._Fld7007_RRRef#(lf)#(tab)#(tab)#(tab)#(tab)INNER join _Reference225 on #(lf)#(tab)#(tab)#(tab)#(tab)_Reference225._IDRRef = _Document279._Fld3223RRef#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)INNER join _Enum448 on #(lf)#(tab)#(tab)#(tab)#(tab)#(tab)_Enum448._IDRRef = _InfoRg7006._Fld7013RRef#(lf)left join _Reference163 on#(lf)_Reference163._IDRRef=_Fld7010RRef#(lf)WHERE #(lf)_Period >= '01.01.2024'#(lf)AND#(lf)_Fld7010RRef = decode('bcd000505688c8b011ee0a8ba155d4a1','hex') --Услуга равно спец.услуга для ИП#(lf)and #(lf)_Enum448._EnumOrder not in (2,3)-- Состояние не отмена и не отмена со штрафом#(lf)"),
+    #"Условный столбец добавлен1" = Table.AddColumn(Источник, "ГруппаТренировки", each if Text.Contains([Услуга], "Персональная тренировка") then "Персональная тренировка" else if Text.Contains([Услуга], "персональная тренировка") then "Персональная тренировка" else if Text.Contains([Услуга], "Индивидуальная тренировка") then "Персональная тренировка" else if Text.Contains([Услуга], "Сплит") then "Сплит" else if Text.Contains([Услуга], "сплит") then "Сплит" else if Text.Contains([Услуга], "Малая группа") then "Малая группа" else if Text.Contains([Услуга], "малая группа") then "Малая группа" else if Text.Contains([Услуга], "Платный урок") then "Платный урок" else if Text.Contains([Услуга], "платный урок") then "Платный урок" else if Text.Contains([Услуга], "СЕКЦИЯ") then "Секция" else if Text.Contains([Услуга], "Секция") then "Секция" else if Text.Contains([Услуга], "секция") then "Секция" else if Text.Contains([Услуга], "ИП") then "Контракт ИП" else if Text.Contains([Услуга], "Sport-уровень") then "Секция" else if Text.Contains([Услуга], "NEW-уровень") then "Секция" else if Text.Contains([Услуга], "PRO-уровень") then "Секция" else "Прочее"),
+    #"Добавлен пользовательский объект" = Table.AddColumn(#"Условный столбец добавлен1", "Возраст", each [Период]-[ДР_Клиента]),
+    #"Вычисленное общее число лет" = Table.TransformColumns(#"Добавлен пользовательский объект",{{"Возраст", each Duration.TotalDays(_) / 365, type number}}),
+        #"Добавлен пользовательский объект2" = Table.AddColumn(#"Вычисленное общее число лет", "Возрастная группа", each if [Возраст]=null then "Без возраста" else
+if [Возраст]<4 then "00-03" else
+if [Возраст]<6 then "04-05" else 
+if [Возраст]<10 then "06-09" else
+if [Возраст]<14 then "10-13" else
+if [Возраст]<18 then "14-17" else
+if [Возраст]<25 then "18-25" else
+if [Возраст]<35 then "26-35" else
+if [Возраст]<45 then "36-45" else
+if [Возраст]<55 then "46-55" else "56+"),
+    #"Добавлен пользовательский объект5" = Table.AddColumn(#"Добавлен пользовательский объект2", "КодКонтракта", each null),
+    #"Добавлен пользовательский объект4" = Table.AddColumn(#"Добавлен пользовательский объект5", "Контракт", each null),
+    #"Добавлен пользовательский объект3" = Table.AddColumn(#"Добавлен пользовательский объект4", "ОсновнойКлубДоступа", each null),
+    #"Добавлен пользовательский объект1" = Table.AddColumn(#"Добавлен пользовательский объект3", "ТипОплаты", each null),
+    #"Переупорядоченные столбцы" = Table.ReorderColumns(#"Добавлен пользовательский объект1",{"Клуб", "Период", "Услуга", "Сотрудник", "Поступления", "ГруппаТренировки", "Пользовательский", "Вид занятий", "Возраст", "Возрастная группа", "ВидДеятельности", "КодКлиента", "ФИО_Клиента", "ДР_Клиента", "Количество", "ПризнакКлиента", "ТипОплаты", "КодКонтракта", "Контракт", "ОсновнойКлубДоступа"}),
+    #"Измененный тип" = Table.TransformColumnTypes(#"Переупорядоченные столбцы",{{"Период", type date}, {"ДР_Клиента", type date}})
+in
+    #"Измененный тип"
+
+ДПФУ факт
+let
+Источник = Odbc.Query("Driver={PostgreSQL Unicode};Server=virt207.worldclass.nnov.ru;Database=gymdb_test;Timeout=300;Fetch=10000;UseDeclareFetch=1;", "#(lf)WITH clients AS (#(lf)    SELECT #(lf)        _IDRRef AS id,#(lf)        _Description AS name1,#(lf)        _Code AS code,#(lf)        _Fld1532RRef AS client_type,#(lf)        _Fld1507 AS birthday#(lf)    FROM _Reference141X1#(lf)),#(lf)empl AS (#(lf)    SELECT #(lf)        _IDRRef AS id,#(lf)        _Description AS name1#(lf)    FROM _Reference225#(lf)),#(lf)tab1 AS (#(lf)    SELECT #(lf)        _Period AS period,#(lf)        _Reference132._Description AS club,#(lf)        CAST(_Reference163._Fld1761 AS VARCHAR(1000)) AS service,#(lf)        _Reference70._Description AS division,#(lf)        empl.name1 AS trainer,#(lf)        clients.code AS client_code,#(lf)        clients.name1 AS client_name,#(lf)        clients.birthday AS client_birthday,#(lf)        CASE#(lf)            WHEN _Fld7583 = '1' THEN 'Прочие' -- Гость = Да#(lf)            WHEN clients.client_type = '\x8e3e8dea66a1d5454387ceb554c10615'::bytea THEN 'Сотрудник' -- ТипКлиента = Сотрудник#(lf)            ELSE 'Клиент'#(lf)        END AS client_type,#(lf)        CASE#(lf)            WHEN _Reference59._Code IS NOT NULL THEN#(lf)                CASE #(lf)                    -- Тип контракта = контракт#(lf)                    WHEN _Reference59._Fld696RRef = '\xbf4b50662e88eb7b44046ebf4849976f'::bytea THEN 'Купон'#(lf)                    ELSE 'Клип-Карта'#(lf)                END#(lf)            ELSE 'Чек'#(lf)        END AS paiment_type,#(lf)        _Reference59._Code AS contract_code,#(lf)        _Reference59._Description AS contract,#(lf)        SUM(_Fld7585) AS number,#(lf)        SUM(_Fld7586) AS equity,#(lf)        SUM(_Fld7588) AS equity_salary#(lf)    FROM _AccumRg7575#(lf)    LEFT JOIN clients ON _Fld7576RRef = clients.id#(lf)    LEFT JOIN empl ON _Fld7582RRef = empl.id#(lf)    LEFT JOIN _Reference132 ON _Fld7577RRef = _Reference132._IDRRef#(lf)    LEFT JOIN _Reference163 ON _Fld7579RRef = _Reference163._IDRRef#(lf)    LEFT JOIN _Reference70 ON _Reference163._Fld1733RRef = _Reference70._IDRRef#(lf)    LEFT JOIN _Reference59 ON _Fld7578_RRRef = _Reference59._IDRRef#(lf)    WHERE #(lf)        _AccumRg7575._Period >= DATE_TRUNC('year', CURRENT_DATE) - INTERVAL '2 year'#(lf)        AND _AccumRg7575._Period < DATE_TRUNC('year', CURRENT_DATE) + INTERVAL '1 year'#(lf)        -- ТипНоменклатуры = ""Услуга"" (9f007d77d46892dc47058346701d3bb6)#(lf)        AND _Fld1795RRef = '\x9f007d77d46892dc47058346701d3bb6'::bytea#(lf)        -- Бизнес направление не равно ""Прочие членство"" (9e10e872e49a551b4968a66b95c28905)#(lf)        AND _Reference70._Fld843RRef <> '\x9e10e872e49a551b4968a66b95c28905'::bytea#(lf)        -- Бизнес направление не равно ""Членство"" (ac626c95655c992a471b27ca8f8812cd)#(lf)        AND _Reference70._Fld843RRef <> '\xac626c95655c992a471b27ca8f8812cd'::bytea#(lf)        AND CAST(_Reference163._Description AS VARCHAR(1000)) <> 'посещение клуба'#(lf)        AND _Reference70._Description IN ('Игровой зал','Восстановительный фитнес','Боевые искусства','Детский клуб','Водные программы','Групповые программы','Тренажёрный зал','Тренажерный зал')#(lf)    GROUP BY#(lf)        _Period,#(lf)        _Reference132._Description,#(lf)        CAST(_Reference163._Fld1761 AS VARCHAR(1000)),#(lf)        _Reference70._Description,#(lf)        empl.name1,#(lf)        clients.code,#(lf)        clients.name1,#(lf)        clients.birthday,#(lf)        CASE#(lf)            WHEN _Fld7583 = '1' THEN 'Прочие'#(lf)            WHEN clients.client_type = '\x8e3e8dea66a1d5454387ceb554c10615'::bytea THEN 'Сотрудник'#(lf)            ELSE 'Клиент'#(lf)        END,#(lf)        CASE#(lf)            WHEN _Reference59._Code IS NOT NULL THEN#(lf)                CASE #(lf)                    WHEN _Reference59._Fld696RRef = '\xbf4b50662e88eb7b44046ebf4849976f'::bytea THEN 'Купон'#(lf)                    ELSE 'Клип-Карта'#(lf)                END#(lf)            ELSE 'Чек'#(lf)        END,#(lf)        _Reference59._Code,#(lf)        _Reference59._Description#(lf)),#(lf)tab2 AS (#(lf)    SELECT #(lf)        _Period AS period,#(lf)        _Reference132._Description AS club,#(lf)        CAST(_Reference163._Fld1761 AS VARCHAR(1000)) AS service,#(lf)        _Reference70._Description AS division,#(lf)        empl.name1 AS trainer,#(lf)        clients.code AS client_code,#(lf)        clients.name1 AS client_name,#(lf)        clients.birthday AS client_birthday,#(lf)        CASE#(lf)            WHEN _Fld7656 = '1' THEN 'Прочие' -- Гость = Да#(lf)            WHEN clients.client_type = '\x8e3e8dea66a1d5454387ceb554c10615'::bytea THEN 'Сотрудник' -- ТипКлиента = Сотрудник#(lf)            ELSE 'Клиент'#(lf)        END AS client_type,#(lf)        'Чек' AS paiment_type,#(lf)        _Reference59._Code AS contract_code,#(lf)        _Reference59._Description AS contract,#(lf)        SUM(_Fld7657) AS number,#(lf)        SUM(_Fld7659) AS equity,#(lf)        SUM(_Fld7660) AS equity_salary#(lf)    FROM _AccumRg7646#(lf)    LEFT JOIN clients ON _Fld7648RRef = clients.id#(lf)    LEFT JOIN empl ON _Fld7652RRef = empl.id#(lf)    LEFT JOIN _Reference132 ON _Fld7653RRef = _Reference132._IDRRef#(lf)    LEFT JOIN _Reference163 ON _Fld7649RRef = _Reference163._IDRRef#(lf)    LEFT JOIN _Reference70 ON _Reference163._Fld1733RRef = _Reference70._IDRRef#(lf)    LEFT JOIN _Reference59 ON _Fld7655RRef = _Reference59._IDRRef#(lf)    WHERE #(lf)        _AccumRg7646._Period >= DATE_TRUNC('year', CURRENT_DATE) - INTERVAL '2 year'#(lf)        AND _AccumRg7646._Period < DATE_TRUNC('year', CURRENT_DATE) + INTERVAL '1 year'#(lf)        -- ТипНоменклатуры не равно ""Услуга"" (9f007d77d46892dc47058346701d3bb6)#(lf)        AND _Fld1795RRef <> '\x9f007d77d46892dc47058346701d3bb6'::bytea#(lf)        -- Тип Номенклатуры не равно ""Абонемент"" (89de5e634e304b1a44efac5ab7088373)#(lf)        AND _Fld1795RRef <> '\x89de5e634e304b1a44efac5ab7088373'::bytea#(lf)        -- Тип номенклатуры не равно ""ПодарочныйСертификат"" (baad3eba9d9fe9b441d2a1a897435c33)#(lf)        AND _Fld1795RRef <> '\xbaad3eba9d9fe9b441d2a1a897435c33'::bytea#(lf)        -- Бизнес направление не равно ""Прочие членство"" (9e10e872e49a551b4968a66b95c28905)#(lf)        AND _Reference70._Fld843RRef <> '\x9e10e872e49a551b4968a66b95c28905'::bytea#(lf)        -- Бизнес направление не равно ""Членство"" (ac626c95655c992a471b27ca8f8812cd)#(lf)        AND _Reference70._Fld843RRef <> '\xac626c95655c992a471b27ca8f8812cd'::bytea#(lf)        AND CAST(_Reference163._Description AS VARCHAR(1000)) <> 'посещение клуба'#(lf)        AND _Reference70._Description IN ('Игровой зал','Восстановительный фитнес','Боевые искусства','Детский клуб','Водные программы','Групповые программы','Тренажёрный зал','Тренажерный зал')#(lf)    GROUP BY#(lf)        _Period,#(lf)        _Reference132._Description,#(lf)        CAST(_Reference163._Fld1761 AS VARCHAR(1000)),#(lf)        _Reference70._Description,#(lf)        empl.name1,#(lf)        clients.code,#(lf)        clients.name1,#(lf)        clients.birthday,#(lf)        CASE#(lf)            WHEN _Fld7656 = '1' THEN 'Прочие'#(lf)            WHEN clients.client_type = '\x8e3e8dea66a1d5454387ceb554c10615'::bytea THEN 'Сотрудник'#(lf)            ELSE 'Клиент'#(lf)        END,#(lf)        _Reference59._Code,#(lf)        _Reference59._Description#(lf)),#(lf)raw_union AS (#(lf)    SELECT #(lf)        tab1.period,#(lf)        tab1.club,#(lf)        tab1.service,#(lf)        tab1.division,#(lf)        tab1.trainer,#(lf)        tab1.client_code,#(lf)        tab1.client_name,#(lf)        tab1.client_birthday,#(lf)        tab1.number,#(lf)        tab1.equity,#(lf)        tab1.equity_salary,#(lf)        tab1.client_type,#(lf)        tab1.paiment_type,#(lf)        tab1.contract_code,#(lf)        tab1.contract#(lf)    FROM tab1#(lf)    GROUP BY#(lf)        tab1.period,#(lf)        tab1.club,#(lf)        tab1.service,#(lf)        tab1.division,#(lf)        tab1.trainer,#(lf)        tab1.client_code,#(lf)        tab1.client_name,#(lf)        tab1.client_birthday,#(lf)        tab1.number,#(lf)        tab1.equity,#(lf)        tab1.equity_salary,#(lf)        tab1.client_type,#(lf)        tab1.paiment_type,#(lf)        tab1.contract_code,#(lf)        tab1.contract#(lf)#(lf)    UNION ALL#(lf)#(lf)    SELECT #(lf)        tab2.period,#(lf)        tab2.club,#(lf)        tab2.service,#(lf)        tab2.division,#(lf)        tab2.trainer,#(lf)        tab2.client_code,#(lf)        tab2.client_name,#(lf)        tab2.client_birthday,#(lf)        tab2.number,#(lf)        tab2.equity,#(lf)        tab2.equity_salary,#(lf)        tab2.client_type,#(lf)        tab2.paiment_type,#(lf)        tab2.contract_code,#(lf)        tab2.contract#(lf)    FROM tab2#(lf)    GROUP BY#(lf)        tab2.period,#(lf)        tab2.club,#(lf)        tab2.service,#(lf)        tab2.division,#(lf)        tab2.trainer,#(lf)        tab2.client_code,#(lf)        tab2.client_name,#(lf)        tab2.client_birthday,#(lf)        tab2.number,#(lf)        tab2.equity,#(lf)        tab2.equity_salary,#(lf)        tab2.client_type,#(lf)        tab2.paiment_type,#(lf)        tab2.contract_code,#(lf)        tab2.contract#(lf)),#(lf)filtered_division AS (#(lf)    SELECT * FROM raw_union#(lf)    WHERE division IN ('Боевые искусства', 'Водные программы', 'Восстановительный фитнес', #(lf)                       'Групповые программы', 'Детский клуб', 'Игровой зал', 'Тренажёрный зал')#(lf)),#(lf)replaced_division AS (#(lf)    SELECT#(lf)        period,#(lf)        club,#(lf)        service,#(lf)        CASE #(lf)            WHEN division = 'Тренажёрный зал' THEN 'Тренажёрный зал (Штат)'#(lf)            ELSE division#(lf)        END AS ВидДеятельности,#(lf)        trainer,#(lf)        client_code,#(lf)        client_name,#(lf)        client_birthday,#(lf)        number,#(lf)        equity,#(lf)        equity_salary,#(lf)        client_type,#(lf)        paiment_type,#(lf)        contract_code,#(lf)        contract#(lf)    FROM filtered_division#(lf)),#(lf)grouped_training AS (#(lf)    SELECT *,#(lf)        CASE#(lf)            WHEN service ILIKE '%Персональная тренировка%' THEN 'Персональная тренировка'#(lf)            WHEN service ILIKE '%Индивидуальная тренировка%' THEN 'Персональная тренировка'#(lf)            WHEN service ILIKE '%Сплит%' THEN 'Сплит'#(lf)            WHEN service ILIKE '%Малая группа%' THEN 'Малая группа'#(lf)            WHEN service ILIKE '%Платный урок%' THEN 'Платный урок'#(lf)            WHEN service ILIKE '%СЕКЦИЯ%' OR service ILIKE '%Секция%' THEN 'Секция'#(lf)            WHEN service ILIKE '%ИП%' THEN 'Контракт ИП'#(lf)            WHEN service ILIKE '%Sport-уровень%' OR service ILIKE '%NEW-уровень%' OR service ILIKE '%PRO-уровень%' THEN 'Секция'#(lf)            ELSE 'Прочее'#(lf)        END AS ГруппаТренировки#(lf)    FROM replaced_division#(lf)),#(lf)custom_service AS (#(lf)    SELECT *,#(lf)        CASE#(lf)            WHEN (service ILIKE '%Аренда%') #(lf)                 AND (club = 'Пушкинский' OR club = 'Пушкинский VIP') #(lf)            THEN 'Прочая услуга'#(lf)            WHEN service ILIKE '%Аренда%' #(lf)            THEN 'Аренда'#(lf)            ELSE 'Прочая услуга'#(lf)        END AS Пользовательский#(lf)    FROM grouped_training#(lf)),#(lf)activity_type AS (#(lf)    SELECT *,#(lf)        CASE#(lf)            WHEN Пользовательский = 'Аренда' THEN ВидДеятельности#(lf)            ELSE ВидДеятельности#(lf)        END AS ""Вид занятий""#(lf)    FROM custom_service#(lf)),#(lf)with_age AS (#(lf)    SELECT#(lf)        TRIM(club::TEXT) AS Клуб,#(lf)        period::DATE AS Период,#(lf)        service AS Услуга,#(lf)        trainer AS Сотрудник,#(lf)        equity AS Поступления,#(lf)        equity_salary AS ПоступленияДляЗП,#(lf)        ГруппаТренировки,#(lf)        Пользовательский,#(lf)        ""Вид занятий"",#(lf)        ВидДеятельности,#(lf)        client_code AS ""КодКлиента"",#(lf)        client_name AS ""ФИО_Клиента"",#(lf)        client_birthday AS ""ДР_Клиента"",#(lf)        number AS Количество,#(lf)        client_type AS ""ПризнакКлиента"",#(lf)        paiment_type AS ""ТипОплаты"",#(lf)        contract_code AS ""КодКонтракта"",#(lf)        contract AS ""Контракт"",#(lf)        CASE#(lf)            WHEN client_birthday IS NULL THEN NULL#(lf)            ELSE (EXTRACT(EPOCH FROM (period - client_birthday)) / 86400.0) / 365.0#(lf)        END AS Возраст#(lf)    FROM activity_type#(lf)    WHERE equity IS NOT NULL AND equity <> 0#(lf)),#(lf)age_grouped AS (#(lf)    SELECT *,#(lf)        CASE#(lf)            WHEN Возраст IS NULL THEN 'Без возраста'#(lf)            WHEN Возраст < 4 THEN '00-03'#(lf)            WHEN Возраст < 6 THEN '04-05'#(lf)            WHEN Возраст < 10 THEN '06-09'#(lf)            WHEN Возраст < 14 THEN '10-13'#(lf)            WHEN Возраст < 18 THEN '14-17'#(lf)            WHEN Возраст < 25 THEN '18-25'#(lf)            WHEN Возраст < 35 THEN '26-35'#(lf)            WHEN Возраст < 45 THEN '36-45'#(lf)            WHEN Возраст < 55 THEN '46-55'#(lf)            ELSE '56+'#(lf)        END AS ""Возрастная группа""#(lf)    FROM with_age#(lf)),#(lf)-- =============== ДОБАВЛЯЕМ КЛАСТЕР И СЕТЬ ===============#(lf)enhanced_base AS (#(lf)    SELECT *,#(lf)        CASE#(lf)            WHEN Клуб IN ('Автозаводский', 'Южное', 'Парковая', 'Бурнаковский', 'Мещера', 'Корабли') THEN 'Физкульт (нижняя часть)'#(lf)            WHEN Клуб IN ('Родионова', 'Деловая', 'Советская', 'Старт', 'Спорт', 'Кстово') THEN 'Физкульт (верхняя часть)'#(lf)            WHEN Клуб IN ('Пушкинский', 'Пушкинский VIP') THEN 'Комплекс Пушкинский'#(lf)            ELSE 'Прочее'#(lf)        END AS Кластер,#(lf)        CASE#(lf)            WHEN Клуб IN ('Пушкинский', 'Пушкинский VIP') THEN 'Комплекс Пушкинский'#(lf)            ELSE 'Физкульт'#(lf)        END AS ""_Сеть"",#(lf)        CASE#(lf)            WHEN (Клуб IN ('Пушкинский', 'Пушкинский VIP') AND (""Вид занятий"" IN ('Детский клуб', 'Аренда Детский клуб')))#(lf)            THEN 'Пушкинский'#(lf)            WHEN Клуб = 'Пушкинский VIP' THEN 'Пушкинский VIP'#(lf)            WHEN Клуб = 'Пушкинский' THEN 'Пушкинский'#(lf)            ELSE Клуб#(lf)        END AS ""Клуб для учета""#(lf)    FROM age_grouped#(lf)),#(lf)-- =============== ФИНАЛЬНЫЙ РАСЧЁТ СТОЛБЦОВ С ПРЕДЫДУЩИМИ ДАТАМИ ===============#(lf)final_with_flags AS (#(lf)    SELECT#(lf)        Клуб,#(lf)        Период,#(lf)        Услуга,#(lf)        Сотрудник,#(lf)        Поступления,#(lf)        ПоступленияДляЗП,#(lf)        ГруппаТренировки,#(lf)        Пользовательский,#(lf)        ""Вид занятий"",#(lf)        Возраст,#(lf)        ""Возрастная группа"",#(lf)        ВидДеятельности,#(lf)        ""КодКлиента"",#(lf)        ""ФИО_Клиента"",#(lf)        ""ДР_Клиента"",#(lf)        Количество,#(lf)        ""ПризнакКлиента"",#(lf)        ""ТипОплаты"",#(lf)        ""КодКонтракта"",#(lf)        ""Контракт"",#(lf)        Кластер,#(lf)        ""_Сеть"",#(lf)        ""Клуб для учета"",#(lf)        -- Только для строк, подходящих под фильтр для метрик#(lf)        CASE #(lf)            WHEN Пользовательский = 'Прочая услуга'#(lf)                 AND ""Клуб для учета"" <> 'Детский развивающий центр'#(lf)                 AND ""Вид занятий"" <> 'Тренажёрный зал (ИП)'#(lf)            THEN LAG(Период, 1) OVER (PARTITION BY ""КодКлиента"", Клуб ORDER BY Период)#(lf)            ELSE NULL#(lf)        END AS ПредПосещениеКлуб,#(lf)        #(lf)        CASE #(lf)            WHEN Пользовательский = 'Прочая услуга'#(lf)                 AND ""Клуб для учета"" <> 'Детский развивающий центр'#(lf)                 AND ""Вид занятий"" <> 'Тренажёрный зал (ИП)'#(lf)            THEN LAG(Период, 1) OVER (PARTITION BY ""КодКлиента"", ""_Сеть"" ORDER BY Период)#(lf)            ELSE NULL#(lf)        END AS ПредПосещениеСеть,#(lf)        #(lf)        CASE #(lf)            WHEN Пользовательский = 'Прочая услуга'#(lf)                 AND ""Клуб для учета"" <> 'Детский развивающий центр'#(lf)                 AND ""Вид занятий"" <> 'Тренажёрный зал (ИП)'#(lf)            THEN LAG(Период, 1) OVER (PARTITION BY ""КодКлиента"", Сотрудник, Клуб ORDER BY Период)#(lf)            ELSE NULL#(lf)        END AS ПредПосещениеТренер,#(lf)#(lf)        -- Разницы в днях#(lf)        CASE #(lf)            WHEN Пользовательский = 'Прочая услуга'#(lf)                 AND ""Клуб для учета"" <> 'Детский развивающий центр'#(lf)                 AND ""Вид занятий"" <> 'Тренажёрный зал (ИП)'#(lf)                 AND LAG(Период, 1) OVER (PARTITION BY ""КодКлиента"", Клуб ORDER BY Период) IS NOT NULL#(lf)            THEN (Период - LAG(Период, 1) OVER (PARTITION BY ""КодКлиента"", Клуб ORDER BY Период))#(lf)            ELSE NULL#(lf)        END AS РазницаКлуб,#(lf)#(lf)        CASE #(lf)            WHEN Пользовательский = 'Прочая услуга'#(lf)                 AND ""Клуб для учета"" <> 'Детский развивающий центр'#(lf)                 AND ""Вид занятий"" <> 'Тренажёрный зал (ИП)'#(lf)                 AND LAG(Период, 1) OVER (PARTITION BY ""КодКлиента"", ""_Сеть"" ORDER BY Период) IS NOT NULL#(lf)            THEN (Период - LAG(Период, 1) OVER (PARTITION BY ""КодКлиента"", ""_Сеть"" ORDER BY Период))#(lf)            ELSE NULL#(lf)        END AS РазницаСеть,#(lf)#(lf)        CASE #(lf)            WHEN Пользовательский = 'Прочая услуга'#(lf)                 AND ""Клуб для учета"" <> 'Детский развивающий центр'#(lf)                 AND ""Вид занятий"" <> 'Тренажёрный зал (ИП)'#(lf)                 AND LAG(Период, 1) OVER (PARTITION BY ""КодКлиента"", Сотрудник, Клуб ORDER BY Период) IS NOT NULL#(lf)            THEN (Период - LAG(Период, 1) OVER (PARTITION BY ""КодКлиента"", Сотрудник, Клуб ORDER BY Период))#(lf)            ELSE NULL#(lf)        END AS РазницаТренер,#(lf)#(lf)        -- Разницы в месяцах (календарных)#(lf)        CASE #(lf)            WHEN Пользовательский = 'Прочая услуга'#(lf)                 AND ""Клуб для учета"" <> 'Детский развивающий центр'#(lf)                 AND ""Вид занятий"" <> 'Тренажёрный зал (ИП)'#(lf)            THEN#(lf)                EXTRACT(YEAR FROM Период) * 12 + EXTRACT(MONTH FROM Период) -#(lf)                EXTRACT(YEAR FROM LAG(Период, 1) OVER (PARTITION BY ""КодКлиента"", Клуб ORDER BY Период)) * 12 -#(lf)                EXTRACT(MONTH FROM LAG(Период, 1) OVER (PARTITION BY ""КодКлиента"", Клуб ORDER BY Период))#(lf)            ELSE NULL#(lf)        END AS ФильтрExКлуб,#(lf)#(lf)        CASE #(lf)            WHEN Пользовательский = 'Прочая услуга'#(lf)                 AND ""Клуб для учета"" <> 'Детский развивающий центр'#(lf)                 AND ""Вид занятий"" <> 'Тренажёрный зал (ИП)'#(lf)            THEN#(lf)                EXTRACT(YEAR FROM Период) * 12 + EXTRACT(MONTH FROM Период) -#(lf)                EXTRACT(YEAR FROM LAG(Период, 1) OVER (PARTITION BY ""КодКлиента"", ""_Сеть"" ORDER BY Период)) * 12 -#(lf)                EXTRACT(MONTH FROM LAG(Период, 1) OVER (PARTITION BY ""КодКлиента"", ""_Сеть"" ORDER BY Период))#(lf)            ELSE NULL#(lf)        END AS ФильтрExСеть,#(lf)#(lf)        CASE #(lf)            WHEN Пользовательский = 'Прочая услуга'#(lf)                 AND ""Клуб для учета"" <> 'Детский развивающий центр'#(lf)                 AND ""Вид занятий"" <> 'Тренажёрный зал (ИП)'#(lf)            THEN#(lf)                EXTRACT(YEAR FROM Период) * 12 + EXTRACT(MONTH FROM Период) -#(lf)                EXTRACT(YEAR FROM LAG(Период, 1) OVER (PARTITION BY ""КодКлиента"", Сотрудник, Клуб ORDER BY Период)) * 12 -#(lf)                EXTRACT(MONTH FROM LAG(Период, 1) OVER (PARTITION BY ""КодКлиента"", Сотрудник, Клуб ORDER BY Период))#(lf)            ELSE NULL#(lf)        END AS ФильтрExТренер,#(lf)#(lf)        -- Флаги: было ли посещение ровно в прошлом месяце?#(lf)        CASE #(lf)            WHEN Пользовательский = 'Прочая услуга'#(lf)                 AND ""Клуб для учета"" <> 'Детский развивающий центр'#(lf)                 AND ""Вид занятий"" <> 'Тренажёрный зал (ИП)'#(lf)                 AND (#(lf)                    EXTRACT(YEAR FROM Период) * 12 + EXTRACT(MONTH FROM Период) -#(lf)                    EXTRACT(YEAR FROM LAG(Период, 1) OVER (PARTITION BY ""КодКлиента"", Клуб ORDER BY Период)) * 12 -#(lf)                    EXTRACT(MONTH FROM LAG(Период, 1) OVER (PARTITION BY ""КодКлиента"", Клуб ORDER BY Период))#(lf)                 ) = 1#(lf)            THEN 1 ELSE 0#(lf)        END AS ПосещениеПрошМесКлуб,#(lf)#(lf)        CASE #(lf)            WHEN Пользовательский = 'Прочая услуга'#(lf)                 AND ""Клуб для учета"" <> 'Детский развивающий центр'#(lf)                 AND ""Вид занятий"" <> 'Тренажёрный зал (ИП)'#(lf)                 AND (#(lf)                    EXTRACT(YEAR FROM Период) * 12 + EXTRACT(MONTH FROM Период) -#(lf)                    EXTRACT(YEAR FROM LAG(Период, 1) OVER (PARTITION BY ""КодКлиента"", ""_Сеть"" ORDER BY Период)) * 12 -#(lf)                    EXTRACT(MONTH FROM LAG(Период, 1) OVER (PARTITION BY ""КодКлиента"", ""_Сеть"" ORDER BY Период))#(lf)                 ) = 1#(lf)            THEN 1 ELSE 0#(lf)        END AS ПосещениеПрошМесСеть,#(lf)#(lf)        CASE #(lf)            WHEN Пользовательский = 'Прочая услуга'#(lf)                 AND ""Клуб для учета"" <> 'Детский развивающий центр'#(lf)                 AND ""Вид занятий"" <> 'Тренажёрный зал (ИП)'#(lf)                 AND (#(lf)                    EXTRACT(YEAR FROM Период) * 12 + EXTRACT(MONTH FROM Период) -#(lf)                    EXTRACT(YEAR FROM LAG(Период, 1) OVER (PARTITION BY ""КодКлиента"", Сотрудник, Клуб ORDER BY Период)) * 12 -#(lf)                    EXTRACT(MONTH FROM LAG(Период, 1) OVER (PARTITION BY ""КодКлиента"", Сотрудник, Клуб ORDER BY Период))#(lf)                 ) = 1#(lf)            THEN 1 ELSE 0#(lf)        END AS ПосещениеПрошМесТренер,#(lf)#(lf)        -- Тип клиента#(lf)        CASE WHEN ""КодКлиента"" = 'И00050639' THEN 'Новый' ELSE 'Действующий' END AS ""Тип клиента""#(lf)    FROM enhanced_base#(lf))#(lf)SELECT#(lf)    Клуб,#(lf)    Период,#(lf)    Услуга,#(lf)    Сотрудник,#(lf)    Поступления,#(lf)    ПоступленияДляЗП,#(lf)    ГруппаТренировки,#(lf)    Пользовательский,#(lf)    ""Вид занятий"",#(lf)    Возраст,#(lf)    ""Возрастная группа"",#(lf)    ВидДеятельности,#(lf)    ""КодКлиента"",#(lf)    ""ФИО_Клиента"",#(lf)    ""ДР_Клиента"",#(lf)    Количество,#(lf)    ""ПризнакКлиента"",#(lf)    ""ТипОплаты"",#(lf)    ""КодКонтракта"",#(lf)    ""Контракт"",#(lf)    Кластер,#(lf)    ""_Сеть"",#(lf)    ""Клуб для учета"",#(lf)    ПредПосещениеКлуб,#(lf)    ПредПосещениеСеть,#(lf)    ПредПосещениеТренер,#(lf)    РазницаКлуб,#(lf)    РазницаСеть,#(lf)    РазницаТренер,#(lf)    ФильтрExКлуб,#(lf)    ФильтрExСеть,#(lf)    ФильтрExТренер,#(lf)    ПосещениеПрошМесКлуб,#(lf)    ПосещениеПрошМесСеть,#(lf)    ПосещениеПрошМесТренер,#(lf)    ""Тип клиента""#(lf)FROM final_with_flags#(lf)"),
+    #"Добавленный запрос" = Table.Combine({Источник, ИП, #"ПЗ ИП"}),
+    #"Выполнена капитализация каждого слова" = Table.TransformColumns(#"Добавленный запрос", {{"Услуга", Text.Proper, type text}}),
+    #"Объединенные запросы" = Table.NestedJoin(#"Выполнена капитализация каждого слова", {"Услуга"}, #"_СправочникУслуг", {"Номенклатура"}, "_Спр Услуги", JoinKind.LeftOuter),
+    #"Развернутый элемент _Спр Услуги" = Table.ExpandTableColumn(#"Объединенные запросы", "_Спр Услуги", {"Раздел услуги"}, {"Раздел услуги"}),
+
+    // 4. Добавляем ГруппаУрока
+    #"Добавлен ГруппаУрока" = Table.AddColumn(#"Развернутый элемент _Спр Услуги", "ГруппаУрока", each 
+        if [Раздел услуги] = null then [ГруппаТренировки] else [Раздел услуги],
+        type text
+    ),
+
+    // 6. КлючКБ
+    #"Добавлен КлючКБ" = Table.AddColumn(#"Добавлен ГруппаУрока", "КлючКБ", each [Клуб] & Text.From([Период]), type text),
+
+    // 7. Конец месяца
+    #"Добавлен КонецПериода" = Table.AddColumn(#"Добавлен КлючКБ", "Конец периода (2)", each Date.EndOfMonth([Период]), type date),
+
+    // 8. Период (2) — копия
+    #"Добавлен Период2" = Table.AddColumn(#"Добавлен КонецПериода", "Период (2)", each [Период], type date),
+
+    // Больше НИЧЕГО не нужно — все расчёты уже в SQL!
+    #"Финал" = #"Добавлен Период2"
+in
+    #"Финал"
+
+Пороги тренеровlet
+    Источник = #"ДПФУ факт",
+    #"Строки с примененным фильтром2" = Table.SelectRows(Источник, each ([Пользовательский] = "Прочая услуга") and ([ВидДеятельности] <> "Тренажёрный зал (ИП)")),
+    #"Объединенные запросы" = Table.NestedJoin(#"Строки с примененным фильтром2", {"Клуб для учета", "Вид занятий", "Сотрудник"}, СотрудникиСДолжностями, {"Клуб2", "ВидДеятельности2", "ФИО Тренера"}, "СотрудникиСДолжностями", JoinKind.LeftOuter),
+    #"Развернутый элемент СотрудникиСДолжностями" = Table.ExpandTableColumn(#"Объединенные запросы", "СотрудникиСДолжностями", {"Должность2", "ДатаПриема", "ДатаУвольнения", "Ранг"}, {"Категория", "ДатаПриема", "ДатаУвольнения", "Ранг"}),
+    #"Измененный тип" = Table.TransformColumnTypes(#"Развернутый элемент СотрудникиСДолжностями",{{"ДатаПриема", type date}, {"ДатаУвольнения", type date}}),
+    #"Добавлен пользовательский объект" = Table.AddColumn(#"Измененный тип", "Пользовательский.1", each if [ДатаПриема] = null then 1 else 
+if [ДатаУвольнения]=null then 1 else 
+if [ДатаПриема]<=[Период] and [ДатаУвольнения]>=[Период] then 1 else 0),
+    #"Строки с примененным фильтром1" = Table.SelectRows(#"Добавлен пользовательский объект", each ([Пользовательский.1] = 1)),
+    #"Замененное значение" = Table.ReplaceValue(#"Строки с примененным фильтром1","Пушкинский VIP","Пушкинский",Replacer.ReplaceText,{"Клуб для учета"}),
+    #"Сгруппированные строки" = Table.Group(#"Замененное значение", {"Конец периода (2)", "Клуб для учета", "Вид занятий", "Сотрудник"}, {{"Количество", each List.Sum([Количество]), type nullable number}, {"Сумма", each List.Sum([ПоступленияДляЗП]), type nullable number}, {"Ранг", each List.Max([Ранг]), type number}}),
+    #"Строки с примененным фильтром" = Table.SelectRows(#"Сгруппированные строки", each ([Сотрудник] <> null)),
+    #"Вычисленное начало месяца" = Table.TransformColumns(#"Строки с примененным фильтром",{{"Конец периода (2)", Date.StartOfMonth, type date}}),
+    #"Объединенные запросы1" = Table.NestedJoin(#"Вычисленное начало месяца", {"Конец периода (2)", "Клуб для учета", "Вид занятий", "Ранг"}, _СпрСтавки, {"Месяц", "Клуб", "Вид деятельности", "Ранг"}, "_СпрСтавки", JoinKind.LeftOuter),
+    #"Развернутый элемент _СпрСтавки" = Table.ExpandTableColumn(#"Объединенные запросы1", "_СпрСтавки", {"ПорогМесяца"}, {"ПорогМесяца"}),
+    #"Измененный тип1" = Table.TransformColumnTypes(#"Развернутый элемент _СпрСтавки",{{"ПорогМесяца", type number}})
+in
+    #"Измененный тип1"
+
+ДежурстваДляВсех
+let
+    Источник = Odbc.Query("Driver={PostgreSQL Unicode};Server=virt207.worldclass.nnov.ru; Database=gymdb_test;Timeout=300;Fetch=10000;UseDeclareFetch=1;", "--РегистрСведений.ТабельУчетаРабочегоВремени (Основная)#(lf)SELECT #(lf)#(tab)#(tab)cast(_Reference132._Description as varchar(1000)) Клуб#(lf)                ,_Reference225._IDRRef ::text AS СотрудникСсылка#(lf)#(tab)#(tab),cast(_Reference225._Description as varchar(1000)) Сотрудник#(lf)#(tab)#(tab),cast(_Reference191._Description as varchar(1000)) Помещение#(lf)#(tab)#(tab),_Fld7110 ДатаВремяНачала#(lf)#(tab)#(tab),_Fld7111 ДатаВремяОкончания#(lf)#(tab)#(tab),_Fld7115 Минуты#(lf)FROM _InfoRg7107#(lf)left join _Reference132 on#(lf)_Reference132._IDRRef = _Fld7108RRef#(lf)left join _Reference225 on#(lf)_Reference225._IDRRef = _Fld7109RRef#(lf)left join _Reference191 on#(lf)_Reference191._IDRRef = _Fld7113RRef#(lf)#(lf)#(lf)#(lf)where#(lf)encode(_Fld7112RRef,'hex')='bd57e817bb8afd31455f678cd21a2f8e' --ТипРабочегоВремени = дежурство#(lf)and _Fld7110 >'01.01.2025' and _Fld7110 <'01.07.2025'"),
+    #"Условный столбец добавлен" = Table.AddColumn(Источник, "ВидДеятельности", each if [Помещение] = "Бассейн" then "Водные программы" else if Text.Contains([Помещение], "Детская комната") then "Детский клуб" else if Text.Contains([Помещение], "Детский зал") then "Детский клуб" else if [Помещение] = "Тренажерный зал" then "Тренажёрный зал" else null),
+    #"Вставлено: время" = Table.AddColumn(#"Условный столбец добавлен", "ВремяНачала", each DateTime.Time([ДатаВремяНачала]), type time),
+    #"Вставлено: время1" = Table.AddColumn(#"Вставлено: время", "ВремяОкончания", each DateTime.Time([ДатаВремяОкончания]), type time),
+    Пользовательский1 = Table.AddColumn(#"Вставлено: время1", "СкоррВремяНачала", each #time(
+    Time.Hour([ВремяНачала]),
+    if Time.Minute([ВремяНачала]) < 15 then 0 
+    else if Time.Minute([ВремяНачала]) < 30 then 15 
+    else if Time.Minute([ВремяНачала]) < 45 then 30 
+    else 45,
+    0
+)),
+    #"Извлеченная дата" = Table.TransformColumns(Пользовательский1,{{"ДатаВремяНачала", DateTime.Date, type date}}),
+    #"Переименованные столбцы" = Table.RenameColumns(#"Извлеченная дата",{{"ДатаВремяНачала", "ДатаНачала"}, {"ДатаВремяОкончания", "ДатаОкончания"}, {"ВремяНачала", "Время начала"}, {"ВремяОкончания", "Время окончания"}, {"Минуты", "Итого минут"}}),
+    #"Извлеченная дата1" = Table.TransformColumns(#"Переименованные столбцы",{{"ДатаОкончания", DateTime.Date, type date}}),
+    #"Добавлен пользовательский объект" = Table.AddColumn(#"Извлеченная дата1", "Услуга", each "Дежурство"),
+    #"Добавлен пользовательский объект1" = Table.AddColumn(#"Добавлен пользовательский объект", "УслугаПолная", each "Дежурство"),
+    #"Добавлен пользовательский объект2" = Table.AddColumn(#"Добавлен пользовательский объект1", "Купон", each "Не купон"),
+    #"Объединенные запросы" = Table.NestedJoin(#"Добавлен пользовательский объект2", {"СотрудникСсылка"}, АБонементыИП, {"СотрудникСсылка"}, "АБонементыИП", JoinKind.LeftOuter),
+    #"Развернутый элемент АБонементыИП" = Table.ExpandTableColumn(#"Объединенные запросы", "АБонементыИП", {"ДатаНачала", "ДатаОкончания"}, {"ДатаНачала.1", "ДатаОкончания.1"}),
+    #"Измененный тип" = Table.TransformColumnTypes(#"Развернутый элемент АБонементыИП",{{"ДатаНачала.1", type date}, {"ДатаОкончания.1", type date}}),
+    #"Добавлен пользовательский объект3" = Table.AddColumn(#"Измененный тип", "ТипВзаиморасчетов", each if [ДатаНачала.1]=null then 0 else 
+if [ДатаНачала]>=[ДатаНачала.1] and [ДатаНачала] <=[ДатаОкончания.1] then 1 else 0),
+    #"Сгруппированные строки" = Table.Group(#"Добавлен пользовательский объект3", {"Клуб", "СотрудникСсылка", "Сотрудник", "Помещение", "ДатаНачала", "ДатаОкончания", "Итого минут", "ВидДеятельности", "Время начала", "Время окончания", "СкоррВремяНачала", "Услуга", "УслугаПолная", "Купон"}, {{"ИП", each List.Sum([ТипВзаиморасчетов]), type number}}),
+    #"Условный столбец добавлен1" = Table.AddColumn(#"Сгруппированные строки", "ТипВзаиморасчетов", each if [ИП] > 0 then "ИП" else null),
+    #"Удаленные столбцы" = Table.RemoveColumns(#"Условный столбец добавлен1",{"ИП"})
+in
+    #"Удаленные столбцы"
+
+ДежурстваДляВсех_2
+let
+    Источник = Odbc.Query("Driver={PostgreSQL Unicode};Server=virt207.worldclass.nnov.ru; Database=gymdb_test;Timeout=300;Fetch=10000;UseDeclareFetch=1;", "--РегистрСведений.ТабельУчетаРабочегоВремени (Основная)#(lf)SELECT #(lf)#(tab)#(tab)_Reference132._Description Клуб#(lf)                ,_Reference225._IDRRef ::text AS СотрудникСсылка#(lf)#(tab)#(tab),_Reference225._Description Сотрудник#(lf)#(tab)#(tab),_Reference191._Description Помещение#(lf)#(tab)#(tab),_Fld7110 ДатаВремяНачала#(lf)#(tab)#(tab),_Fld7111 ДатаВремяОкончания#(lf)#(tab)#(tab),_Fld7115 Минуты#(lf)FROM _InfoRg7107#(lf)left join _Reference132 on#(lf)_Reference132._IDRRef = _Fld7108RRef#(lf)left join _Reference225 on#(lf)_Reference225._IDRRef = _Fld7109RRef#(lf)left join _Reference191 on#(lf)_Reference191._IDRRef = _Fld7113RRef#(lf)#(lf)#(lf)#(lf)where#(lf)encode(_Fld7112RRef,'hex')='bd57e817bb8afd31455f678cd21a2f8e' --ТипРабочегоВремени = дежурство#(lf)and _Fld7110 >='01.07.2025' and _Fld7110  <'01.01.2027'"),
+    #"Условный столбец добавлен" = Table.AddColumn(Источник, "ВидДеятельности", each if [Помещение] = "Бассейн" then "Водные программы" else if Text.Contains([Помещение], "Детская комната") then "Детский клуб" else if Text.Contains([Помещение], "Детский зал") then "Детский клуб" else if [Помещение] = "Тренажерный зал" then "Тренажёрный зал" else null),
+    #"Вставлено: время" = Table.AddColumn(#"Условный столбец добавлен", "ВремяНачала", each DateTime.Time([ДатаВремяНачала]), type time),
+    #"Вставлено: время1" = Table.AddColumn(#"Вставлено: время", "ВремяОкончания", each DateTime.Time([ДатаВремяОкончания]), type time),
+    Пользовательский1 = Table.AddColumn(#"Вставлено: время1", "СкоррВремяНачала", each #time(
+    Time.Hour([ВремяНачала]),
+    if Time.Minute([ВремяНачала]) < 15 then 0 
+    else if Time.Minute([ВремяНачала]) < 30 then 15 
+    else if Time.Minute([ВремяНачала]) < 45 then 30 
+    else 45,
+    0
+)),
+    #"Извлеченная дата" = Table.TransformColumns(Пользовательский1,{{"ДатаВремяНачала", DateTime.Date, type date}}),
+    #"Переименованные столбцы" = Table.RenameColumns(#"Извлеченная дата",{{"ДатаВремяНачала", "ДатаНачала"}, {"ДатаВремяОкончания", "ДатаОкончания"}, {"ВремяНачала", "Время начала"}, {"ВремяОкончания", "Время окончания"}, {"Минуты", "Итого минут"}}),
+    #"Извлеченная дата1" = Table.TransformColumns(#"Переименованные столбцы",{{"ДатаОкончания", DateTime.Date, type date}}),
+    #"Добавлен пользовательский объект" = Table.AddColumn(#"Извлеченная дата1", "Услуга", each "Дежурство"),
+    #"Добавлен пользовательский объект1" = Table.AddColumn(#"Добавлен пользовательский объект", "УслугаПолная", each "Дежурство"),
+    #"Добавлен пользовательский объект2" = Table.AddColumn(#"Добавлен пользовательский объект1", "Купон", each "Не купон"),
+    #"Объединенные запросы" = Table.NestedJoin(#"Добавлен пользовательский объект2", {"СотрудникСсылка"}, АБонементыИП, {"СотрудникСсылка"}, "АБонементыИП", JoinKind.LeftOuter),
+    #"Развернутый элемент АБонементыИП" = Table.ExpandTableColumn(#"Объединенные запросы", "АБонементыИП", {"ДатаНачала", "ДатаОкончания"}, {"ДатаНачала.1", "ДатаОкончания.1"}),
+    #"Измененный тип" = Table.TransformColumnTypes(#"Развернутый элемент АБонементыИП",{{"ДатаНачала.1", type date}, {"ДатаОкончания.1", type date}}),
+    #"Добавлен пользовательский объект3" = Table.AddColumn(#"Измененный тип", "ТипВзаиморасчетов", each if [ДатаНачала.1]=null then 0 else 
+if [ДатаНачала]>=[ДатаНачала.1] and [ДатаНачала] <=[ДатаОкончания.1] then 1 else 0),
+    #"Сгруппированные строки" = Table.Group(#"Добавлен пользовательский объект3", {"Клуб", "СотрудникСсылка", "Сотрудник", "Помещение", "ДатаНачала", "ДатаОкончания", "Итого минут", "ВидДеятельности", "Время начала", "Время окончания", "СкоррВремяНачала", "Услуга", "УслугаПолная", "Купон"}, {{"ИП", each List.Sum([ТипВзаиморасчетов]), type number}}),
+    #"Условный столбец добавлен1" = Table.AddColumn(#"Сгруппированные строки", "ТипВзаиморасчетов", each if [ИП] > 0 then "ИП" else null),
+    #"Удаленные столбцы" = Table.RemoveColumns(#"Условный столбец добавлен1",{"ИП"})
+in
+    #"Удаленные столбцы"
+
+Док_ПредварительнаяЗапись
+let
+    Источник = Odbc.Query("Driver={PostgreSQL Unicode};Server=virt207.worldclass.nnov.ru; Database=gymdb_test;", "SELECT #(lf)#(tab)#(tab)encode(_Document329._IDRRef,'hex') Ссылка#(lf)#(tab)#(tab),_Document329._Date_Time Дата#(lf)#(tab)#(tab),_Document329._Posted Проведен#(lf)#(tab)#(tab),_Fld4306 ДатаНачала#(lf)#(tab)#(tab),_Fld4307 ДатаОкончания#(lf)#(tab)#(tab)-- ,_Fld4178 Резерв#(lf)#(tab)#(tab),cast(_Reference225._Description as varchar(1000)) Сотрудник#(lf)#(tab)#(tab),encode(_Fld4323RRef,'hex') Статус#(lf)#(tab)#(tab),cast(_Reference132._Description as varchar(1000)) Клуб#(lf)        ,cast(_Reference163._Description as varchar(1000)) Услуга#(lf)#(tab)#(tab),cast(_Reference191._Description as varchar(1000)) Помещение#(lf)#(tab)#(tab),_Reference163._Fld1778 РазрешенаЗаписьСНулевойЦеной#(lf)#(tab)#(tab),cast(_Reference70._Description as varchar(1000)) ВидДеятельности#(lf)#(tab)#(tab),encode(_Document313._Fld3810_RRRef,'hex') ПредварительнаяЗапись#(lf)       #(tab)#(tab),cast(_Reference163._Fld1761 as varchar(1000)) УслугаПолная#(lf)                ,case#(lf)                     when _Reference163._ParentIDRRef = decode('4296a4bf013441d111e7cae05001072c', 'hex')#(lf)                     then 'Купон'#(lf)                     else 'Не купон'#(lf)                 end as Купон#(lf)#(tab)#(tab),case #(lf)                     when _Fld4358RRef = decode('a0f1524d502e0d5d4c1dfeb9d5bbb3fe','hex') then 'ИП' --Типвзаимодрасчетов с сотрудником #(lf)                     when cast(_Reference163._Fld1761 as varchar(1000)) = 'Персональная тренировка в ТЗ, , Тренажёрный зал, 10 мин' then 'ИП'#(lf)                     else null#(lf)                 end as ТипВзаиморасчетов#(lf)FROM _Document329#(lf)left join _Reference132 on #(lf)_Reference132._IDRRef =_Document329._Fld4310RRef#(lf)left join _Reference163 on#(lf)_Document329._Fld4316RRef=_Reference163._IDRRef#(lf)left join _Reference191 on#(lf)_Document329._Fld4320RRef=_Reference191._IDRRef#(lf)left join _Reference70 on#(lf)_Reference70._IDRRef=_Reference163._Fld1733RRef#(lf)left join _Reference225 on #(lf)_Reference225._IDRRef =_Document329._Fld4322RRef#(lf)left join _Document313 on #(lf)_Document313._Fld3810_RRRef =_Document329._IDRRef#(lf)left join _Document329_VT4352 on#(lf)_Document329_IDRRef = _Document329._IDRRef#(lf)#(lf)where #(lf)_Fld4306> '01.01.2023' #(lf)and _Fld4306< '01.07.2025' #(lf)and _Document313._IDRRef is null --Документ.Отмена ПЗ = пусто"),
+    #"Добавлен пользовательский объект1" = Table.AddColumn(Источник, "РазницаРегистрацииУрока", each [ДатаОкончания]-[Дата]),
+    #"Всего вычислено минут" = Table.TransformColumns(#"Добавлен пользовательский объект1",{{"РазницаРегистрацииУрока", Duration.TotalMinutes, type number}}),
+    #"Условный столбец добавлен4" = Table.AddColumn(#"Всего вычислено минут", "КогдаЗанесен", each if [РазницаРегистрацииУрока] < 0 then "После" else "До"),
+    #"Вставлено: время" = Table.AddColumn(#"Условный столбец добавлен4", "Время", each DateTime.Time([ДатаНачала]), type time),
+    #"Условный столбец добавлен3" = Table.AddColumn(#"Вставлено: время", "Платное", each if [РазрешенаЗаписьСНулевойЦеной] = "1" then "Клубное время" else if [РазрешенаЗаписьСНулевойЦеной] = null then "Резерв" else "Платное"),
+    #"Строки с примененным фильтром1" = Table.SelectRows(#"Условный столбец добавлен3", each ([Статус] = "a0d533e2ede766b3408ad9ef5403fadd") and ([Проведен] = "1")),
+    #"Условный столбец добавлен" = Table.AddColumn(#"Строки с примененным фильтром1", "Резерв/услуга", each if [Услуга] = null then "Нет названия" else if [Услуга] = "Резерв" then "Резерв" else [Услуга]),
+    #"Вычитание вставленного времени" = Table.AddColumn(#"Условный столбец добавлен", "Вычитание", each [ДатаОкончания]-[ДатаНачала]),
+    #"Вставлено минут, всего" = Table.AddColumn(#"Вычитание вставленного времени", "Итого минут", each Duration.TotalMinutes([Вычитание]), type number),
+    #"Вставлено: время1" = Table.AddColumn(#"Вставлено минут, всего", "Время.1", each DateTime.Time([ДатаОкончания]), type time),
+    #"Измененный тип" = Table.TransformColumnTypes(#"Вставлено: время1",{{"ДатаНачала", type date}, {"ДатаОкончания", type date}}),
+    #"Переименованные столбцы" = Table.RenameColumns(#"Измененный тип",{{"Время", "Время начала"}, {"Время.1", "Время окончания"}}),
+    #"Условный столбец добавлен1" = Table.AddColumn(#"Переименованные столбцы", "ГруппаТренировки", each if Text.Contains([#"Резерв/услуга"], "Персональная тренировка") then "ПТ" else if Text.Contains([#"Резерв/услуга"], "персональная тренировка") then "ПТ" else if Text.Contains([#"Резерв/услуга"], "Индивидуальная тренировка") then "ПТ" else if Text.Contains([#"Резерв/услуга"], "Сплит") then "ПТ" else if Text.Contains([#"Резерв/услуга"], "сплит") then "ПТ" else if Text.Contains([#"Резерв/услуга"], "Малая группа") then "МГ" else if Text.Contains([#"Резерв/услуга"], "малая группа") then "МГ" else if Text.Contains([#"Резерв/услуга"], "Платный урок") then "ПУ" else if Text.Contains([#"Резерв/услуга"], "платный урок") then "ПУ" else if Text.Contains([#"Резерв/услуга"], "СЕКЦИЯ") then "СЕК" else if Text.Contains([#"Резерв/услуга"], "Секция") then "СЕК" else if Text.Contains([#"Резерв/услуга"], "секция") then "СЕК" else if Text.Contains([#"Резерв/услуга"], "Резерв") then "РЕЗ" else if Text.Contains([#"Резерв/услуга"], "Аренд") then "АР" else if Text.Contains([#"Резерв/услуга"], "аренд") then "АР" else if Text.Contains([#"Резерв/услуга"], "малой груп") then "МГ" else if Text.Contains([#"Резерв/услуга"], "вдво") then "ПТ" else if Text.Contains([#"Резерв/услуга"], "втро") then "ПТ" else if Text.Contains([#"Резерв/услуга"], "спарр") then "ПТ" else "ПРОЧ"),
+    #"Добавлен пользовательский объект2" = Table.AddColumn(#"Условный столбец добавлен1", "АР+ПТ", each if [Услуга] = null 
+then null 
+else if
+List.AllTrue(
+    {Text.Contains([Услуга],"Арен",Comparer.OrdinalIgnoreCase),
+    Text.Contains([Услуга],"+",Comparer.OrdinalIgnoreCase)}) 
+    then "АР+ПТ" 
+    else null),
+    #"Условный столбец добавлен5" = Table.AddColumn(#"Добавлен пользовательский объект2", "ГруппаИтог", each if [#"АР+ПТ"] = null then [ГруппаТренировки] else [#"АР+ПТ"]),
+    #"Условный столбец добавлен2" = Table.AddColumn(#"Условный столбец добавлен5", "Возрастная категория", each if [ВидДеятельности] = "Детский клуб" then "Дети" else "Взрослые"),
+    #"Удаленные столбцы" = Table.RemoveColumns(#"Условный столбец добавлен2",{"Статус",  "Услуга", "Ссылка", "Проведен", "Вычитание", "РазрешенаЗаписьСНулевойЦеной", "РазницаРегистрацииУрока"}),
+    #"Переупорядоченные столбцы" = Table.ReorderColumns(#"Удаленные столбцы",{"Клуб", "Резерв/услуга", "ГруппаТренировки", "ВидДеятельности", "Дата", "ДатаНачала", "ДатаОкончания", "КогдаЗанесен", "Помещение", "Время начала", "Время окончания", "Итого минут", "Возрастная категория", "Платное"}),
+    #"Переименованные столбцы1" = Table.RenameColumns(#"Переупорядоченные столбцы",{{"Резерв/услуга", "Услуга"}, {"Дата", "ДатаРегистрации"}}),
+    Пользовательский1 = Table.AddColumn(#"Переименованные столбцы1", "СкоррВремяНачала", each #time(
+    Time.Hour([Время начала]),
+    if Time.Minute([Время начала]) < 15 then 0 
+    else if Time.Minute([Время начала]) < 30 then 15 
+    else if Time.Minute([Время начала]) < 45 then 30 
+    else 45,
+    0
+)),
+    #"Удаленные столбцы1" = Table.RemoveColumns(Пользовательский1,{"ГруппаТренировки", "АР+ПТ"}),
+    #"Переименованные столбцы2" = Table.RenameColumns(#"Удаленные столбцы1",{{"ГруппаИтог", "ГруппаТренировки"}}),
+    #"Переупорядоченные столбцы1" = Table.ReorderColumns(#"Переименованные столбцы2",{"Клуб", "Услуга", "ГруппаТренировки", "ВидДеятельности", "Сотрудник", "ДатаРегистрации", "ДатаНачала", "ДатаОкончания", "КогдаЗанесен", "Помещение", "Время начала", "Время окончания", "Итого минут", "Возрастная категория", "Платное"})
+
+in
+    #"Переупорядоченные столбцы1"
+
+ДОК_ГрупповоеЗанятие
+let
+    Источник = Odbc.Query("Driver={PostgreSQL Unicode};Server=virt207.worldclass.nnov.ru; Database=gymdb_test", "--Документ.ГрупповоеЗанятие (Основная)#(lf)SELECT #(lf)#(tab)#(tab)encode(_Document279._IDRRef,'hex') Ссылка#(lf)#(tab)#(tab),_Date_Time Дата#(lf)#(tab)#(tab),_Document279._Marked ПометкаУдаления#(lf)#(tab)#(tab),encode(_Reference163._Fld1741RRef,'hex') ВозрастнаяКатегория#(lf)#(tab)#(tab),_Reference163._Fld1778 РазрешенаЗаписьСНулевойЦеной#(lf)#(tab)#(tab),cast(_Reference70._Description as varchar(1000)) ВидДеятельности#(lf)#(tab)#(tab),_Fld3218 ВремяНачала#(lf)#(tab)#(tab),_Fld3219 ВремяОкончания#(lf)#(tab)#(tab),cast(_Reference225._Description as varchar(1000)) Сотрудник#(lf)#(tab)#(tab),cast(_Reference132._Description as varchar(1000)) Клуб#(lf)        ,cast(_Reference163._Description as varchar(1000)) Услуга#(lf)        ,cast(_Reference191._Description as varchar(1000)) Помещение#(lf)#(tab)#(tab),cast(_Fld3229 as varchar(1000)) ПредставлениеДокумента#(lf)#(tab)#(tab),_Fld3228 ПоПредворительнойОплате#(lf)       #(tab)#(tab),cast(_Reference163._Fld1761 as varchar(1000)) УслугаПолная#(lf)                ,case#(lf)                     when _Reference163._ParentIDRRef = decode('4296a4bf013441d111e7cae05001072c', 'hex')#(lf)                     then 'Купон'#(lf)                     else 'Не купон'#(lf)                 end as Купон#(lf)#(lf)FROM _Document279#(lf)left join _Reference132 on #(lf)_Reference132._IDRRef =_Document279._Fld3224RRef#(lf)left join _Reference163 on#(lf)_Document279._Fld3226RRef=_Reference163._IDRRef#(lf)left join _Reference191 on#(lf)_Document279._Fld3227RRef=_Reference191._IDRRef#(lf)left join _Reference70 on#(lf)_Reference163._Fld1733RRef = _Reference70._IDRRef#(lf)left join _Reference225 on #(lf)_Reference225._IDRRef =_Document279._Fld3223RRef#(lf)#(lf)#(lf)where _Fld3218 > '01.01.2023' and _Fld3218 <'01.07.2025'#(lf)and encode(_Fld3231RRef,'hex') ='00000000000000000000000000000000' -- ПричинаОтмены = пусто"),
+    #"Условный столбец добавлен4" = Table.AddColumn(Источник, "ТипВзаиморасчетов", each if [УслугаПолная] = "Персональная тренировка в ТЗ, , Тренажёрный зал, 10 мин" then "ИП" else null),
+    #"Добавлен пользовательский объект1" = Table.AddColumn(#"Условный столбец добавлен4", "СверкаРегистрацииУрока", each [ВремяОкончания]-[Дата]),
+    #"Всего вычислено минут" = Table.TransformColumns(#"Добавлен пользовательский объект1",{{"СверкаРегистрацииУрока", Duration.TotalMinutes, type number}}),
+    #"Условный столбец добавлен3" = Table.AddColumn(#"Всего вычислено минут", "КогдаЗанесен", each if [СверкаРегистрацииУрока] < 0 then "После" else "До"),
+    #"Строки с примененным фильтром1" = Table.SelectRows(#"Условный столбец добавлен3", each ([ПометкаУдаления] = "0")),
+    #"Вставлено: время" = Table.AddColumn(#"Строки с примененным фильтром1", "Время", each DateTime.Time([ВремяНачала]), type time),
+    #"Вставлено: время1" = Table.AddColumn(#"Вставлено: время", "Время.1", each DateTime.Time([ВремяОкончания]), type time),
+    #"Измененный тип" = Table.TransformColumnTypes(#"Вставлено: время1",{{"ВремяНачала", type date}, {"ВремяОкончания", type date}}),
+    #"Переименованные столбцы" = Table.RenameColumns(#"Измененный тип",{{"Время", "Время начала"}, {"Время.1", "Время окончания"}}),
+    #"Вычитание вставленного времени" = Table.AddColumn(#"Переименованные столбцы", "Вычитание", each [Время окончания]-[Время начала], type duration),
+    #"Вставлено минут, всего" = Table.AddColumn(#"Вычитание вставленного времени", "Итого минут", each Duration.TotalMinutes([Вычитание]), type number),
+    #"Вставлено: деление" = Table.AddColumn(#"Вставлено минут, всего", "СкоррВремяНачала", each #time(
+    Time.Hour([Время начала]),
+    if Time.Minute([Время начала]) < 15 then 0 
+    else if Time.Minute([Время начала]) < 30 then 15 
+    else if Time.Minute([Время начала]) < 45 then 30 
+    else 45,
+    0
+)),
+    #"Условный столбец добавлен1" = Table.AddColumn(#"Вставлено: деление", "ГруппаТренировки", each if Text.Contains([ПредставлениеДокумента], "Персональная тренировка") then "ПТ" else if Text.Contains([ПредставлениеДокумента], "персональная тренировка") then "ПТ" else if Text.Contains([ПредставлениеДокумента], "Индивидуальная тренировка") then "ПТ" else if Text.Contains([ПредставлениеДокумента], "Сплит") then "ПТ" else if Text.Contains([ПредставлениеДокумента], "сплит") then "ПТ" else if Text.Contains([ПредставлениеДокумента], "Малая группа") then "МГ" else if Text.Contains([ПредставлениеДокумента], "малая группа") then "МГ" else if Text.Contains([ПредставлениеДокумента], "Платный урок") then "ПУ" else if Text.Contains([ПредставлениеДокумента], "платный урок") then "ПУ" else if Text.Contains([ПредставлениеДокумента], "СЕКЦИЯ") then "СЕК" else if Text.Contains([ПредставлениеДокумента], "Секция") then "СЕК" else if Text.Contains([ПредставлениеДокумента], "секция") then "СЕК" else "ГЗ"),
+    #"Условный столбец добавлен" = Table.AddColumn(#"Условный столбец добавлен1", "Возрастная категория", each if [ВидДеятельности] = "Детский клуб" then "Дети" else "Взрослые"),
+    #"Условный столбец добавлен2" = Table.AddColumn(#"Условный столбец добавлен", "Платное", each if [РазрешенаЗаписьСНулевойЦеной] = "1" then "Клубное время" else "Платное"),
+    #"Удаленные столбцы" = Table.RemoveColumns(#"Условный столбец добавлен2",{"Ссылка", "ПометкаУдаления", "ВозрастнаяКатегория", "ПоПредворительнойОплате", "РазрешенаЗаписьСНулевойЦеной", "ПредставлениеДокумента", "СверкаРегистрацииУрока"}),
+    #"Переупорядоченные столбцы" = Table.ReorderColumns(#"Удаленные столбцы",{"Клуб", "Услуга", "ГруппаТренировки", "ВидДеятельности", "Дата", "ВремяНачала", "ВремяОкончания", "Помещение", "Время начала", "Время окончания", "Вычитание", "Итого минут", "Возрастная категория", "Платное"}),
+    #"Удаленные столбцы1" = Table.RemoveColumns(#"Переупорядоченные столбцы",{"Вычитание"}),
+    #"Переименованные столбцы1" = Table.RenameColumns(#"Удаленные столбцы1",{{"ВремяНачала", "ДатаНачала"}, {"ВремяОкончания", "ДатаОкончания"}, {"Дата", "ДатаРегистрации"}})
+
+in
+    #"Переименованные столбцы1"
+
+Все уроки
+let
+    Источник = Table.Combine({Док_ПредварительнаяЗапись, ДОК_ГрупповоеЗанятие, ДежурстваДляВсех}),
+    #"Добавлен индекс" = Table.AddIndexColumn(Источник, "Индекс", 1, 1, Int64.Type),
+    #"Добавлен пользовательский объект" = Table.AddColumn(#"Добавлен индекс", "Список времени", each List.Times ([СкоррВремяНачала],[Итого минут]/15 , #duration(0, 0, 15, 0))),
+    #"Развернутый элемент Пользовательский" = Table.ExpandListColumn(#"Добавлен пользовательский объект", "Список времени"),
+    #"Измененный тип" = Table.TransformColumnTypes(#"Развернутый элемент Пользовательский",{{"Список времени", type time}}),
+    #"Вставлено: объединенный столбец" = Table.AddColumn(#"Измененный тип", "Ключ", each Text.Combine({Text.From([ДатаНачала], "ru-RU"), Text.From([Список времени], "ru-RU")}, ""), type text),
+    #"Замененное значение" = Table.ReplaceValue(#"Вставлено: объединенный столбец",null,"Резерв",Replacer.ReplaceValue,{"ВидДеятельности"}),
+    #"Строки с примененным фильтром" = Table.SelectRows(#"Замененное значение", each ([ВидДеятельности] <> "Резерв") and ([Сотрудник] <> null)),
+    #"Выполнена капитализация каждого слова" = Table.TransformColumns(#"Строки с примененным фильтром",{{"УслугаПолная", Text.Proper, type text}}),
+    #"Объединенные запросы" = Table.NestedJoin(#"Выполнена капитализация каждого слова", {"УслугаПолная"}, _СправочникУслуг, {"Номенклатура"}, "_СправочникУслуг", JoinKind.LeftOuter),
+    #"Развернутый элемент _СправочникУслуг" = Table.ExpandTableColumn(#"Объединенные запросы", "_СправочникУслуг", {"Раздел услуги"}, {"Раздел услуги"}),
+    #"Условный столбец добавлен" = Table.AddColumn(#"Развернутый элемент _СправочникУслуг", "Пользовательский", each if [Услуга] = "Дежурство" then "Дежурство" else [Раздел услуги]),
+    #"Удаленные столбцы" = Table.RemoveColumns(#"Условный столбец добавлен",{"Раздел услуги"}),
+    #"Переименованные столбцы" = Table.RenameColumns(#"Удаленные столбцы",{{"Пользовательский", "Раздел услуги"}}),
+    #"Замененное значение1" = Table.ReplaceValue(#"Переименованные столбцы",null,"Раздел не указан",Replacer.ReplaceValue,{"Раздел услуги"})
+in
+    #"Замененное значение1"
+
+Док_ПредварительнаяЗапись_2
+let
+    Источник = Odbc.Query("Driver={PostgreSQL Unicode};Server=virt207.worldclass.nnov.ru; Database=gymdb_test", "SELECT #(lf)#(tab)#(tab)encode(_Document329._IDRRef,'hex') Ссылка#(lf)#(tab)#(tab),_Document329._Date_Time Дата#(lf)#(tab)#(tab),_Document329._Posted Проведен#(lf)#(tab)#(tab),_Fld4306 ДатаНачала#(lf)#(tab)#(tab),_Fld4307 ДатаОкончания#(lf)#(tab)#(tab)-- ,_Fld4178 Резерв#(lf)#(tab)#(tab),_Reference225._Description Сотрудник#(lf)#(tab)#(tab),encode(_Fld4323RRef,'hex') Статус#(lf)#(tab)#(tab),_Reference132._Description Клуб#(lf)        ,_Reference163._Description Услуга#(lf)#(tab)#(tab),_Reference191._Description Помещение#(lf)#(tab)#(tab),_Reference163._Fld1778 РазрешенаЗаписьСНулевойЦеной#(lf)#(tab)#(tab),_Reference70._Description ВидДеятельности#(lf)#(tab)#(tab),encode(_Document313._Fld3810_RRRef,'hex') ПредварительнаяЗапись#(lf)       #(tab)#(tab),cast(_Reference163._Fld1761 as varchar(1000)) УслугаПолная#(lf)                ,case#(lf)                     when _Reference163._ParentIDRRef = decode('4296a4bf013441d111e7cae05001072c', 'hex')#(lf)                     then 'Купон'#(lf)                     else 'Не купон'#(lf)                 end as Купон#(lf)#(tab)#(tab),case #(lf)                     when _Fld4358RRef = decode('a0f1524d502e0d5d4c1dfeb9d5bbb3fe','hex') then 'ИП' --Типвзаимодрасчетов с сотрудником #(lf)                     when cast(_Reference163._Fld1761 as varchar(1000)) = 'Персональная тренировка в ТЗ, , Тренажёрный зал, 10 мин' then 'ИП'#(lf)                     else null#(lf)                 end as ТипВзаиморасчетов#(lf)FROM _Document329#(lf)left join _Reference132 on #(lf)_Reference132._IDRRef =_Document329._Fld4310RRef#(lf)left join _Reference163 on#(lf)_Document329._Fld4316RRef=_Reference163._IDRRef#(lf)left join _Reference191 on#(lf)_Document329._Fld4320RRef=_Reference191._IDRRef#(lf)left join _Reference70 on#(lf)_Reference70._IDRRef=_Reference163._Fld1733RRef#(lf)left join _Reference225 on #(lf)_Reference225._IDRRef =_Document329._Fld4322RRef#(lf)left join _Document313 on #(lf)_Document313._Fld3810_RRRef =_Document329._IDRRef#(lf)left join _Document329_VT4352 on#(lf)_Document329_IDRRef = _Document329._IDRRef#(lf)#(lf)WHERE _Fld4306 >= DATE '2025-07-01'#(lf)  AND _Fld4306 < DATE '2027-01-01'#(lf)and _Document313._IDRRef is null --Документ.Отмена ПЗ = пусто"),
+    #"Добавлен пользовательский объект1" = Table.AddColumn(Источник, "РазницаРегистрацииУрока", each [ДатаОкончания]-[Дата]),
+    #"Всего вычислено минут" = Table.TransformColumns(#"Добавлен пользовательский объект1",{{"РазницаРегистрацииУрока", Duration.TotalMinutes, type number}}),
+    #"Условный столбец добавлен4" = Table.AddColumn(#"Всего вычислено минут", "КогдаЗанесен", each if [РазницаРегистрацииУрока] < 0 then "После" else "До"),
+    #"Вставлено: время" = Table.AddColumn(#"Условный столбец добавлен4", "Время", each DateTime.Time([ДатаНачала]), type time),
+    #"Условный столбец добавлен3" = Table.AddColumn(#"Вставлено: время", "Платное", each if [РазрешенаЗаписьСНулевойЦеной] = "1" then "Клубное время" else if [РазрешенаЗаписьСНулевойЦеной] = null then "Резерв" else "Платное"),
+    #"Строки с примененным фильтром1" = Table.SelectRows(#"Условный столбец добавлен3", each ([Статус] = "a0d533e2ede766b3408ad9ef5403fadd") and ([Проведен] = "1")),
+    #"Условный столбец добавлен" = Table.AddColumn(#"Строки с примененным фильтром1", "Резерв/услуга", each if [Услуга] = null then "Нет названия" else if [Услуга] = "Резерв" then "Резерв" else [Услуга]),
+    #"Вычитание вставленного времени" = Table.AddColumn(#"Условный столбец добавлен", "Вычитание", each [ДатаОкончания]-[ДатаНачала]),
+    #"Вставлено минут, всего" = Table.AddColumn(#"Вычитание вставленного времени", "Итого минут", each Duration.TotalMinutes([Вычитание]), type number),
+    #"Вставлено: время1" = Table.AddColumn(#"Вставлено минут, всего", "Время.1", each DateTime.Time([ДатаОкончания]), type time),
+    #"Измененный тип" = Table.TransformColumnTypes(#"Вставлено: время1",{{"ДатаНачала", type date}, {"ДатаОкончания", type date}}),
+    #"Переименованные столбцы" = Table.RenameColumns(#"Измененный тип",{{"Время", "Время начала"}, {"Время.1", "Время окончания"}}),
+    #"Условный столбец добавлен1" = Table.AddColumn(#"Переименованные столбцы", "ГруппаТренировки", each if Text.Contains([#"Резерв/услуга"], "Персональная тренировка") then "ПТ" else if Text.Contains([#"Резерв/услуга"], "персональная тренировка") then "ПТ" else if Text.Contains([#"Резерв/услуга"], "Индивидуальная тренировка") then "ПТ" else if Text.Contains([#"Резерв/услуга"], "Сплит") then "ПТ" else if Text.Contains([#"Резерв/услуга"], "сплит") then "ПТ" else if Text.Contains([#"Резерв/услуга"], "Малая группа") then "МГ" else if Text.Contains([#"Резерв/услуга"], "малая группа") then "МГ" else if Text.Contains([#"Резерв/услуга"], "Платный урок") then "ПУ" else if Text.Contains([#"Резерв/услуга"], "платный урок") then "ПУ" else if Text.Contains([#"Резерв/услуга"], "СЕКЦИЯ") then "СЕК" else if Text.Contains([#"Резерв/услуга"], "Секция") then "СЕК" else if Text.Contains([#"Резерв/услуга"], "секция") then "СЕК" else if Text.Contains([#"Резерв/услуга"], "Резерв") then "РЕЗ" else if Text.Contains([#"Резерв/услуга"], "Аренд") then "АР" else if Text.Contains([#"Резерв/услуга"], "аренд") then "АР" else if Text.Contains([#"Резерв/услуга"], "малой груп") then "МГ" else if Text.Contains([#"Резерв/услуга"], "вдво") then "ПТ" else if Text.Contains([#"Резерв/услуга"], "втро") then "ПТ" else if Text.Contains([#"Резерв/услуга"], "спарр") then "ПТ" else "ПРОЧ"),
+    #"Добавлен пользовательский объект2" = Table.AddColumn(#"Условный столбец добавлен1", "АР+ПТ", each if [Услуга] = null 
+then null 
+else if
+List.AllTrue(
+    {Text.Contains([Услуга],"Арен",Comparer.OrdinalIgnoreCase),
+    Text.Contains([Услуга],"+",Comparer.OrdinalIgnoreCase)}) 
+    then "АР+ПТ" 
+    else null),
+    #"Условный столбец добавлен5" = Table.AddColumn(#"Добавлен пользовательский объект2", "ГруппаИтог", each if [#"АР+ПТ"] = null then [ГруппаТренировки] else [#"АР+ПТ"]),
+    #"Условный столбец добавлен2" = Table.AddColumn(#"Условный столбец добавлен5", "Возрастная категория", each if [ВидДеятельности] = "Детский клуб" then "Дети" else "Взрослые"),
+    #"Удаленные столбцы" = Table.RemoveColumns(#"Условный столбец добавлен2",{"Статус",  "Услуга", "Ссылка", "Проведен", "Вычитание", "РазрешенаЗаписьСНулевойЦеной", "РазницаРегистрацииУрока"}),
+    #"Переупорядоченные столбцы" = Table.ReorderColumns(#"Удаленные столбцы",{"Клуб", "Резерв/услуга", "ГруппаТренировки", "ВидДеятельности", "Дата", "ДатаНачала", "ДатаОкончания", "КогдаЗанесен", "Помещение", "Время начала", "Время окончания", "Итого минут", "Возрастная категория", "Платное"}),
+    #"Переименованные столбцы1" = Table.RenameColumns(#"Переупорядоченные столбцы",{{"Резерв/услуга", "Услуга"}, {"Дата", "ДатаРегистрации"}}),
+    Пользовательский1 = Table.AddColumn(#"Переименованные столбцы1", "СкоррВремяНачала", each #time(
+    Time.Hour([Время начала]),
+    if Time.Minute([Время начала]) < 15 then 0 
+    else if Time.Minute([Время начала]) < 30 then 15 
+    else if Time.Minute([Время начала]) < 45 then 30 
+    else 45,
+    0
+)),
+    #"Удаленные столбцы1" = Table.RemoveColumns(Пользовательский1,{"ГруппаТренировки", "АР+ПТ"}),
+    #"Переименованные столбцы2" = Table.RenameColumns(#"Удаленные столбцы1",{{"ГруппаИтог", "ГруппаТренировки"}}),
+    #"Переупорядоченные столбцы1" = Table.ReorderColumns(#"Переименованные столбцы2",{"Клуб", "Услуга", "ГруппаТренировки", "ВидДеятельности", "Сотрудник", "ДатаРегистрации", "ДатаНачала", "ДатаОкончания", "КогдаЗанесен", "Помещение", "Время начала", "Время окончания", "Итого минут", "Возрастная категория", "Платное"})
+in
+    #"Переупорядоченные столбцы1"
+
+ДОК_ГрупповоеЗанятие_2
+let
+    Источник = Odbc.Query("Driver={PostgreSQL Unicode};Server=virt207.worldclass.nnov.ru; Database=gymdb_test", "--Документ.ГрупповоеЗанятие (Основная)#(lf)SELECT #(lf)#(tab)#(tab)encode(_Document279._IDRRef,'hex') Ссылка#(lf)#(tab)#(tab),_Date_Time Дата#(lf)#(tab)#(tab),_Document279._Marked ПометкаУдаления#(lf)#(tab)#(tab),encode(_Reference163._Fld1741RRef,'hex') ВозрастнаяКатегория#(lf)#(tab)#(tab),_Reference163._Fld1778 РазрешенаЗаписьСНулевойЦеной#(lf)#(tab)#(tab),_Reference70._Description ВидДеятельности#(lf)#(tab)#(tab),_Fld3218 ВремяНачала#(lf)#(tab)#(tab),_Fld3219 ВремяОкончания#(lf)#(tab)#(tab),_Reference225._Description Сотрудник#(lf)#(tab)#(tab),_Reference132._Description Клуб#(lf)        ,_Reference163._Description Услуга#(lf)        ,_Reference191._Description Помещение#(lf)#(tab)#(tab),cast(_Fld3229 as varchar(1000)) ПредставлениеДокумента#(lf)#(tab)#(tab),_Fld3228 ПоПредворительнойОплате#(lf)       #(tab)#(tab),cast(_Reference163._Fld1761 as varchar(1000)) УслугаПолная#(lf)                ,case#(lf)                     when _Reference163._ParentIDRRef = decode('4296a4bf013441d111e7cae05001072c', 'hex')#(lf)                     then 'Купон'#(lf)                     else 'Не купон'#(lf)                 end as Купон#(lf)#(lf)FROM _Document279#(lf)left join _Reference132 on #(lf)_Reference132._IDRRef =_Document279._Fld3224RRef#(lf)left join _Reference163 on#(lf)_Document279._Fld3226RRef=_Reference163._IDRRef#(lf)left join _Reference191 on#(lf)_Document279._Fld3227RRef=_Reference191._IDRRef#(lf)left join _Reference70 on#(lf)_Reference163._Fld1733RRef = _Reference70._IDRRef#(lf)left join _Reference225 on #(lf)_Reference225._IDRRef =_Document279._Fld3223RRef#(lf)#(lf)#(lf)where _Fld3218 >= '01.07.2025' and _Fld3218 <'01.01.2027'#(lf)and encode(_Fld3231RRef,'hex') ='00000000000000000000000000000000' -- ПричинаОтмены = пусто"),
+    #"Условный столбец добавлен4" = Table.AddColumn(Источник, "ТипВзаиморасчетов", each if [УслугаПолная] = "Персональная тренировка в ТЗ, , Тренажёрный зал, 10 мин" then "ИП" else null),
+    #"Добавлен пользовательский объект1" = Table.AddColumn(#"Условный столбец добавлен4", "СверкаРегистрацииУрока", each [ВремяОкончания]-[Дата]),
+    #"Всего вычислено минут" = Table.TransformColumns(#"Добавлен пользовательский объект1",{{"СверкаРегистрацииУрока", Duration.TotalMinutes, type number}}),
+    #"Условный столбец добавлен3" = Table.AddColumn(#"Всего вычислено минут", "КогдаЗанесен", each if [СверкаРегистрацииУрока] < 0 then "После" else "До"),
+    #"Строки с примененным фильтром1" = Table.SelectRows(#"Условный столбец добавлен3", each ([ПометкаУдаления] = "0")),
+    #"Вставлено: время" = Table.AddColumn(#"Строки с примененным фильтром1", "Время", each DateTime.Time([ВремяНачала]), type time),
+    #"Вставлено: время1" = Table.AddColumn(#"Вставлено: время", "Время.1", each DateTime.Time([ВремяОкончания]), type time),
+    #"Измененный тип" = Table.TransformColumnTypes(#"Вставлено: время1",{{"ВремяНачала", type date}, {"ВремяОкончания", type date}}),
+    #"Переименованные столбцы" = Table.RenameColumns(#"Измененный тип",{{"Время", "Время начала"}, {"Время.1", "Время окончания"}}),
+    #"Вычитание вставленного времени" = Table.AddColumn(#"Переименованные столбцы", "Вычитание", each [Время окончания]-[Время начала], type duration),
+    #"Вставлено минут, всего" = Table.AddColumn(#"Вычитание вставленного времени", "Итого минут", each Duration.TotalMinutes([Вычитание]), type number),
+    #"Вставлено: деление" = Table.AddColumn(#"Вставлено минут, всего", "СкоррВремяНачала", each #time(
+    Time.Hour([Время начала]),
+    if Time.Minute([Время начала]) < 15 then 0 
+    else if Time.Minute([Время начала]) < 30 then 15 
+    else if Time.Minute([Время начала]) < 45 then 30 
+    else 45,
+    0
+)),
+    #"Условный столбец добавлен1" = Table.AddColumn(#"Вставлено: деление", "ГруппаТренировки", each if Text.Contains([ПредставлениеДокумента], "Персональная тренировка") then "ПТ" else if Text.Contains([ПредставлениеДокумента], "персональная тренировка") then "ПТ" else if Text.Contains([ПредставлениеДокумента], "Индивидуальная тренировка") then "ПТ" else if Text.Contains([ПредставлениеДокумента], "Сплит") then "ПТ" else if Text.Contains([ПредставлениеДокумента], "сплит") then "ПТ" else if Text.Contains([ПредставлениеДокумента], "Малая группа") then "МГ" else if Text.Contains([ПредставлениеДокумента], "малая группа") then "МГ" else if Text.Contains([ПредставлениеДокумента], "Платный урок") then "ПУ" else if Text.Contains([ПредставлениеДокумента], "платный урок") then "ПУ" else if Text.Contains([ПредставлениеДокумента], "СЕКЦИЯ") then "СЕК" else if Text.Contains([ПредставлениеДокумента], "Секция") then "СЕК" else if Text.Contains([ПредставлениеДокумента], "секция") then "СЕК" else "ГЗ"),
+    #"Условный столбец добавлен" = Table.AddColumn(#"Условный столбец добавлен1", "Возрастная категория", each if [ВидДеятельности] = "Детский клуб" then "Дети" else "Взрослые"),
+    #"Условный столбец добавлен2" = Table.AddColumn(#"Условный столбец добавлен", "Платное", each if [РазрешенаЗаписьСНулевойЦеной] = "1" then "Клубное время" else "Платное"),
+    #"Удаленные столбцы" = Table.RemoveColumns(#"Условный столбец добавлен2",{"Ссылка", "ПометкаУдаления", "ВозрастнаяКатегория", "ПоПредворительнойОплате", "РазрешенаЗаписьСНулевойЦеной", "ПредставлениеДокумента", "СверкаРегистрацииУрока"}),
+    #"Переупорядоченные столбцы" = Table.ReorderColumns(#"Удаленные столбцы",{"Клуб", "Услуга", "ГруппаТренировки", "ВидДеятельности", "Дата", "ВремяНачала", "ВремяОкончания", "Помещение", "Время начала", "Время окончания", "Вычитание", "Итого минут", "Возрастная категория", "Платное"}),
+    #"Удаленные столбцы1" = Table.RemoveColumns(#"Переупорядоченные столбцы",{"Вычитание"}),
+    #"Переименованные столбцы1" = Table.RenameColumns(#"Удаленные столбцы1",{{"ВремяНачала", "ДатаНачала"}, {"ВремяОкончания", "ДатаОкончания"}, {"Дата", "ДатаРегистрации"}})
+
+in
+    #"Переименованные столбцы1"
+
+Все уроки-2
+let
+    Источник = Table.Combine({Док_ПредварительнаяЗапись_2, ДОК_ГрупповоеЗанятие_2, ДежурстваДляВсех_2}),
+    #"Добавлен индекс" = Table.AddIndexColumn(Источник, "Индекс", 1, 1, Int64.Type),
+    #"Добавлен пользовательский объект" = Table.AddColumn(#"Добавлен индекс", "Список времени", each List.Times ([СкоррВремяНачала],[Итого минут]/15 , #duration(0, 0, 15, 0))),
+    #"Развернутый элемент Пользовательский" = Table.ExpandListColumn(#"Добавлен пользовательский объект", "Список времени"),
+    #"Измененный тип" = Table.TransformColumnTypes(#"Развернутый элемент Пользовательский",{{"Список времени", type time}}),
+    #"Вставлено: объединенный столбец" = Table.AddColumn(#"Измененный тип", "Ключ", each Text.Combine({Text.From([ДатаНачала], "ru-RU"), Text.From([Список времени], "ru-RU")}, ""), type text),
+    #"Замененное значение" = Table.ReplaceValue(#"Вставлено: объединенный столбец",null,"Резерв",Replacer.ReplaceValue,{"ВидДеятельности"}),
+    #"Строки с примененным фильтром" = Table.SelectRows(#"Замененное значение", each ([ВидДеятельности] <> "Резерв") and ([Сотрудник] <> null)),
+    #"Выполнена капитализация каждого слова" = Table.TransformColumns(#"Строки с примененным фильтром",{{"УслугаПолная", Text.Proper, type text}}),
+    #"Объединенные запросы" = Table.NestedJoin(#"Выполнена капитализация каждого слова", {"УслугаПолная"}, _СправочникУслуг, {"Номенклатура"}, "_СправочникУслуг", JoinKind.LeftOuter),
+    #"Развернутый элемент _СправочникУслуг" = Table.ExpandTableColumn(#"Объединенные запросы", "_СправочникУслуг", {"Раздел услуги"}, {"Раздел услуги"}),
+    #"Условный столбец добавлен" = Table.AddColumn(#"Развернутый элемент _СправочникУслуг", "Пользовательский", each if [Услуга] = "Дежурство" then "Дежурство" else [Раздел услуги]),
+    #"Удаленные столбцы" = Table.RemoveColumns(#"Условный столбец добавлен",{"Раздел услуги"}),
+    #"Переименованные столбцы" = Table.RenameColumns(#"Удаленные столбцы",{{"Пользовательский", "Раздел услуги"}}),
+    #"Замененное значение1" = Table.ReplaceValue(#"Переименованные столбцы",null,"Раздел не указан",Replacer.ReplaceValue,{"Раздел услуги"})
+in
+    #"Замененное значение1"
+
+Посещения сотрудников 2025-1 (4)
+let
+    Источник = Odbc.Query("Driver={PostgreSQL Unicode};Server=virt207.worldclass.nnov.ru; Database=gymdb_test;Timeout=300;Fetch=10000;UseDeclareFetch=1;", "with service (id) as #(lf)(#(lf)SELECT #(lf)#(tab)#(tab)#(lf)encode(_Reference163._IDRRef,'hex') as id#(lf)FROM _Reference163#(lf)left join _Reference163 as par#(lf)on par._IDRRef = _Reference163._ParentIDRRef#(lf)where#(lf)par._Description = 'Служебная'#(lf))#(lf)SELECT #(lf)   _Reference132._Description as club#(lf)  ,date_trunc('day',_AccumRg7575._Period) as period#(lf)  , _Document325._Fld4172 as start_visit#(lf)  , _Document325._Fld4174 as end_visit#(lf)#(lf)#(tab)--#(tab),cast(_Reference141X1._Code as varchar(1000)) Код#(lf)#(tab)--#(tab),cast(_Reference141X1._Description as varchar(1000)) ФИОКлиента#(lf)#(tab)#(tab),_Reference225._Description ФИОСотрудника#(lf),_Reference59._Description Абонемент#(lf)#(lf)FROM _AccumRg7575#(lf)left join _Document325#(lf)#(tab)on #(tab)_RecorderRRef =_Document325._IDRRef#(lf)left join _Reference132#(lf)#(tab)on #(tab)_Fld7577RRef =_Reference132._IDRRef#(lf)--left join _Reference141X1#(lf)--#(tab)on   _Fld7576RRef = _Reference141X1._IDRRef#(lf)inner join _Reference225 on#(lf)_Fld2504RRef = _Fld7576RRef#(lf)#(lf)left join _Reference59#(lf)#(tab)on   _Fld7578_RRRef = _Reference59._IDRRef#(lf)inner join service on #(lf)id = encode(_Reference59._Fld685RRef,'hex')#(lf)#(lf)where #(lf)    _Document325._Fld4164RRef=decode('9a5a4c90d2b1aede4b91dcd1abe84c43','hex') --ВидПосещенияНовый = посещение#(lf)#(tab)and _Reference132._Description not in ('Детский развивающий центр',#(tab)'Управляющая компания')#(lf)#(tab)and _AccumRg7575._Period >= timestamp '2025-10-01'#(lf)#(tab)and _AccumRg7575._Period < timestamp '2027-01-01'"),
+    #"Вставлено: конец дня" = Table.AddColumn(Источник, "Конец дня", each Date.EndOfDay([start_visit]), type datetime),
+    #"Условный столбец добавлен1" = Table.AddColumn(#"Вставлено: конец дня", "КонецПосещения", each if [end_visit] > [Конец дня] then [Конец дня] else if [end_visit] = #datetime(1, 1, 1, 0, 0, 0) then [Конец дня] else [end_visit]),
+    #"Добавлен пользовательский объект" = Table.AddColumn(#"Условный столбец добавлен1", "Время в клубе", each [КонецПосещения]-[start_visit]),
+    #"Вставлено часов, всего" = Table.AddColumn(#"Добавлен пользовательский объект", "Итого часов", each Duration.TotalHours([Время в клубе]), type number),
+    #"Сгруппированные строки" = Table.Group(#"Вставлено часов, всего", {"club", "period", "ФИОСотрудника"}, {{"Часов в клубе", each List.Sum([Итого часов]), type number}})
+in
+    #"Сгруппированные строки"
+
+Купоны
+let
+    Источник = Odbc.Query("Driver={PostgreSQL Unicode};Server=virt207.worldclass.nnov.ru; Database=gymdb_test;Timeout=300;Fetch=10000;UseDeclareFetch=1;", "WITH#(lf)#(lf)-- 🔹 Константы: бинарные RRef, рассчитанные через decode(hex, 'hex')#(lf)constants AS (#(lf)    SELECT #(lf)        decode('4296a4bf013441d111e7cae05001072c', 'hex') AS coupons_parent_ref,#(lf)        decode('9a5a4c90d2b1aede4b91dcd1abe84c43', 'hex') AS visit_operation_ref,#(lf)        decode('bf4b50662e88eb7b44046ebf4849976f', 'hex') AS club_card_type_ref#(lf)),#(lf)#(lf)-- 🔹 Только услуги, чей родитель — ""Купоны""#(lf)services_filtered AS (#(lf)    SELECT _IDRRef#(lf)    FROM _Reference163#(lf)    CROSS JOIN constants c#(lf)    WHERE _ParentIDRRef = c.coupons_parent_ref#(lf)),#(lf)#(lf)-- 🔹 Плановые занятия (ПЗ): последние версии, только ""Состоялись""#(lf)pz AS (#(lf)    SELECT *#(lf)    FROM (#(lf)        SELECT #(lf)            rg._Period,#(lf)            rg._Fld7008RRef AS client_ref,           -- bytea: для JOIN#(lf)            rg._Fld7009RRef AS club_ref,             -- bytea#(lf)            encode(rg._Fld7008RRef, 'hex') AS client_link,#(lf)            encode(rg._Fld7009RRef, 'hex') AS club_link,#(lf)            cl._Description AS client,#(lf)            cl._Code AS client_code,#(lf)            clb._Description AS club,#(lf)            encode(rg._Fld7010RRef, 'hex') AS service,#(lf)            emp._Description AS employee,#(lf)            srv._Description AS service_name,#(lf)            div._Description AS division_name,#(lf)            doc._Fld4306 AS class_start,#(lf)            doc._Fld4307 AS class_end,#(lf)            doc._Date_Time AS date,#(lf)#(tab)    srv._Fld1767 service_time,#(lf)#(tab)    rg._Fld7012 quantity,#(lf)#(lf)#(lf)#(lf)            ROW_NUMBER() OVER (#(lf)                PARTITION BY rg._Fld7007_RRRef, rg._Fld7010RRef#(lf)                ORDER BY rg._Period DESC#(lf)            ) AS rn#(lf)#(lf)        FROM _InfoRg7006 rg#(lf)        INNER JOIN _Document329 doc ON doc._IDRRef = rg._Fld7007_RRRef#(lf)        INNER JOIN _Reference141X1 cl ON cl._IDRRef = rg._Fld7008RRef#(lf)        INNER JOIN _Reference132 clb ON clb._IDRRef = rg._Fld7009RRef#(lf)        INNER JOIN _Reference225 emp ON emp._IDRRef = doc._Fld4322RRef#(lf)        INNER JOIN _Enum448 e ON e._IDRRef = rg._Fld7013RRef#(lf)        INNER JOIN services_filtered sf ON sf._IDRRef = rg._Fld7010RRef#(lf)        INNER JOIN _Document329_VT4352 vt ON vt._Document329_IDRRef = doc._IDRRef#(lf)            AND vt._Fld4356RRef = rg._Fld7010RRef#(lf)        INNER JOIN _Reference163 srv ON srv._IDRRef = rg._Fld7010RRef#(lf)        LEFT JOIN _Reference70 div ON div._IDRRef = srv._Fld1733RRef#(lf)#(lf)        WHERE #(lf)            rg._Period >= '2025-01-01'::date#(lf)            AND e._EnumOrder = 4  -- Статус: ""Состоялось""#(lf)#(lf)    ) ranked#(lf)    WHERE rn = 1#(lf)),#(lf)#(lf)-- 🔹 Только уникальные клиенты из ПЗ#(lf)pz_clients AS (#(lf)    SELECT DISTINCT client_ref#(lf)    FROM pz#(lf)),#(lf)#(lf)-- 🔹 Посещения: ТОЛЬКО по клиентам из ПЗ, начиная с 2025-05-01#(lf)visits AS (#(lf)    SELECT #(lf)        _Fld4171RRef AS client_ref,#(lf)        _Fld4167RRef AS club_ref,#(lf)        _Date_Time AS visit_date,#(lf)        _Fld4172 AS visit_start#(lf)    FROM _Document325#(lf)    CROSS JOIN constants c#(lf)    INNER JOIN pz_clients pc ON pc.client_ref = _Fld4171RRef#(lf)    WHERE #(lf)        _Date_Time >= '2025-01-01'::timestamp#(lf)        AND _Fld4164RRef = c.visit_operation_ref  -- ""Посещение""#(lf)),#(lf)#(lf)-- 🔹 Связка ПЗ и посещений: только те, что совпали по времени и дате#(lf)pz_visited AS (#(lf)    SELECT #(lf)        p._Period AS period,#(lf)        p.client_link,#(lf)        p.client,#(lf)        p.client_code,#(lf)        p.club_link,#(lf)        p.club,#(lf)        p.division_name,#(lf)        p.service,#(lf)        p.employee,#(lf)        p.service_name,#(lf)        p.class_start,#(lf)        p.class_end,#(lf)        p.date,#(lf)        v.visit_date#(lf),p.service_time#(lf),p.quantity#(lf)    FROM pz p#(lf)    INNER JOIN visits v #(lf)        ON v.client_ref = p.client_ref#(lf)        AND v.club_ref = p.club_ref#(lf)        AND date_trunc('day', v.visit_date) = date_trunc('day', p._Period)#(lf)        AND v.visit_start <= p.class_start#(lf)        AND v.visit_start <= p.class_end#(lf)),#(lf)#(lf)-- 🔹 Последний договор (клубная карта), только по клиентам из pz_visited#(lf)last_contract AS (#(lf)    SELECT #(lf)        encode(_Fld681RRef, 'hex') AS client_link,#(lf)        CASE #(lf)            WHEN _Fld671 <> '0001-01-01'::date THEN _Fld671#(lf)            ELSE _Fld674 #(lf)        END AS contract_start,#(lf)        _Fld672 AS contract_end#(lf)    FROM _Reference59#(lf)    CROSS JOIN constants c#(lf)    WHERE #(lf)        _Fld696RRef = c.club_card_type_ref  -- Тип абонемента = Клубная карта#(lf)        AND _Fld672 > '2025-01-01'::date#(lf)        AND _Fld681RRef IN (SELECT client_ref FROM pz_clients)#(lf)    ORDER BY _Fld672 DESC#(lf)    -- Чтобы взять последний договор, используем DISTINCT ON или ROW_NUMBER в подзапросе#(lf)),#(lf)-- Если нужно только по одному договору на клиента — добавим ранжирование#(lf)last_contract_final AS (#(lf)    SELECT *,#(lf)        ROW_NUMBER() OVER (PARTITION BY client_link ORDER BY contract_end DESC) AS rn#(lf)    FROM last_contract#(lf))#(lf)#(lf)-- 🔹 Финальный результат#(lf)SELECT #(lf)    pv.period,#(lf)    pv.client_link,#(lf)    pv.client,#(lf)    pv.client_code,#(lf)    pv.club_link,#(lf)    pv.club,#(lf)    pv.division_name,#(lf)    pv.service,#(lf)    pv.employee,#(lf)    pv.service_name,#(lf)    pv.class_start,#(lf)    pv.class_end,#(lf)    pv.date,#(lf)    pv.visit_date,#(lf)pv.service_time,#(lf)pv.quantity,#(lf)    lc.contract_start,#(lf)    lc.contract_end#(lf)FROM pz_visited pv#(lf)LEFT JOIN last_contract_final lc ON lc.client_link = pv.client_link AND lc.rn = 1#(lf)WHERE #(lf)    (lc.contract_end > pv.class_start #(lf)    OR lc.contract_end IS NULL)#(lf)"),
+    #"Добавлен пользовательский объект" = Table.AddColumn(Источник, "ДнейСначалаАбонемента", each [class_start]-[contract_start]),
+    #"Всего вычислено дней" = Table.TransformColumns(#"Добавлен пользовательский объект",{{"ДнейСначалаАбонемента", Duration.TotalDays, type number}}),
+    #"Добавлен пользовательский объект1" = Table.AddColumn(#"Всего вычислено дней", "Учет для ЗП", each if List.AnyTrue (
+    {
+        List.AllTrue({[division_name]="Водные программы",
+        [ДнейСначалаАбонемента]>=0}),
+        List.AllTrue ({[ДнейСначалаАбонемента]>=0,[ДнейСначалаАбонемента]<31})
+    }
+) then 1 else 0),
+    #"Строки с примененным фильтром" = Table.SelectRows(#"Добавлен пользовательский объект1", each ([Учет для ЗП] = 1)),
+    #"Удаленные дубликаты" = Table.Distinct(#"Строки с примененным фильтром", {"client_code", "club", "division_name", "employee", "service_name", "class_start"}),
+    #"Извлеченная дата" = Table.TransformColumns(#"Удаленные дубликаты",{{"visit_date", DateTime.Date, type date}}),
+    #"Условный столбец добавлен2" = Table.AddColumn(#"Извлеченная дата", "ТипКупона", each if [service_name] = "Купон: Фитнес тест" then "Купон 1" else if [service_name] = "Анализ состава тела ACCUNIQ" then "Купон 1" else "Купон 2"),
+    #"Добавлен пользовательский объект2" = Table.AddColumn(#"Условный столбец добавлен2", "Время купона", each [quantity]*[service_time]/60),
+    #"Измененный тип" = Table.TransformColumnTypes(#"Добавлен пользовательский объект2",{{"Время купона", type number}})
+in
+    #"Измененный тип"
+
+ДежурстваИтог
+let
+    Источник = Odbc.Query("Driver={PostgreSQL Unicode};Server=virt207.worldclass.nnov.ru; Database=gymdb_test;Timeout=300;Fetch=10000;UseDeclareFetch=1;", "-- 🔹 Константы (однократное декодирование)#(lf)WITH constants AS (#(lf)    SELECT #(lf)        decode('4296a4bf013441d111e7cae05001072c', 'hex') AS coupons_parent_ref,#(lf)        decode('9a5a4c90d2b1aede4b91dcd1abe84c43', 'hex') AS visit_operation_ref,#(lf)        decode('bf4b50662e88eb7b44046ebf4849976f', 'hex') AS club_card_type_ref,#(lf)        decode('b5ad0e5b4356c20d11e7145dde9ec41c', 'hex') AS non_service_nom_parent_ref,#(lf)        decode('bd57e817bb8afd31455f678cd21a2f8e', 'hex') AS duty_type_ref#(lf)),#(lf)#(lf)-- 🔹 Абонементы ИП с КОРРЕКТНОЙ связкой клиент → тренер#(lf)ip_contracts AS (#(lf)    SELECT #(lf)        encode(emp._IDRRef, 'hex') AS trainer_link,  -- ← ссылка на тренера в hex#(lf)        ab._Fld671 AS start_date,#(lf)        ab._Fld672 AS end_date#(lf)    FROM _Reference59 ab#(lf)    INNER JOIN _Reference163 nom ON ab._Fld685RRef = nom._IDRRef#(lf)    INNER JOIN _Reference141X1 client ON ab._Fld681RRef = client._IDRRef#(lf)    LEFT JOIN _Reference225 emp ON emp._Fld2504RRef = client._IDRRef  -- ← ИСПРАВЛЕНО: тренер.поле = клиент.ID#(lf)    CROSS JOIN constants c#(lf)    WHERE #(lf)        ab._Fld672 >= CURRENT_DATE - INTERVAL '3 years'#(lf)        AND nom._ParentIDRRef = c.non_service_nom_parent_ref#(lf)        AND ab._Description:: text ILIKE '%ИП%'#(lf)        AND emp._IDRRef IS NOT NULL  -- только с привязанным тренером#(lf)),#(lf)#(lf)-- 🔹 Услуги ""Купоны""#(lf)coupon_services AS (#(lf)    SELECT _IDRRef#(lf)    FROM _Reference163 s#(lf)    CROSS JOIN constants c#(lf)    WHERE s._ParentIDRRef = c.coupons_parent_ref#(lf)),#(lf)#(lf)-- 🔹 Посещения#(lf)visits_filtered AS (#(lf)    SELECT #(lf)        _Fld4171RRef AS client_ref,#(lf)        _Fld4167RRef AS club_ref,#(lf)        _Date_Time::date AS visit_date,#(lf)        _Fld4172 AS visit_start#(lf)    FROM _Document325 v#(lf)    CROSS JOIN constants c#(lf)    WHERE #(lf)        v._Date_Time >= date_trunc('month', CURRENT_DATE) - INTERVAL '1 month'#(lf)        AND v._Fld4164RRef = c.visit_operation_ref#(lf)),#(lf)#(lf)-- 🔹 ПЗ с подтверждённым визитом#(lf)pz_valid AS (#(lf)    SELECT #(lf)        rg._Period::date AS pz_date,#(lf)        rg._Fld7008RRef AS client_ref,#(lf)        rg._Fld7009RRef AS club_ref,#(lf)        doc._Fld4322RRef AS trainer_ref,#(lf)        doc._Fld4306 AS class_start,#(lf)        doc._Fld4307 AS class_end,#(lf)        srv._Fld1733RRef AS division_ref#(lf)    FROM _InfoRg7006 rg#(lf)    INNER JOIN _Document329 doc ON doc._IDRRef = rg._Fld7007_RRRef#(lf)    INNER JOIN _Enum448 e ON e._IDRRef = rg._Fld7013RRef#(lf)    INNER JOIN coupon_services cs ON cs._IDRRef = rg._Fld7010RRef#(lf)    INNER JOIN _Reference163 srv ON srv._IDRRef = rg._Fld7010RRef#(lf)    INNER JOIN visits_filtered v #(lf)        ON v.client_ref = rg._Fld7008RRef#(lf)        AND v.club_ref = rg._Fld7009RRef#(lf)        AND v.visit_date = rg._Period::date#(lf)        AND v.visit_start <= doc._Fld4307#(lf)    WHERE #(lf)        rg._Period >= date_trunc('month', CURRENT_DATE) - INTERVAL '1 month'#(lf)        AND e._EnumOrder = 4#(lf)        AND doc._Fld4306 IS NOT NULL #(lf)        AND doc._Fld4307 IS NOT NULL#(lf)),#(lf)#(lf)-- 🔹 Контракты клиентов#(lf)client_contracts AS (#(lf)    SELECT #(lf)        _Fld681RRef AS client_ref,#(lf)        CASE WHEN _Fld671 <> '0001-01-01'::date THEN _Fld671 ELSE _Fld674 END AS contract_start,#(lf)        _Fld672 AS contract_end#(lf)    FROM _Reference59 c#(lf)    CROSS JOIN constants cnst#(lf)    WHERE #(lf)        c._Fld696RRef = cnst.club_card_type_ref#(lf)        AND c._Fld672 > CURRENT_DATE - INTERVAL '2 months'#(lf)        AND c._Fld681RRef IN (SELECT DISTINCT client_ref FROM pz_valid)#(lf)),#(lf)#(lf)-- 🔹 Валидные занятия#(lf)valid_sessions AS (#(lf)    SELECT #(lf)        clb._Description::text AS club,#(lf)        encode(emp._IDRRef, 'hex') AS trainer_link,  -- согласовано с ИП#(lf)        pv.pz_date AS session_date,#(lf)        pv.class_start,#(lf)        pv.class_end#(lf)    FROM pz_valid pv#(lf)    INNER JOIN client_contracts cc #(lf)        ON cc.client_ref = pv.client_ref#(lf)        AND cc.contract_end > pv.class_start#(lf)    INNER JOIN _Reference132 clb ON clb._IDRRef = pv.club_ref#(lf)    INNER JOIN _Reference225 emp ON emp._IDRRef = pv.trainer_ref#(lf)    LEFT JOIN _Reference70 div ON div._IDRRef = pv.division_ref#(lf)    WHERE #(lf)        (div._Description = 'Водные программы' AND pv.class_start::date >= cc.contract_start::date)#(lf)        OR #(lf)        (pv.class_start::date >= cc.contract_start::date #(lf)         AND pv.class_start::date - cc.contract_start::date < 31)#(lf)),#(lf)#(lf)-- 🔹 Дежурства#(lf)duties AS (#(lf)    SELECT #(lf)        clb._Description::text AS club,#(lf)        encode(emp._IDRRef, 'hex') AS trainer_link,  -- согласовано с ИП и занятиями#(lf)        emp._Description::text AS trainer,#(lf)        room._Description::text AS room,#(lf)        rg._Fld7110 AS duty_start,#(lf)        rg._Fld7111 AS duty_end,#(lf)        rg._Fld7115 AS duty_minutes,#(lf)        rg._Fld7110::date AS duty_date#(lf)    FROM _InfoRg7107 rg#(lf)    INNER JOIN _Reference132 clb ON clb._IDRRef = rg._Fld7108RRef#(lf)    INNER JOIN _Reference225 emp ON emp._IDRRef = rg._Fld7109RRef#(lf)    INNER JOIN _Reference191 room ON room._IDRRef = rg._Fld7113RRef#(lf)    CROSS JOIN constants c#(lf)    WHERE #(lf)        rg._Fld7112RRef = c.duty_type_ref#(lf)        AND rg._Fld7110 >= date_trunc('month', CURRENT_DATE) - INTERVAL '1 month'#(lf))#(lf)#(lf)-- 🔹 Финальный расчёт#(lf)SELECT#(lf)    d.club AS ""Клуб"",#(lf)    d.trainer_link AS ""СотрудникСсылка"",#(lf)    d.trainer AS ""Сотрудник"",#(lf)    d.room AS ""Помещение"",#(lf)    d.duty_date AS ""Дата"",#(lf)    d.duty_start AS ""ДатаВремяНачала"",#(lf)    d.duty_end AS ""ДатаВремяОкончания"",#(lf)    d.duty_minutes AS ""Минуты"",#(lf)    COALESCE(SUM(#(lf)        EXTRACT(EPOCH FROM (#(lf)            LEAST(d.duty_end, s.class_end) - GREATEST(d.duty_start, s.class_start)#(lf)        )) / 3600.0#(lf)    ), 0) AS ""ЧасыКупонов"",#(lf)    (d.duty_minutes / 60.0 - COALESCE(SUM(#(lf)        EXTRACT(EPOCH FROM (#(lf)            LEAST(d.duty_end, s.class_end) - GREATEST(d.duty_start, s.class_start)#(lf)        )) / 3600.0#(lf)    ), 0)) AS ""ЧистоеДежурство"",#(lf)    -- 🔹 Корректная проверка ИП: оба trainer_link — hex из _IDRRef тренера#(lf)    CASE WHEN EXISTS (#(lf)        SELECT 1 #(lf)        FROM ip_contracts ip #(lf)        WHERE ip.trainer_link = d.trainer_link#(lf)          AND d.duty_date BETWEEN ip.start_date AND ip.end_date#(lf)    ) THEN 1 ELSE 0 END AS ""Тип Взаиморасчетов""#(lf)FROM duties d#(lf)LEFT JOIN valid_sessions s#(lf)    ON s.club = d.club#(lf)    AND s.trainer_link = d.trainer_link#(lf)    AND s.session_date = d.duty_date#(lf)    AND s.class_start < d.duty_end#(lf)    AND s.class_end > d.duty_start#(lf)GROUP BY#(lf)    d.club,#(lf)    d.trainer_link,#(lf)    d.trainer,#(lf)    d.room,#(lf)    d.duty_date,#(lf)    d.duty_start,#(lf)    d.duty_end,#(lf)    d.duty_minutes#(lf)ORDER BY#(lf)    d.club,#(lf)    d.trainer,#(lf)    d.duty_start;")
+in
+    Источник
+
+АБонементыИП
+let
+    Источник = Odbc.Query("Driver={PostgreSQL Unicode};Server=virt207.worldclass.nnov.ru; Database=gymdb_test;Timeout=300;Fetch=10000;UseDeclareFetch=1;", "--Справочник.Абонементы (Основная)#(lf)SELECT #(lf)#(tab)#(tab)encode(ab._IDRRef,'hex') Ссылка#(lf)#(tab)#(tab),cast(ab._Code as varchar(1000)) Код#(lf)#(tab)#(tab),cast(ab._Description as varchar(1000)) Абонемент#(lf)#(tab)#(tab),cast(client._Description as varchar(1000)) Клиент#(lf)                ,emp._IDRRef ::text СотрудникСсылка#(lf)#(tab)#(tab),cast(emp._Description as varchar(1000)) Сотрудник#(lf)#(tab)#(tab),_Fld671 ДатаНачала#(lf)#(tab)#(tab),_Fld672 ДатаОкончания#(lf)FROM _Reference59 ab#(lf)        LEFT JOIN _Reference163 nom ON ab._Fld685RRef = nom._IDRRef#(lf)        LEFT JOIN _Reference141X1 client ON ab._Fld681RRef = client._IDRRef#(lf)        LEFT JOIN _Reference225 emp ON _Fld2504RRef = client._IDRRef#(lf)where#(lf)_Fld672>='01.01.2022'#(lf)     AND nom._ParentIDRRef = '\xb5ad0e5b4356c20d11e7145dde9ec41c'::bytea --папка номенклатуры не служебная#(lf)and cast(ab._Description as varchar(1000)) ILIKE '%ИП%'#(lf)")
+in
+    Источник
+
+__ВсегоТренеров = 
+DISTINCTCOUNT('Пороги тренеров'[Сотрудник])
+__ВыполнениеПорога = 
+DIVIDE(
+    '_Меры2'[__ВыручкаФактПорог],
+    '_Меры2'[__ВыручкаПорог]
+)
+__ВыручкаПорог = SUM('Пороги тренеров'[ПорогМесяца])
+__ВыручкаФактПорог = 
+SUM('Пороги тренеров'[Сумма])
+__ДоляВышеПорога = 
+DIVIDE(
+    '_Меры2'[__Кол-воВышеПорога]
+    ,
+    DISTINCTCOUNT('Пороги тренеров'[Сотрудник])
+)
+__Кол-воВышеПорога = 
+countrows(
+    SELECTCOLUMNS(
+        FILTER(
+            'Пороги тренеров',
+            'Пороги тренеров'[Сумма]>='Пороги тренеров'[ПорогМесяца]
+        ),
+        "Тренер",'Пороги тренеров'[Сотрудник]
+    )
+)
+_ЧистыеДежурства(Gymmy) = 
+SUM('ДежурстваИтог'[ЧистоеДежурство])
+%Загрузки = 
+DIVIDE(
+    '_Меры2'[ЗагрузкаТренера],
+    SUM('ПосещенияСотрудников'[Часов в клубе]),
+    0
+)
+ЗагрузкаТренера = 
+'_Меры2'[mЗанято, ч (без отмен)] +
+'_Меры2'[_ЧистыеДежурства(Gymmy)] + 
+'Купоны'[_ЧасыКупоны1]+
+'Купоны'[_ЧасыКупоны2]
+mЗанято, ч (без отмен) = 
+VAR les =      
+FILTER(
+        'ВсеУроки'
+        ,
+        'ВсеУроки'[Купон] = "Не купон"&&'ВсеУроки'[Услуга]<>"Дежурство"&&'ВсеУроки'[ДатаРегистрации]<>BLANK()
+    )
+RETURN
+SUMX(
+    SUMMARIZE(
+        les,
+        'ВсеУроки'[Индекс]
+        ,
+        'ВсеУроки'[Итого минут]
+    ),
+    [Итого минут]
+)
+/60
+
+Пер-льKPIплан = 
+IF(
+    SELECTEDVALUE('_ПереключательKPI'[Параметр]) = "Выручка", 'Дневное планирование для Power BI (2)'[_Выручка план],
+    IF(
+        SELECTEDVALUE('_ПереключательKPI'[Параметр]) = "Кол-во услуг", 'Дневное планирование для Power BI (2)'[_Кол-во план],
+        IF(
+            SELECTEDVALUE('_ПереключательKPI'[Параметр]) = "Ср. Чек", 'Дневное планирование для Power BI (2)'[_ср чек план],
+            IF(
+            SELECTEDVALUE('_ПереключательKPI'[Параметр]) = "Часы", BLANK()
+            )
+        )
+    )
+)
+Пер-льKPIпланНИ = 
+IF(
+    SELECTEDVALUE('_ПереключательKPI'[Параметр]) = "Выручка", TOTALMTD('Дневное планирование для Power BI (2)'[_Выручка план],'_Спр Дата'[Date]),
+    IF(
+        SELECTEDVALUE('_ПереключательKPI'[Параметр]) = "Кол-во услуг",  TOTALMTD('Дневное планирование для Power BI (2)'[_Кол-во план],'_Спр Дата'[Date]),
+        IF(
+            SELECTEDVALUE('_ПереключательKPI'[Параметр]) = "Ср. Чек", TOTALMTD( 'Дневное планирование для Power BI (2)'[_ср чек план],'_Спр Дата'[Date]),
+            IF(
+            SELECTEDVALUE('_ПереключательKPI'[Параметр]) = "Часы", BLANK()
+            )
+        )
+    )
+)
+Пер-льKPIфакт = 
+var rev = '_Меры'[_Поступления]
+var num = '_Меры'[mКолУслуг]
+var av = '_Меры'[mСрЧек]
+var hours = '_Меры2'[ЗагрузкаТренера]
+RETURN
+IF(
+    SELECTEDVALUE('_ПереключательKPI'[Параметр]) = "Выручка",  IF(ISBLANK(rev), 0, rev),
+    IF(
+        SELECTEDVALUE('_ПереключательKPI'[Параметр]) = "Кол-во услуг", IF(ISBLANK(num), 0, num),
+        IF(
+            SELECTEDVALUE('_ПереключательKPI'[Параметр]) = "Ср. Чек", IF(ISBLANK(av), 0, av),
+            IF(
+            SELECTEDVALUE('_ПереключательKPI'[Параметр]) = "Часы", IF(ISBLANK(hours), 0, hours)
+            )
+        )
+    )
+)
+Пер-льKPIфактНИ = 
+var rev = TOTALMTD('_Меры'[_Поступления],'_Спр Дата'[Date])
+var num = TOTALMTD('_Меры'[mКолУслуг],'_Спр Дата'[Date])
+var av = TOTALMTD('_Меры'[mСрЧек],'_Спр Дата'[Date])
+var hours = TOTALMTD('_Меры2'[ЗагрузкаТренера],'_Спр Дата'[Date])
+return
+IF(
+    SELECTEDVALUE('_ПереключательKPI'[Параметр]) = "Выручка", IF(ISBLANK(rev), 0, rev),
+    IF(
+        SELECTEDVALUE('_ПереключательKPI'[Параметр]) = "Кол-во услуг", IF(ISBLANK(num), 0, num),
+        IF(
+            SELECTEDVALUE('_ПереключательKPI'[Параметр]) = "Ср. Чек", IF(ISBLANK(av), 0, av),
+            IF(
+            SELECTEDVALUE('_ПереключательKPI'[Параметр]) = "Часы", IF(ISBLANK(hours), 0, hours)
+            )
+        )
+    )
+)
+ФильтрПоДате = 
+VAR FilteredDate = MIN('_Спр Дата'[Date])
+RETURN
+    IF(
+        ISBLANK(FilteredDate),
+        "Нет фильтра",
+        FORMAT(FilteredDate, "dd.mm.yyyy")
+    )
+_Поступления = (sum('ДПФУ факт'[Поступления]))
+!МаксЗначДата = MAX('ДПФУ факт'[Период (2)])
+mКолУслуг = 
+if (
+    SELECTEDVALUE('_Спр Вид деятельности'[Вид деятельности])="Тренажёрный зал (ИП)",
+    // DISTINCTCOUNT('ДПФУ 01 2019 - 2021 (2)'[КодКлиента]),
+    SUMx(
+    FILTER(
+        'ДПФУ факт',
+        'ДПФУ факт'[Пользовательский]="Прочая услуга"&&'ДПФУ факт'[Услуга]<>"Контракт ИП"
+    ),
+    'ДПФУ факт'[Количество]
+)
+    ,
+SUMx(
+    FILTER(
+        'ДПФУ факт',
+        'ДПФУ факт'[Пользовательский]="Прочая услуга"&&'ДПФУ факт'[Вид занятий]<>"Тренажёрный зал (ИП)"
+    ),
+    'ДПФУ факт'[Количество]
+)
+)
+
+mСрЧек = 
+DIVIDE(
+    SUMx(
+        FILTER(
+            'ДПФУ факт',    
+            'ДПФУ факт'[Пользовательский]="Прочая услуга"&&'ДПФУ факт'[Вид занятий]<>"Тренажёрный зал (ИП)"
+        ),
+        'ДПФУ факт'[Поступления]),
+    '_Меры'[mКолУслуг])
+ВсеУроки = 
+UNION(
+    'Все уроки',
+    'Все уроки-2'
+)
+ВидЗанятий = 
+IF(
+    'ВсеУроки'[ТипВзаиморасчетов] = "ИП", 
+    "Тренажёрный зал (ИП)",
+    IF(
+        'ВсеУроки'[ВидДеятельности] = "Тренажёрный зал", 
+        "Тренажёрный зал (Штат)", 
+        'ВсеУроки'[ВидДеятельности]
+    )
+)
+ВидОплаты = 
+IF(
+    'ВсеУроки'[Платное] = "Платное",
+    "Платно",
+    IF(
+        ISBLANK('ВсеУроки'[Платное]) && 'ВсеУроки'[Раздел услуги] = "Дежурство",
+        "Дежурство",
+"Бесплатно"
+))
+ГруппаМаржинальности = 
+IF(
+    'ВсеУроки'[Платное] ="Клубное время" ,
+    "КлубноеВремя",
+    IF(
+    'ВсеУроки'[Платное] = "Резерв" ,
+    "Резерв",
+        IF(
+            'ВсеУроки'[ГруппаТренировки] in {"АР+ПТ"}, 
+            "АР+ПТ",
+            IF(
+                'ВсеУроки'[ГруппаТренировки] in {"МГ","СЕК","ПУ"}, 
+                "МГ/СЕК/ПУ",
+                IF(
+                    'ВсеУроки'[ГруппаТренировки] in {"ПТ"}, 
+                    "ПТ", 
+                    IF(
+                        'ВсеУроки'[ГруппаТренировки] in {"АР"}, 
+                        "АР", 
+                        "Другое"
+                    )
+                )
+            )
+        )
+    )
+)
+
+ДатаВремя = 
+'ВсеУроки'[ДатаНачала].[Date]&'ВсеУроки'[Список времени]
+Ключ2 = 'ВсеУроки'[Клуб]&'ВсеУроки'[Помещение]
+МаксЧасов = SWITCH(WEEKDAY('ВсеУроки'[ДатаНачала].[Date],2),
+6, 14,
+7, 14,16)
+
+Раздел = 
+var period = SELECTEDVALUE('_Спр Дата'[Date])
+var trainer = SELECTEDVALUE('_Спр Тренеры'[ФИО Тренера])
+var no_deg = 
+FILTER(
+    'ВсеУроки',
+    'ВсеУроки'[Услуга]<>"Дежурство"&&'ВсеУроки'[ДатаНачала] = period&&'ВсеУроки'[Сотрудник] = trainer
+)
+var with_deg = 
+FILTER(
+    'ВсеУроки',
+    'ВсеУроки'[ДатаНачала] = period&&'ВсеУроки'[Сотрудник] = trainer
+)
+RETURN
+IF(
+    NOT ISINSCOPE('_Спр ДатаВремя'[Список времени]),
+    BLANK(),
+    IF(
+        MINX(no_deg,'ВсеУроки'[Раздел услуги]) = BLANK(),
+    minx(with_deg,'ВсеУроки'[Раздел услуги]),
+    MINX(no_deg,'ВсеУроки'[Раздел услуги])
+    )
+)
+
+УникКод = 'ВсеУроки'[УслугаПолная]&'ВсеУроки'[Список времени]&'ВсеУроки'[Индекс]
+Услуга1 = 
+var period = SELECTEDVALUE('_Спр Дата'[Date])
+var trainer = SELECTEDVALUE('_Спр Тренеры'[ФИО Тренера])
+var no_deg = 
+FILTER(
+    'ВсеУроки',
+    'ВсеУроки'[Услуга]<>"Дежурство"&&'ВсеУроки'[ДатаНачала] = period&&'ВсеУроки'[Сотрудник] = trainer
+)
+var with_deg = 
+FILTER(
+    'ВсеУроки',
+    'ВсеУроки'[ДатаНачала]= period&&'ВсеУроки'[Сотрудник] = trainer
+)
+var section =
+IF(
+    NOT ISINSCOPE('_Спр ДатаВремя'[Список времени]),
+    BLANK(),
+    IF(
+        MINX(no_deg,'ВсеУроки'[Раздел услуги]) = BLANK(),
+    minx(with_deg,'ВсеУроки'[Раздел услуги]),
+    MINX(no_deg,'ВсеУроки'[Раздел услуги])
+    )
+)
+
+RETURN
+IF(
+    NOT ISINSCOPE('_Спр ДатаВремя'[Список времени]),
+    BLANK(),
+    minx(
+        filter(
+            with_deg,
+            'ВсеУроки'[Раздел услуги] = section
+        ),
+        'ВсеУроки'[УслугаПолная]
+    )
+)
+
+Час = HOUR('ВсеУроки'[Время начала])
+ЧасПик = RELATED('_Спр ДатаВремя'[ЧасПик])
+ДатаВремя = '_Спр ДатаВремя'[Date].[Date]&'_Спр ДатаВремя'[Список времени]
+ДатаВремя2 = 
+// IF(
+//     LEN(HOUR('СПР_ДатыВремя'[Список времени]))=1,'СПР_ДатыВремя'[Date].[Date]&"0"&'СПР_ДатыВремя'[Список времени],
+
+'_Спр ДатаВремя'[Date].[Date]&'_Спр ДатаВремя'[Список времени]
+ДатаДата = '_Спр ДатаВремя'[Date]
+ДеньНедели = SWITCH(TRUE(),
+WEEKDAY('_Спр ДатаВремя'[Date].[Date],2) = 1, "ПН",
+WEEKDAY('_Спр ДатаВремя'[Date].[Date],2) = 2, "ВТ",
+WEEKDAY('_Спр ДатаВремя'[Date].[Date],2) = 3, "СР",
+WEEKDAY('_Спр ДатаВремя'[Date].[Date],2) = 4, "ЧТ",
+WEEKDAY('_Спр ДатаВремя'[Date].[Date],2) = 5, "ПТ",
+WEEKDAY('_Спр ДатаВремя'[Date].[Date],2) = 6, "СБ",
+WEEKDAY('_Спр ДатаВремя'[Date].[Date],2) = 7, "ВС",
+BLANK())
+Макс часов = switch( true(),
+'_Спр ДатаВремя'[ДеньНедели] = "СБ", 14,
+'_Спр ДатаВремя'[ДеньНедели] = "ВС", 14, 16)
+НомерНедели = WEEKNUM('_Спр ДатаВремя'[Date])
+Час = HOUR('_Спр ДатаВремя'[Список времени])
+ЧасПик = 
+IF(
+    '_Спр ДатаВремя'[Час]<14&&'_Спр ДатаВремя'[Час]>=9&&'_Спр ДатаВремя'[Статус дня]="Рабочий",
+    1,
+    IF(
+        '_Спр ДатаВремя'[Час]<21&&'_Спр ДатаВремя'[Час]>=16&&'_Спр ДатаВремя'[Статус дня]="Рабочий",
+        1,
+        IF(
+            '_Спр ДатаВремя'[Час]<15&&'_Спр ДатаВремя'[Час]>=10&&'_Спр ДатаВремя'[Статус дня]="Выходной",
+            1,
+            0
+        )
+    )
+)
+ВидДеятельности = 
+IF(
+    'ДежурстваИтог'[Тип Взаиморасчетов] >0, 
+    "Тренажёрный зал (ИП)", 
+    SWITCH(
+    'ДежурстваИтог'[Помещение],
+        "Тренажерный зал", "Тренажёрный зал (Штат)",
+        "Бассейн", "Водные программы",
+        "Детская комната", "Детский клуб",
+        "Детский зал 1", "Детский клуб",
+        "Детская комната (детский фитнес)", "Детский клуб",
+        "Детский зал", "Детский клуб"
+    )
+)
+__Проверка выручка = if ('Дневное планирование для Power BI (2)'[_Выручка план]>'_Меры'[_Поступления],0,1)
+__Проверка кол-во = if ('Дневное планирование для Power BI (2)'[_Кол-во план]>'_Меры'[mКолУслуг],0,1)
+__Проверка Ср чек = if ('Дневное планирование для Power BI (2)'[_ср чек план]>'_Меры'[mСрЧек],0,1)
+_Выручка план = sum('Дневное планирование для Power BI (2)'[Стоимость тренировки])
+_Кол-во план = COUNT('Дневное планирование для Power BI (2)'[Клиент])
+_ср чек план = AVERAGE('Дневное планирование для Power BI (2)'[Стоимость тренировки])
+новыйКлиент = IF('Дневное планирование для Power BI (2)'[Код] = "И00050639", 'Дневное планирование для Power BI (2)'[Клиент], BLANK())
+НачалоМесяца = STARTOFMONTH('Дневное планирование для Power BI (2)'[Дата тренировки])
+_КолКупоны1 = 
+COUNTROWS(
+    FILTER(
+        'Купоны',
+        'Купоны'[ТипКупона] = "Купон 1"
+)
+)
+
+_КолКупоны2 = 
+COUNTROWS(
+    FILTER(
+        'Купоны',
+        'Купоны'[ТипКупона] = "Купон 2"
+)
+)
+
+_ЧасыКупоны1 = 
+SUMX(
+    FILTER(
+        'Купоны',
+        'Купоны'[ТипКупона] = "Купон 1"
+    ),
+    'Купоны'[Время купона]
+)
+_ЧасыКупоны2 = 
+SUMX(
+    FILTER(
+        'Купоны',
+        'Купоны'[ТипКупона] = "Купон 2"
+    ),
+    'Купоны'[Время купона]
+)
+ВидЗанятий = 
+IF('Купоны'[division_name] = "Тренажёрный зал","Тренажёрный зал (Штат)", 'Купоны'[division_name])
+ПосещенияСотрудников = 
+UNION(
+    'Посещения сотрудников 2025-1',
+    'Посещения сотрудников 2025-1 (2)',
+    'Посещения сотрудников 2025-1 (3)',
+    'Посещения сотрудников 2025-1 (4)'
+)
+

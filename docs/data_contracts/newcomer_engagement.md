@@ -17,7 +17,7 @@
 | История | предыдущий + текущий год; до 31 марта также второй предыдущий | CONFIRMED project policy |
 | Watermark | отсутствует | full bounded rebuild |
 | План | внешний Excel, не часть объекта | CONFIRMED current architecture |
-| SLA | не измерен | UNKNOWN |
+| SLA | данные доступны не позднее 08:30 по Москве | CONFIRMED — BR-014, решение пользователя 2026-07-30 |
 
 ## Колонки
 

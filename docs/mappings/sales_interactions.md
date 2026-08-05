@@ -2,19 +2,19 @@
 
 Статус: `BUSINESS MAPPING COMPLETE / TECHNICAL VALIDATION DEFERRED`.
 
-Mapping основан на текущих SQL/M/DAX, metadata и решениях пользователя 2026-07-24. Бизнес-гранулярность и правила подтверждены. Кардинальность телефонии и технические joins требуют проверки, поэтому физический объект и DDL пока не выбираются.
+Mapping основан на текущих SQL/M/DAX, metadata и решениях пользователя 2026-07-24. Общий core `mart.crm_interaction` и view `mart.v_sales_interaction` спроектированы в ADR-0016; DDL и реализация отложены до технической проверки.
 
-## Предварительная гранулярность
+## Подтверждённая гранулярность
 
-Кандидат:
+Одна строка на самостоятельный звонок из `InfoRg7146`; если у
+взаимодействия нет строки звонка — одна строка на `Reference67.ID`.
+Взаимодействие с двумя звонками даёт две строки. Это подтверждённое
+пользователем правило текущего отчёта и проверкой SV-026; нормализация звонков
+в одну строку запрещена.
 
-> одна строка на взаимодействие `Reference67.ID`.
-
-Логический ключ:
-
-> `interaction_id`.
-
-Эта гранулярность нужна для медианы длительности и детальной таблицы запланированных взаимодействий. Если одно взаимодействие содержит несколько самостоятельных звонков, потребуется отдельное решение после проверки `InfoRg7146`; смешивать их в одной строке без правила нельзя.
+Логический ключ — составной: `interaction_id` + ключ строки `InfoRg7146`
+(`Fld7147RRef`, `Fld8699`) для звонка; для interaction без звонка —
+`interaction_id` + технический признак «нет звонка».
 
 ## Предварительные целевые поля
 
@@ -28,14 +28,14 @@ Mapping основан на текущих SQL/M/DAX, metadata и решения
 | `duration_seconds` | длительность для средней и медианы | разница `Reference67.Fld821 − Fld820`; `NULL`, если начало `00:00`, разница отрицательна или отсутствует | `integer` | да | CONFIRMED — current measure | midnight, outliers |
 | `answered_flag` | ответ для текущей воронки звонков | `InfoRg7146.Fld7148` заполнен, но для входящего звонка принудительно `false` | `boolean` | нет | CONFIRMED — current measure | multiple phone rows |
 | `event_type_id` | стабильный вид события | `Reference67.Fld831` | UNKNOWN | да | CONFIRMED source | перечень значений |
-| `event_type_name` | русская категория события | mapping текущих GUID | `text`/малый код | да | current mapping | неизвестные типы |
-| `interaction_state_id` | состояние | `Reference67.Fld829` | UNKNOWN | да | CONFIRMED source | удалённые справочники |
-| `interaction_state_name` | состояние для визуала | `Reference224.Description`; звонки `В процессе → Закрыто` по текущему DAX | `text`/малый код | да | current rule | подтвердить переклассификацию |
+| `event_type_name` | русская категория события | mapping текущих 15 GUID; для прочих ID — `NULL`, как в текущем SQL | `text`/малый код | да | CONFIRMED current / SV-034 | не добавлять значение для `a11c516fb5884f2048dcdf57fd20462b` без отдельного бизнес-правила |
+| `interaction_state_id` | состояние | `Reference67.Fld829`; ключ `Запланировано` = `99a9ebb169a4e2a611eeb5e55b05d103`, `В процессе` = `99a9ebb169a4e2a611eeb5e55b05d101` | `bytea` → protected/text key | да | CONFIRMED current / SV-033 | плановая страница фильтрует по ключу `Запланировано` |
+| `interaction_state_name` | состояние для визуала | `Reference224.Description`; звонки `В процессе → Закрыто` по текущему DAX | `text`/малый код | да | CONFIRMED current / SV-033 | не использовать для фильтра плановой страницы |
 | `interaction_status_id` | статус | `Reference67.Fld830` | UNKNOWN | да | CONFIRMED source | перечень значений |
 | `interaction_status_name` | выполнено / не выполнено / отменено | mapping текущих GUID | `text`/малый код | да | current mapping | неизвестные статусы |
-| `manager_id` | стабильный оператор | `Reference67.Fld824` | UNKNOWN | нет | CONFIRMED source | пустые исполнители |
-| `manager_name` | имя оператора | `Reference225.Description` | `text` | нет | CONFIRMED need | не использовать как ключ |
-| `operator_club_id` | клуб задания, в котором трудоустроен менеджер | `Reference106.Fld1195`; требуется совпадение с `InfoRg6291.Fld6293` на дату создания | UNKNOWN | нет | CONFIRMED — user decision | employee-club interval cardinality |
+| `manager_id` | стабильный оператор | `Reference67.Fld824` | `bytea` → protected/text key | да | CONFIRMED source / physical join VALIDATED (SV-027) | 16.41% строк 2026 без совпавшего сотрудника; `LEFT JOIN` |
+| `manager_name` | имя оператора | `Reference225.Description` | `text` | да | CONFIRMED need / physical join VALIDATED (SV-027) | не использовать как ключ; `LEFT JOIN` |
+| `operator_club_id` | клуб задания | `Reference106.Fld1195`; текущий M не сверяет его с кадровой записью | `bytea` → protected/text key | да | CONFIRMED current | не добавлять кадровое условие по клубу: это изменит текущий отчёт |
 | `network_name` | Физкульт / Пушкинский | по подтверждённому клубу | `text`/малый код | нет | current rule | справочник клубов |
 | `client_key` | стабильный клиент | `Reference106.Fld1196` | UNKNOWN | да | CONFIRMED source | считать ли строки без клиента |
 | `client_code` | код клиента | `Reference141X1.Code` | `text` | да | CONFIRMED need | доступ |
@@ -43,9 +43,9 @@ Mapping основан на текущих SQL/M/DAX, metadata и решения
 | `client_phone` | телефон в детальной таблице | `Reference141X1.Fld1531` | `text` | да | CONFIRMED need | PII access |
 | `tenure_type` | New / Ex / Renew | `Reference106.Fld1190` + текущий GUID mapping | `text`/малый код | да | CONFIRMED current | неизвестные значения |
 | `client_status` | действительный / бывший / потенциальный | `Reference106.Fld1204` + текущий GUID mapping | `text`/малый код | да | CONFIRMED current | неизвестные значения |
-| `funnel_id` | стабильная воронка | `Reference106.Fld1191` | UNKNOWN | нет | CONFIRMED source | фильтр по ID |
+| `funnel_id` | стабильная воронка | `Reference106.Fld1191`; разрешённый набор: `99a9ebb169a4e2a611eecbf18a73ffa6`, `99b0e03a7af94bc911ef0167b7844d74`, `99b0e03a7af94bc911ef016b69a7124a` | `bytea` → protected/text key | нет | CONFIRMED current / SV-030 | при реализации сравнить с текущим текстовым отбором |
 | `funnel_name` | вид воронки | `Reference89.Description` | `text` | нет | CONFIRMED need | текущие три значения |
-| `campaign_id` | маркетинговая кампания | `Reference106.Fld1197` | UNKNOWN | да | CONFIRMED source | Jivo exclusion |
+| `campaign_id` | маркетинговая кампания | `Reference106.Fld1197`; для исключения Jivo: `99e886b88886661011f0ae4e3da6296e`, `99cc8098b8acd0e411efe53f048393c3` | `bytea` → protected/text key | да | CONFIRMED current / SV-031 | исключать только вместе с сервисной воронкой |
 | `campaign_name` | название кампании | `Reference145.Description` | `text` | да | current need | не использовать как filter key |
 | `channel_id` | канал | `Reference106.Fld1194` | UNKNOWN | да | CONFIRMED source | фактическое использование |
 | `cancellation_reason` | причина отмены | `Reference67.Fld828 → Reference202.Description` | `text` | да | current source | используется ли визуалом |
@@ -60,20 +60,29 @@ Mapping основан на текущих SQL/M/DAX, metadata и решения
 
 Интервал `InfoRg6291.Fld6298..Fld6299` проверяется на `Reference67.Fld823` (`ДатаСоздания`) — CONFIRMED.
 
-Связывать по `employee_id` и `operator_club_id`, а не по имени. Проверка должна использовать `EXISTS`/эквивалентную семиджойн-логику, чтобы несколько строк настроек сотрудника не размножали взаимодействие.
+Текущий M связывает `Менеджер` с кадровыми настройками по имени сотрудника,
+после чего проверяет `ДатаПриема <= ДатаСоздания <= ДатаУвольнения` (верхняя
+граница включительна; sentinel увольнения заменён на `2099-12-31`). Это
+сохранённое правило первого релиза. SV-032 на январе 2026 подтвердил: `EXISTS`
+с теми же условиями даёт ровно текущий результат `Table.Distinct` (98 798
+строк), устраняя только размножение одной interaction кадровыми строками и
+не удаляя самостоятельные звонки. Поэтому реализация использует `EXISTS`, а
+не прямой join или `Table.Distinct`. Смена связи с имени на ID сотрудника —
+методологическое улучшение и не входит в воспроизведение без отдельной сверки
+результата.
 
 ## Отбор воронок
 
 Текущая реализация оставляет:
 
-- `Продажа клубной карты`;
-- `Сервисная воронка ОП`;
-- `Корпоративная продажа`.
+- `Продажа клубной карты` — `99a9ebb169a4e2a611eecbf18a73ffa6`;
+- `Сервисная воронка ОП` — `99b0e03a7af94bc911ef0167b7844d74`;
+- `Корпоративная продажа` — `99b0e03a7af94bc911ef016b69a7124a`.
 
 Из сервисной воронки исключаются кампании:
 
-- `Заявка c Jivo-site Физкульт`;
-- `Заявка с Jivo-site (Пушкинский)`.
+- `Заявка c Jivo-site Физкульт` — `99e886b88886661011f0ae4e3da6296e`;
+- `Заявка с Jivo-site (Пушкинский)` — `99cc8098b8acd0e411efe53f048393c3`.
 
 Пользователь подтвердил оставить этот охват без изменений. Отбор следует выполнять по стабильным ID/кодам.
 
@@ -116,11 +125,9 @@ Mapping основан на текущих SQL/M/DAX, metadata и решения
 
 ## Блокеры
 
-1. Кардинальность `Reference67 → InfoRg7146` и правило нескольких звонков.
-2. Кардинальность настроек сотрудника после совпадения manager + club + position + interval.
-3. Технические правила `Marked` и архивных признаков.
-4. Фактические типы и объёмы.
-5. Контрольные значения.
+1. `CONFIRMED business rule`: SV-026 подтверждает 3 103 CRM-взаимодействия 2026 года с 2–3 строками `InfoRg7146`. Каждая строка регистра — отдельный звонок менеджера в рамках одного взаимодействия; report-view сохраняет прямой join и одну строку на звонок. Нормализация запрещена.
+2. Технические правила `Marked` и архивных признаков.
+3. Контрольные значения.
 
 ## Именование Power BI
 

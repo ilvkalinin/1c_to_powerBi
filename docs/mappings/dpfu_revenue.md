@@ -1,6 +1,6 @@
 # Source-to-target mapping: выручка ДПФУ
 
-Статус: `BUSINESS MAPPING COMPLETE / TECHNICAL VALIDATION DEFERRED`.
+Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0005/0012/0025 / TECHNICAL VALIDATION DEFERRED`.
 
 Mapping основан на текущих SQL/M/DAX, бизнес-описании и metadata. Это логическое сопоставление, а не решение о числе физических таблиц. SQL и DDL не создаются.
 
@@ -18,13 +18,16 @@ Mapping основан на текущих SQL/M/DAX, бизнес-описан�
 | `source_kind` | ветка посещения/продажи/ИП | константа по исходному регистру | `smallint`/`text` | нет | CONFIRMED BY DESIGN | взаимоисключаемость |
 | `club_id` | фактический клуб операции | `Fld7577` / `Fld7653` | UNKNOWN | нет | CONFIRMED metadata | orphan и расхождения |
 | `client_key` | стабильный обезличенный клиент для УЧК | `Fld7576` / `Fld7648` → защищённый ключ | UNKNOWN | да | CONFIRMED need | null, стабильность, защита |
+| `employee_id` | стабильный тренер для KPI Фитнеса | `Fld7582` / `Fld7652` → `Reference225.ID` | UNKNOWN | да | CONFIRMED — consumer `KPI Фитнеса` | orphan, deleted, null |
+| `employee_name` | отображаемое ФИО тренера | `Reference225.Description` | `text` | да | CONFIRMED — consumer `KPI Фитнеса` | дубли имён не являются ключом |
+| `client_code` | детальный код клиента для страницы дневного плана KPI | `Reference141X1.Code` | `text` | да | CONFIRMED — consumer `KPI Фитнеса` | доступ, маскирование и null |
 | `service_id` | стабильная номенклатура | `Fld7579` / `Fld7649` | UNKNOWN | нет | CONFIRMED metadata | orphan, deleted |
 | `service_name` | наименование для иерархии | `Reference163.Fld1761` либо `Description` | `text` | нет | CONFIRMED need / precedence pending | переименования |
 | `activity_id` | вид деятельности/подразделение | `Reference163.Fld1733 → Reference70.ID` | UNKNOWN | нет | CONFIRMED metadata | соответствие списку |
 | `activity_name` | русское название подразделения | `Reference70.Description`; тренажёрный зал штата переименовать целевым правилом | `text` | нет | CONFIRMED current | варианты написания |
 | `training_format_id` | формат тренировки | `Reference163.Fld1803 → Reference248.ID` | UNKNOWN | да | CONFIRMED metadata | null и удалённые |
 | `training_format_name` | русское название формата | `Reference248.Description`; `Платный урок → Групповое занятие` по текущему M | `text` | да | CONFIRMED current | варианты и null |
-| `service_group` | группа для структуры услуг | свойства номенклатуры и внешний справочник `Структура услуг фитнес` | `text` | да | BLOCKER | источник и уникальность |
+| `service_group` | группа для структуры услуг | внешний Excel-справочник `Структура услуг фитнес` | `text` | да | EXTERNAL / остаётся в Power BI | решение пользователя 2026-07-30 |
 | `client_category` | клиент/сотрудник/прочие | `Fld7583/Fld7656` и `Reference141X1.Fld1532` | `text`/`smallint` | нет | CONFIRMED current | точные исключения |
 | `payment_category` | чек/купон/клип-карта | основание `Reference59` и `Fld696` | `text`/`smallint` | да | current rule / consumer pending | нужен ли отчёту |
 | `calculation_category` | прочая услуга/аренда/ИП | подтверждённая классификация без повторного text matching в Power BI | `text`/`smallint` | нет | CONFIRMED current + user | классификация |
@@ -50,16 +53,19 @@ Mapping основан на текущих SQL/M/DAX, бизнес-описан�
 |---|---|---|---|---|---|---|
 | `revenue_date` | дата оплаты ИП | `AccumRg7370.Period::date`; не обрезать до месяца | `date` | нет | CONFIRMED — combined user decisions | частичный месяц |
 | `club_id` | клуб выручки ИП | `AccumRg7370.Fld7372` | UNKNOWN | нет | CONFIRMED metadata | клуб-корреспондент |
-| `service_id` | услуга/контракт ИП | текущий join через `Fld7371 → Reference59.Fld685` либо прямой `Fld7378` | UNKNOWN | да | BLOCKER | правильный источник услуги |
+| `service_id` | услуга/контракт ИП | `_Fld7371RRef → _Reference59._Fld685RRef → _Reference163._IDRRef`; `_Fld7378RRef` не использовать как fallback | `bytea` → protected/text key | да | CONFIRMED current rule / physical path VALIDATED (SV-019–SV-022): нулевая услуга исключается текущим фильтром `Description LIKE '%ИП%'` и `RecordKind = 0` | стабильный классификатор услуги вместо text matching |
 | `revenue_amount` | сумма оплат по рекуррентным договорам членства ИП | `SUM(AccumRg7370.Fld7377)` при подтверждённом `RecordKind` | `numeric` | нет | CONFIRMED rule / technical filter pending | знак и договор |
 
 ## Компонент D: планы
 
 Предварительная гранулярность текущего дневного плана:
 
-> дата плана × клуб × подразделение.
+> дата плана × клуб × подразделение × тренер × плановый клиент.
 
-Сотрудник и клиент не нужны показанным визуалам и могут быть агрегированы на стороне источника после проверки правил.
+Для отчёта «Выручка ДПФУ» сотрудник и клиент могут агрегироваться, но KPI
+Фитнеса подтверждает их потребность в дневной иерархии. Общий план сохраняет
+технические ключи сотрудника и клиента; код клиента выдаётся только модели с
+подтверждённой детализацией.
 
 | Целевая колонка | Бизнес-описание | Источник / преобразование | Тип PostgreSQL | NULL | Статус | Проверка |
 |---|---|---|---|---|---|---|
@@ -67,12 +73,15 @@ Mapping основан на текущих SQL/M/DAX, бизнес-описан�
 | `plan_month` | бюджетный месяц | `InfoRg6612.Fld6618` либо внешний бюджет | `date` | нет | source split pending | смысл двух дат |
 | `club_id` | клуб плана | `InfoRg6612.Fld6615` / внешний бюджет | UNKNOWN | нет | CONFIRMED current | единое измерение |
 | `activity_id` | подразделение плана | `InfoRg6612.Fld6614` через `Reference217` / внешний бюджет | UNKNOWN | да | current source | соответствие факту |
+| `employee_id` | тренер дневного плана | `InfoRg6612.Fld6616 → Reference225.ID` | UNKNOWN | да | CONFIRMED — KPI consumer | orphan, deleted |
+| `planned_client_key` | клиент, по которому составлен план | `InfoRg6612.Fld6617 → Reference141X1.ID` | `bytea` → защищённый `text`-key | да | CONFIRMED — KPI consumer / physical join VALIDATED (SV-016) | key protection, Active, dedupe |
+| `planned_client_code` | отображаемый код клиента | `Reference141X1.Code` | `text` | да | CONFIRMED — KPI consumer | доступ/маскирование |
 | `plan_type` | годовой С/С или текущий Т | константа источника | `smallint`/`text` | нет | CONFIRMED need | перечень типов |
 | `planned_revenue` | плановая выручка | `SUM(InfoRg6612.Fld6620)` / внешний бюджет | `numeric` | нет | CONFIRMED metadata | дополнительные источники |
 | `planned_quantity` | плановое количество услуг С/С | внешние `Бюджет` / `Бюджет по клубам`; не `InfoRg6612` | `numeric` | да | CONFIRMED current DAX / EXTERNAL | внешний контракт |
-| `planned_uch` | плановый УЧК | внешний бюджет | `numeric` | да | BLOCKER | источник |
-| `planned_regularity` | плановая регулярность | внешний бюджет | `numeric` | да | BLOCKER | источник |
-| `planned_average_check` | плановый средний чек | внешний бюджет либо производная | `numeric` | да | BLOCKER | формула |
+| `planned_uch` | плановый УЧК | внешний бюджет | `numeric` | да | EXTERNAL / остаётся в Power BI | решение пользователя 2026-07-30 |
+| `planned_regularity` | плановая регулярность | внешний бюджет | `numeric` | да | EXTERNAL / остаётся в Power BI | решение пользователя 2026-07-30 |
+| `planned_average_check` | плановый средний чек | внешний бюджет либо производная | `numeric` | да | EXTERNAL / остаётся в Power BI | решение пользователя 2026-07-30 |
 
 ## Power BI
 
@@ -99,7 +108,7 @@ Mapping основан на текущих SQL/M/DAX, бизнес-описан�
 ## Не переносить
 
 - ФИО клиента и DOB;
-- ФИО сотрудника, пока нет визуала по сотруднику;
+- ФИО сотрудника; KPI использует имя тренера, а не ФИО клиента;
 - сырые ссылки контрактов;
 - основной клуб доступа;
 - `LAG`-колонки и признаки предыдущих посещений;
@@ -111,11 +120,16 @@ Mapping основан на текущих SQL/M/DAX, бизнес-описан�
 
 1. Технические состояния `Active`, проведение и удаление.
 2. Точная связь договора ИП и допустимый `RecordKind`.
-3. Схемы внешних бюджетов/дополнительных планов для будущего Power BI-контракта.
-4. Внешний справочник услуг и его уникальность.
+3. Внешние бюджет, план мероприятий и классификатор услуг остаются в Power BI; в PostgreSQL mapping не включаются по решению пользователя 2026-07-30.
+4. Не идентифицировать `Дневное планирование ... (3)/(4)` и `Текущий план по выручке` как отдельные источники без нового evidence; подтверждённый дневной план — `InfoRg6612`.
 5. Фактические типы, объёмы и контрольные значения.
 
 Поле количества `InfoRg6612.Fld6621` и текущий `COUNT(Fld6619)` не переносятся: DAX использует из дневного плана только сумму выручки `Fld6620`.
+
+Техническая валидация SV-016 подтверждает: `_fld6617rref` имеет 100% покрытие
+с `_reference141x1` за 2026 год, поэтому это ссылка планового клиента.
+`_fld6619` совпадает с клиентом только в 70.92% строк и не используется как
+client join; его бизнес-смысл остаётся `UNKNOWN`.
 
 ## Обновление
 

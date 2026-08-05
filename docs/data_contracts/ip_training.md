@@ -1,0 +1,30 @@
+# Data contract: «Тренировки ИП»
+
+Статус: `DESIGNED / BLOCKED BY TECHNICAL VALIDATION / IMPLEMENTATION DEFERRED`.
+
+| Параметр | Значение | Статус |
+|---|---|---|
+| Объект | `mart.ip_training_daily` | ADR-0025 |
+| Таблица Power BI | `Тренировки ИП` | CONFIRMED |
+| Grain | дата × клуб × сотрудник × клиент × услуга | CONFIRMED |
+| Ключ | полный состав grain | VALIDATION_PENDING |
+| Обновление | ежедневно, bounded rebuild BR-003 | DESIGNED |
+| Power BI | Import; общий календарь | DESIGNED |
+
+| PostgreSQL | Power BI | Тип | NULL | Роль | Аддитивность | Скрыть |
+|---|---|---|---|---|---|---|
+| `training_date` | `Дата тренировки` | date | нет | FK даты | не мера | нет |
+| `club_id` | `ID клуба` | text | нет | FK клуба | не мера | да |
+| `employee_id` | `ID сотрудника` | text | нет | FK сотрудника | не мера | да |
+| `employee_name` | `Сотрудник` | text | нет | срез/detail | не мера | нет |
+| `client_key` | `Ключ клиента` | text | нет | distinct | не мера | да |
+| `client_code` | `Код клиента` | text | нет | detail | не мера | нет |
+| `service_id` | `ID услуги` | text | нет | FK услуги | не мера | да |
+| `service_name` | `Услуга` | text | нет | срез | не мера | нет |
+| `training_count` | `Количество тренировок` | bigint | нет | показатель | аддитивна | нет |
+
+Календарь, клубы, сотрудники и услуги имеют связи `1:*` к факту, single
+direction. DAX: сумма тренировок, distinct УЧК/тренеров, регулярность и доли.
+PostgreSQL: квалификация и схлопывание логических тренировок. Реализация
+заблокирована до доказательства ключа события, `VT4352`, branches и states.
+

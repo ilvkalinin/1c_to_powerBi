@@ -20,14 +20,14 @@ TEXT)` в фильтрах. В приложенном M нет фильтра `A
 
 ## Меры и модель Power BI
 
-`_ПереключательМер` содержит 13 статей. `_Факт` и `_ТекПлан` имеют отдельную
-ветку только для итога; ветви 02–13 закомментированы и fallback опирается на
-фильтрацию соответствующих таблиц. Без схемы модели неизвестно, является ли
-переключатель связанным с `Факт`, поэтому результат выбранной статьи не
-доказан. `_ТекПлан2` содержит явные ветви всех 13 статей, но его потребитель
+`_ПереключательМер` содержит 13 статей. PBIT подтверждает его активные
+однонаправленные связи с объединёнными `Факт`, `Тек план` и `Бюджет` по полю
+статьи. `_Факт` и `_ТекПлан` имеют отдельную ветку только для итога; ветви
+02–13 закомментированы и fallback опирается на фильтрацию соответствующих
+таблиц. `_ТекПлан2` содержит явные ветви всех 13 статей, но его потребитель
 в визуалах не доказан.
 
-Недоступны M-код и схема следующих таблиц: календарь, среднесрочный бюджет,
+Недоступны M-код следующих таблиц: календарь, среднесрочный бюджет,
 текущие планы членства/рецепции/ДРЦ/прочих статей, бюджеты DPFU/IP/рецепции/
 ДРЦ/прочих и таблица актуальности. Пользователь подтвердил, что это внешние
 Excel-факты той же структуры и периода, которые остаются в Power BI; поэтому
@@ -122,11 +122,13 @@ WHERE a._Fld7649RRef IS NOT NULL AND s._IDRRef IS NULL;
 -- GK-R06: кандидаты пересечения 7575 и 7646; не дедуплицировать автоматически.
 WITH v AS (
   SELECT _Period::date AS event_date,_Fld7577RRef AS club_id,_Fld7579RRef AS service_id,
-         _Fld7578RRef AS basis_id,_Fld7585 AS qty,_Fld7586 AS amount,_RecorderRRef AS recorder,_LineNo AS line_no
+         _Fld7578_RRRef AS basis_id,_Fld7585 AS qty,_Fld7586 AS amount,
+         _RecorderTRef AS recorder_type,_RecorderRRef AS recorder,_LineNo AS line_no
   FROM _AccumRg7575
 ), s AS (
   SELECT _Period::date AS event_date,_Fld7653RRef AS club_id,_Fld7649RRef AS service_id,
-         _Fld7647RRef AS sale_document_id,_Fld7657 AS qty,_Fld7659 AS amount,_RecorderRRef AS recorder,_LineNo AS line_no
+         _Fld7647_RRRef AS sale_document_id,_Fld7657 AS qty,_Fld7659 AS amount,
+         _RecorderTRef AS recorder_type,_RecorderRRef AS recorder,_LineNo AS line_no
   FROM _AccumRg7646
 )
 SELECT v.event_date,v.club_id,v.service_id,v.basis_id,v.recorder,v.line_no,s.recorder,s.line_no,v.qty,v.amount

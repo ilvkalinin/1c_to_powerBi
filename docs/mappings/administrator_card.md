@@ -1,8 +1,10 @@
 # Source-to-target mapping: карта администратора
 
-Статус: `BUSINESS MAPPING CONFIRMED / TECHNICAL VERIFICATION PENDING`.
+Статус: `BUSINESS MAPPING CONFIRMED / ARCHITECTURE DESIGNED — ADR-0023 / TECHNICAL VERIFICATION PENDING`.
 
-Mapping описывает одну логическую итоговую таблицу из Gymmy и внешнего журнала администраторов. Физический объект и SQL не выбираются.
+Mapping описывает одну семантическую таблицу Power BI из
+`mart.administrator_card_gymmy_daily` и внешнего журнала администраторов.
+PostgreSQL SQL не создаётся.
 
 ## Гранулярность
 

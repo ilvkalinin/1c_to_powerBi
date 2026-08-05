@@ -1,0 +1,165 @@
+
+Посещения
+let
+    Источник = Odbc.Query("Driver={PostgreSQL Unicode};Server=virt207.worldclass.nnov.ru; Database=gymdb_test;Timeout=300;Fetch=10000;UseDeclareFetch=1", "SELECT #(lf)#(tab)_Reference132._Description as club#(lf)  ,date_trunc('day',_AccumRg7575._Period) as period#(lf)  ,EXTRACT(hour from _Document325._Fld4172) as start_visit#(lf)  ,EXTRACT(hour from _Document325._Fld4174) as end_visit#(lf)  ,EXTRACT (year from age (_Reference59._Fld670,_Reference141X1._Fld1507)) as age#(lf)#(tab),CASE encode(_Reference141X1._Fld1527RRef,'hex')#(lf)#(tab)#(tab)WHEN 'b64a5b1e2f68583046c1077a96a54ebd' THEN 'Женский'#(lf)#(tab)#(tab)WHEN 'b26004420b2465b8457ffa23c30a12aa' THEN 'Мужской'#(lf)#(tab)#(tab)ELSE null#(lf)#(tab)END as sex_client#(lf)#(tab),count  (encode(_Document325._IDRRef,'hex')) as visits#(lf),SUM(#(lf)  (#(lf)    EXTRACT(epoch FROM #(lf)      CASE #(lf)        WHEN _Document325._Fld4174 <= TIMESTAMP '0001-01-01 00:00:00' OR _Document325._Fld4174 IS NULL#(lf)        THEN DATE_TRUNC('day', _Document325._Fld4172) + INTERVAL '23 hours 59 minutes 59 seconds'#(lf)        ELSE _Document325._Fld4174#(lf)      END#(lf)    ) - EXTRACT(epoch FROM _Document325._Fld4172)#(lf)  ) / 60#(lf)) AS sum_clubtime#(lf)FROM _AccumRg7575#(lf)left join _Document325#(lf)#(tab)on #(tab)_RecorderRRef =_Document325._IDRRef#(lf)left join _Reference132#(lf)#(tab)on #(tab)_Fld7577RRef =_Reference132._IDRRef#(lf)left join _Reference141X1#(lf)#(tab)on   _Document325._Fld4171RRef = _Reference141X1._IDRRef#(lf)left join _Reference59#(lf)#(tab)on   _Fld7578_RRRef = _Reference59._IDRRef#(lf)where #(lf)    _Document325._Fld4164RRef=decode('9a5a4c90d2b1aede4b91dcd1abe84c43','hex') --ВидПосещенияНовый = посещение#(lf)#(tab)and _Reference132._Description not in ('Детский развивающий центр',#(tab)'Управляющая компания')#(lf)#(tab)and _AccumRg7575._Period >= timestamp '2026-01-01'#(lf)#(tab)and _AccumRg7575._Period < current_date#(lf)#(tab)--and    cast(_Reference59._Description as varchar(1000)) is not null#(lf)#(tab)and    _Reference59._Description not like '%ИП%'#(lf)#(tab)and    _Reference59._Description not like '%сотрудн%'#(lf)#(tab)and _Document325._Fld4172 <> _Document325._Fld4174#(lf)#(tab)AND _Reference141X1._Fld1532RRef = decode('9e8eaa7b2e77c19f4a1c22a8d9c3efa1','hex') -- ТипКлиента = Клиент#(lf)group by #(lf)#(tab)_Reference132._Description #(lf)  ,date_trunc('day',_AccumRg7575._Period) #(lf)#(tab),CASE encode(_Reference141X1._Fld1527RRef,'hex')#(lf)#(tab)#(tab)WHEN 'b64a5b1e2f68583046c1077a96a54ebd' THEN 'Женский'#(lf)#(tab)#(tab)WHEN 'b26004420b2465b8457ffa23c30a12aa' THEN 'Мужской'#(lf)#(tab)#(tab)ELSE null#(lf)#(tab)END #(lf)    ,EXTRACT(hour from _Document325._Fld4172)#(lf)    ,EXTRACT(hour from _Document325._Fld4174)#(lf)    ,EXTRACT (year from age (_Reference59._Fld670,_Reference141X1._Fld1507))"),
+    #"Измененный тип" = Table.TransformColumnTypes(Источник,{{"period", type date}, {"sum_clubtime", type number}}),
+    #"Переименованные столбцы" = Table.RenameColumns(#"Измененный тип",{{"period", "Дата посещения"}, {"club", "Клуб"}, {"start_visit", "Время прихода"}, {"end_visit", "Время ухода"}, {"sex_client", "Клиент.Пол"}, {"visits", "Посещений"},{"sum_clubtime","Всего минут"}}),
+    #"Переупорядоченные столбцы" = Table.ReorderColumns(#"Переименованные столбцы",{"Дата посещения", "Время прихода", "Время ухода", "Клиент.Пол", "Клуб", "age", "Посещений", "Всего минут"})
+in
+    #"Переупорядоченные столбцы"
+
+ДПФУlet
+    Источник = Odbc.Query("Driver={PostgreSQL Unicode};Server=virt207.worldclass.nnov.ru;Database=gymdb_test;Timeout=300;Fetch=10000;UseDeclareFetch=1;", "WITH main_revenue AS (#(lf)    SELECT period, club, SUM(equity) AS revenue#(lf)    FROM (#(lf)        SELECT #(lf)            a._Period::DATE AS period,#(lf)            CAST(_Reference132._Description AS TEXT) AS club,#(lf)            _Fld7586 AS equity#(lf)        FROM _AccumRg7575 a#(lf)        LEFT JOIN _Reference132 ON _Fld7577RRef = _Reference132._IDRRef#(lf)        LEFT JOIN _Reference163 ON _Fld7579RRef = _Reference163._IDRRef#(lf)        LEFT JOIN _Reference70 ON _Reference163._Fld1733RRef = _Reference70._IDRRef#(lf)        WHERE #(lf)            _Period >= DATE_TRUNC('year', CURRENT_DATE) - INTERVAL '1 year'#(lf)            AND _Period < DATE_TRUNC('year', CURRENT_DATE) + INTERVAL '1 year'#(lf)            AND _Fld1795RRef = '\x9f007d77d46892dc47058346701d3bb6'::bytea#(lf)            AND _Reference70._Fld843RRef NOT IN ('\x9e10e872e49a551b4968a66b95c28905'::bytea, '\xac626c95655c992a471b27ca8f8812cd'::bytea)#(lf)            AND CAST(_Reference163._Description AS TEXT) <> 'посещение клуба'#(lf)            AND CAST(_Reference70._Description AS TEXT) IN ('Игровой зал','Восстановительный фитнес','Боевые искусства','Детский клуб','Водные программы','Групповые программы','Тренажёрный зал','Тренажерный зал')#(lf)        #(lf)        UNION ALL#(lf)        #(lf)        SELECT #(lf)            a._Period::DATE AS period,#(lf)            CAST(_Reference132._Description AS TEXT) AS club,#(lf)            _Fld7659 AS equity#(lf)        FROM _AccumRg7646 a#(lf)        LEFT JOIN _Reference132 ON _Fld7653RRef = _Reference132._IDRRef#(lf)        LEFT JOIN _Reference163 ON _Fld7649RRef = _Reference163._IDRRef#(lf)        LEFT JOIN _Reference70 ON _Reference163._Fld1733RRef = _Reference70._IDRRef#(lf)        WHERE #(lf)            _Period >= DATE_TRUNC('year', CURRENT_DATE) - INTERVAL '1 year'#(lf)            AND _Period < DATE_TRUNC('year', CURRENT_DATE) + INTERVAL '1 year'#(lf)            AND _Fld1795RRef NOT IN ('\x9f007d77d46892dc47058346701d3bb6'::bytea, '\x89de5e634e304b1a44efac5ab7088373'::bytea, '\xbaad3eba9d9fe9b441d2a1a897435c33'::bytea)#(lf)            AND _Reference70._Fld843RRef NOT IN ('\x9e10e872e49a551b4968a66b95c28905'::bytea, '\xac626c95655c992a471b27ca8f8812cd'::bytea)#(lf)            AND CAST(_Reference163._Description AS TEXT) <> 'посещение клуба'#(lf)            AND CAST(_Reference70._Description AS TEXT) IN ('Игровой зал','Восстановительный фитнес','Боевые искусства','Детский клуб','Водные программы','Групповые программы','Тренажёрный зал','Тренажерный зал')#(lf)    ) AS combined_main#(lf)    WHERE equity IS NOT NULL AND equity <> 0#(lf)    GROUP BY period, club#(lf)),#(lf)ip_revenue AS (#(lf)    SELECT #(lf)        a._Period::DATE AS period,#(lf)        CAST(_Reference132._Description AS TEXT) AS club,#(lf)        SUM(_Fld7377) AS revenue#(lf)    FROM _AccumRg7370 a#(lf)    LEFT JOIN _Reference59 ON a._Fld7371RRef = _Reference59._IDRRef#(lf)    LEFT JOIN _Reference163 ON _Reference59._Fld685RRef = _Reference163._IDRRef#(lf)    LEFT JOIN _Reference132 ON a._Fld7372RRef = _Reference132._IDRRef#(lf)    WHERE #(lf)        a._Period >= DATE_TRUNC('year', CURRENT_DATE) - INTERVAL '1 year'#(lf)        AND a._Period < DATE_TRUNC('year', CURRENT_DATE) + INTERVAL '1 year'#(lf)        AND CAST(_Reference163._Description AS TEXT) LIKE '%ИП%'#(lf)        AND _RecordKind = 0#(lf)    GROUP BY #(lf)        a._Period,#(lf)        _Reference132._Description#(lf))#(lf)SELECT #(lf)    date_trunc ('month' ,period) AS ""Дата"",#(lf)    club AS ""Клуб"",#(lf)    SUM(revenue) AS ""Сумма""#(lf)FROM (#(lf)    SELECT period, club, revenue FROM main_revenue#(lf)    UNION ALL#(lf)    SELECT period, club, revenue FROM ip_revenue#(lf)) AS total#(lf)GROUP BY #(lf)date_trunc ('month', period), #(lf)club#(lf)"),
+    #"Строки с примененным фильтром" = Table.SelectRows(Источник, each ([Клуб] <> null )),
+    #"Изменённый тип" = Table.TransformColumnTypes(#"Строки с примененным фильтром",{{"Дата", type date}, {"Клуб", type text}, {"Сумма", type number}})
+in
+    #"Изменённый тип"
+
+Рецепция
+let
+    Источник = Odbc.Query("Driver={PostgreSQL Unicode};Server=virt207.worldclass.nnov.ru;Database=gymdb_test;Timeout=300;Fetch=10000;UseDeclareFetch=1;", "WITH main_data AS (#(lf)    -- Регистр 1: _AccumRg7575#(lf)    SELECT #(lf)        a._Period::DATE AS ""Дата"",#(lf)        CAST(r132._Description AS TEXT) AS ""Клуб"",#(lf)        SUM(a._Fld7586) AS ""Сумма""#(lf)    FROM _AccumRg7575 a#(lf)    LEFT JOIN _Reference132 r132 ON a._Fld7577RRef = r132._IDRRef#(lf)    LEFT JOIN _Reference163 r163 ON a._Fld7579RRef = r163._IDRRef#(lf)    LEFT JOIN _Reference70 r70 ON r163._Fld1733RRef = r70._IDRRef#(lf)    WHERE #(lf)        a._Period >= DATE_TRUNC('year', CURRENT_DATE) - INTERVAL '1 year'#(lf)        AND a._Period < DATE_TRUNC('year', CURRENT_DATE) + INTERVAL '1 year'#(lf)        AND r163._Fld1795RRef IN (#(lf)            '\x9f007d77d46892dc47058346701d3bb6'::bytea, #(lf)            '\x8c807e46a4e01db54ab1c0ddf6eea237'::bytea#(lf)        )#(lf)        AND COALESCE(r70._Fld843RRef, '\x00'::bytea) NOT IN (#(lf)            '\x9e10e872e49a551b4968a66b95c28905'::bytea, #(lf)            '\xac626c95655c992a471b27ca8f8812cd'::bytea#(lf)        )#(lf)        AND CAST(COALESCE(r163._Description, '') AS TEXT) <> 'посещение клуба'#(lf)        AND CAST(COALESCE(r70._Description, '') AS TEXT) NOT IN (#(lf)            'Игровой зал','Восстановительный фитнес','Боевые искусства',#(lf)            'Детский клуб','Водные программы','Групповые программы',#(lf)            'Тренажёрный зал','Тренажерный зал', 'Бар','Прочие услуги SPA',#(lf)            'ДРЦ Умный малыш','Услуги прачечной','Прочие виды деятельности'#(lf)        )#(lf)    GROUP BY a._Period, r132._Description#(lf)#(lf)    UNION ALL#(lf)#(lf)    -- Регистр 2: _AccumRg7646#(lf)    SELECT #(lf)        a._Period::DATE AS ""Дата"",#(lf)        CAST(r132._Description AS TEXT) AS ""Клуб"",#(lf)        SUM(a._Fld7659) AS ""Сумма""#(lf)    FROM _AccumRg7646 a#(lf)    LEFT JOIN _Reference132 r132 ON a._Fld7653RRef = r132._IDRRef#(lf)    LEFT JOIN _Reference163 r163 ON a._Fld7649RRef = r163._IDRRef#(lf)    LEFT JOIN _Reference70 r70 ON r163._Fld1733RRef = r70._IDRRef#(lf)    WHERE #(lf)        a._Period >= DATE_TRUNC('year', CURRENT_DATE) - INTERVAL '1 year'#(lf)        AND a._Period < DATE_TRUNC('year', CURRENT_DATE) + INTERVAL '1 year'#(lf)        AND r163._Fld1795RRef NOT IN (#(lf)            '\x9f007d77d46892dc47058346701d3bb6'::bytea, #(lf)            '\x89de5e634e304b1a44efac5ab7088373'::bytea, #(lf)            '\xbaad3eba9d9fe9b441d2a1a897435c33'::bytea#(lf)        )#(lf)        AND COALESCE(r70._Fld843RRef, '\x00'::bytea) NOT IN (#(lf)            '\x9e10e872e49a551b4968a66b95c28905'::bytea, #(lf)            '\xac626c95655c992a471b27ca8f8812cd'::bytea#(lf)        )#(lf)        AND CAST(COALESCE(r163._Description, '') AS TEXT) <> 'посещение клуба'#(lf)        AND CAST(COALESCE(r70._Description, '') AS TEXT) NOT IN (#(lf)            'Игровой зал','Восстановительный фитнес','Боевые искусства',#(lf)            'Детский клуб','Водные программы','Групповые программы',#(lf)            'Тренажёрный зал','Тренажерный зал', 'Бар','Прочие услуги SPA',#(lf)            'ДРЦ Умный малыш','Услуги прачечной','Прочие виды деятельности'#(lf)        )#(lf)    GROUP BY a._Period, r132._Description#(lf))#(lf)SELECT #(lf)    date_trunc ('month',""Дата"") as ""Дата"", #(lf)    ""Клуб"", #(lf)    SUM(""Сумма"") AS ""Сумма""#(lf)FROM main_data#(lf)WHERE ""Сумма"" IS NOT NULL AND ""Сумма"" <> 0#(lf)GROUP BY #(lf)date_trunc ('month',""Дата""), #(lf)""Клуб""#(lf)"),
+    #"Строки с примененным фильтром" = Table.SelectRows(Источник, each ([Клуб] <> null and [Клуб] <> "Детский развивающий центр")),
+    #"Изменённый тип" = Table.TransformColumnTypes(#"Строки с примененным фильтром",{{"Дата", type date}, {"Клуб", type text}, {"Сумма", type number}})
+in
+    #"Изменённый тип"
+
+Членство
+let
+    Источник = Odbc.Query("Driver={PostgreSQL Unicode};Server=virt207.worldclass.nnov.ru;Database=gymdb_test;Timeout=300;Fetch=10000;UseDeclareFetch=1;", "WITH period_bounds AS (#(lf)    SELECT #(lf)        DATE_TRUNC('year', CURRENT_DATE) - INTERVAL '1 year' AS start_date,#(lf)        DATE_TRUNC('year', CURRENT_DATE) + INTERVAL '1 year' AS end_date#(lf)),#(lf)-- 1. Основная выручка (Контракты)#(lf)main_contracts AS (#(lf)        SELECT #(lf)        a._Period::DATE AS ""Дата"",#(lf)        CAST(r132._Description AS TEXT) AS ""Клуб"",#(lf)        SUM(#(lf)            CASE #(lf)                WHEN a._RecordKind = 1 THEN#(lf)                    CASE#(lf)                        -- Если это ПКО (Приходный кассовый ордер), сумма = 0#(lf)                        WHEN d331._IDRRef IS NOT NULL AND d331._IDRRef <> decode('00000000000000000000000000000000', 'hex') THEN 0#(lf)                        -- Если это Перевод, РКО, Списание, Отчет или Карта -> минус сумма#(lf)                        WHEN d316._IDRRef IS NOT NULL AND d316._IDRRef <> decode('00000000000000000000000000000000', 'hex') THEN -a._Fld7377#(lf)                        WHEN d333._IDRRef IS NOT NULL AND d333._IDRRef <> decode('00000000000000000000000000000000', 'hex') THEN -a._Fld7377#(lf)                        WHEN d340._IDRRef IS NOT NULL AND d340._IDRRef <> decode('00000000000000000000000000000000', 'hex') THEN -a._Fld7377#(lf)                        WHEN d315._IDRRef IS NOT NULL AND d315._IDRRef <> decode('00000000000000000000000000000000', 'hex') THEN -a._Fld7377#(lf)                        WHEN d304._IDRRef IS NOT NULL AND d304._IDRRef <> decode('00000000000000000000000000000000', 'hex') THEN -a._Fld7377#(lf)                        ELSE a._Fld7377#(lf)                    END#(lf)                ELSE a._Fld7377#(lf)            END#(lf)        ) AS ""Сумма""#(lf)    FROM _AccumRg7370 a#(lf)    CROSS JOIN period_bounds pb#(lf)    LEFT JOIN _Reference59 r59 ON a._Fld7371RRef = r59._IDRRef#(lf)    LEFT JOIN _Reference132 r132 ON r59._Fld687RRef = r132._IDRRef#(lf)    LEFT JOIN _Reference163 r163 ON r59._Fld685RRef = r163._IDRRef#(lf)    LEFT JOIN _Reference134 r134 ON a._Fld7376RRef = r134._IDRRef#(lf)    -- Документы для определения типа операции#(lf)    LEFT JOIN _Document316 d316 ON a._RecorderRRef = d316._IDRRef#(lf)    LEFT JOIN _Document331 d331 ON a._RecorderRRef = d331._IDRRef#(lf)    LEFT JOIN _Document333 d333 ON a._RecorderRRef = d333._IDRRef#(lf)    LEFT JOIN _Document340 d340 ON a._RecorderRRef = d340._IDRRef#(lf)    LEFT JOIN _Document315 d315 ON a._RecorderRRef = d315._IDRRef#(lf)    LEFT JOIN _Document304 d304 ON a._RecorderRRef = d304._IDRRef#(lf)#(lf)    LEFT JOIN _Document332 d332 ON a._RecorderRRef = d332._IDRRef#(lf)    LEFT JOIN _Document285 d285 ON a._RecorderRRef = d285._IDRRef#(lf)    LEFT JOIN _Document346 d346 ON a._RecorderRRef = d346._IDRRef#(lf)    LEFT JOIN _Document327 d327 ON a._RecorderRRef = d327._IDRRef#(lf)    LEFT JOIN _Document305 d305 ON a._RecorderRRef = d305._IDRRef#(lf)    LEFT JOIN _Document339 d339 ON a._RecorderRRef = d339._IDRRef#(lf)    LEFT JOIN _Document296 d296 ON a._RecorderRRef = d296._IDRRef#(lf)    LEFT JOIN _Document317 d317 ON a._RecorderRRef = d317._IDRRef#(lf)    WHERE #(lf)        a._Period >= pb.start_date #(lf)        AND a._Period <pb.end_date#(lf)        -- Фильтр: Тип контракта = Контракт#(lf)        AND r59._Fld696RRef <> '\x9b656ee141a764e44de79e83cd30c1b2'::bytea#(lf)        -- Фильтр: Исключаем ИП#(lf)        AND (r59._Description IS NULL OR CAST(r59._Description AS TEXT) NOT LIKE '%ИП%')#(lf)        -- Фильтр: Исключаем ДСУ в аналитике#(lf)        AND CAST(COALESCE(r134._Description, '') AS TEXT) NOT LIKE '%ДСУ%'#(lf)        AND d332._IDRRef IS NULL#(lf)        AND COALESCE(d316._IDRRef, d331._IDRRef, d333._IDRRef, d340._IDRRef, d315._IDRRef, d304._IDRRef, d285._IDRRef, d346._IDRRef, d327._IDRRef, d305._IDRRef, d339._IDRRef, d296._IDRRef, d317._IDRRef) IS NOT NULL#(lf)    GROUP BY a._Period::DATE, r132._Description),#(lf)-- 2. Прочие услуги по членству (Таблица 2)#(lf)other_services AS (#(lf)    SELECT #(lf)        a._Period::DATE AS ""Дата"",#(lf)        CAST(r132._Description AS TEXT) AS ""Клуб"",#(lf)        SUM(#(lf)            CASE #(lf)                WHEN a._RecordKind = 1 THEN#(lf)                    CASE#(lf)                        -- Если это ПКО (Приходный кассовый ордер), сумма = 0#(lf)                        WHEN d331._IDRRef IS NOT NULL AND d331._IDRRef <> decode('00000000000000000000000000000000', 'hex') THEN 0#(lf)                        -- Если это Перевод, РКО, Списание, Отчет или Карта -> минус сумма#(lf)                        WHEN d316._IDRRef IS NOT NULL AND d316._IDRRef <> decode('00000000000000000000000000000000', 'hex') THEN -a._Fld7377#(lf)                        WHEN d333._IDRRef IS NOT NULL AND d333._IDRRef <> decode('00000000000000000000000000000000', 'hex') THEN -a._Fld7377#(lf)                        WHEN d340._IDRRef IS NOT NULL AND d340._IDRRef <> decode('00000000000000000000000000000000', 'hex') THEN -a._Fld7377#(lf)                        WHEN d315._IDRRef IS NOT NULL AND d315._IDRRef <> decode('00000000000000000000000000000000', 'hex') THEN -a._Fld7377#(lf)                        WHEN d304._IDRRef IS NOT NULL AND d304._IDRRef <> decode('00000000000000000000000000000000', 'hex') THEN -a._Fld7377#(lf)                        ELSE a._Fld7377#(lf)                    END#(lf)                ELSE a._Fld7377#(lf)            END#(lf)        ) AS ""Сумма""#(lf)    FROM _AccumRg7370 a#(lf)    CROSS JOIN period_bounds pb#(lf)    LEFT JOIN _Reference59 r59 ON a._Fld7371RRef = r59._IDRRef#(lf)    LEFT JOIN _Reference132 r132 ON r59._Fld687RRef = r132._IDRRef#(lf)    LEFT JOIN _Reference163 r163 ON r59._Fld685RRef = r163._IDRRef#(lf)    -- Документы для определения типа операции#(lf)     LEFT JOIN _Document316 d316 ON a._RecorderRRef = d316._IDRRef#(lf)    LEFT JOIN _Document331 d331 ON a._RecorderRRef = d331._IDRRef#(lf)    LEFT JOIN _Document333 d333 ON a._RecorderRRef = d333._IDRRef#(lf)    LEFT JOIN _Document340 d340 ON a._RecorderRRef = d340._IDRRef#(lf)    LEFT JOIN _Document315 d315 ON a._RecorderRRef = d315._IDRRef#(lf)    LEFT JOIN _Document304 d304 ON a._RecorderRRef = d304._IDRRef#(lf)#(lf)    LEFT JOIN _Document332 d332 ON a._RecorderRRef = d332._IDRRef#(lf)    LEFT JOIN _Document285 d285 ON a._RecorderRRef = d285._IDRRef#(lf)    LEFT JOIN _Document346 d346 ON a._RecorderRRef = d346._IDRRef#(lf)    LEFT JOIN _Document327 d327 ON a._RecorderRRef = d327._IDRRef#(lf)    LEFT JOIN _Document305 d305 ON a._RecorderRRef = d305._IDRRef#(lf)    LEFT JOIN _Document339 d339 ON a._RecorderRRef = d339._IDRRef#(lf)    LEFT JOIN _Document296 d296 ON a._RecorderRRef = d296._IDRRef#(lf)    LEFT JOIN _Document317 d317 ON a._RecorderRRef = d317._IDRRef#(lf)#(lf)    WHERE #(lf)        a._Period >= pb.start_date AND a._Period < pb.end_date#(lf)        -- Фильтр: ВидДеятельностиНоменклатуры = ""ПрочиеУслугиПоЧленству""#(lf)        AND r163._Fld1733RRef = '\x80d100505681013811e4d16f28bf1aab'::bytea#(lf)        AND d332._IDRRef IS NULL#(lf)        AND COALESCE(d316._IDRRef, d331._IDRRef, d333._IDRRef, d340._IDRRef, d315._IDRRef, d304._IDRRef, d285._IDRRef, d346._IDRRef, d327._IDRRef, d305._IDRRef, d339._IDRRef, d296._IDRRef, d317._IDRRef) IS NOT NULL#(lf) #(lf)    GROUP BY a._Period::DATE, r132._Description#(lf)),#(lf)-- 3. Товары (Полотенца, Гостевые, Заморозки) - Таблица 3#(lf)goods AS (#(lf)    SELECT #(lf)        a._Period::DATE AS ""Дата"",#(lf)        CAST(#(lf)            CASE #(lf)                WHEN CAST(r163._Description AS TEXT) LIKE '%Со-д%' #(lf)                  OR CAST(r163._Description AS TEXT) LIKE '%со-д%' #(lf)                THEN r59_club._Description#(lf)                ELSE r132._Description#(lf)            END AS TEXT#(lf)        ) AS ""Клуб"",#(lf)        SUM(a._Fld7749) AS ""Сумма""#(lf)    FROM _AccumRg7739 a#(lf)    CROSS JOIN period_bounds pb#(lf)    LEFT JOIN _Reference132 r132 ON a._Fld7746RRef = r132._IDRRef#(lf)    LEFT JOIN _Reference163 r163 ON a._Fld7743RRef = r163._IDRRef#(lf)    LEFT JOIN _Reference59 r59 ON a._Fld7741RRef = r59._IDRRef#(lf)    LEFT JOIN _Reference132 r59_club ON r59._Fld687RRef = r59_club._IDRRef#(lf)    WHERE #(lf)        a._Period >= pb.start_date AND a._Period < pb.end_date#(lf)        AND a._RecordKind = 1#(lf)        AND a._Fld7743RRef <> decode('00000000000000000000000000000000', 'hex')#(lf)        AND (#(lf)            CAST(r163._Description AS TEXT) LIKE '%Полоте%' OR#(lf)            CAST(r163._Description AS TEXT) LIKE '%полоте%' OR#(lf)            CAST(r163._Description AS TEXT) LIKE '%Госте%' OR#(lf)            CAST(r163._Description AS TEXT) LIKE '%гостев%' OR#(lf)            CAST(r163._Description AS TEXT) LIKE '%день здоровья%' OR#(lf)            CAST(r163._Description AS TEXT) LIKE '%Переоформление%' OR#(lf)            CAST(r163._Description AS TEXT) LIKE '%Адаптац%' OR#(lf)            CAST(r163._Description AS TEXT) LIKE '%Вход для детей%' OR#(lf)            CAST(r163._Description AS TEXT) LIKE '%Заморо%' OR#(lf)            CAST(r163._Description AS TEXT) LIKE '%заморо%'#(lf)        )#(lf)        -- Исключаем названия, которые Power Query отбрасывает#(lf)        AND CAST(r163._Description AS TEXT) NOT IN ('Полотенце', 'Аренда полотенца (разовая)')#(lf)    GROUP BY a._Period::DATE, r132._Description, r59_club._Description, r163._Description#(lf)    )#(lf)-- Финальное объединение#(lf)SELECT #(lf)    date_trunc ('month',""Дата"") as ""Дата"", #(lf)    ""Клуб"", #(lf)    SUM(""Сумма"") AS ""Сумма""#(lf)FROM (#(lf)    SELECT ""Дата"", ""Клуб"", ""Сумма"" FROM main_contracts#(lf)    UNION ALL#(lf)    SELECT ""Дата"", ""Клуб"", ""Сумма"" FROM other_services#(lf)    UNION ALL#(lf)    SELECT ""Дата"", ""Клуб"", ""Сумма"" FROM goods#(lf)) AS total#(lf)WHERE ""Клуб"" IS NOT NULL#(lf)GROUP BY date_trunc ('month',""Дата""), ""Клуб""#(lf)"),
+    #"Строки с примененным фильтром" = Table.SelectRows(Источник, each ([Клуб] <> null)),
+    #"Изменённый тип" = Table.TransformColumnTypes(#"Строки с примененным фильтром",{{"Дата", type date}, {"Клуб", type text}, {"Сумма", type number}})
+in
+    #"Изменённый тип"
+
+ВыручкаВсего = 
+VAR selected_date = MIN('_Спр_даты'[Date])
+var prevmonthdate = EDATE(selected_date,-1)
+VAR selected_month = MONTH(prevmonthdate)
+var selected_year = YEAR(prevmonthdate)
+var rev_membership = 
+SUMX(
+    FILTER(
+        'Членство',
+        'Членство'[Дата].[№Месяца]=selected_month&&'Членство'[Дата].[Год]=selected_year
+    ),
+    'Членство'[Сумма]
+)
+var rev_fitness = 
+SUMX(
+    FILTER(
+        'ДПФУ',
+        'ДПФУ'[Дата].[№Месяца]=selected_month&&'ДПФУ'[Дата].[Год]=selected_year
+    ),
+    'ДПФУ'[Сумма]
+)var rev_reception = 
+SUMX(
+    FILTER(
+        'Рецепция',
+        'Рецепция'[Дата].[№Месяца]=selected_month&&'Рецепция'[Дата].[Год]=selected_year
+    ),
+    'Рецепция'[Сумма]
+)
+
+return rev_membership+rev_fitness+rev_reception
+
+ВыручкаВсегоГрафик = 
+VAR selected_date = MIN('_Спр_даты'[Date])
+var prevmonthdate = EDATE(selected_date,0)
+VAR selected_month = MONTH(prevmonthdate)
+var selected_year = YEAR(prevmonthdate)
+var rev_membership = 
+SUMX(
+    FILTER(
+        'Членство',
+        'Членство'[Дата].[№Месяца]=selected_month&&'Членство'[Дата].[Год]=selected_year
+    ),
+    'Членство'[Сумма]
+)
+var rev_fitness = 
+SUMX(
+    FILTER(
+        'ДПФУ',
+        'ДПФУ'[Дата].[№Месяца]=selected_month&&'ДПФУ'[Дата].[Год]=selected_year
+    ),
+    'ДПФУ'[Сумма]
+)var rev_reception = 
+SUMX(
+    FILTER(
+        'Рецепция',
+        'Рецепция'[Дата].[№Месяца]=selected_month&&'Рецепция'[Дата].[Год]=selected_year
+    ),
+    'Рецепция'[Сумма]
+)
+
+return rev_membership+rev_fitness+rev_reception
+
+ВыручкаФитнес = 
+VAR selected_date = MIN('_Спр_даты'[Date])
+var prevmonthdate = EDATE(selected_date,-1)
+VAR selected_month = MONTH(prevmonthdate)
+var selected_year = YEAR(prevmonthdate)
+return 
+SUMX(
+    FILTER(
+        'ДПФУ',
+        'ДПФУ'[Дата].[№Месяца]=selected_month&&'ДПФУ'[Дата].[Год]=selected_year
+    ),
+    'ДПФУ'[Сумма]
+)
+
+ВыручкаФитнесГрафик = 
+VAR selected_date = MIN('_Спр_даты'[Date])
+var prevmonthdate = EDATE(selected_date,0)
+VAR selected_month = MONTH(prevmonthdate)
+var selected_year = YEAR(prevmonthdate)
+return 
+SUMX(
+    FILTER(
+        'ДПФУ',
+        'ДПФУ'[Дата].[№Месяца]=selected_month&&'ДПФУ'[Дата].[Год]=selected_year
+    ),
+    'ДПФУ'[Сумма]
+)
+
+ДоляФитнеса = 
+DIVIDE(
+    '__Меры'[ВыручкаФитнес],
+    '__Меры'[ВыручкаВсего]
+)
+
+ДоляФитнесаГрафик = 
+DIVIDE(
+    '__Меры'[ВыручкаФитнесГрафик],
+    '__Меры'[ВыручкаВсегоГрафик]
+)
+
+Выручка на м2 = 
+DIVIDE(
+    '__Меры'[ВыручкаВсего],
+    SUM('Площади'[Площадь])
+)
+
+АктивнаяБаза = 
+DIVIDE(
+    CALCULATE(
+        '__Меры'[КБФакт],
+        'КБ факт'[Активная база] = "Активная база"
+    ),
+    '__Меры'[КБФакт]
+)
+МаксЧКвКлубе = 
+MAXX(
+    VALUES(
+        '_СпрЧасы'[Value]
+    ),
+    var currentHour = '_СпрЧасы'[Value]
+    RETURN
+        CALCULATE(
+            SUM('Посещения'[Посещений]),
+            FILTER(
+                'Посещения',
+                'Посещения'[Время прихода]<currentHour&&'Посещения'[Время ухода]>=currentHour
+            )
+        )
+)
+

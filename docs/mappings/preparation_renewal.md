@@ -1,0 +1,88 @@
+# Source-to-target mapping: «Подготовка к продлению»
+
+Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0013 / TECHNICAL VALIDATION DEFERRED`.
+Спроектирован `mart.preparation_renewal_checkpoint`; SQL и физические объекты не создаются.
+
+## Гранулярность
+
+Кандидат одной строки:
+
+> один контракт × контрольная точка подготовки `7/14/21/28/30`.
+
+Кандидат ключа: `(contract_id, checkpoint_day)`.
+
+## Целевые колонки
+
+| Целевая колонка | Бизнес-описание | Исходная таблица | Исходная колонка | Преобразование | PostgreSQL тип | NULL | Гранулярность | Статус | Источник подтверждения | Тест |
+|---|---|---|---|---|---|---|---|---|---|---|
+| `contract_id` | стабильный идентификатор контракта | `Reference59` | `ID` | явное hex/text-представление ссылки | `text` | нет | contract × checkpoint | CONFIRMED current source | M `Абонементы` | уникальность `ID` |
+| `contract_code` | отображаемый код для детализации | `Reference59` | `Code` | явный `text`; не ключ join | `text` | нет | contract × checkpoint | CONFIRMED current consumer and access policy BR-017 | M и скриншот модели | дубли `Code` |
+| `client_id` | клиент контракта | `Reference59` | `Fld681` | явное hex/text-представление | `text` | нет | contract × checkpoint | CONFIRMED current source | M join с visit client | orphan, null |
+| `membership_start_date` | дата начала контракта | `Reference59` | `Fld671` | `::date` | `date` | нет | contract × checkpoint | CONFIRMED current source | M | sentinel, end >= start |
+| `membership_end_date` | дата окончания и база окна | `Reference59` | `Fld672` | `::date` | `date` | нет | contract × checkpoint | CONFIRMED current source | M/DAX | boundary, timezone |
+| `access_club_id` | клуб доступа | `Reference59` | `Fld687` | явное hex/text-представление | `text` | нет | contract × checkpoint | CONFIRMED current source | M | orphan |
+| `access_club_name` | название клуба для визуала | `Reference132` | `Description` | join по ID клуба | `text` | нет | contract × checkpoint | CONFIRMED current source | M | один клуб на ID |
+| `checkpoint_day` | контрольный срез подготовки | generated | — | одно из `7,14,21,28,30` | `smallint` | нет | contract × checkpoint | CONFIRMED current model | M/DAX | допустимые значения |
+| `checkpoint_date` | дата, на которой выводится срез | `Reference59` | `Fld672` | `membership_end_date - 121 days + checkpoint_day` | `date` | нет | contract × checkpoint | CONFIRMED user decision | пользователь 2026-07-29; текущий DAX | примеры на контрактах |
+| `visit_count_to_checkpoint` | накопительное число посещений в 30-дневном окне к срезу | `AccumRg7575` | `Period`, `Fld7576`, `Fld7578`, `Fld7579` | события контракта и клиента; текущая M-логика 120–90 дней до окончания, кумулятивно по checkpoint | `integer` | нет, `0` | contract × checkpoint | CONFIRMED current calculation / technical semantics pending | M | rows vs documents vs quantity |
+| `visit_bucket` | категория посещаемости | derived | — | `0`, `1`, `2`, `3`, `4+` | `text` | нет | contract × checkpoint | CONFIRMED | описание и DAX | границы |
+| `target_visit_count` | минимум раз в неделю | generated | — | `1,2,3,4,4` для checkpoint `7,14,21,28,30` | `smallint` | нет | contract × checkpoint | CONFIRMED | описание | соответствие точке |
+| `below_target_flag` | ниже целевой посещаемости | derived | — | `visit_count_to_checkpoint < target_visit_count` | `boolean` | нет | contract × checkpoint | CONFIRMED | описание | пороговые значения |
+| `frozen_at_checkpoint_flag` | заморожен на дату среза | `InfoRg5859`, `AccumRg7478` | `Fld5860`, `Fld5862`, `Fld5863`, движения | `EXISTS` по интервалу после доказательства join; не `NATURAL...JOIN` | `boolean` | нет | contract × checkpoint | CONFIRMED current DAX / technical join pending | DAX заморозок | overlap, дубли, границы |
+| `age_group` | возрастной срез | `Reference141X1`, `Reference59` | `Fld1507`, `Fld670` | точный календарный возраст на дату активации: `<14`, `14–17`, `18+` | `text` | да | contract × checkpoint | CONFIRMED user decision | пользователь 2026-07-29; BR-008 | дни рождения, null |
+| `membership_tenure` | `New` / `Renew` / `Ex` | `Reference59` | `Fld694` | текущий GUID mapping | `text` | нет | contract × checkpoint | CONFIRMED current calculation / IDs technical pending | M | unknown GUIDs |
+
+## Подтверждённые источники
+
+| Объект | Назначение | Статус | Доказательство |
+|---|---|---|---|
+| `Reference59` | контракт, клиент, даты, клуб, стаж | CONFIRMED current source | M, source catalogue |
+| `Reference141X1` | дата рождения и код клиента | CONFIRMED current source / physical name pending | M, source catalogue |
+| `Reference132` | клуб | CONFIRMED current source | M, source catalogue |
+| `AccumRg7575` | события посещений, связанные с контрактом и клиентом | CONFIRMED current source / semantics pending | M, source catalogue |
+| `Reference163` | отбор номенклатуры `посещение клуба` | CONFIRMED current source / textual filter pending | M, source catalogue |
+| `AccumRg7478`, `InfoRg5859` | движения и интервалы заморозок | CONFIRMED current source / join pending | M, source catalogue |
+| `InfoRg6015` | календарь Power BI | CONFIRMED current source | M; source metadata |
+| Excel «Подготовка базы план» | план по дате и клубу | CONFIRMED external / excluded from SQL | пользовательское решение 2026-07-29; скриншот связей |
+
+## Reuse review
+
+| Проверка | Результат | Статус / доказательство |
+|---|---|---|
+| Проверенные источники из `docs/catalogs/source_objects.md` | `Reference59`, `Reference141X1`, `Reference132`, `AccumRg7575`, `Reference163`, `AccumRg7478`, `InfoRg5859` уже используются; `InfoRg6015` доказан source metadata, но пока отсутствует в каталоге. | CONFIRMED catalog, M and metadata |
+| Проверенные продукты из `docs/catalogs/data_products.md` | Проверены `mart.contract_usage`, `mart.renewal_management_contract`, `mart.newcomer_engagement_milestone`; набора для этого 30-дневного окна нет. | CONFIRMED catalog |
+| Проверенные правила из `docs/catalogs/business_rules.md` | BR-002, BR-003, BR-007, BR-008, BR-012, BR-013 применимы; для возраста принят BR-008. | CONFIRMED catalog and user decision |
+| Сравнение гранулярности | `contract_usage`: контракт; `renewal_management`: заканчивающийся контракт; newcomer: контракт × клиент × checkpoint. Здесь контракт × checkpoint. | CONFIRMED evidence |
+| Сравнение ключей | Кандидат `(contract_id, checkpoint_day)` не совпадает с ключами существующих продуктов. | CONFIRMED design evidence |
+| Сравнение бизнес-семантики | Существующие факты считают весь срок, Renew или первые дни действия; отчёт считает месяц **до** периода продления и исключает заморозку в срезе. | CONFIRMED current logic |
+| Решение (`REUSE` / `EXTEND` / `NEW` / `NOT_APPLICABLE`) | `NEW` `mart.preparation_renewal_checkpoint`; REUSE общих календаря/клубов и source rules. | DESIGNED — ADR-0013 |
+| Причина решения | Общий grain без подтверждённых потребителей не выделяется; existing facts имеют несовместимое время. | CONFIRMED BR-002 |
+| Затронутые существующие потребители | `newcomer_engagement` и `renew_contract_usage` делят technical validation посещений; их утверждённая бизнес-логика не меняется. | CONFIRMED |
+
+## Неизвестные поля, риски и отклонённые связи
+
+| Статус | Элемент | Риск / причина | Проверка / следующее действие |
+|---|---|---|---|
+| VALIDATION_PENDING | `AccumRg7575.Fld7578 → Reference59.ID` | основание полиморфно; строка может не быть одним посещением | `NOT_EXECUTED — ожидается подключение к корпоративной сети`: тип ссылки, orphan, cardinality, rows/documents/quantity |
+| VALIDATION_PENDING | состояния контракта, регистра и номенклатуры | `Active`, удаление, проведение, сторно не отобраны | `NOT_EXECUTED — ожидается подключение к корпоративной сети`: metadata и сверка control values |
+| VALIDATION_PENDING | заморозка | `NATURALLEFTOUTERJOIN` может размножить контракт; границы интервала не доказаны | `NOT_EXECUTED — ожидается подключение к корпоративной сети`: key/cardinality, overlap and boundary cases |
+| VALIDATION_PENDING | code/name joins | `Code` и название клуба не технические ключи | `NOT_EXECUTED — ожидается подключение к корпоративной сети`: uniqueness/null/orphan |
+| NOT_APPLICABLE | внешний план | внешний Excel намеренно не переносится на SQL-сервер | остаётся отдельной таблицей Power BI |
+
+## Подготовленные read-only проверки
+
+Все проверки ниже имеют статус `VALIDATION_PENDING` и
+`NOT_EXECUTED — ожидается подключение к корпоративной сети`.
+
+1. Проверить `Reference59.ID`, `Code`, даты, null/sentinel и соответствие
+   отбору M-кода.
+2. Проверить тип, orphan и кардинальность связи
+   `AccumRg7575.Fld7578 → Reference59.ID`, а также `Fld7576 → client_id`.
+3. Для контрольных контрактов сравнить `COUNT(*)`, distinct документов и
+   ресурс количества в окне 120–90 дней с текущим Power BI.
+4. Проверить `Active`, проведение, удаление, сторно и текстовый фильтр
+   номенклатуры.
+5. Проверить связь и перекрытия `AccumRg7478`/`InfoRg5859`, исключение на
+   точках и отсутствие размножения после join.
+6. Проверить уникальность club/client references и календарные границы
+   `InfoRg6015`.

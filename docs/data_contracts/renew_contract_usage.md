@@ -18,7 +18,7 @@
 | История | финализированные контракты подключённых Excel-снимков | CONFIRMED BY DESIGN |
 | Mutable-секция | текущие и будущие окончания | CONFIRMED user process |
 | Watermark | отсутствует | NOT APPLICABLE / hybrid close boundary |
-| SLA | не определён | UNKNOWN |
+| SLA | данные доступны не позднее 08:30 по Москве | CONFIRMED — BR-014, решение пользователя 2026-07-30 |
 
 ## Колонки
 

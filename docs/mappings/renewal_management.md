@@ -96,9 +96,10 @@ SQL и физические объекты пока не создаются.
 
 ## Решения и блокеры
 
-1. `BLOCKER`: доказанная связь старого и нового контракта и tie-break.
-2. `BLOCKER`: состояния исходного/нового контракта и возврата.
-3. `BLOCKER`: уникальность кода контракта.
-4. `BLOCKER`: кардинальности последних rating/tenure/interaction.
-5. `BLOCKER`: цена покупки и знаки движений.
-6. `UNKNOWN`: фактические типы, размеры, планы и SLA.
+1. `VALIDATION_PENDING — implementation blocker`: связь старого и нового контракта и tie-break.
+2. `VALIDATION_PENDING — implementation blocker`: состояния исходного/нового контракта и возврата.
+3. `VALIDATION_PENDING — implementation blocker`: уникальность кода контракта.
+4. `VALIDATION_PENDING — implementation blocker`: кардинальности последних rating/tenure/interaction.
+5. `VALIDATION_PENDING — implementation blocker`: цена покупки и знаки движений.
+6. `UNKNOWN`: фактические типы, размеры и планы. Данные должны быть доступны
+   не позднее 08:30 по Москве (`CONFIRMED`, BR-014).

@@ -2,7 +2,7 @@
 
 Статус: `BUSINESS MAPPING COMPLETE / TECHNICAL VALIDATION DEFERRED`.
 
-Mapping основан на текущих запросах, metadata и решениях пользователя 2026-07-24. Состав состояний, дата отчёта и refresh подтверждены. Источник логической тренировки и кардинальности join ещё требуют проверки, поэтому физический объект, тип хранения и DDL пока не выбираются.
+Mapping основан на текущих запросах, metadata и решениях пользователя 2026-07-24. Архитектура `mart.ip_training_daily` выбрана в ADR-0025; реализация заблокирована до проверки источника логической тренировки и кардинальностей join.
 
 ## Целевой смысл и гранулярность
 
@@ -39,7 +39,7 @@ Mapping основан на текущих запросах, metadata и реш�
 | `InfoRg7006` | состояние предварительной записи, клиент, клуб, услуга | центральный набор | CONFIRMED metadata |
 | `Document329` | дата, сотрудник и реквизиты ПЗ | `InfoRg7006.Fld7007 = Document329.ID` | current query / document type semantics pending |
 | `Document279` | дата, сотрудник и клуб ГП | `InfoRg7006.Fld7007 = Document279.ID` | current query / document type semantics pending |
-| `Document329.VT4352` | тип взаиморасчётов ПЗ | только по `Document329.ID` | BLOCKER: возможный one-to-many |
+| `Document329.VT4352` | тип взаиморасчётов ПЗ | только по `Document329.ID` | VALIDATION_PENDING — implementation blocker: возможный one-to-many |
 | `Reference141X1` | код клиента | `InfoRg7006.Fld7008 = client.ID` | CONFIRMED current |
 | `Reference132` | название клуба | `InfoRg7006.Fld7009 = club.ID` | CONFIRMED current |
 | `Reference225` | имя сотрудника | employee ref документа = employee.ID | CONFIRMED current |
@@ -51,7 +51,7 @@ Mapping основан на текущих запросах, metadata и реш�
 | Правило | Текущая реализация | Целевой статус |
 |---|---|---|
 | период | `InfoRg7006.Period >= 2024-01-01` | отбирать по дате начала тренировки и общей календарной политике; CONFIRMED |
-| ИП, ветка ПЗ | специальная услуга ИП или тип взаиморасчётов «с сотрудником» | source confirmed / join semantics BLOCKER |
+| ИП, ветка ПЗ | специальная услуга ИП или тип взаиморасчётов «с сотрудником» | source confirmed / join semantics VALIDATION_PENDING — implementation blocker |
 | ИП, ветка ГП | специальная услуга ИП | source confirmed |
 | состояние | исключить enum order 2 и 3 | CONFIRMED — оставить текущее правило |
 | активность регистра | не фильтруется | TECHNICAL VALIDATION REQUIRED |
@@ -89,7 +89,7 @@ Mapping основан на текущих запросах, metadata и реш�
 - история следует общей календарной политике проекта;
 - пересчёт изменяемого окна около двух месяцев остаётся кандидатом до технической проверки изменений и удалений.
 
-## Блокеры архитектурного решения
+## Блокеры реализации спроектированного объекта
 
 1. Временный технический ключ одной исходной тренировки и кардинальность join с услугами.
 2. Тип составной ссылки `InfoRg7006.Fld7007` и взаимоисключаемость ветвей ГП/ПЗ.
