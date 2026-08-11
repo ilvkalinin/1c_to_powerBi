@@ -1,6 +1,6 @@
 # Source-to-target mapping: применения промокодов
 
-Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0018 / TECHNICAL VALIDATION DEFERRED`.
+Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0018 / TECHNICAL VALIDATION BLOCKED — source registry; Stage 3 deferred`.
 Спроектирован `mart.promo_application`; SQL не создаётся.
 
 ## Гранулярность

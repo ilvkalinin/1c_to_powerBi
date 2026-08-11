@@ -1,6 +1,6 @@
 # ADR-0018: факт применений промокодов
 
-- Статус: `DESIGNED / TECHNICAL VALIDATION REQUIRED / IMPLEMENTATION DEFERRED`
+- Статус: `DESIGNED / TECHNICAL VALIDATION BLOCKED — source registry / IMPLEMENTATION DEFERRED`
 - Дата: 2026-08-03
 - Отчёт: №14 «Отчёт по промокодам»
 

@@ -1,6 +1,6 @@
 # Data contract: «Отчёт по промокодам»
 
-Статус: `DESIGNED / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION REQUIRED`.
+Статус: `DESIGNED / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION BLOCKED — source registry`.
 
 | Параметр | Значение |
 |---|---|
@@ -35,4 +35,3 @@ PII не входит.
 
 Приёмка: ключ, branch reconciliation, document-line joins, signs/states,
 границы 1/44/45, контрольные категории и дни, rerun и SLA.
-

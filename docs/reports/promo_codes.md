@@ -1,6 +1,14 @@
 # Требования отчёта: «Отчет по промокодам»
 
-Статус: `BUSINESS LOGIC COMPLETE / TECHNICAL VALIDATION DEFERRED`.
+Статус: `BUSINESS LOGIC COMPLETE / TECHNICAL VALIDATION BLOCKED — source registry / Stage 3 deferred`.
+
+## Stage 2: source blocker
+
+Воспроизводимость текущей связи маркетинговой акции заблокирована физическим
+источником, уже зафиксированным в [едином реестре отсутствующих
+объектов](../source_metadata/missing_source_objects.md). Альтернатива не
+подбирается, связь не исключается и методика не меняется. Остальные
+source-side проверки не снимают этот блокер для current SQL/M/DAX.
 
 Источники разбора:
 
