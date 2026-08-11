@@ -1,6 +1,6 @@
 # Data contract: «Подготовка к продлению»
 
-Статус: `DESIGNED / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION REQUIRED`.
+Статус: `DESIGNED / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION PARTIALLY VALIDATED (SV-077)`.
 
 ## Общие параметры
 
@@ -9,7 +9,7 @@
 | Объект PostgreSQL | `mart.preparation_renewal_checkpoint` | ADR-0013 |
 | Таблица Power BI | `Подготовка к продлению` | CONFIRMED naming rule |
 | Гранулярность | контракт × контрольная точка `7/14/21/28/30` | CONFIRMED mapping |
-| Ключ | `(contract_id, checkpoint_day)` | VALIDATION_PENDING |
+| Ключ | `(contract_id, checkpoint_day)` | PARTIALLY VALIDATED — PR-V05: 100 contracts × 5 points, duplicate key = 0 |
 | Дата | `checkpoint_date` → общий `Календарь` | CONFIRMED |
 | Обновление | ежедневный атомарный rebuild BR-003 | DESIGNED; watermark отсутствует |
 | SLA | до 08:30 МСК | BR-014 |
@@ -51,4 +51,3 @@ PostgreSQL рассчитывает точки, посещения, заморо
 Уникальный ключ; не более пяти допустимых точек на контракт; нет размножения
 после visits/freeze joins; подтверждены границы окна, states, rerun,
 исправления/удаления, контрольные значения и SLA.
-

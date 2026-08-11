@@ -1,6 +1,6 @@
 # Source-to-target mapping: «Подготовка к продлению»
 
-Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0013 / TECHNICAL VALIDATION DEFERRED`.
+Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0013 / TECHNICAL VALIDATION PARTIALLY VALIDATED (SV-077)`.
 Спроектирован `mart.preparation_renewal_checkpoint`; SQL и физические объекты не создаются.
 
 ## Гранулярность

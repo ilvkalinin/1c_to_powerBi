@@ -1759,3 +1759,16 @@ Power BI snapshot не является обязательным входом St
 является сохранённой безопасной контрольной выборкой. Текущая логика `COUNT`
 строк, детские `RANK()`/as-of и совпадение СПТ по клиенту и дате сохраняются
 по BR-018; указанные кратности и orphan не исправляются на Stage 2.
+
+## SV-077 — «Подготовка к продлению»: обратное окно и заморозки
+
+Статус: `PARTIALLY VALIDATED` на live read-only снимках 2026-08-11. SQL: [`preparation_renewal_2026-08-11.sql`](validation_sql/preparation_renewal_2026-08-11.sql).
+
+| Контроль | Фактический результат | Статус |
+|---|---|---|
+| PR-V01—V03 | Все 8 relations существуют. `Reference59`: 675 447 уникальных ID, 90 384 интервала `<30`, 16 marked. `AccumRg7575` 2026: 3 180 795 уникальных ключей; 240 304 orphan-контракта, 146 139 client-owner mismatch, 1 orphan услуги | current filters обязательны |
+| PR-V04/V06 | `InfoRg5859`: 1 602 786 строк, 71 обратный интервал, 22 998 duplicate groups. `AccumRg7478`: 1 801 015 уникальных ключей, 10 258 inactive, 59 orphan-контрактов | VALIDATION_FAILED для единственного валидного join |
+| PR-V05 | 100 контрактов с окончанием 2026-07-31 дали 500 уникальных точек; все даты 2026-04-08/15/22/29 и 2026-05-01, 1 360 visit-строк, 54 frozen point | VALIDATED bounded control |
+| PR-V07—V09 | 2026 starts: 56 977 overlap-строк у 12 000 контрактов. 40 duplicate contract-code groups, 230 549 orphan club links. Календарь: 1 826 уникальных non-null дат, 2022-01-01—2026-12-31 | code/name не технические ключи; calendar key VALIDATED |
+
+Текущие DAX границы, `NATURALLEFTOUTERJOIN` и отсутствие новых state filters сохраняются по BR-018. Замена join или методическое исправление требует отдельного решения перед Stage 3.

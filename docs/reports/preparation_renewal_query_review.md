@@ -1,6 +1,6 @@
 # Разбор текущей модели: «Подготовка к продлению»
 
-Статус: `BUSINESS LOGIC COMPLETE / TECHNICAL VALIDATION DEFERRED`.
+Статус: `BUSINESS LOGIC COMPLETE / TECHNICAL VALIDATION PARTIALLY VALIDATED (SV-077)`.
 
 Источники зафиксированы в
 [архиве](../source_reports/preparation_renewal/README.md). Разбор сделан по

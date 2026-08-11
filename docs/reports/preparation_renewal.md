@@ -1,6 +1,6 @@
 # Требования отчёта: «Подготовка к продлению»
 
-Статус: `BUSINESS LOGIC COMPLETE / TECHNICAL VALIDATION DEFERRED`.
+Статус: `BUSINESS LOGIC COMPLETE / TECHNICAL VALIDATION PARTIALLY VALIDATED (SV-077)`.
 SQL, физические объекты и проверки на БД не создаются.
 
 ## Назначение
