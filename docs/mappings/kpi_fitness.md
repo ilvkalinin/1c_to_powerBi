@@ -1,8 +1,8 @@
 # Source-to-target mapping: «KPI Фитнеса»
 
-Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0012 / TECHNICAL VALIDATION DEFERRED`.
-Реализация и DDL не создавались. Все SQL-проверки имеют статус
-`NOT_EXECUTED — ожидается подключение к корпоративной сети`.
+Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0012 / TECHNICAL VALIDATION COMPLETE`.
+Реализация и DDL не создавались. Выполненные read-only проверки зафиксированы
+в SV-054—SV-061.
 
 ## Компонент A: факт платных фитнес-услуг
 
@@ -10,8 +10,8 @@
 
 > дата движения × фактический клуб × клиент × тренер × услуга × подразделение × формат × категория расчёта.
 
-Ключ: кандидат `(source_register, recorder_id, line_no)` до группировки;
-уникальность — `VALIDATION_PENDING`. Общая выручка, количество и средний чек
+Ключ: `(source_register, recorder_id, line_no)` до группировки;
+уникальность — `VALIDATED` в SV-054. Общая выручка, количество и средний чек
 имеют разные подтверждённые фильтры ИП/аренды и должны быть отдельными
 DAX-мерами над классифицированным фактом.
 
@@ -41,7 +41,9 @@ DAX-мерами над классифицированным фактом.
 движением выручки, поэтому общая выручка ИП остаётся отдельной ветвью
 `AccumRg7370`: `revenue_date`, `club_id`, `service_id`, `revenue_amount`.
 Дата — день оплаты, не месяц; filter `RecordKind` и связь с услугой —
-`VALIDATION_PENDING` (KF-V03, KF-V05).
+`VALIDATED` для текущей денежной ветви (SV-055, SV-061). Для ПЗ ИП первый
+релиз сохраняет наблюдаемую кратность PBIT: 49 200 строк из 48 973 физических
+событий (SV-058, BR-018); уникальные события — отдельное улучшение методики.
 
 ## Компонент C: текущий план
 
@@ -85,7 +87,7 @@ SQL-факт: `CONFIRMED — решение пользователя 2026-07-30`
 |---|---|---|
 | Источники из каталога | все технические объекты уже каталогизированы | CONFIRMED |
 | Продукты из каталога | факт ДПФУ, тренировки ИП, дневной план ДПФУ, `mart.client_base_daily` | CONFIRMED |
-| Общие правила | BR-001, BR-002, BR-003, BR-004, BR-007, BR-008, BR-009, BR-010, BR-013 | CONFIRMED / BR-004, BR-010, BR-013 technical pending |
+| Общие правила | BR-001, BR-002, BR-003, BR-004, BR-007, BR-008, BR-009, BR-010, BR-013, BR-018 | CONFIRMED / BR-004, BR-010, BR-013 implementation pending |
 | Grain и ключи | KPI требует тренера и клиента; текущий факт ДПФУ уже имеет client-level источник, но employee — подтверждённый новый потребитель | CONFIRMED consumer / technical key pending |
 | Семантика | ДПФУ совпадает с отчётом «Выручка ДПФУ»; ИП — с «Отчётом по ИП»; планы имеют отдельный grain | CONFIRMED |
 | Решение | `EXTEND` логического факта ДПФУ полями сотрудника и кода клиента; `REUSE` тренировки ИП и client-base daily; `NEW` не требуется | PROPOSED / technical validation required |
@@ -95,14 +97,15 @@ SQL-факт: `CONFIRMED — решение пользователя 2026-07-30`
 
 | ID | Статус | Проверка / ожидаемый результат |
 |---|---|---|
-| KF-V01 | VALIDATION_PENDING | `(Recorder, LineNo)` уникален или известно правило схлопывания в каждом регистре. |
-| KF-V02 | VALIDATION_PENDING | joins измерений one-to-one и не меняют строки, суммы или количество. |
-| KF-V03 | VALIDATION_PENDING | значения `Active`/`Posted`/`Marked`/`RecordKind`, возвраты и нулевые строки согласованы с контрольной суммой. |
-| KF-V04 | VALIDATION_PENDING | две ветви движений не дублируют одну операцию. |
-| KF-V05 | VALIDATION_PENDING | тренировки ИП: ключ, ветви документов, enum и кратность услуги подтверждены. |
-| KF-V06 | VALIDATION_PENDING | дневной план: ключ, active, период и `Fld6620` подтверждены. |
+| KF-V01 | VALIDATED | `(Recorder, LineNo)` уникален в каждом регистре (SV-054). |
+| KF-V02 | VALIDATED | source joins покрыты; nullable display-поля не меняют суммы (SV-054). |
+| KF-V03 | VALIDATED | active, возвраты и `RecordKind` согласованы с текущими ветвями (SV-054, SV-055). |
+| KF-V04 | VALIDATED | две ветви не имеют точных совпадающих бизнес-пар (SV-054). |
+| KF-V05 | VALIDATED | тренировки ИП: физическая кратность ПЗ подтверждена; legacy-кратность сохранена по BR-018 (SV-058). |
+| KF-V06 | VALIDATED | дневной план: ключ, active, период и `Fld6620` подтверждены (SV-056). |
 | KF-V07 | NOT_APPLICABLE для PostgreSQL | годовой бюджет, план мероприятий и классификатор услуг остаются внешними источниками Power BI. |
-| KF-V08 | VALIDATION_PENDING | контрольные значения по клубу/полному и неполному месяцу для шести KPI и Renew. |
+| KF-V08 | VALIDATED | регулярность и граница истории Renew сохраняют PBIT; улучшения помечены отдельно (SV-060, BR-018). |
 
-Подготовленные SQL для KF-V01–KF-V08: `NOT_EXECUTED — ожидается подключение
-к корпоративной сети`; перечень и пример — в [query review](../reports/kpi_fitness_query_review.md).
+Исполненные SQL и результаты — в
+[`server_validation_2026-08-05.md`](../source_metadata/server_validation_2026-08-05.md),
+SV-054—SV-061.
