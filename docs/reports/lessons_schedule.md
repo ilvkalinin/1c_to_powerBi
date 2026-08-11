@@ -1,6 +1,6 @@
 # Требования отчёта: «Уроки и расписание»
 
-Статус: `BUSINESS LOGIC COMPLETE / ARCHITECTURE DESIGNED — ADR-0015 / TECHNICAL VALIDATION DEFERRED`.
+Статус: `BUSINESS LOGIC COMPLETE / ARCHITECTURE DESIGNED — ADR-0015 / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-073`.
 
 Разбор выполнен локально по описанию отчёта и полному текущему Power Query/DAX.
 Подключений к 1С/PostgreSQL, выполнения SQL и создания объектов не было.

@@ -1,6 +1,8 @@
 # Разбор текущей модели: «Уроки и расписание»
 
-Статус: `BUSINESS LOGIC COMPLETE / TECHNICAL VALIDATION DEFERRED`.
+Статус: `BUSINESS LOGIC COMPLETE / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-073`.
+
+Read-only результаты LS-V01—LS-V06 и SQL сохранены в [SV-073](../source_metadata/server_validation_2026-08-05.md#sv-073--уроки-и-расписание-интервалы-и-source-dimensions). Некратные 5-минутные интервалы, orphan dimensions и разные state-наборы ПЗ/ГП зафиксированы как current-source evidence; исправления не вносятся по BR-018.
 
 ## Lineage
 

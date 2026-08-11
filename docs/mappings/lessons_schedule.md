@@ -1,6 +1,6 @@
 # Source-to-target mapping: «Уроки и расписание»
 
-Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0015 / TECHNICAL VALIDATION DEFERRED`.
+Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0015 / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-073`.
 
 Спроектированы `mart.lesson_room_slot_5m` и REUSE `mart.group_lesson`.
 Production SQL не создаётся.

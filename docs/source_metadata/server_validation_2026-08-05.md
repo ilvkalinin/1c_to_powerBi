@@ -1691,3 +1691,21 @@ client-day подход SV-070; отдельный физический факт
 orphan Enum, различий document/registry и размножения VT4352 не исправляются
 в Stage 2: BR-018 требует воспроизвести существующий результат, а изменения
 методики требуют отдельного решения перед Stage 3.
+
+## SV-073 — «Уроки и расписание»: интервалы и source dimensions
+
+Статус: `PARTIALLY VALIDATED` на live read-only снимках 2026-08-11. SQL:
+[`lessons_schedule_2026-08-11.sql`](validation_sql/lessons_schedule_2026-08-11.sql).
+
+| Контроль | Ожидание | Фактический результат |
+|---|---|---|
+| LS-V01 | ID уникален; не скрывать плохие интервалы | ГП 573 629 / ПЗ 681 544 уникальных ID; nonpositive ГП/ПЗ = 6/0, nonmultiple-5m = 161/1 541; unposted = 57 865/1 012, marked = 57 695/119 |
+| LS-V02 | current-M ПЗ определяется posted + GUID + отсутствием отмены | Набор комбинаций подтверждён; в том числе 73 659 posted/current-status ПЗ имеют документ отмены. `Marked` не фильтруется current M. |
+| LS-V03 | слоты `[start,end)` без выхода за интервал | Июль 2026: 37 017 корректных занятий, expected/actual slots = 318 319 / 318 319, outside = 0. Некратные интервалы не округляются. |
+| LS-V04 | dimensions не размножают документ | Club orphan = 0; имеются orphan room/employee/service/activity/format, в частности ПЗ 122 717 / 6 683 / 13 595 / 13 595 / 13 959. |
+| LS-V05/V06 | payment/status branches и `created_at > lesson_end_at` измерены без унификации | Значения ГП/PЗ различаются; поздние строки присутствуют в обеих ветках. Сохраняется current M, а не текстовое описание. |
+
+LS-V07 остаётся `NOT_APPLICABLE`: Excel-справочники сохраняются в Power BI.
+LS-V08 выполнен source-side только в доступном объёме; независимый Power BI
+snapshot не запрашивается и не является входом Stage 2. Не добавлять фильтры
+или заполнять orphan dimension без отдельного решения и BR-018.
