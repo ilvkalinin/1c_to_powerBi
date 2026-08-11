@@ -1,6 +1,6 @@
 # Source-to-target mapping: «Посещения Физкульт»
 
-Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0003/0025 / TECHNICAL VALIDATION DEFERRED`. Общее посещение, ДПФУ и купоны сохраняют `DISTINCTCOUNT` клиента по произвольному диапазону; ИП считает строки. SQL не создаётся.
+Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0003/0025 / TECHNICAL VALIDATION PARTIALLY VALIDATED (SV-070)`. Общее посещение, ДПФУ и купоны сохраняют `DISTINCTCOUNT` клиента по произвольному диапазону; ИП считает строки. SQL не создаётся.
 
 Предлагаемый общий физический объект: `mart.visit_client_day`; архитектура — `docs/adr/0003-shared-visits-domain.md`. Отдельная таблица отчёта Физкульт не создаётся.
 
@@ -19,10 +19,10 @@
 | Целевая колонка | Бизнес-описание | Источник / преобразование | PostgreSQL тип | NULL | Статус | Проверка перед SQL |
 |---|---|---|---|---|---|---|
 | `visit_date` | календарный день посещения/услуги | дата подтверждённого события | `date` | нет | CONFIRMED concept | границы дня и timezone |
-| `club_id` | клуб фактического посещения | `Document325.Fld4167`, `AccumRg7575.Fld7577` либо клуб занятия/записи | UNKNOWN | нет | CONFIRMED rule | единое соответствие источников клубу |
+| `club_id` | клуб фактического посещения | `Document325.Fld4167`, `AccumRg7575.Fld7577` либо клуб занятия/записи | `bytea` source ID → target representation TBD | нет | CONFIRMED rule / VF-V01 control validated | в июле 2026 две ссылки совпали во всех 289 966 строках; representation — Stage 3 |
 | `client_key` | стабильный обезличенный ключ клиента для `DISTINCTCOUNT` | детерминированное преобразование исходного client ID; способ утвердить в архитектуре | UNKNOWN | нет | CONFIRMED need / implementation pending | стабильность между датами, клубами и refresh |
-| `has_visit` | клиент имеет хотя бы одно посещение в этот день и клубе | `AccumRg7575`/`Document325`; схлопнуть повторные события до client-day-club | `boolean` | нет | CONFIRMED | уникальность client-day-club |
-| `has_coupon` | клиент имеет хотя бы одно посещение по купону | `InfoRg7006 + Document329 + Document325 + Reference163` | `boolean` | нет | CONFIRMED | ключ, статусы, distinct по диапазону |
+| `has_visit` | клиент имеет хотя бы одно посещение в этот день и клубе | `AccumRg7575`/`Document325`; схлопнуть повторные события до client-day-club | `boolean` | нет | CONFIRMED / VF-V01 validated | технический ключ уникален; свёртка 289 966 → 286 887 на июле 2026 |
+| `has_coupon` | клиент имеет хотя бы одно посещение по купону | `InfoRg7006 + Document329 + Document325 + Reference163` | `boolean` | нет | CONFIRMED / VF-V03 validated | текущая M-кратность: 803 строк / 798 source events; не дедуплицировать без решения |
 | `has_paid_service` | клиент имеет хотя бы одно ДПФУ | `AccumRg7575` + даты `Document279/Document329` + клиент/клуб/услуга/вид деятельности; исключить купон и сотрудника | `boolean` | нет | CONFIRMED | фильтры классификации, distinct по диапазону |
 
 ## Дневной набор ГП
@@ -35,7 +35,7 @@
 |---|---|---|---|---|---|---|
 | `event_date` | дата группового занятия | `Document279.Fld3218::date` | `date` | нет | CONFIRMED | timezone и границы дня |
 | `club_id` | клуб занятия | `Document279.Fld3224` | UNKNOWN | нет | CONFIRMED | FK клуба |
-| `group_program_visit_count` | сумма посетивших ГП | `SUM(InfoRg8675.Fld8677)` | `integer`/`bigint` | нет | CONFIRMED | проведение/удаление и один state на занятие |
+| `group_program_visit_count` | сумма посетивших ГП | `SUM(InfoRg8675.Fld8677)` | `numeric` source → `bigint` only after range check | нет | CONFIRMED / VF-V02 validated | 3 325 занятий, сумма 55 244; `_InfoRg8675` не имеет `_Active` |
 
 `with_trainer_count`, `without_trainer_count` и проценты физически не хранятся:
 
@@ -105,12 +105,12 @@
 - `Reference163` — услуга;
 - `Reference59` — абонемент, если его участие подтвердится.
 
-## Блокеры
+## Технические проверки до реализации
 
-- состояния `Active`, `Posted`, `Marked`, enum состояния;
 - стабильный способ получения обезличенного `client_key`;
-- фактическая кардинальность join в двух ветках `ОбщаяРС`;
-- контрольные значения минимум для одного клуба и двух дней.
+- правило представления `bytea` клубов в целевой модели;
+- полный контроль distinct-клиента для ДПФУ после текущих отчётных исключений;
+- текущая legacy-кратность объединённых ИП-ветвей сохраняется по SV-068, без скрытой дедупликации.
 
 ## Refresh
 

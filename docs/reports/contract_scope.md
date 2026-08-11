@@ -26,7 +26,7 @@ data contract оформлены по 31 из 31 отчёта. Реализов�
 | 6 | Фитнес | Загрузка сотрудников | COMPLETE — `employee_workload` | COMPLETE — `employee_workload` | DESIGNED — ADR-0014 | COMPLETE — `employee_workload` | DEFERRED | DEFERRED — technical validation |
 | 7 | Фитнес | Контроль предварительной записи | COMPLETE — `prebooking_control` | COMPLETE — `prebooking_control` | DESIGNED — ADR-0015 | COMPLETE — `prebooking_control` | DEFERRED | DEFERRED — technical validation |
 | 8 | Фитнес | Отчет по ИП | COMPLETE | COMPLETE — `ip_training` | DESIGNED — ADR-0025 | COMPLETE — `ip_training` | DEFERRED | DEFERRED — technical validation |
-| 9 | Фитнес | Посещения Физкульт | COMPLETE | COMPLETE — `visits_fizkult` | DESIGNED — ADR-0003 | COMPLETE — `visits_fizkult` | DEFERRED | DEFERRED — technical validation |
+| 9 | Фитнес | Посещения Физкульт | COMPLETE | COMPLETE — `visits_fizkult` | DESIGNED — ADR-0003 | COMPLETE — `visits_fizkult` | DEFERRED | PARTIALLY VALIDATED — SV-070; Stage 3 deferred |
 | 10 | Фитнес | Уроки и расписание | COMPLETE — `lessons_schedule` | COMPLETE — `lessons_schedule` | DESIGNED — ADR-0015 | COMPLETE — `lessons_schedule` | DEFERRED | DEFERRED — technical validation |
 | 11 | Фитнес | Фитнес воронка | COMPLETE — `fitness_funnel` | COMPLETE — `fitness_funnel` | DESIGNED — ADR-0026 | COMPLETE — `fitness_funnel` | DEFERRED | DEFERRED — technical validation |
 | 12 | Продажи | Загрузка ОП | COMPLETE | COMPLETE — `sales_interactions` | DESIGNED — ADR-0016 | COMPLETE — `sales_interactions` | DEFERRED | DEFERRED — technical validation |

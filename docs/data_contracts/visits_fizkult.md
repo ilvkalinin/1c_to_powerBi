@@ -1,6 +1,6 @@
 # Data contract: «Посещения Физкульт»
 
-Статус: `DESIGNED COMPOSITE MODEL / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION REQUIRED`.
+Статус: `DESIGNED COMPOSITE MODEL / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION PARTIALLY VALIDATED (SV-070)`.
 
 ## Факты
 
@@ -22,4 +22,6 @@ distinct посещения/купоны/ДПФУ, сумму ГП и ИП, «с
 
 Приёмка: уникальный client-day, стабильный защищённый client key, actual club,
 source states, отсутствие размножения, reconciliation категорий и refresh.
-
+SV-070 уже подтвердил контрольный client-day для общего посещения, отсутствие
+размножения ГП и наблюдаемую legacy-кратность купонов; реализация остаётся
+запрещена до отдельного разрешения Stage 3.
