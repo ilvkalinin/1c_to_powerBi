@@ -1,8 +1,17 @@
 # Source-to-target mapping: продажи детских пакетов
 
-Статус: `BUSINESS RULES CONFIRMED / TECHNICAL VALIDATION REQUIRED`.
+Статус: `BUSINESS RULES CONFIRMED / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-085; Stage 3 deferred`.
 
 Mapping основан на текущем SQL/M/DAX, metadata и решениях пользователя от 2026-07-24. `mart.children_package_sale` спроектирован в ADR-0019; реализация заблокирована до проверки связи строки с суммой/номенклатурой, возврата и source states.
+
+## Stage 2 evidence — SV-085
+
+SV-076: `VT4913` содержит 46 470 unique physical rows; каждая имеет
+совпавшие чек и контракт, но 9 933 child-ссылки не совпали с
+`Reference141X1`. SV-083: bounded 100 `AccumRg7739` rows равны technical keys
+и не имеют orphan-contract. Следовательно, grain package row и source key
+имеют ограниченное физическое evidence, но `VT4913 → VT4924/AccumRg7739`,
+сумма/номенклатура, возврат и состояния остаются implementation blockers.
 
 ## Подтверждённая гранулярность
 

@@ -1881,3 +1881,19 @@ Excel-планы и их Power Query не анализировались.
 Не добавлять filters по `Marked`/archive и не менять direct phone-row semantics
 или legacy employee match без отдельного решения. Внешние Excel-нормативы и их
 Power Query не анализировались.
+
+## SV-085 — «Продажа детских пакетов»: package-row and payment keys
+
+Статус: `PARTIALLY VALIDATED` на live read-only evidence 2026-08-11.
+Отдельный SQL не добавляется: применены точные executed controls
+[`newcomer_engagement_second_month_2026-08-11.sql`](validation_sql/newcomer_engagement_second_month_2026-08-11.sql)
+и [`membership_receipts_2026-08-11.sql`](validation_sql/membership_receipts_2026-08-11.sql).
+
+| Контроль | Фактический результат | Статус |
+|---|---|---|
+| CP-V01 | `VT4913`: 46 470 unique rows; receipt и contract matched; child orphan = 9 933 | VALIDATED physical package-row control / child reference requires current-logic care |
+| CP-V02 | bounded `AccumRg7739`: 100 rows = 100 technical keys, orphan-contract = 0 | VALIDATED bounded register-key control |
+| CP-V03—CP-V06 | `VT4913 → VT4924/AccumRg7739`, amount/product, return sign, states, sentinel dates и card controls | VALIDATION_PENDING |
+
+Наблюдения не заменяют current `LIMIT 1`, не создают line join и не меняют
+возвраты. Любая методическая корректировка требует отдельного решения по BR-018.

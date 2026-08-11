@@ -1,6 +1,14 @@
 # Разбор текущего запроса: «Продажа детских пакетов»
 
-Статус: `BUSINESS LOGIC COMPLETE / TECHNICAL VALIDATION DEFERRED`.
+Статус: `BUSINESS LOGIC COMPLETE / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-085; Stage 3 deferred`.
+
+## Stage 2 evidence — SV-085
+
+SV-076 подтвердил unique physical rows `VT4913` и их связь с чеком/контрактом;
+orphan child references зафиксированы как source-side наблюдение. SV-083
+подтвердил bounded technical key `AccumRg7739`. Это не устраняет
+недетерминированные `LIMIT 1` текущего SQL: связь с `VT4924`, приоритет суммы
+и номенклатуры, возврат и source states остаются `VALIDATION_PENDING`.
 
 Источники:
 

@@ -1,6 +1,10 @@
 # Data contract: «Продажа детских пакетов»
 
-Статус: `DESIGNED / BLOCKED BY TECHNICAL VALIDATION / IMPLEMENTATION DEFERRED`.
+Статус: `DESIGNED / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-085 / IMPLEMENTATION DEFERRED`.
+
+SV-085 дал source-side evidence physical package row и technical расчётного
+ключа. Контракт не реализуется, пока не доказана line-to-line связь с
+номенклатурой и суммой, а также source states и знак возврата.
 
 | Параметр | Значение |
 |---|---|
@@ -32,4 +36,3 @@ BR-017. PostgreSQL рассчитывает знаки и корректност
 Реализация заблокирована до доказательства связи `VT4913` с продуктом/суммой,
 знака возврата и states. Приёмка также включает уникальность ключа,
 reconciliation по чеку, отсутствие дублей, rerun и SLA.
-

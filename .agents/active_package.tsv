@@ -8,4 +8,4 @@ sales_validation_2026-08-11	STAGE_2_SERVER_VALIDATION	ACTIVE	2026-08-11
 report_id	report_status	completion_commit
 sales_team_workload	COMPLETE	SELF
 promo_codes	BLOCKED
-children_package_sales	IN_PROGRESS
+children_package_sales	COMPLETE	SELF

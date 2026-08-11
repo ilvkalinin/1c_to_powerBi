@@ -1,6 +1,6 @@
 # ADR-0019: продажи детских пакетов
 
-- Статус: `DESIGNED / BLOCKED BY TECHNICAL VALIDATION / IMPLEMENTATION DEFERRED`
+- Статус: `DESIGNED / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-085 / IMPLEMENTATION DEFERRED`
 - Дата: 2026-08-03
 - Отчёт: №15 «Продажа детских пакетов»
 
@@ -39,4 +39,3 @@ View/materialized view не выбираются без измерений.
 
 - [Требования](../reports/children_packages_sales.md)
 - [Mapping](../mappings/children_package_sales.md)
-
