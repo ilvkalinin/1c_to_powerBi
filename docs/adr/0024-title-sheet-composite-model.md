@@ -1,6 +1,6 @@
 # ADR-0024: составная модель «Титульного листа»
 
-- Статус: `DESIGNED / TECHNICAL VALIDATION REQUIRED / IMPLEMENTATION DEFERRED`
+- Статус: `DESIGNED / TECHNICAL VALIDATION COMPLETE / IMPLEMENTATION DEFERRED`
 - Дата: 2026-08-03
 - Отчёт: №26 «Титульный лист»
 
@@ -27,9 +27,10 @@
 
 ## Риски
 
-Категории доходов, daily-КБ и hourly-ЧК проходят техническую валидацию в
-собственных продуктах. `active_base_rate` остаётся текущим внешним показателем
-Power BI и не выводится из PostgreSQL без отдельного mapping.
+Категории доходов и current почасовая ЧК титульного листа подтверждены в
+SV-062—SV-064. Daily-КБ остаётся зависимостью собственного продукта, а
+`active_base_rate` — текущим внешним показателем Power BI и не выводится из
+PostgreSQL без отдельного mapping.
 
 ## Доказательства
 
@@ -37,4 +38,3 @@ Power BI и не выводится из PostgreSQL без отдельного 
 - [Mapping](../mappings/title_sheet.md)
 - [Свод выручки](0010-revenue-group-summary-daily.md)
 - [Почасовая посещаемость](0022-hourly-club-attendance.md)
-

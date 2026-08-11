@@ -43,7 +43,7 @@ data contract оформлены по 31 из 31 отчёта. Реализов�
 | 23 | Гостеприимство | Посещения Пушкинский | COMPLETE | COMPLETE — `visits_pushkinsky` | DESIGNED — ADR-0003 | COMPLETE — `visits_pushkinsky` | DEFERRED | DEFERRED — technical validation |
 | 24 | Гостеприимство | Работа с посещаемостью | COMPLETE — `work_attendance` | COMPLETE — `work_attendance` | DESIGNED — ADR-0022 | COMPLETE — `work_attendance` | DEFERRED | DEFERRED — technical validation |
 | 25 | Гостеприимство | Карта администратора | COMPLETE | COMPLETE — `administrator_card` | DESIGNED — ADR-0023 | COMPLETE — `administrator_card` | DEFERRED | DEFERRED — technical verification |
-| 26 | Гостеприимство | Титульный лист | COMPLETE — `title_sheet` | COMPLETE — `title_sheet` | DESIGNED — ADR-0024 | COMPLETE — `title_sheet` | DEFERRED | DEFERRED — technical validation |
+| 26 | Гостеприимство | Титульный лист | COMPLETE — `title_sheet` | COMPLETE — `title_sheet` | DESIGNED — ADR-0024 | COMPLETE — `title_sheet` | DEFERRED | COMPLETE — SV-062—SV-064 |
 | 27 | Маркетинг | Воронка | COMPLETE — `marketing_funnel` | COMPLETE — `marketing_funnel` | DESIGNED — REUSE ADR-0011 | COMPLETE — `marketing_funnel` | DEFERRED | DEFERRED — technical validation |
 | 28 | Маркетинг | Клиентская база | COMPLETE | COMPLETE — `client_base`, `client_base_retention` | COMPLETE — ADR-0002 | COMPLETE — `client_base` | DEFERRED | DEFERRED — DB tests |
 | 29 | Для правления | Выручка ДПФУ | COMPLETE | COMPLETE — `dpfu_revenue` | DESIGNED — ADR-0005/0012/0025 | COMPLETE — `dpfu_revenue` | DEFERRED | DEFERRED — technical validation |

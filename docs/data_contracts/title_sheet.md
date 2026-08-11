@@ -1,6 +1,6 @@
 # Data contract: «Титульный лист»
 
-Статус: `DESIGNED COMPOSITE MODEL / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION REQUIRED`.
+Статус: `DESIGNED COMPOSITE MODEL / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION COMPLETE`.
 
 Отдельного PostgreSQL-объекта нет (ADR-0024). Модель Power BI импортирует:
 
@@ -24,4 +24,5 @@ PostgreSQL поставляет только готовые общие факт�
 
 Приёмка выполняется в контрактах трёх PostgreSQL-фактов и дополнительно
 проверяет единственность выбранной даты/клуба, категории дохода, отсутствие
-M2M и контрольные значения карточек.
+M2M и контрольные значения карточек. Текущие source-side controls титульного
+листа подтверждены в SV-062—SV-064; внешние факты не входят в этот контур.

@@ -1,6 +1,6 @@
 # Source-to-target mapping: «Титульный лист»
 
-Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0024 / TECHNICAL VALIDATION DEFERRED`.
+Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0024 / TECHNICAL VALIDATION COMPLETE`.
 
 Это mapping семантического отчёта, а не проект нового mart. Одна физическая
 строка не может одновременно представлять выручку, расход, снимок КБ и
@@ -45,8 +45,8 @@ BR-014).
 
 | Объект | Назначение | Статус | Доказательство |
 |---|---|---|---|
-| `AccumRg7370`, `AccumRg7575`, `AccumRg7646`, `AccumRg7739` | текущие ветви выручки | CONFIRMED source / states and keys pending | supplied M; revenue mappings |
-| `Document325`, `Reference59`, `Reference70`, `Reference132`, `Reference141X1`, `Reference163` | текущая выручка/посещения и классификация | CONFIRMED current source / cardinality pending | supplied M; source catalog |
+| `AccumRg7370`, `AccumRg7575`, `AccumRg7646`, `AccumRg7739` | текущие ветви выручки | VALIDATED current query, keys and control sums | SV-063, SV-064 |
+| `Document325`, `Reference59`, `Reference70`, `Reference132`, `Reference141X1`, `Reference163` | текущая выручка/посещения и классификация | VALIDATED current join/cardinality on control period | SV-062, SV-063 |
 | `mart.revenue_group_summary_daily` | будущий переиспользуемый дневной факт выручки | DESIGNED / validation pending | data products catalog; ADR-0010 |
 | `mart.client_base_daily` | ежедневная КБ для произвольной даты | CONFIRMED dependency / validation pending | data products catalog; client base/work attendance mappings |
 | логический факт почасовой посещаемости | интервалы для максимальной ЧК | BUSINESS MAPPING COMPLETE / validation pending | work attendance mapping |
@@ -60,7 +60,7 @@ BR-014).
 | Проверенные продукты из `data_products` | найдены дневная выручка, ежедневная КБ и почасовой кандидат посещаемости | CONFIRMED |
 | Проверенные правила | BR-001, BR-002, BR-003, BR-004, BR-007, BR-010, BR-013 | CONFIRMED; BR-003 validation pending for report |
 | Сравнение гранулярности | выручка, КБ и интервалы посещения различны; объединение фактов запрещено | CONFIRMED |
-| Сравнение ключей | устойчивые club/date keys требуются во всех наборах; их уникальность и physical types не подтверждены | VALIDATION_PENDING |
+| Сравнение ключей | current joins титульного листа сохраняют строки; канонический `club_id` и тип общего календаря принадлежат общему домену клубов/календаря, не новому объекту TS | CONFIRMED report boundary / implementation dependency |
 | Сравнение бизнес-семантики | доходные компоненты соответствуют текущей TS формуле; DPFU включает ИП; часовой показатель совпадает с `work_attendance` | CONFIRMED current logic |
 | Решение (`REUSE` / `EXTEND` / `NEW` / `NOT_APPLICABLE`) | REUSE дохода; REUSE/EXTEND consumer КБ и часов; NOT_APPLICABLE для внешних наборов; NEW отсутствует | CONFIRMED |
 | Причина решения | одинаковые grain/правила используются без копий; разные grain остаются отдельными фактами | CONFIRMED — BR-002 |
@@ -70,8 +70,8 @@ BR-014).
 
 | Статус | Элемент | Риск / причина | Проверка / следующее действие |
 |---|---|---|---|
-| VALIDATION_PENDING | выручечные ветви | дубли/неверный знак/состояния скрыты месячной агрегацией | TS-V01–TS-V03, затем сверка клуб×месяц |
-| VALIDATION_PENDING | ЧК | непонятная единица строки и границы входа/выхода | TS-V04–TS-V05 |
+| VALIDATED | выручечные ветви | ключи уникальны, ДПФУ и рецепция не пересекаются, членские joins не размножают июльский контроль | SV-063, SV-064 |
+| VALIDATED | ЧК | единица — документ; июльская кратность one-to-one, границы часов сохранены как legacy PBIT | SV-062 |
 | NOT_APPLICABLE | расходы и параметры клуба | внешние файлы остаются в Power BI | не включать в PostgreSQL по решению пользователя 2026-07-30 |
 | NOT_APPLICABLE | КБ факт и активная база | внешний входной набор остаётся в Power BI | не включать в PostgreSQL по решению пользователя 2026-07-30 |
 | NOT_APPLICABLE | Renew | внешний входной набор остаётся в Power BI | не выводить из `contract_usage` автоматически |
