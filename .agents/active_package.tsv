@@ -6,6 +6,6 @@ package_id	stage	package_status	approved_at
 hospitality_validation_2026-08-11	STAGE_2_SERVER_VALIDATION	ACTIVE	2026-08-11
 
 report_id	report_status	completion_commit
-reception_revenue	IN_PROGRESS
-administrator_bookings	PENDING
+reception_revenue	COMPLETE	SELF
+administrator_bookings	IN_PROGRESS
 newcomer_guest_visits	PENDING

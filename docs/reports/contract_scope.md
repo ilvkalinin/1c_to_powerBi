@@ -12,9 +12,9 @@ Excel-перечень не меняет договорный scope без от�
 - `NOT STARTED` — артефакта нет;
 - `DEFERRED` — работа сознательно не запускалась; это не завершение этапа.
 
-На 2026-08-03 бизнес-анализ, source mapping, проектная архитектура и Power BI
-data contract оформлены по 31 из 31 отчёта. Реализованных витрин и завершённой
-технической валидации нет.
+На 2026-08-11 бизнес-анализ, source mapping, проектная архитектура и Power BI
+data contract оформлены по 31 из 31 отчёта. Реализованных витрин нет;
+подтверждённые server-side сверки отражены в строках соответствующих отчётов.
 
 | № | Блок | Наименование отчёта | Business analysis | Source mapping | Architecture | Data contract | Implementation | Validation |
 |---:|---|---|---|---|---|---|---|---|
@@ -35,7 +35,7 @@ data contract оформлены по 31 из 31 отчёта. Реализов�
 | 15 | Продажи | Продажа детских пакетов | COMPLETE | COMPLETE — `children_package_sales` | DESIGNED — ADR-0019 | COMPLETE — `children_package_sales` | DEFERRED | PARTIALLY VALIDATED — SV-085; Stage 3 deferred |
 | 16 | Продажи | Управление продлением | COMPLETE | COMPLETE | PROPOSED — ADR-0007 | COMPLETE — `renewal_management` | DEFERRED | PARTIALLY VALIDATED — SV-081; Stage 3 deferred |
 | 17 | Продажи | Отчет по %Renew | COMPLETE | COMPLETE | PROPOSED — ADR-0006 | COMPLETE — `renew_contract_usage` | DEFERRED | PARTIALLY VALIDATED — SV-082; Stage 3 deferred |
-| 18 | Гостеприимство | Выручка рецепции | COMPLETE | COMPLETE | PROPOSED — ADR-0005 | COMPLETE — `reception_revenue` | DEFERRED | DEFERRED — technical validation |
+| 18 | Гостеприимство | Выручка рецепции | COMPLETE | COMPLETE | PROPOSED — ADR-0005 | COMPLETE — `reception_revenue` | DEFERRED | COMPLETE — SV-050—SV-053 |
 | 19 | Гостеприимство | Записи администраторов | COMPLETE | COMPLETE | PROPOSED — ADR-0004 | COMPLETE — `administrator_bookings` | DEFERRED | DEFERRED — technical validation |
 | 20 | Гостеприимство | Новички и гостевые визиты | COMPLETE — `newcomer_guest_visits` | COMPLETE — `newcomer_guest_visits` | DESIGNED — ADR-0020 | COMPLETE — `newcomer_guest_visits` | DEFERRED | DEFERRED — technical validation |
 | 21 | Гостеприимство | Отчет по обращениям | COMPLETE — `calls_report` | COMPLETE — `calls_report` | DESIGNED — ADR-0016 | COMPLETE — `calls_report` | DEFERRED | DEFERRED — technical validation |
