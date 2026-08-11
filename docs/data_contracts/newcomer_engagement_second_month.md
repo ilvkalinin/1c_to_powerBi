@@ -1,6 +1,6 @@
 # Data contract: «Вовлечение новичков Второй месяц»
 
-Статус: `DESIGNED / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION REQUIRED`.
+Статус: `DESIGNED / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION PARTIALLY VALIDATED (SV-076)`.
 
 | Параметр | Значение | Статус / доказательство |
 |---|---|---|
@@ -8,7 +8,7 @@
 | Таблица Power BI | `Вовлечение новичков Второй месяц` | CONFIRMED naming rule |
 | Назначение | вовлечение New-контрактов во второй полный календарный месяц после месяца начала | CONFIRMED |
 | Гранулярность строки | подходящий контракт × клиент × месяц вовлечения | CONFIRMED BY DESIGN |
-| Логический/первичный ключ | `(contract_id, client_id, month_of_engagement)` | CONFIRMED BY DESIGN; source uniqueness pending |
+| Логический/первичный ключ | `(contract_id, client_id, month_of_engagement)` | CONFIRMED BY DESIGN; NM-V08 100-row control без дублей, child-source duplicates требуют сохранения current logic по BR-018 |
 | Единица KPI | пара клиент × контракт; взрослый и ребёнок одного контракта считаются раздельно | CONFIRMED user decision 2026-07-28 |
 | Период хранения | по BR-003, применённому к месяцу вовлечения | CONFIRMED project rule |
 | Режим и правила обновления | полный ограниченный rebuild с атомарной заменой на каждом разрешённом запуске | CONFIRMED BY DESIGN; частота UNKNOWN |

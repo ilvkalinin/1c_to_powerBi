@@ -1,6 +1,6 @@
 # Разбор текущей модели: «Вовлечение новичков Второй месяц»
 
-Статус: `EVIDENCE REVIEWED / ARCHITECTURE DESIGNED / IMPLEMENTATION DEFERRED`.
+Статус: `EVIDENCE REVIEWED / ARCHITECTURE DESIGNED / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION PARTIALLY VALIDATED (SV-076)`.
 
 Источник разбора: `Вовлечение новичков2 месяц.docx`. В документе приведены
 Power Query и DAX, но не выгрузка модели Power BI; отсутствующие сведения
@@ -103,6 +103,10 @@ PBIT подтверждает десять активных однонаправ
    список новичков; доступ разрешён всем пользователям с доступом к отчёту
    (BR-017). Техническая фиксация workspace permissions/RLS требуется перед
    реализацией.
+7. SV-076 подтверждает 3 144 повторных source-пары contract × child и raw
+   one-to-many совпадение СПТ по client × date. Это технические риски текущих
+   joins, а не разрешение менять `RANK()` или матчинг без отдельного решения
+   по BR-018.
 
 ## Предварительная техническая граница
 

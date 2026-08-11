@@ -1,6 +1,6 @@
 # Отчёт №3 «Вовлечение новичков Второй месяц»
 
-Статус: `BUSINESS ANALYSIS COMPLETE / ARCHITECTURE DESIGNED / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION REQUIRED`.
+Статус: `BUSINESS ANALYSIS COMPLETE / ARCHITECTURE DESIGNED / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION PARTIALLY VALIDATED (SV-076)`.
 
 Доказательства: предоставленные пользователем документы
 `Вовлечение_новичков_Второй_месяц.docx` и
@@ -61,9 +61,9 @@ Excel не является источником этого расчёта; ег
 
 | Набор текущей модели | Гранулярность | Статус |
 |---|---|---|
-| `Абонементы` | кандидат: контракт × клиент × месяц вовлечения | ASSUMPTION: уникальность результата не проверена |
+| `Абонементы` | контракт × клиент × месяц вовлечения | PARTIALLY VALIDATED: 100-row source control без дублей; детская ветка имеет source duplicates |
 | `ПосещенияНовичков_Агрегат` | контракт × клиент; число и последняя дата посещения за второй календарный месяц | CONFIRMED query |
-| `СПТ_Уникальные` | контракт × клиент с признаком СПТ | ASSUMPTION: ключ и отсутствие ложных совпадений не проверены |
+| `СПТ_Уникальные` | контракт × клиент с признаком СПТ | VALIDATION_FAILED для one-to-one: raw match client × date one-to-many; legacy match сохраняется по BR-018 |
 | `_Даты` | календарная дата | CONFIRMED query; активная связь с `Абонементы[ДатаВовлечения]` подтверждена PBIT |
 | `_Клубы` | клуб | CONFIRMED query; активная связь с `Абонементы[КлубДоступа]` подтверждена PBIT; уникальность не проверена |
 | `Выпускники план` | клуб × год | CONFIRMED current Power Query; PBIT подтверждает связь по клубу; уникальность не проверена |
