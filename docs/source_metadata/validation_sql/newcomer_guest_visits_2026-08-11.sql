@@ -29,6 +29,8 @@ SELECT count(*) AS rows,
        count(*) FILTER (WHERE _fld7068 IS NULL) AS null_visit_date_rows,
        count(*) FILTER (WHERE _fld7067rref IS NULL) AS null_status_rows,
        count(DISTINCT _fld7067rref) AS distinct_non_null_statuses,
+       count(*) FILTER (WHERE _fld7068::date < DATE '2000-01-01') AS pre_2000_visit_dates,
+       count(*) FILTER (WHERE _fld7068::date > CURRENT_DATE) AS future_visit_dates,
        min(_fld7068)::date AS min_visit_date,
        max(_fld7068)::date AS max_visit_date
 FROM public._inforg7064
@@ -65,5 +67,39 @@ WITH history AS (
 SELECT (SELECT count(*) FROM history) AS history_rows,
        (SELECT count(*) FROM ties) AS client_period_ties,
        coalesce((SELECT max(rows_in_tie) FROM ties), 0) AS max_rows_per_tie;
+
+-- NV-V08 expected: the exact current-M tour filter is measured at interaction
+-- grain before any future source-side aggregation. Phone-row multiplicity is
+-- observed, never silently deduplicated; the current tour date remains the
+-- phone date when present and interaction start otherwise.
+WITH tours AS (
+  SELECT i._idrref AS interaction_id,
+         CASE
+           WHEN s._description = 'Закрыто'
+            AND i._fld830rref = decode('b78f16cfde0c1e1f4f7c0ae8d942393d', 'hex')
+             THEN 'completed'
+           WHEN s._description = 'Запланировано'
+            AND i._fld830rref = decode('83b62b0bd3908a65448b72ca1ec17e94', 'hex')
+             THEN 'planned'
+         END AS tour_kind
+  FROM public._reference67 i
+  JOIN public._reference106 task ON task._idrref = i._owneridrref
+  JOIN public._reference224 s ON s._idrref = i._fld829rref
+  LEFT JOIN public._inforg7146 phone ON phone._fld7151rref = i._idrref
+  WHERE i._fld831rref = decode('b538e5326d9fc9a943c11fd0e7a0e678', 'hex')
+    AND task._fld1191rref = decode('99a9ebb169a4e2a611eecbf18a73ffa6', 'hex')
+    AND coalesce(phone._fld7150, i._fld820) >= DATE '2025-01-01'
+    AND coalesce(phone._fld7150, i._fld820) < CURRENT_DATE
+    AND ((s._description = 'Закрыто'
+          AND i._fld830rref = decode('b78f16cfde0c1e1f4f7c0ae8d942393d', 'hex'))
+      OR (s._description = 'Запланировано'
+          AND i._fld830rref = decode('83b62b0bd3908a65448b72ca1ec17e94', 'hex')))
+)
+SELECT tour_kind,
+       count(*) AS current_m_tour_rows,
+       count(DISTINCT interaction_id) AS distinct_interactions,
+       count(*) - count(DISTINCT interaction_id) AS phone_join_excess
+FROM tours
+GROUP BY 1 ORDER BY 1;
 
 ROLLBACK;

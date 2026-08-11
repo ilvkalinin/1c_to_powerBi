@@ -1,6 +1,6 @@
 # ADR-0020: первые посещения, гостевые визиты и туры новичков
 
-- Статус: `DESIGNED / TECHNICAL VALIDATION BLOCKED — gymdb read-only unavailable / IMPLEMENTATION DEFERRED`
+- Статус: `DESIGNED / STAGE 2 PARTIALLY VALIDATED — SV-087 / STAGE 3 APPROVAL REQUIRED`
 - Дата: 2026-08-03
 - Отчёт: №20 «Новички и гостевые визиты»
 
@@ -39,10 +39,11 @@ Tie-break первого посещения, ключ/статус гостев�
 границы, CRM normalization и ACCUNIQ states — `VALIDATION_PENDING`. При
 недоказанном ключе гостевого события физический объект не реализуется.
 
-NV-V01/NV-V03/NV-V04/NV-V07 подготовлены в read-only SQL, но не выполнены
-2026-08-11: два последовательных подключения к `gymdb` завершились
-`timeout expired`. Это не доказывает отсутствие relations и не разрешает
-Stage 3.
+NV-V01/NV-V03/NV-V04/NV-V07/NV-V08 выполнены в read-only snapshot: physical
+guest key и history ties подтверждены, но guest candidate key материально
+неуникален; у регистра четыре статуса и присутствуют аномальные даты. CRM-туры
+не размножаются телефонией в проверенном current-M контуре. Это не разрешает
+Stage 3: ACCUNIQ, первый визит и 0/44/45 outcomes остаются pending.
 
 ## Доказательства
 

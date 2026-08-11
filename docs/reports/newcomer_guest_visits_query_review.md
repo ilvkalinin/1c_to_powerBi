@@ -1,16 +1,15 @@
 # Разбор текущих запросов: «Новички и гостевые визиты»
 
-Статус: `BUSINESS REVIEW COMPLETE / TECHNICAL VALIDATION BLOCKED — gymdb read-only unavailable`.
+Статус: `BUSINESS REVIEW COMPLETE / STAGE 2 PARTIALLY VALIDATED — SV-087`.
 
 Источники:
 
 - `Новички и гостевые визиты.docx`, SHA-1 `33f1651add0cca9b245f2f7336767414f7758769` — описание страниц;
 - `НОвички и гостевые визиты (2).docx`, SHA-1 `29e83535b03a65f190b227122b1d33f63c4dc60e` — текущие Power Query, SQL и DAX.
 
-Ни один SQL-запрос данного отчёта не запускался. Все SQL-проверки ниже имеют
-статус `NOT_EXECUTED — gymdb read-only unavailable`: 2026-08-11 два отдельных
-подключения к источнику, включая минимальный `SELECT 1`, завершились
-`timeout expired`. Это не доказательство отсутствия физического источника.
+NV-V01/NV-V03/NV-V04/NV-V07/NV-V08 выполнены 2026-08-11 в `BEGIN READ ONLY`.
+Первичная запись о таймауте исправлена: клиент ошибочно включал SSL, который
+сервер не поддерживает. Это не является доказательством отсутствия источника.
 
 ## Наборы Power Query
 
@@ -89,8 +88,9 @@ guest_visit_date + 44 days]`. Финальный `Distinct` оставляет �
 
 ## Подготовленные проверки STAGE_2
 
-Все проверки `VALIDATION_PENDING`; SQL ниже
-`NOT_EXECUTED — ожидается подключение к корпоративной сети`.
+NV-V01/NV-V03/NV-V04/NV-V07/NV-V08 выполнены и описаны в SV-087. Для
+V-02/V-05/V-06/V-09 точные current-M источники/константы и кардинальности
+остаются `VALIDATION_PENDING`.
 
 | ID | Проверка и ожидаемый результат |
 |---|---|
@@ -122,8 +122,9 @@ HAVING COUNT(*) > 1;
 
 ## Подготовленный read-only набор
 
-NV-V01/NV-V03/NV-V04/NV-V07 зафиксированы до запуска в
+NV-V01/NV-V03/NV-V04/NV-V07/NV-V08 зафиксированы до запуска в
 [`newcomer_guest_visits_2026-08-11.sql`](../source_metadata/validation_sql/newcomer_guest_visits_2026-08-11.sql).
-Остальные V-02/V-05/V-06/V-08/V-09 требуют того же доступного source snapshot
-для проверки точных current-M констант и cardinality. Никакая из них не
-считается выполненной по суммарным доказательствам других отчётов.
+NV-V03/V04 подтвердили unique technical key, но material candidate duplicates;
+NV-V07 — отсутствие history ties; NV-V08 — отсутствие phone-row multiplication
+в текущем tour-контуре. V-02/V-05/V-06/V-09 требуют точных current-M
+констант/кардинальностей и остаются `VALIDATION_PENDING`.

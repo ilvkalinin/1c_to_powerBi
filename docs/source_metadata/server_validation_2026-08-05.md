@@ -1919,19 +1919,24 @@ Power Query не анализировались.
 
 ## SV-087 — «Новички и гостевые визиты»: guest-register checkpoint
 
-Статус: `BLOCKED` на 2026-08-11. SQL:
+Статус: `PARTIALLY VALIDATED` на live read-only снимке 2026-08-11. SQL:
 [`newcomer_guest_visits_2026-08-11.sql`](validation_sql/newcomer_guest_visits_2026-08-11.sql).
-NV-V01/NV-V03/NV-V04/NV-V07 имеют ожидаемые результаты до запуска и не
-возвращают ПДн или raw identifiers. Запуск не повторялся: непосредственно
-перед началом отчёта бизнес-набор AB-V01—AB-V04 и отдельный `SELECT 1` уже
-подтвердили недоступность `gymdb` с `timeout expired`.
+NV-V01/NV-V03/NV-V04/NV-V07/NV-V08 имеют ожидаемые результаты до запуска и
+не возвращают ПДн или raw identifiers. Все выполненные запросы были в
+`BEGIN READ ONLY`; `transaction_read_only=on`. Первичная запись о таймауте
+исправлена: клиент ошибочно включал SSL, который сервер не поддерживает.
 
 | Контроль | Фактический результат | Статус |
 |---|---|---|
-| NV-V01/NV-V03/NV-V04/NV-V07 | Нет доступного read-only соединения; SQL не исполнялся и агрегаты не получены | NOT_EXECUTED |
-| V-02/V-05/V-06/V-08/V-09 | Точные current-M ключи, константы и cardinality не проверялись без source snapshot | NOT_EXECUTED |
+| NV-V01 | Все 17 relations существуют в `public` | VALIDATED |
+| NV-V03 | 224 394 guest rows = technical keys; inactive/NULL period/client/visit/status = 0; 4 статуса; 2 даты до 2000 и 2 будущие | VALIDATED physical key / date anomalies observed |
+| NV-V04 | 111 578 duplicate candidate groups, 224 358 строк в них, максимум 7 | VALIDATION_FAILED для unique `(registration, client, visit date)` |
+| NV-V07 | `InfoRg5654`: 1 084 860 строк, client × period ties = 0 | VALIDATED physical history key; default `New` unconfirmed |
+| NV-V08 | current-M tours: completed 95 386/95 386, planned 63/63 rows/interaction ID; phone join excess = 0 | VALIDATED bounded CRM grain control |
+| V-02/V-05/V-06/V-09 | First-visit join, 12 ACCUNIQ codes/states, 0/44/45 outcomes и latest booking attribution | VALIDATION_PENDING |
 
-SV-006 уже подтверждает физическое существование `_inforg7064`; этот блокер
-не добавляет источник в `missing_source_objects.md`. После восстановления
-доступа повторить исключительно read-only NV-набор, сохраняя текущие SQL/M/DAX
-по BR-018.
+SV-006 уже подтверждает физическое существование `_inforg7064`; реестр
+`missing_source_objects.md` не изменяется. Аномальные даты и candidate
+duplicates не отбрасываются: current SQL/M/DAX сохраняется по BR-018. Любое
+правило выбора гостевого события, статуса или outcome требует отдельного
+решения перед Stage 3.

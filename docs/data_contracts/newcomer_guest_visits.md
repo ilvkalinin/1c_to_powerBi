@@ -1,10 +1,11 @@
 # Data contract: «Новички и гостевые визиты»
 
-Статус: `DESIGNED COMPOSITE MODEL / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION BLOCKED — gymdb read-only unavailable`.
+Статус: `DESIGNED COMPOSITE MODEL / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-087`.
 
-Точечные NV-V01/NV-V03/NV-V04/NV-V07 имеют зафиксированные ожидания до
-запуска, но не исполнены: доступ к `gymdb` завершился `timeout expired`.
-До доступного read-only снимка контракт не является технически принятым.
+NV-V01/NV-V03/NV-V04/NV-V07/NV-V08 выполнены с зафиксированными ожиданиями.
+Physical guest key и CRM-tour grain подтверждены, но candidate guest key
+материально неуникален; статусы, ACCUNIQ и 0/44/45 outcomes не приняты.
+Контракт остаётся непринимаемым до Stage 3.
 
 ## Наборы
 
