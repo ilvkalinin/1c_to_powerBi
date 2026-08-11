@@ -1772,3 +1772,17 @@ Power BI snapshot не является обязательным входом St
 | PR-V07—V09 | 2026 starts: 56 977 overlap-строк у 12 000 контрактов. 40 duplicate contract-code groups, 230 549 orphan club links. Календарь: 1 826 уникальных non-null дат, 2022-01-01—2026-12-31 | code/name не технические ключи; calendar key VALIDATED |
 
 Текущие DAX границы, `NATURALLEFTOUTERJOIN` и отсутствие новых state filters сохраняются по BR-018. Замена join или методическое исправление требует отдельного решения перед Stage 3.
+
+## SV-078 — «Воронка лиды фитнес»: task-to-service attribution
+
+Статус: `PARTIALLY VALIDATED` на live read-only снимке 2026-08-11. SQL:
+[`fitness_leads_funnel_2026-08-11.sql`](validation_sql/fitness_leads_funnel_2026-08-11.sql).
+
+| Контроль | Фактический результат | Статус |
+|---|---|---|
+| FL-V05 | Bounded cohort: 100 current tasks 2026 → 100 joined rows, join excess=0; 82 tasks have no raw client-day state match | VALIDATED bounded task join; absence is compatible with stage-based DAX `Есть запись` |
+| FL-V06/V07 | Переиспользован SV-072: `InfoRg7006` technical key уникален; document branches измерены; `Document329.VT4352` создаёт legacy one-to-many | PARTIALLY VALIDATED; сохранять current result по BR-018 |
+
+Полный scan `Reference106` не вернул подтверждаемого агрегата в лимите среды и
+не засчитывается. Не изменять current client-code/date attribution или
+stage-based `Есть запись` без отдельного решения.

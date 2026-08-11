@@ -1,6 +1,6 @@
 # Query review: «Воронка. Лиды. Фитнес»
 
-Статус: `BUSINESS REVIEW COMPLETE / TECHNICAL VALIDATION PENDING`. Review
+Статус: `BUSINESS REVIEW COMPLETE / TECHNICAL VALIDATION PARTIALLY VALIDATED (SV-078)`. Review
 основан на полном доступном SQL/M/DAX, трёх скриншотах, полученных
 2026-07-29, и PBIT `ВоронкаЛидыФитнес.pbit`, полученном 2026-07-31. Никаких
 запросов к БД не выполнялось.

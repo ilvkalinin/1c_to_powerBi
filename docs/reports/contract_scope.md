@@ -22,7 +22,7 @@ data contract оформлены по 31 из 31 отчёта. Реализов�
 | 2 | Фитнес | Вовлечение новичков | COMPLETE | COMPLETE | DESIGNED — ADR-0008 | COMPLETE — `newcomer_engagement` | DEFERRED | PARTIALLY VALIDATED — SV-075; Stage 3 deferred |
 | 3 | Фитнес | Вовлечение новичков Второй месяц | COMPLETE | COMPLETE — `newcomer_engagement_second_month` | DESIGNED — ADR-0009 | COMPLETE — `newcomer_engagement_second_month` | DEFERRED | PARTIALLY VALIDATED — SV-076; Stage 3 deferred |
 | 4 | Фитнес | Подготовка к продлению | COMPLETE — `preparation_renewal` | COMPLETE — `preparation_renewal` | DESIGNED — ADR-0013 | COMPLETE — `preparation_renewal` | DEFERRED | PARTIALLY VALIDATED — SV-077; Stage 3 deferred |
-| 5 | Фитнес | Воронка лиды фитнес | COMPLETE — `fitness_leads_funnel` | COMPLETE — `fitness_leads_funnel` | DESIGNED — ADR-0011 | COMPLETE — `fitness_leads_funnel` | DEFERRED | DEFERRED — technical validation |
+| 5 | Фитнес | Воронка лиды фитнес | COMPLETE — `fitness_leads_funnel` | COMPLETE — `fitness_leads_funnel` | DESIGNED — ADR-0011 | COMPLETE — `fitness_leads_funnel` | DEFERRED | PARTIALLY VALIDATED — SV-078; Stage 3 deferred |
 | 6 | Фитнес | Загрузка сотрудников | COMPLETE — `employee_workload` | COMPLETE — `employee_workload` | DESIGNED — ADR-0014 | COMPLETE — `employee_workload` | DEFERRED | PARTIALLY VALIDATED — SV-074; Stage 3 deferred |
 | 7 | Фитнес | Контроль предварительной записи | COMPLETE — `prebooking_control` | COMPLETE — `prebooking_control` | DESIGNED — ADR-0015 | COMPLETE — `prebooking_control` | DEFERRED | PARTIALLY VALIDATED — SV-072; Stage 3 deferred |
 | 8 | Фитнес | Отчет по ИП | COMPLETE | COMPLETE — `ip_training` | DESIGNED — ADR-0025 | COMPLETE — `ip_training` | DEFERRED | DEFERRED — technical validation |

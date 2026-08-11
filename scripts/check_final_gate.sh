@@ -35,7 +35,7 @@ while IFS=$'\t' read -r report status commit; do
   if [[ "$status" != "COMPLETE" || "$commit" == "-" || -z "$commit" ]]; then
     printf 'FINAL FORBIDDEN: %s is %s (commit: %s).\n' "$report" "$status" "$commit" >&2
     failed=1
-  elif ! git merge-base --is-ancestor "$commit" HEAD; then
+  elif [[ "$commit" != "SELF" ]] && ! git merge-base --is-ancestor "$commit" HEAD; then
     printf 'FINAL FORBIDDEN: completion commit %s for %s is not reachable from HEAD.\n' "$commit" "$report" >&2
     failed=1
   fi

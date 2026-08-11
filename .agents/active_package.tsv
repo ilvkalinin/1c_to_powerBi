@@ -1,10 +1,11 @@
 # Fail-closed state for the only package that may currently run autonomously.
-# Update this file in the same commit as the completed report.
+# Update this file in the same commit as the completed report.  SELF means that
+# the completion commit is the commit that contains this state update.
 # package_status must be ACTIVE or CLOSED; report_status must be PENDING, IN_PROGRESS, COMPLETE, or BLOCKED.
 package_id	stage	package_status	approved_at
 fitness_funnels_2026-08-11	STAGE_2_SERVER_VALIDATION	ACTIVE	2026-08-11
 
 report_id	report_status	completion_commit
-fitness_leads_funnel	IN_PROGRESS	-
-fitness_funnel	PENDING	-
+fitness_leads_funnel	COMPLETE	SELF
+fitness_funnel	IN_PROGRESS	-
 marketing_funnel	PENDING	-

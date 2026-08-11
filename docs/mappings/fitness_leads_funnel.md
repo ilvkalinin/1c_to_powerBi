@@ -1,6 +1,6 @@
 # Source-to-target mapping: воронка лиды фитнес
 
-Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE ACCEPTED / TECHNICAL VALIDATION REQUIRED`.
+Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE ACCEPTED / TECHNICAL VALIDATION PARTIALLY VALIDATED (SV-078)`.
 Outcome-атрибуция подтверждена calculated columns текущей модели; физические
 ключи, типы, состояния и кардинальности остаются `VALIDATION_PENDING`.
 
