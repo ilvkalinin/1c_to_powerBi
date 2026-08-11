@@ -1,6 +1,6 @@
 # Source-to-target mapping: тренировки ИП
 
-Статус: `BUSINESS MAPPING COMPLETE / TECHNICAL VALIDATION DEFERRED`.
+Статус: `BUSINESS MAPPING COMPLETE / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED`.
 
 Mapping основан на текущих запросах, metadata и решениях пользователя 2026-07-24. Архитектура `mart.ip_training_daily` выбрана в ADR-0025; реализация заблокирована до проверки источника логической тренировки и кардинальностей join.
 
@@ -28,13 +28,13 @@ Mapping основан на текущих запросах, metadata и реш�
 
 | Целевая колонка | Бизнес-описание | Источник / преобразование | Тип PostgreSQL | NULL | Статус | Проверка до SQL |
 |---|---|---|---|---|---|---|
-| `training_date` | календарная дата тренировки | `Document329.Fld4306::date` либо `Document279.Fld3218::date`; не `InfoRg7006.Period` | `date` | нет | CONFIRMED — user decision | timezone и фактический тип |
-| `club_id` | клуб тренировки | `InfoRg7006.Fld7009`; сверить с клубом документа | UNKNOWN | нет | CONFIRMED source / precedence pending | расхождения клуба регистра и документа |
-| `employee_id` | стабильный тренер ИП | `Document329.Fld4322` / `Document279.Fld3223` | UNKNOWN | нет | CONFIRMED source | пустые/удалённые сотрудники |
+| `training_date` | календарная дата тренировки | `Document329.Fld4306::date` либо `Document279.Fld3218::date`; не `InfoRg7006.Period` | `date` | нет | CONFIRMED — user decision / SV-068 | timezone и фактический тип |
+| `club_id` | клуб тренировки | `InfoRg7006.Fld7009`; сверить с клубом документа | UNKNOWN | нет | CONFIRMED source / SV-068 | расхождения клуба регистра и документа |
+| `employee_id` | стабильный тренер ИП | `Document329.Fld4322` / `Document279.Fld3223` | UNKNOWN | нет | CONFIRMED source / SV-068 | пустые/удалённые сотрудники |
 | `employee_name` | отображаемое имя сотрудника | `Reference225.Description` | `text` | нет | CONFIRMED need | дубли имён не являются ключом |
-| `client_key` | стабильный ключ клиента для `DISTINCTCOUNT` | `InfoRg7006.Fld7008` → согласованное стабильное представление | UNKNOWN | нет | CONFIRMED need | способ защиты исходного ID |
+| `client_key` | стабильный ключ клиента для `DISTINCTCOUNT` | `InfoRg7006.Fld7008` → согласованное стабильное представление | UNKNOWN | нет | CONFIRMED need / SV-068 | способ защиты исходного ID |
 | `client_code` | код клиента в детальном визуале | `Reference141X1.Code` | `text` | нет | CONFIRMED need | доступ и маскирование |
-| `service_id` | стабильный тип услуги | `InfoRg7006.Fld7010`; связь со строкой услуги проверить | UNKNOWN | нет | CONFIRMED source | расхождения номенклатуры |
+| `service_id` | стабильный тип услуги | `InfoRg7006.Fld7010`; связь со строкой услуги проверить | UNKNOWN | нет | CONFIRMED source / SV-068 | расхождения номенклатуры |
 | `service_name` | наименование услуги в структуре тренировок | `Reference163.Description` | `text` | нет | CONFIRMED need | переименования и история |
 | `training_count` | количество квалифицированных строк текущей логики в целевой комбинации | `COUNT` строк двух ветвей после текущих квалифицирующих условий; сохраняет legacy-кратность ПЗ | `integer`/`bigint` | нет | CONFIRMED current rule / SV-058 | сверка с текущим `COUNT(Контрагент)` |
 
@@ -60,8 +60,8 @@ Mapping основан на текущих запросах, metadata и реш�
 | ИП, ветка ПЗ | специальная услуга ИП или тип взаиморасчётов «с сотрудником» | CONFIRMED current rule; one-to-many `VT4352` сохраняет observed multiplicity SV-058 |
 | ИП, ветка ГП | специальная услуга ИП | source confirmed |
 | состояние | исключить enum order 2 и 3 | CONFIRMED — оставить текущее правило |
-| активность регистра | не фильтруется | TECHNICAL VALIDATION REQUIRED |
-| проведение/удаление документов | не фильтруется | TECHNICAL VALIDATION REQUIRED |
+| активность регистра | не фильтруется | CONFIRMED current rule; `SV-068`: 0 inactive rows in live PBIT cohort |
+| проведение/удаление документов | не фильтруется | CONFIRMED current rule; `SV-068`: 0 unposted/marked rows in live PBIT cohort |
 
 ## Агрегации для Power BI
 
@@ -97,10 +97,12 @@ Mapping основан на текущих запросах, metadata и реш�
 
 ## Техническая валидация до реализации
 
-1. Физические типы и полиморфная ссылка `InfoRg7006.Fld7007`, включая
-   взаимоисключаемость ветвей ГП/ПЗ.
-2. Полнота правил `Active`, `Posted` и `Marked` за весь исторический период.
-3. Фактические объёмы и контрольные значения итогового дневного агрегата.
+1. Физические типы и полиморфная ссылка `InfoRg7006.Fld7007`; `SV-068`
+   подтвердил нулевое пересечение ветвей по техническому ключу, но не заменяет
+   metadata-проверку типов перед реализацией.
+2. Фактические объёмы и контрольные значения итогового дневного агрегата для
+   утверждённого refresh-окна. `SV-068` уже подтвердил current full cohort:
+   197 109 legacy-строк → 195 238 строк target grain, без NULL-компонентов.
 
 Кардинальность `VT4352` для текущего результата уже доказана SV-058 и не
 служит причиной скрытой дедупликации.
