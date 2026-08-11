@@ -7,7 +7,7 @@
 | Объект | `mart.club_attendance_hourly` | ADR-0022 |
 | Таблица Power BI | `Почасовая посещаемость` | CONFIRMED naming rule |
 | Grain | дата × клуб × час входа × час выхода/NULL × пол × возраст | CONFIRMED |
-| Ключ | полный состав grain | VALIDATION_PENDING |
+| Ключ | полный состав grain | VALIDATED на control 2026-07-15, SV-067; полный historical contract BLOCKED политикой даты рождения |
 | Обновление | ежедневно, атомарный rebuild BR-003 | DESIGNED |
 | Power BI | Import | DESIGNED |
 
@@ -29,4 +29,3 @@
 
 Приёмка: уникальность grain, допустимые часы, отсутствие дублей join,
 совпадение количества/минут с Power Query, states, rerun и SLA.
-
