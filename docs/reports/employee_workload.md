@@ -1,6 +1,6 @@
 # Требования отчёта: «Загрузка сотрудников»
 
-Статус: `BUSINESS LOGIC COMPLETE / TECHNICAL VALIDATION DEFERRED`.
+Статус: `BUSINESS LOGIC COMPLETE / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-074`.
 
 Договорной отчёт №6, блок «Фитнес». Анализ выполнен локально по двум
 предоставленным DOCX, текущему Power Query, DAX и скриншотам Power BI. К 1С и

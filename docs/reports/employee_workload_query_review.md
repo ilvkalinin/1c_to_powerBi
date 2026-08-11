@@ -1,6 +1,11 @@
 # Разбор текущих запросов: «Загрузка сотрудников»
 
-Статус: `BUSINESS LOGIC CONFIRMED / TECHNICAL VALIDATION DEFERRED`.
+Статус: `BUSINESS LOGIC CONFIRMED / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-074`.
+
+SV-074 подтвердил технические ограничения дежурств, связи СКУД и кадровых
+интервалов. Они не исправляются скрыто: legacy занятия/план переиспользуют
+SV-072/SV-073, а правила выбора единственной кадровой записи требуют решения
+перед Stage 3.
 
 ## Наборы Power Query
 

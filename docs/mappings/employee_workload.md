@@ -1,6 +1,6 @@
 # Source-to-target mapping: «Загрузка сотрудников»
 
-Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0014 / TECHNICAL VALIDATION DEFERRED`.
+Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0014 / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-074`.
 
 Единственного source grain нет. Отчёт использует общий факт ДПФУ и дневной
 план, а для загрузки — самостоятельные события занятий, дежурств, купонов и
