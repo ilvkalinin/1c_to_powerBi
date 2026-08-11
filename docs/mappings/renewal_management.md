@@ -1,6 +1,6 @@
 # Source-to-target mapping: «Управление продлением»
 
-Статус: `BUSINESS MAPPING COMPLETE / TECHNICAL VALIDATION DEFERRED`.
+Статус: `BUSINESS MAPPING COMPLETE / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-081; Stage 3 deferred`.
 SQL и физические объекты пока не создаются.
 
 ## Гранулярность
@@ -103,3 +103,19 @@ SQL и физические объекты пока не создаются.
 5. `VALIDATION_PENDING — implementation blocker`: цена покупки и знаки движений.
 6. `UNKNOWN`: фактические типы, размеры и планы. Данные должны быть доступны
    не позднее 08:30 по Москве (`CONFIRMED`, BR-014).
+
+## Stage 2 evidence — SV-081 (2026-08-11)
+
+Все 18 физических relations существуют. Ограниченная выборка 100 контрактов
+подтвердила текущий contract grain после `Document332`/`Document287`: 100
+строк, 100 distinct ID, `duplicate_contract_groups = 0`. В 51 строке найден
+next-contract; `earliest_start_tie_groups = 0` в выборке. Это не превращает
+эвристику same-client/date в доказанную прямую связь и не закрывает
+full-population проверку.
+
+Для 100 клиентов `InfoRg6861` и `InfoRg5654` не дали ties на latest period.
+Цена: 1 448 source rows = 1 448 technical keys, orphan contract = 0,
+неактивных = 4; legacy `RecordKind = 0` не меняется. Посещения на том же
+bounded scope: legacy `COUNT(*)`, technical keys и distinct documents равны
+133; ресурс `Fld7585 = 133.00`. Технические состояния документов и единица
+посещаемости остаются `VALIDATION_PENDING` для полного источника.

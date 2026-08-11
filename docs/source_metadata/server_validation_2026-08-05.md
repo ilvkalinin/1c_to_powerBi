@@ -1811,3 +1811,26 @@ result не выбирает «главный» контракт: contract detai
 | MF-V02/MF-V04 | Task grain и CRM join controls переиспользуют SV-078 | PARTIALLY VALIDATED; task core остаётся `REUSE` |
 
 Нельзя суммировать contract rows как task-level `contract_count` или silently deduplicate bridge. Current SQL/M/DAX воспроизводится по BR-018; правило агрегации нескольких контрактов требует отдельного решения перед Stage 3.
+
+## SV-081 — «Управление продлением»: current-contract cohort и продление
+
+Статус: `PARTIALLY VALIDATED` на live read-only срезе 2026-08-11. SQL:
+[`renewal_management_2026-08-11.sql`](validation_sql/renewal_management_2026-08-11.sql).
+Все выполненные запросы были в отдельных `READ ONLY` транзакциях под
+`gymdb_readonly`; результат не содержит PII или идентификаторов.
+
+| Контроль | Фактический результат | Статус |
+|---|---|---|
+| RM-V01 | Все 18 physical relations существуют как таблицы `public` | VALIDATED |
+| RM-V03B | Bounded current cohort: 100 pre-exclusion → 100 retained rows → 100 distinct contract ID; duplicate groups = 0 | VALIDATED bounded source-side control |
+| RM-V04B | 100 cohort contracts; 51 имеют next-contract; ties на минимальной дате начала = 0 | VALIDATED bounded determinism control |
+| RM-V05B | 100 клиентов: latest rating ties = 0, latest tenure ties = 0 | VALIDATED bounded latest-join control |
+| RM-V06B | 1 448 price rows = technical keys; 0 contract orphan; inactive = 4; `RecordKind` 0 / 1 = 1 007 / 441 | VALIDATED bounded physical control; current M сохраняет только `RecordKind = 0` |
+| RM-V07B | current-PBI visit path для 100 контрактов: `COUNT(*) = 133` = technical keys = distinct documents; `SUM(Fld7585) = 133.00` | VALIDATED bounded unit observation |
+
+Полные популяционные scan-контроли не вернули подтверждаемого результата в
+серверном лимите и не засчитываются. Прямая связь старый → новый контракт,
+семантика states `Document287`/`Document332`, полный price/visit reconciliation
+и PII authorization остаются перед реализацией. По BR-018 не добавлять state
+filters, не менять `RecordKind = 0` и не подменять current `COUNT(*)` без
+отдельного решения.

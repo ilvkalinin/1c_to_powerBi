@@ -1,6 +1,6 @@
 # Data contract: «Управление продлением»
 
-Статус: `DESIGNED / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION REQUIRED`.
+Статус: `DESIGNED / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-081`.
 
 ## Общие параметры
 
@@ -139,3 +139,6 @@ DAX выполняет проценты, прошлый год, цель, деф
 7. Измерение времени ежедневной полной замены.
 8. Проверка прав доступа к PII.
 
+SV-081 дал bounded source-side доказательство ключа, legacy-исключений,
+next-start tie, latest rating/tenure, цены и единицы посещений. Он не закрывает
+условия принятия для всей популяции и не разрешает реализацию.
