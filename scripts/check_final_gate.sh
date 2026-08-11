@@ -31,8 +31,10 @@ if [[ "$package_status" != "CLOSED" ]]; then
 fi
 
 failed=0
+in_reports=0
 while IFS=$'\t' read -r report status commit; do
-  [[ -z "$report" || "$report" == \#* || "$report" == "report_id" ]] && continue
+  [[ "$report" == "report_id" ]] && { in_reports=1; continue; }
+  [[ "$in_reports" -eq 0 || -z "$report" || "$report" == \#* ]] && continue
   if [[ "$status" != "COMPLETE" || "$commit" == "-" || -z "$commit" ]]; then
     printf 'FINAL FORBIDDEN: %s is %s (commit: %s).\n' "$report" "$status" "$commit" >&2
     failed=1
