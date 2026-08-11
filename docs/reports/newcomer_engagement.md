@@ -1,6 +1,6 @@
 # Отчёт №2 «Вовлечение новичков»
 
-Статус: `BUSINESS REQUIREMENTS CONFIRMED / TECHNICAL VALIDATION PARTIALLY VALIDATED`.
+Статус: `BUSINESS REQUIREMENTS CONFIRMED / TECHNICAL VALIDATION PARTIALLY VALIDATED (SV-075)`.
 
 Исходники сохранены в
 `docs/source_reports/newcomer_engagement/README.md`.

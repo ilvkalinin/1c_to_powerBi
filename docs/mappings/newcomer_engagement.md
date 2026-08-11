@@ -1,6 +1,6 @@
 # Source-to-target mapping: `newcomer_engagement_milestone`
 
-Статус: `BUSINESS MAPPING COMPLETE / TECHNICAL VALIDATION DEFERRED`.
+Статус: `BUSINESS MAPPING COMPLETE / TECHNICAL VALIDATION PARTIALLY VALIDATED (SV-075)`.
 SQL и физические объекты пока не создаются.
 
 Гранулярность одной строки:
