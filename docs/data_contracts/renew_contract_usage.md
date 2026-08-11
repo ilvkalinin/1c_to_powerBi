@@ -1,6 +1,6 @@
 # Data contract: «Использование контрактов»
 
-Статус: `DESIGNED / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION REQUIRED`.
+Статус: `DESIGNED / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-082`.
 Контракт относится только к PostgreSQL-обогащению отчёта `%Renew`.
 
 ## Общие параметры
@@ -116,3 +116,8 @@ DAX сохраняет существующие расчёты Renew, рекар
 6. Контрольное закрытие месяца без изменения финализированных строк.
 7. Проверка контракта, пересекающего Новый год.
 8. Измерение ежедневного source-side запроса и Power BI refresh.
+
+SV-082 подтвердил bounded physical current-PBI path, но не закрывает
+unique `contract_code`, полный type-domain основания, состояния источника,
+finalization и связь с внешними Excel-снимками. Эти Excel-артефакты не
+запрашиваются и не анализируются на Stage 2.

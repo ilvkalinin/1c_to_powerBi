@@ -34,7 +34,7 @@ data contract оформлены по 31 из 31 отчёта. Реализов�
 | 14 | Продажи | Отчет по промокодам | COMPLETE — `promo_codes` | COMPLETE — `promo_codes` | DESIGNED — ADR-0018 | COMPLETE — `promo_codes` | DEFERRED | DEFERRED — technical validation |
 | 15 | Продажи | Продажа детских пакетов | COMPLETE | COMPLETE — `children_package_sales` | DESIGNED — ADR-0019 | COMPLETE — `children_package_sales` | DEFERRED | DEFERRED — technical validation |
 | 16 | Продажи | Управление продлением | COMPLETE | COMPLETE | PROPOSED — ADR-0007 | COMPLETE — `renewal_management` | DEFERRED | PARTIALLY VALIDATED — SV-081; Stage 3 deferred |
-| 17 | Продажи | Отчет по %Renew | COMPLETE | COMPLETE | PROPOSED — ADR-0006 | COMPLETE — `renew_contract_usage` | DEFERRED | DEFERRED — technical validation |
+| 17 | Продажи | Отчет по %Renew | COMPLETE | COMPLETE | PROPOSED — ADR-0006 | COMPLETE — `renew_contract_usage` | DEFERRED | PARTIALLY VALIDATED — SV-082; Stage 3 deferred |
 | 18 | Гостеприимство | Выручка рецепции | COMPLETE | COMPLETE | PROPOSED — ADR-0005 | COMPLETE — `reception_revenue` | DEFERRED | DEFERRED — technical validation |
 | 19 | Гостеприимство | Записи администраторов | COMPLETE | COMPLETE | PROPOSED — ADR-0004 | COMPLETE — `administrator_bookings` | DEFERRED | DEFERRED — technical validation |
 | 20 | Гостеприимство | Новички и гостевые визиты | COMPLETE — `newcomer_guest_visits` | COMPLETE — `newcomer_guest_visits` | DESIGNED — ADR-0020 | COMPLETE — `newcomer_guest_visits` | DEFERRED | DEFERRED — technical validation |

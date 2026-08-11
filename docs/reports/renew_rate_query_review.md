@@ -1,6 +1,6 @@
 # Разбор текущего запроса: «Отчет по %Renew»
 
-Статус: `EVIDENCE REVIEWED / TECHNICAL VALIDATION DEFERRED`.
+Статус: `EVIDENCE REVIEWED / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-082`.
 
 Источник: запрос Power Query, переданный пользователем 2026-07-28 и сохранённый
 в `docs/source_reports/renew_rate/Текущий запрос посещений.pq`.
@@ -80,3 +80,8 @@ read-only проверки:
 - число уникальных `Document325.ID`;
 - сумма `Fld7585`;
 - расхождения между тремя вариантами на контрольных контрактах.
+
+SV-082 выполнил bounded контроль: 133 legacy rows = 133 technical keys = 133
+distinct documents, ресурс равен 133.00. В 100 cross-year контрактах 15 034
+из 16 089 in-interval событий находятся до 2026 года. Это доказывает эффект
+legacy-границы, но BR-018 запрещает её изменение в первом релизе.

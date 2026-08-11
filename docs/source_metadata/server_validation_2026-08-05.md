@@ -1834,3 +1834,19 @@ result не выбирает «главный» контракт: contract detai
 и PII authorization остаются перед реализацией. По BR-018 не добавлять state
 filters, не менять `RecordKind = 0` и не подменять current `COUNT(*)` без
 отдельного решения.
+
+## SV-082 — «Отчет по %Renew»: contract usage и legacy-year window
+
+Статус: `PARTIALLY VALIDATED` на live read-only срезе 2026-08-11. SQL:
+[`renew_contract_usage_2026-08-11.sql`](validation_sql/renew_contract_usage_2026-08-11.sql).
+
+| Контроль | Фактический результат | Статус |
+|---|---|---|
+| RU-V01 | Все физические поля существуют; `Fld693 = numeric(5,0)`, а полиморфное основание имеет обязательные `Type`/`RTRef`/`RRRef` | VALIDATED physical metadata |
+| RU-V02 | Bounded current-PBI path: 133 `COUNT(*)` = 133 technical keys = 133 documents; `SUM(Fld7585)=133.00`; один type-pair основания | VALIDATED bounded source-side control |
+| RU-V03 | 100 cross-year contracts: full interval = 16 089 events; legacy 2026 window omits 15 034 and retains 1 055 | VALIDATED methodological observation; first release keeps legacy filter by BR-018 |
+| RU-V04 | 100 contracts: 25 nonpositive terms, 1 nonpositive interval; term differs from calendar days in 100; range 0—1 000 | VALIDATION_FAILED for deriving term from dates |
+
+Не анализировались и не запрашивались Excel-снимки или их Power Query. Full
+polymorphic-domain, state semantics, `contract_code` relation, finalization и
+performance остаются перед реализацией.

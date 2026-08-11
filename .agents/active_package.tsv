@@ -7,5 +7,5 @@ renewal_receipts_2026-08-11	STAGE_2_SERVER_VALIDATION	ACTIVE	2026-08-11
 
 report_id	report_status	completion_commit
 renewal_management	COMPLETE	SELF
-renew_contract_usage	IN_PROGRESS
-membership_receipts	PENDING
+renew_contract_usage	COMPLETE	SELF
+membership_receipts	IN_PROGRESS
