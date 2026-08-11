@@ -1,14 +1,16 @@
 # Разбор текущих запросов: «Новички и гостевые визиты»
 
-Статус: `BUSINESS REVIEW COMPLETE / TECHNICAL VALIDATION PENDING`.
+Статус: `BUSINESS REVIEW COMPLETE / TECHNICAL VALIDATION BLOCKED — gymdb read-only unavailable`.
 
 Источники:
 
 - `Новички и гостевые визиты.docx`, SHA-1 `33f1651add0cca9b245f2f7336767414f7758769` — описание страниц;
 - `НОвички и гостевые визиты (2).docx`, SHA-1 `29e83535b03a65f190b227122b1d33f63c4dc60e` — текущие Power Query, SQL и DAX.
 
-Ни один SQL-запрос не запускался. Все SQL-проверки ниже имеют статус
-`NOT_EXECUTED — ожидается подключение к корпоративной сети`.
+Ни один SQL-запрос данного отчёта не запускался. Все SQL-проверки ниже имеют
+статус `NOT_EXECUTED — gymdb read-only unavailable`: 2026-08-11 два отдельных
+подключения к источнику, включая минимальный `SELECT 1`, завершились
+`timeout expired`. Это не доказательство отсутствия физического источника.
 
 ## Наборы Power Query
 
@@ -117,3 +119,11 @@ HAVING COUNT(*) > 1;
 
 Ожидаемый результат: дубли либо отсутствуют, либо для каждого типа дубля
 зафиксировано правило выбора актуальной записи; иначе `VALIDATION_FAILED`.
+
+## Подготовленный read-only набор
+
+NV-V01/NV-V03/NV-V04/NV-V07 зафиксированы до запуска в
+[`newcomer_guest_visits_2026-08-11.sql`](../source_metadata/validation_sql/newcomer_guest_visits_2026-08-11.sql).
+Остальные V-02/V-05/V-06/V-08/V-09 требуют того же доступного source snapshot
+для проверки точных current-M констант и cardinality. Никакая из них не
+считается выполненной по суммарным доказательствам других отчётов.

@@ -1,12 +1,15 @@
 # Source-to-target mapping: «Новички и гостевые визиты»
 
-Статус: `BUSINESS MAPPING COMPLETE / TECHNICAL VALIDATION DEFERRED`.
+Статус: `BUSINESS MAPPING COMPLETE / TECHNICAL VALIDATION BLOCKED — gymdb read-only unavailable / Stage 3 deferred`.
 
 Ниже описаны наборы, для которых ADR-0020 проектирует
 `mart.new_first_visit`, `mart.guest_visit_conversion` и REUSE
 `mart.v_guest_tour`. Это не разрешение на SQL/DDL. Все проверки имеют статус
-`VALIDATION_PENDING`; SQL не выполнялся (`NOT_EXECUTED — ожидается
-подключение к корпоративной сети`).
+`VALIDATION_PENDING`; SQL данного отчёта не выполнялся (`NOT_EXECUTED —
+gymdb read-only unavailable`). Read-only NV-V01/NV-V03/NV-V04/NV-V07
+подготовлены до запуска; два непосредственных source connection attempts
+2026-08-11 завершились `timeout expired`. SV-006 ранее подтвердил физическое
+наличие `InfoRg7064`, поэтому реестр отсутствующих объектов не изменяется.
 
 История следует `BR-003`; refresh — ежедневно (`CONFIRMED — решение
 пользователя 2026-07-30`).

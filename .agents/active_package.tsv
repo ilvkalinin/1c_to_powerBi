@@ -8,4 +8,4 @@ hospitality_validation_2026-08-11	STAGE_2_SERVER_VALIDATION	ACTIVE	2026-08-11
 report_id	report_status	completion_commit
 reception_revenue	COMPLETE	SELF
 administrator_bookings	BLOCKED
-newcomer_guest_visits	IN_PROGRESS
+newcomer_guest_visits	BLOCKED

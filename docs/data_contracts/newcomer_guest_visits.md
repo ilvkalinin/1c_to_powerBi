@@ -1,6 +1,10 @@
 # Data contract: «Новички и гостевые визиты»
 
-Статус: `DESIGNED COMPOSITE MODEL / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION REQUIRED`.
+Статус: `DESIGNED COMPOSITE MODEL / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION BLOCKED — gymdb read-only unavailable`.
+
+Точечные NV-V01/NV-V03/NV-V04/NV-V07 имеют зафиксированные ожидания до
+запуска, но не исполнены: доступ к `gymdb` завершился `timeout expired`.
+До доступного read-only снимка контракт не является технически принятым.
 
 ## Наборы
 

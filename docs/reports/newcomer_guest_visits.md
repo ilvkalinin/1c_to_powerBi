@@ -1,11 +1,26 @@
 # Требования отчёта: «Новички и гостевые визиты»
 
-Статус: `BUSINESS ANALYSIS COMPLETE / TECHNICAL VALIDATION DEFERRED`.
+Статус: `BUSINESS ANALYSIS COMPLETE / TECHNICAL VALIDATION BLOCKED — gymdb read-only unavailable / Stage 3 deferred`.
 
 Анализ выполнен локально по двум документам: описанию страниц
 `Новички и гостевые визиты.docx` и выгрузке текущих Power Query / DAX
 `НОвички и гостевые визиты (2).docx`. Подключений к 1С/PostgreSQL и запуска
 SQL не было.
+
+## Stage 2: блокер доступа к источнику
+
+Точные исходные проверки гостевого регистра NV-V01/NV-V03/NV-V04/NV-V07
+сохранены в
+[`newcomer_guest_visits_2026-08-11.sql`](../source_metadata/validation_sql/newcomer_guest_visits_2026-08-11.sql).
+Они имеют зафиксированные ожидаемые результаты, не выбирают ПДн или raw IDs и
+дополняют переиспользуемые SV-006, SV-035, SV-037, SV-072, SV-075, SV-076 и
+SV-084. Выполнение не запускалось повторно: непосредственно перед этим два
+отдельных read-only подключения к `gymdb`, включая `SELECT 1`, завершились
+`timeout expired`. Поэтому специфичные V-01—V-09 остаются `NOT_EXECUTED`.
+
+`InfoRg7064` был физически найден SV-006; недоступность соединения не является
+доказательством отсутствия source relation и не меняет единый реестр объектов
+для системного администратора.
 
 ## Назначение
 
