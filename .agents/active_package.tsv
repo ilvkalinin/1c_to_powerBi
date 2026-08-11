@@ -3,9 +3,9 @@
 # the completion commit is the commit that contains this state update.
 # package_status must be ACTIVE or CLOSED; report_status must be PENDING, IN_PROGRESS, COMPLETE, or BLOCKED.
 package_id	stage	package_status	approved_at
-sales_validation_2026-08-11	STAGE_2_SERVER_VALIDATION	ACTIVE	2026-08-11
+hospitality_validation_2026-08-11	STAGE_2_SERVER_VALIDATION	ACTIVE	2026-08-11
 
 report_id	report_status	completion_commit
-sales_team_workload	COMPLETE	SELF
-promo_codes	BLOCKED
-children_package_sales	COMPLETE	SELF
+reception_revenue	IN_PROGRESS
+administrator_bookings	PENDING
+newcomer_guest_visits	PENDING
