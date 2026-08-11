@@ -5,6 +5,7 @@ set -euo pipefail
 
 mode=${1:-}
 if [[ "$mode" != "--report-handoff" && "$mode" != "--direct-reply" ]]; then
+  printf 'FINAL FORBIDDEN: progress messages belong to commentary, not final.\n' >&2
   printf 'Usage: %s --report-handoff | --direct-reply\n' "$0" >&2
   exit 2
 fi
