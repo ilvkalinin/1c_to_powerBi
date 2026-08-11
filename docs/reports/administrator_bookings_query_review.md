@@ -1,6 +1,6 @@
 # Разбор текущей модели: «Записи администраторов»
 
-Статус: `EVIDENCE REVIEWED / BUSINESS LOGIC COMPLETE`.
+Статус: `EVIDENCE REVIEWED / BUSINESS LOGIC COMPLETE / STAGE 2 BLOCKED — gymdb read-only unavailable`.
 
 ## Состав модели
 
@@ -105,3 +105,14 @@
 - refresh ежедневный;
 - выручка обеих веток берётся из `AccumRg7575.Fld7586`; сырая таблица на
   целевую VM не копируется.
+
+## Stage 2: попытка source-side сверки
+
+AB-V01—AB-V04 в
+[`administrator_bookings_2026-08-11.sql`](../source_metadata/validation_sql/administrator_bookings_2026-08-11.sql)
+повторяют точные условия текущего SQL для обеих веток и не выбирают ПДн или
+исходные идентификаторы. Перед запуском зафиксированы ожидаемые ограничения
+гранулярности; 11 августа 2026 года транзакция `READ ONLY` не выполнилась из-за
+`timeout expired` при соединении с `gymdb`. Контроли остаются `NOT_EXECUTED`.
+Это не свидетельствует об отсутствии какой-либо таблицы и не допускает
+изменения текущих фильтров, отмен или связи с движениями.

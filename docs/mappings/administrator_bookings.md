@@ -1,9 +1,16 @@
 # Source-to-target mapping: записи администраторов
 
-Статус: `BUSINESS MAPPING COMPLETE / TECHNICAL VALIDATION DEFERRED`.
+Статус: `BUSINESS MAPPING COMPLETE / TECHNICAL VALIDATION BLOCKED — gymdb read-only unavailable / Stage 3 deferred`.
 
 SQL и физический объект не выбираются. Mapping описывает минимальный логический
 агрегат и его связь с общим фактом оказанных услуг ДПФУ.
+
+Точные read-only контроли AB-V01—AB-V04 подготовлены до запуска в
+[`administrator_bookings_2026-08-11.sql`](../source_metadata/validation_sql/administrator_bookings_2026-08-11.sql).
+Запуск 2026-08-11 и отдельный `SELECT 1` не получили соединения с `gymdb`
+(`timeout expired`), поэтому контролям присвоен только `NOT_EXECUTED`.
+Физическое отсутствие источников не доказано; реестр отсутствующих объектов
+не изменяется.
 
 ## Гранулярность
 
