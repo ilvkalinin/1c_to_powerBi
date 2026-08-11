@@ -12,7 +12,7 @@
 | Таблица Power BI | `Свод выручка ГК` | CONFIRMED naming rule |
 | Назначение | факт статей выручки `02`–`13` по дню и клубу | CONFIRMED |
 | Гранулярность | дата факта × клуб × статья | CONFIRMED — ADR-0010/mapping |
-| Логический ключ | `(revenue_date, club_id, revenue_article_code)` | ASSUMPTION pending uniqueness tests |
+| Логический ключ | `(revenue_date, club_id, revenue_article_code)` | VALIDATED для внутренних PostgreSQL-ветвей — SV-048/SV-066; Excel-ветви вне контракта |
 | Хранение | BR-003 | CONFIRMED user decision |
 | Режим Power BI | `Import`, ежедневно; данные доступны не позднее 08:30 по Москве | CONFIRMED current report; BR-014 |
 | Исправления/удаления | атомарный полный пересчёт горизонта | CONFIRMED design; states pending |
@@ -24,7 +24,7 @@
 | PostgreSQL | Power BI | PostgreSQL тип | Power BI тип | NULL | Роль | Аддитивность | Скрыть | Mapping |
 |---|---|---|---|---|---|---|---|---|
 | `revenue_date` | `Дата` | `date` | Date | нет | FK календаря | не мера | нет | `revenue_date` |
-| `club_id` | `Код клуба` | `text` | Text | нет | FK клуба | не мера | да | `club_id` |
+| `club_id` | `Код клуба` | `text` | Text | да — только 17 legacy дневных ключей ветки ИП, SV-049 | FK клуба | не мера | да | `club_id` |
 | `revenue_article_code` | `Код статьи` | `text` | Text | нет | FK статьи | не мера | да | `revenue_article_code` |
 | `revenue_amount` | `Выручка` | `numeric` | Fixed decimal number | нет | показатель | аддитивна | нет | `revenue_amount` |
 Если несколько ветвей законно составляют одну статью/день/клуб, PostgreSQL
@@ -36,7 +36,7 @@
 | От | К | Кардинальность | Фильтрация | Статус |
 |---|---|---|---|---|
 | `Календарь[Дата]` | факт `[Дата]` | `1:*` | однонаправленная | CONFIRMED BY DESIGN; unique date pending |
-| `Клубы[Код клуба]` | факт `[Код клуба]` | `1:*` | однонаправленная | technical FK pending |
+| `Клубы[Код клуба]` | факт `[Код клуба]` | `1:*` | однонаправленная | non-NULL keys validated SV-066; legacy `NULL` ИП сохраняется по BR-018 |
 | `Статьи выручки[Код статьи]` | факт `[Код статьи]` | `1:*` | однонаправленная | article coverage pending |
 
 Excel-таблицы планов и бюджетов не соединяются с фактом. Они получают тот же
