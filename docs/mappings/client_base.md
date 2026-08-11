@@ -1,6 +1,7 @@
 # Source-to-target mapping: агрегированный снимок «Клиентская база»
 
-Статус: `DRAFT`. Основная гранулярность подтверждена; SQL заблокирован до проверки временных границ, source keys, статусов и контрольных значений.
+Статус: `DRAFT / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED`. Основная
+гранулярность подтверждена; реализация остаётся отложенной.
 
 Предлагаемый объект: `mart.client_base_snapshot`.
 
@@ -26,7 +27,7 @@
 | `club_id` | `Reference59.Fld687` → `Reference132.ID` | основной клуб доступа | CONFIRMED metadata |
 | `active_from` | `Reference59.Fld671`; пакет `max(check.Date_Time, subscription.Fld671)` | включать только `active_from < report_date` | CONFIRMED rule / package source verify |
 | `active_to` | `Reference59.Fld672` | включать `active_to >= report_date - 1 day`; пакет использует срок взрослого абонемента | CONFIRMED boundary / package source verify |
-| `source_state` | `Reference59.Marked/Fld678/Fld679/Fld695`; `Document346.Marked/Posted/Fld4910`; `AccumRg7575.Active` | исключения только после подтверждения | BLOCKER |
+| `source_state` | `Reference59.Marked/Fld678/Fld679/Fld695`; `Document346.Marked/Posted/Fld4910`; `AccumRg7575.Active` | исключения только после подтверждения; на control-date `Reference59.Marked = 0` | PARTIALLY VALIDATED — SV-069 |
 | `birth_date` | `Reference141.Fld1507` | только для расчёта возраста, не переносить | CONFIRMED metadata |
 | `gender_ref` | `Reference141.Fld1527` | enum mapping | CONFIRMED metadata / значения проверить |
 | `tenure_ref` | `InfoRg5654.Fld5656` | последняя запись клиента на момент снимка | CONFIRMED source / boundary проверить |
@@ -36,6 +37,10 @@
 
 - для `club` выполнить `DISTINCT (report_date, club_id, client_id)`;
 - для `network` выполнить `DISTINCT (report_date, client_id)`.
+
+`SV-069` подтвердил необходимость обеих ветвей: на 2026-07-01 52 клиента
+состоят более чем в одном клубе, а 1 308 сочетаний `клиент × клуб` имеют
+несколько active-membership строк.
 
 Атрибуты клиента и network-wide активность должны быть однозначны для этих ключей.
 
