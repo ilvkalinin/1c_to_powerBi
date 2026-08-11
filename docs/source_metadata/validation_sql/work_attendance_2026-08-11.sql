@@ -45,6 +45,35 @@ SELECT count(*) AS pbit_counted_rows,
        round(sum(extract(epoch FROM (effective_exit_at - entry_at)) / 60.0)::numeric, 2) AS fallback_minutes_total
 FROM measured;
 
+-- WA-V04: inspect every source birth-date value that produces an implausible
+-- age in the exact July population. Expected: no undocumented sentinel values.
+WITH pbit_visits AS (
+    SELECT a._period::date AS visit_date,
+           client._fld1507 AS birth_date,
+           extract(year FROM age(a._period::date, client._fld1507::date))::int
+               AS age_years
+    FROM public._accumrg7575 a
+    JOIN public._document325 d ON a._recorderrref = d._idrref
+    JOIN public._reference132 c ON a._fld7577rref = c._idrref
+    JOIN public._reference141x1 client ON d._fld4171rref = client._idrref
+    JOIN public._reference59 contract ON a._fld7578_rrref = contract._idrref
+    WHERE d._fld4164rref = decode('9a5a4c90d2b1aede4b91dcd1abe84c43', 'hex')
+      AND c._description NOT IN ('Детский развивающий центр', 'Управляющая компания')
+      AND a._period >= DATE '2026-07-01' AND a._period < DATE '2026-08-01'
+      AND contract._description NOT LIKE '%ИП%'
+      AND contract._description NOT LIKE '%сотрудн%'
+      AND d._fld4172 <> d._fld4174
+      AND client._fld1532rref = decode('9e8eaa7b2e77c19f4a1c22a8d9c3efa1', 'hex')
+)
+SELECT birth_date::text AS stored_birth_date,
+       pg_typeof(birth_date)::text AS source_type,
+       age_years,
+       count(*) AS visit_rows
+FROM pbit_visits
+WHERE age_years > 100
+GROUP BY 1, 2, 3
+ORDER BY 1;
+
 -- WA-V07: aggregation to the candidate hourly grain on the independent
 -- control date 2026-07-15. Expected: aggregate visit/minute totals equal the
 -- source totals and no required grain component is NULL.
