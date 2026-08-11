@@ -36,7 +36,7 @@ data contract оформлены по 31 из 31 отчёта. Реализов�
 | 16 | Продажи | Управление продлением | COMPLETE | COMPLETE | PROPOSED — ADR-0007 | COMPLETE — `renewal_management` | DEFERRED | PARTIALLY VALIDATED — SV-081; Stage 3 deferred |
 | 17 | Продажи | Отчет по %Renew | COMPLETE | COMPLETE | PROPOSED — ADR-0006 | COMPLETE — `renew_contract_usage` | DEFERRED | PARTIALLY VALIDATED — SV-082; Stage 3 deferred |
 | 18 | Гостеприимство | Выручка рецепции | COMPLETE | COMPLETE | PROPOSED — ADR-0005 | COMPLETE — `reception_revenue` | DEFERRED | COMPLETE — SV-050—SV-053 |
-| 19 | Гостеприимство | Записи администраторов | COMPLETE | COMPLETE | PROPOSED — ADR-0004 | COMPLETE — `administrator_bookings` | DEFERRED | BLOCKED — gymdb read-only unavailable; AB-V01—AB-V04 not executed |
+| 19 | Гостеприимство | Записи администраторов | COMPLETE | COMPLETE | PROPOSED — ADR-0004 | COMPLETE — `administrator_bookings` | DEFERRED | PARTIALLY VALIDATED — SV-086; Stage 3 deferred |
 | 20 | Гостеприимство | Новички и гостевые визиты | COMPLETE — `newcomer_guest_visits` | COMPLETE — `newcomer_guest_visits` | DESIGNED — ADR-0020 | COMPLETE — `newcomer_guest_visits` | DEFERRED | BLOCKED — gymdb read-only unavailable; NV controls not executed |
 | 21 | Гостеприимство | Отчет по обращениям | COMPLETE — `calls_report` | COMPLETE — `calls_report` | DESIGNED — ADR-0016 | COMPLETE — `calls_report` | DEFERRED | DEFERRED — technical validation |
 | 22 | Гостеприимство | Отчет по посещаемости клиентов с долгами | COMPLETE — `visits_debt` | COMPLETE — `visits_debt` | DESIGNED — ADR-0021 | COMPLETE — `visits_debt` | DEFERRED | DEFERRED — technical validation |

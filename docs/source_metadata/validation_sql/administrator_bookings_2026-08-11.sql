@@ -56,8 +56,8 @@ SELECT count(*) AS sampled_rows,
        count(*) - count(DISTINCT booking_id) AS duplicate_booking_rows
 FROM base;
 
--- AB-V03 expected: 100 bounded, exact-current-M preliminary-booking rows are
--- 100 distinct booking documents. The current M aggregation on Fld7581 is
+-- AB-V03 expected: up to 100 bounded, exact-current-M preliminary-booking rows
+-- are all distinct booking documents. The current M aggregation on Fld7581 is
 -- kept intact; its row preservation is measured without adding client/service
 -- predicates that would change the first release.
 WITH staff_current AS (

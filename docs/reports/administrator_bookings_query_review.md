@@ -1,6 +1,6 @@
 # Разбор текущей модели: «Записи администраторов»
 
-Статус: `EVIDENCE REVIEWED / BUSINESS LOGIC COMPLETE / STAGE 2 BLOCKED — gymdb read-only unavailable`.
+Статус: `EVIDENCE REVIEWED / BUSINESS LOGIC COMPLETE / STAGE 2 PARTIALLY VALIDATED — SV-086`.
 
 ## Состав модели
 
@@ -111,8 +111,10 @@
 AB-V01—AB-V04 в
 [`administrator_bookings_2026-08-11.sql`](../source_metadata/validation_sql/administrator_bookings_2026-08-11.sql)
 повторяют точные условия текущего SQL для обеих веток и не выбирают ПДн или
-исходные идентификаторы. Перед запуском зафиксированы ожидаемые ограничения
-гранулярности; 11 августа 2026 года транзакция `READ ONLY` не выполнилась из-за
-`timeout expired` при соединении с `gymdb`. Контроли остаются `NOT_EXECUTED`.
-Это не свидетельствует об отсутствии какой-либо таблицы и не допускает
-изменения текущих фильтров, отмен или связи с движениями.
+исходные идентификаторы. В `READ ONLY`-снимке 2026-08-11 AB-V01 подтвердил
+13 relations; AB-V02 — 100/100 unique group-booking ID; AB-V03 — 72/72 unique
+prebooking ID, из них 26 имеют 2+ движений (максимум 25). AB-V04 показал
+отсутствие historical admin-position match у 199 из 200 документов и четыре
+match у одного оставшегося. Поэтому historical кадровую замену нельзя вводить
+автоматически; текущие фильтры, отмены и связь с движениями сохраняются по
+BR-018.

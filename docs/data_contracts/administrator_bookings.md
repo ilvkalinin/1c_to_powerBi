@@ -1,12 +1,14 @@
 # Data contract: «Записи администраторов»
 
-Статус: `DESIGNED / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION BLOCKED — gymdb read-only unavailable`.
+Статус: `DESIGNED / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-086`.
 Контракт фиксирует логическую модель. SQL, DDL и фактические типы исходных
 ссылок не подтверждены.
 
-AB-V01—AB-V04 зафиксированы с ожидаемыми результатами до запуска; 2026-08-11
-они не выполнились из-за `timeout expired` при подключении к `gymdb`. До
-доступного read-only снимка данный контракт не является технически принятым.
+AB-V01—AB-V04 зафиксированы с ожидаемыми результатами до запуска и выполнены
+2026-08-11 в read-only snapshot. Document grain обеих веток подтверждён;
+множественные движения предварительной записи и отсутствие/множественность
+historical admin-position не допускают изменения current M без отдельного
+решения. Контракт остаётся непринимаемым до Stage 3.
 
 ## Общие параметры
 

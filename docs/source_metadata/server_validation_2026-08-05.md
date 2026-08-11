@@ -1900,21 +1900,22 @@ Power Query не анализировались.
 
 ## SV-086 — «Записи администраторов»: two-branch booking path
 
-Статус: `BLOCKED` на 2026-08-11. SQL:
+Статус: `PARTIALLY VALIDATED` на live read-only снимке 2026-08-11. SQL:
 [`administrator_bookings_2026-08-11.sql`](validation_sql/administrator_bookings_2026-08-11.sql).
-AB-V01—AB-V04 содержат ожидаемые результаты до запуска и не возвращают ПДн или
-исходные идентификаторы. Запуск в `BEGIN READ ONLY` с `statement_timeout=30s`
-не получил результата: подключение к `gymdb` завершилось `timeout expired`.
-Отдельный минимальный `SELECT 1` повторил тот же таймаут.
+Каждый запрос выполнялся в `BEGIN READ ONLY`; `transaction_read_only=on`.
+Результаты не содержат ПДн или raw identifiers. Первичная запись о таймауте
+исправлена: клиент ошибочно включал SSL, который сервер не поддерживает.
 
 | Контроль | Фактический результат | Статус |
 |---|---|---|
-| AB-V01—AB-V04 | Нет доступного read-only соединения; SQL не исполнялся и агрегаты не получены | NOT_EXECUTED |
+| AB-V01 | Все 13 relations существуют в `public` | VALIDATED |
+| AB-V02 | 100 group-booking rows = 100 unique document ID; повторов 0 | VALIDATED bounded current-M control |
+| AB-V03 | 72 prebooking rows = 72 unique document ID; 26 имеют 2+ движений, максимум 25 | VALIDATED document grain / multiple movements preserved |
+| AB-V04 | historical admin-position: group 100 без match; prebooking 99 без match, 1 с 4 match | VALIDATION_FAILED для автоматической замены current-M кадровой связи |
 
-Это не является доказательством отсутствия какой-либо relation и не меняет
-реестр `missing_source_objects.md`. После восстановления доступа повторить
-только тот же read-only набор AB-V01—AB-V04; до этого сохраняются текущие
-SQL/M/DAX и ограничения BR-018.
+Это не меняет реестр `missing_source_objects.md`. Текущий SQL/M/DAX сохраняется
+по BR-018; историческая кадровая атрибуция и правило нескольких движений
+требуют отдельного решения перед Stage 3.
 
 ## SV-087 — «Новички и гостевые визиты»: guest-register checkpoint
 

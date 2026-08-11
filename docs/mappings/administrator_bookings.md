@@ -1,16 +1,19 @@
 # Source-to-target mapping: записи администраторов
 
-Статус: `BUSINESS MAPPING COMPLETE / TECHNICAL VALIDATION BLOCKED — gymdb read-only unavailable / Stage 3 deferred`.
+Статус: `BUSINESS MAPPING COMPLETE / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-086 / IMPLEMENTATION DEFERRED`.
 
 SQL и физический объект не выбираются. Mapping описывает минимальный логический
 агрегат и его связь с общим фактом оказанных услуг ДПФУ.
 
 Точные read-only контроли AB-V01—AB-V04 подготовлены до запуска в
 [`administrator_bookings_2026-08-11.sql`](../source_metadata/validation_sql/administrator_bookings_2026-08-11.sql).
-Запуск 2026-08-11 и отдельный `SELECT 1` не получили соединения с `gymdb`
-(`timeout expired`), поэтому контролям присвоен только `NOT_EXECUTED`.
-Физическое отсутствие источников не доказано; реестр отсутствующих объектов
-не изменяется.
+В `READ ONLY` snapshot AB-V01 подтвердил все 13 relations; AB-V02 и AB-V03
+сохранили document grain (100/100 и 72/72 ID соответственно), хотя 26 из 72
+предварительных документов имеют несколько source movements. AB-V04 не нашёл
+historical admin-position у 199 из 200 документов и дал 4 match у одного;
+историческая кадровая атрибуция остаётся `VALIDATION_FAILED` как автоматическая
+замена current M. Физическое отсутствие источников не доказано; реестр не
+изменяется.
 
 ## Гранулярность
 
