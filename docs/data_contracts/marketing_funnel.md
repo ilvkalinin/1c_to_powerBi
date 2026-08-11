@@ -1,6 +1,6 @@
 # Data contract: маркетинговая «Воронка»
 
-Статус: `DESIGNED REUSE / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION REQUIRED`.
+Статус: `DESIGNED REUSE / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION PARTIALLY VALIDATED (SV-080)`.
 
 Отдельного PostgreSQL-факта нет. Модель REUSE
 `mart.fitness_leads_funnel_task` (ADR-0011) на grain одного CRM-задания.
@@ -21,4 +21,3 @@ single direction. Excel-планы остаются отдельными фак�
 
 Приёмка: уникальный task, доказанный task→contract bridge, distinct contract
 без размножения, plan grain, network/cluster, контрольные меры и SLA.
-

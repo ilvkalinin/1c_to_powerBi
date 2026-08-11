@@ -1,6 +1,6 @@
 # Query review: «Воронка»
 
-Статус: `EVIDENCE REVIEWED / TECHNICAL VALIDATION DEFERRED`.
+Статус: `EVIDENCE REVIEWED / TECHNICAL VALIDATION PARTIALLY VALIDATED (SV-080)`.
 
 Рассмотрены полный текущий Power Query/SQL/DAX из `Воронка.docx` и
 бизнес-описание из `Воронка (2).docx`. Запросы не выполнялись. Все SQL ниже

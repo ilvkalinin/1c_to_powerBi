@@ -1800,3 +1800,14 @@ stage-based `Есть запись` без отдельного решения.
 Полный cohort scan не вернул подтверждаемого агрегата в лимите среды. Bounded
 result не выбирает «главный» контракт: contract detail остаётся отдельно, а
 меры сохраняют утверждённый grain client × start-date.
+
+## SV-080 — маркетинговая «Воронка»: task-to-contract bridge
+
+Статус: `PARTIALLY VALIDATED` на live read-only снимке 2026-08-11. SQL: [`marketing_funnel_2026-08-11.sql`](validation_sql/marketing_funnel_2026-08-11.sql).
+
+| Контроль | Фактический результат | Статус |
+|---|---|---|
+| MF-V03 | Bounded current bridge: 100 rows → 36 tasks; 21 tasks имеют >1 contract, 85 contracts в multi-task groups, max=16 | VALIDATION_FAILED для one-to-one task→contract |
+| MF-V02/MF-V04 | Task grain и CRM join controls переиспользуют SV-078 | PARTIALLY VALIDATED; task core остаётся `REUSE` |
+
+Нельзя суммировать contract rows как task-level `contract_count` или silently deduplicate bridge. Current SQL/M/DAX воспроизводится по BR-018; правило агрегации нескольких контрактов требует отдельного решения перед Stage 3.

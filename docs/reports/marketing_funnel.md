@@ -1,6 +1,6 @@
 # Требования отчёта: «Воронка»
 
-Статус: `BUSINESS LOGIC COMPLETE / TECHNICAL VALIDATION DEFERRED`.
+Статус: `BUSINESS LOGIC COMPLETE / TECHNICAL VALIDATION PARTIALLY VALIDATED (SV-080)`.
 
 Договорный отчёт № 27, блок «Маркетинг». Он показывает созданные задания
 CRM-воронки «Продажа клубной карты», конверсию в активацию подходящих

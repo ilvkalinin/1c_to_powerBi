@@ -1,6 +1,6 @@
 # Source-to-target mapping: маркетинговая воронка
 
-Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE REUSE CONFIRMED / TECHNICAL VALIDATION REQUIRED`.
+Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE REUSE CONFIRMED / TECHNICAL VALIDATION PARTIALLY VALIDATED (SV-080)`.
 
 Гранулярность одной строки: одно CRM-задание `Reference106.ID` в воронке
 «Продажа клубной карты». Логический ключ: `task_id`; физический тип и
@@ -36,7 +36,7 @@
 | `contract_payment_type` | тип оплаты покупки | `Reference59.Fld699` | GUID: рекарринг, иначе предоплата | text | да | task | CONFIRMED current | SQL/M | MF-V05, MF-V07 |
 | `contract_duration_group` | длительность покупки | `Reference59.Fld693` | дни: `001–007`, `008–030`, `031–180`, `181–364`, `365+` | text | да | task | CONFIRMED current | SQL/M | MF-V07 |
 | `task_count` | вклад в число заданий | `task_id` | `1`; мера — distinct task key и удаляет contract-фильтры | smallint | нет | task | CONFIRMED current | DAX | MF-V02, MF-V09 |
-| `contract_count` | вклад в число абонементов | `contract_id` | `1` после подтверждённой дедупликации; до MF-V03 не реализовывать как строковую сумму | smallint | UNKNOWN | task | VALIDATION_PENDING | current DAX | MF-V03, MF-V09 |
+| `contract_count` | вклад в число абонементов | `contract_id` | current bridge is 1:N; не реализовывать как строковую сумму без отдельного решения | smallint | UNKNOWN | task | VALIDATION_FAILED | SV-080 | MF-V03, MF-V09 |
 
 ## Подтверждённые источники
 
