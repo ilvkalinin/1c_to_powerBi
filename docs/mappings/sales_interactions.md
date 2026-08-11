@@ -1,8 +1,19 @@
 # Source-to-target mapping: взаимодействия отдела продаж
 
-Статус: `BUSINESS MAPPING COMPLETE / TECHNICAL VALIDATION DEFERRED`.
+Статус: `BUSINESS MAPPING COMPLETE / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-084; Stage 3 deferred`.
 
 Mapping основан на текущих SQL/M/DAX, metadata и решениях пользователя 2026-07-24. Общий core `mart.crm_interaction` и view `mart.v_sales_interaction` спроектированы в ADR-0016; DDL и реализация отложены до технической проверки.
+
+## Stage 2 evidence — SV-084
+
+На live `gymdb` в `READ ONLY` транзакции SA-V01 подтвердил 5 из 5 центральных
+physical relations: `_reference67`, `_reference106`, `_inforg7146`,
+`_inforg6291`, `_reference225`. Валидации SV-026—SV-034 остаются применимым
+evidence для phone-row grain, join cardinality и current filters. SA-V02—SA-V04
+сохранены с ожидаемым результатом, но не выполнены: полный bounded legacy path
+достиг `statement_timeout`, а повторное соединение получило `ETIMEDOUT`.
+Состояния и архивные признаки, full-population controls и независимые business
+control values остаются `VALIDATION_PENDING`; Stage 3 не начинается.
 
 ## Подтверждённая гранулярность
 

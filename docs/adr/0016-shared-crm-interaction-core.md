@@ -1,6 +1,6 @@
 # ADR-0016: общий факт CRM-взаимодействий
 
-- Статус: `DESIGNED / TECHNICAL VALIDATION REQUIRED / IMPLEMENTATION DEFERRED`
+- Статус: `DESIGNED / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-084 / IMPLEMENTATION DEFERRED`
 - Дата: 2026-08-03
 - Отчёты: №12 «Загрузка ОП», №20 «Новички и гостевые визиты», №21 «Отчёт по обращениям»
 

@@ -1865,3 +1865,19 @@ performance остаются перед реализацией.
 Знак, document-recorder exclusivity, recurring-payment key, freezes, prices и
 states не выводятся из этих наблюдений. Текущий M/DAX сохраняется по BR-018;
 Excel-планы и их Power Query не анализировались.
+
+## SV-084 — «Загрузка ОП»: CRM source availability
+
+Статус: `PARTIALLY VALIDATED` на live read-only срезе 2026-08-11. SQL:
+[`sales_team_workload_2026-08-11.sql`](validation_sql/sales_team_workload_2026-08-11.sql).
+Результаты не содержат PII или raw identifiers.
+
+| Контроль | Фактический результат | Статус |
+|---|---|---|
+| SA-V01 | 5 central CRM relations существуют в `public` | VALIDATED |
+| SA-V02—SA-V04 | expected results зафиксированы до запуска; full bounded legacy filter не завершился в `statement_timeout`, повторное соединение получило `ETIMEDOUT` | NOT_EXECUTED; не засчитывается |
+| SV-026—SV-034 | ранее подтверждены phone-row grain, risky CRM joins, stable filter keys и planned state | REUSED evidence |
+
+Не добавлять filters по `Marked`/archive и не менять direct phone-row semantics
+или legacy employee match без отдельного решения. Внешние Excel-нормативы и их
+Power Query не анализировались.

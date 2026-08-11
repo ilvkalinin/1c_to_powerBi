@@ -1,6 +1,11 @@
 # Data contract: «Загрузка ОП»
 
-Статус: `DESIGNED / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION REQUIRED`.
+Статус: `DESIGNED / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-084`.
+
+SV-084 подтвердил существование центральных CRM-источников; SV-026—SV-034
+дают source-side evidence для report-compatible phone grain и рисковых joins.
+Физический объект не создан, а remaining state, archive и full-population
+controls остаются перед реализацией.
 
 | Параметр | Значение | Статус |
 |---|---|---|
@@ -47,4 +52,3 @@ manager-day, нормативные минуты, загрузку и backlog. P
 Приёмка: уникальный `interaction_id`, deterministic phone row, отсутствие
 размножения кадровыми интервалами, корректные статусы/воронки, обе роли даты,
 контрольные значения и каждый из восьми refresh.
-
