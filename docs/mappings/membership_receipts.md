@@ -1,7 +1,7 @@
 # Source-to-target mapping: поступления по членству
 
 Статус:
-`BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0017 / TECHNICAL VALIDATION DEFERRED`.
+`BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0017 / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-083; Stage 3 deferred`.
 
 Этот mapping фиксирует текущую логику отчёта и не утверждает физический объект
 или SQL. На `STAGE_1_LOCAL_ANALYSIS` DDL/DML и серверные проверки запрещены.
@@ -159,3 +159,11 @@ PBIT подтверждает общую звезду и одновременн�
 | REJECTED | plans in PostgreSQL mart | user confirmed stable Excel files remain in Power BI | keep separate external plan facts |
 | REJECTED | direct plan-to-movement join | incompatible grain and sum multiplication | separate plan facts with shared dimensions |
 | REJECTED | PII in target by default | no confirmed consumer on shown pages | protected key only |
+
+## Stage 2 evidence — SV-083
+
+`AccumRg7370`, `AccumRg7739`, `Reference59` и `Reference134` существуют. В
+bounded 2026 выборках по 100 строк оба регистра имеют 100 technical keys и 0
+orphan-contract. Наблюдаемые `RecordKind` не интерпретируются без current M
+sign CASE; recurring key, recorder exclusivity, states, freeze and price joins
+остаются `VALIDATION_PENDING` перед реализацией.

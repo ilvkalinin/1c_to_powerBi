@@ -1,6 +1,6 @@
 # ADR-0017: поступления по членству — движение и контрактная KPI-единица
 
-- Статус: `DESIGNED / TECHNICAL VALIDATION REQUIRED / IMPLEMENTATION DEFERRED`
+- Статус: `DESIGNED / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-083 / IMPLEMENTATION DEFERRED`
 - Дата: 2026-08-03
 - Отчёты: №13 «Отчёт по поступлениям», №30 «Членство для правления»
 
@@ -53,4 +53,3 @@ freeze joins — `VALIDATION_PENDING`. Без доказанного `kpi_unit_k
 - [Требования](../reports/membership_receipts.md)
 - [Mapping](../mappings/membership_receipts.md)
 - [Правила BR-015/016](../catalogs/business_rules.md)
-

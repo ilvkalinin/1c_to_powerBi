@@ -1,7 +1,7 @@
 # Отчёт по поступлениям
 
 Статус:
-`BUSINESS ANALYSIS COMPLETE / MODEL REVIEW COMPLETE / TECHNICAL VALIDATION DEFERRED`.
+`BUSINESS ANALYSIS COMPLETE / MODEL REVIEW COMPLETE / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-083; Stage 3 deferred`.
 
 Первичные доказательства:
 
@@ -19,6 +19,14 @@
 
 Подключения к PostgreSQL/1С, SQL и `EXPLAIN` не выполнялись. Все физические
 проверки имеют статус `VALIDATION_PENDING`.
+
+## Stage 2: SV-083 (2026-08-11)
+
+В bounded 2026 выборках по 100 движений `AccumRg7370` и `AccumRg7739` все
+строки равны physical technical keys и связались с контрактом без orphan. Для
+`AccumRg7370` наблюдались `RecordKind` 0/1 = 45/55; для `AccumRg7739` = 100/0;
+неактивных строк в обеих выборках нет. Это не доказывает sign/states или
+document classification и не добавляет фильтры в первый релиз по BR-018.
 
 ## Назначение и решения
 

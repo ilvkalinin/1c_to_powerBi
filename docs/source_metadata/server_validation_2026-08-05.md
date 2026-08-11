@@ -1850,3 +1850,18 @@ filters, не менять `RecordKind = 0` и не подменять current `
 Не анализировались и не запрашивались Excel-снимки или их Power Query. Full
 polymorphic-domain, state semantics, `contract_code` relation, finalization и
 performance остаются перед реализацией.
+
+## SV-083 — «Отчёт по поступлениям»: source registers and contract joins
+
+Статус: `PARTIALLY VALIDATED` на live read-only срезе 2026-08-11. SQL:
+[`membership_receipts_2026-08-11.sql`](validation_sql/membership_receipts_2026-08-11.sql).
+
+| Контроль | Фактический результат | Статус |
+|---|---|---|
+| MR-V01 | `AccumRg7370`, `AccumRg7739`, `Reference59`, `Reference134` существуют | VALIDATED |
+| MR-V02 | 100 авансов: 100 technical keys, 0 orphan-contract, inactive = 0, `RecordKind` 0/1 = 45/55 | VALIDATED bounded physical control |
+| MR-V03 | 100 расчётных движений: 100 technical keys, 0 orphan-contract, inactive = 0, `RecordKind` 0/1 = 100/0 | VALIDATED bounded physical control |
+
+Знак, document-recorder exclusivity, recurring-payment key, freezes, prices и
+states не выводятся из этих наблюдений. Текущий M/DAX сохраняется по BR-018;
+Excel-планы и их Power Query не анализировались.

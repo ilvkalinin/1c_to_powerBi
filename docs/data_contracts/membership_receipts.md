@@ -1,6 +1,6 @@
 # Data contract: «Поступления по членству»
 
-Статус: `DESIGNED / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION REQUIRED`.
+Статус: `DESIGNED / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-083`.
 
 ## Объекты
 
@@ -58,4 +58,3 @@ PostgreSQL рассчитывает signs, net, unit key, duration, classificati
 продолжительность/30.42, средняя цена месяца, LY/YTD. Приёмка следует
 MR-V01…MR-V12: keys, signs, services scope, freeze/price joins, role dates,
 manager/sales-club propagation, rerun и SLA.
-
