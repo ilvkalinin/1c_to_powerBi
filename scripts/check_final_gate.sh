@@ -3,6 +3,17 @@
 # every report is COMPLETE, and each completion commit is reachable from HEAD.
 set -euo pipefail
 
+mode=${1:-}
+if [[ "$mode" != "--report-handoff" && "$mode" != "--direct-reply" ]]; then
+  printf 'Usage: %s --report-handoff | --direct-reply\n' "$0" >&2
+  exit 2
+fi
+
+if [[ "$mode" == "--direct-reply" ]]; then
+  printf 'DIRECT REPLY ALLOWED: this mode cannot be used for a report handoff.\n'
+  exit 0
+fi
+
 repo_root=$(git rev-parse --show-toplevel)
 state_file="$repo_root/.agents/active_package.tsv"
 
