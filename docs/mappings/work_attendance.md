@@ -1,6 +1,6 @@
 # Source-to-target mapping: «Работа с посещаемостью»
 
-Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0022 / TECHNICAL VALIDATION DEFERRED`.
+Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0022 / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED`.
 
 Целевой проектный объект: `mart.club_attendance_hourly`. Тип — компактная
 физическая таблица по ADR-0022; реализация отложена. Production SQL не создаётся.
@@ -19,7 +19,8 @@ requirements и ADR-0022. Reuse-граница остаётся прежней: 
 `mart.club_day_metrics` не расширяются из-за несовместимой гранулярности.
 Следовательно, решение — `DESIGNED — ADR-0022`: отдельный компактный
 `mart.club_attendance_hourly`; source states и контрольный grain подтверждены
-SV-065/SV-067. Нерешённой остаётся только политика даты рождения по умолчанию.
+SV-065/SV-067. Sentinel-дата рождения `0001-01-01 00:00:00` теперь имеет
+явное правило BR-019: возраст и возрастная группа остаются `NULL`.
 
 ## Целевые колонки
 
@@ -30,7 +31,7 @@ SV-065/SV-067. Нерешённой остаётся только политик
 | `start_hour` | час прихода, 0–23 | `Document325` | `Fld4172` | `EXTRACT(hour ...)` | `smallint` | нет | CONFIRMED | WA-V03 |
 | `end_hour` | час ухода | `Document325` | `Fld4174` | `EXTRACT(hour ...)`; сохранить `NULL` как отдельное значение current query | `smallint` | да | CONFIRMED current calculation | WA-V03, WA-V07 |
 | `sex_code` | пол клиента | `Reference141X1` | `Fld1527` | текущий GUID mapping в Женский/Мужской/`NULL`; постоянный ключ пола подтвердить | `text`/UNKNOWN | да | CONFIRMED current calculation / technical mapping pending | WA-V05 |
-| `age_years` | возраст в полных годах на дату посещения | `Document325`, `Reference141X1` | `Fld4172`, `Fld1507` | `EXTRACT(year FROM age(visit_date, birth_date))`; обработка даты рождения по умолчанию не утверждена | `smallint` | да | VALIDATION_FAILED — 2025 лет на контроле июля, SV-065 | WA-V04 |
+| `age_years` | возраст в полных годах на дату посещения | `Document325`, `Reference141X1` | `Fld4172`, `Fld1507` | `CASE WHEN birth_date::date = DATE '0001-01-01' THEN NULL ELSE EXTRACT(year FROM age(visit_date, birth_date)) END` | `smallint` | да | CONFIRMED — BR-019 / решение пользователя 2026-08-11 | WA-V04 |
 | `visit_count` | число текущих посещений | `Document325` после связи с `AccumRg7575` | `ID` | `COUNT(Document325.ID)` в текущем grain | `bigint` | нет | CONFIRMED current calculation / source cardinality validated | WA-V01, WA-V05 |
 | `club_minutes_total` | суммарные минуты в клубе | `Document325` | `Fld4172`, `Fld4174` | разность окончания и начала в минутах; при `NULL`/минимальном окончании подставлять `23:59:59` даты начала, как в текущем Power Query | `numeric` | нет | CONFIRMED — пользовательское решение 2026-07-31 | WA-V03, WA-V05 |
 
@@ -80,7 +81,7 @@ SV-065/SV-067. Нерешённой остаётся только политик
 | Статус | Элемент | Риск / причина | Проверка / следующее действие |
 |---|---|---|---|
 | VALIDATION_PENDING | `mart.client_base_daily` | подтвердить ежедневное покрытие, выбор `club/network`, совместимость календаря и измерений с метрикой посещений | WA-V06 |
-| BLOCKER | возрастной срез `% посещений от КБ` | дата рождения по умолчанию источника даёт возраст 2025; без правила это меняет age-group числителя и знаменателя | WA-V04 / SV-065; нужно решение пользователя |
+| CONFIRMED | возрастной срез `% посещений от КБ` | sentinel `0001-01-01 00:00:00` преобразуется в `NULL`; возрастная группа остаётся пустой, а не `85+` | BR-019, решение пользователя 2026-08-11; WA-V04 / SV-065 |
 | NOT_APPLICABLE | `Шкафчики` и мощности | Excel-наборы остаются в Power BI | WA-V06 не выполняется для PostgreSQL |
 | CONFIRMED | состояния документов/регистра | на текущей M-когорте 2026-01—07 нет неактивных, непроведённых или помеченных строк | SV-065; не добавлять новый source-filter |
 | CONFIRMED | ключ события и кратность join | на текущей M-когорте 2026-01—07 `COUNT(Document325.ID)` не размножается после регистра | SV-065 |

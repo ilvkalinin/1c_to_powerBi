@@ -51,7 +51,10 @@ WITH pbit_visits AS (
     SELECT a._period::date AS visit_date,
            client._fld1507 AS birth_date,
            extract(year FROM age(a._period::date, client._fld1507::date))::int
-               AS age_years
+               AS legacy_age_years,
+           CASE WHEN client._fld1507::date = DATE '0001-01-01' THEN NULL
+                ELSE extract(year FROM age(a._period::date, client._fld1507::date))::int
+           END AS target_age_years
     FROM public._accumrg7575 a
     JOIN public._document325 d ON a._recorderrref = d._idrref
     JOIN public._reference132 c ON a._fld7577rref = c._idrref
@@ -67,11 +70,12 @@ WITH pbit_visits AS (
 )
 SELECT birth_date::text AS stored_birth_date,
        pg_typeof(birth_date)::text AS source_type,
-       age_years,
+       legacy_age_years,
+       target_age_years,
        count(*) AS visit_rows
 FROM pbit_visits
-WHERE age_years > 100
-GROUP BY 1, 2, 3
+WHERE legacy_age_years > 100
+GROUP BY 1, 2, 3, 4
 ORDER BY 1;
 
 -- WA-V07: aggregation to the candidate hourly grain on the independent
@@ -83,7 +87,9 @@ WITH pbit_visits AS (
            extract(hour FROM d._fld4172)::smallint AS start_hour,
            extract(hour FROM d._fld4174)::smallint AS end_hour,
            client._fld1527rref AS sex_code,
-           extract(year FROM age(a._period::date, client._fld1507::date))::smallint AS age_years,
+           CASE WHEN client._fld1507::date = DATE '0001-01-01' THEN NULL
+                ELSE extract(year FROM age(a._period::date, client._fld1507::date))::smallint
+           END AS age_years,
            extract(epoch FROM (
                CASE WHEN d._fld4174 IS NULL OR d._fld4174 <= timestamp '0001-01-01'
                     THEN date_trunc('day', d._fld4172) + interval '23:59:59'

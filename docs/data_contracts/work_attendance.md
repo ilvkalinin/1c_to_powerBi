@@ -1,13 +1,13 @@
 # Data contract: «Работа с посещаемостью»
 
-Статус: `DESIGNED / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION REQUIRED`.
+Статус: `DESIGNED / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED / IMPLEMENTATION DEFERRED`.
 
 | Параметр | Значение | Статус |
 |---|---|---|
 | Объект | `mart.club_attendance_hourly` | ADR-0022 |
 | Таблица Power BI | `Почасовая посещаемость` | CONFIRMED naming rule |
 | Grain | дата × клуб × час входа × час выхода/NULL × пол × возраст | CONFIRMED |
-| Ключ | полный состав grain | VALIDATED на control 2026-07-15, SV-067; полный historical contract BLOCKED политикой даты рождения |
+| Ключ | полный состав grain | VALIDATED на control 2026-07-15, SV-067; BR-019 определяет `NULL` возраста для sentinel-даты |
 | Обновление | ежедневно, атомарный rebuild BR-003 | DESIGNED |
 | Power BI | Import | DESIGNED |
 
@@ -22,7 +22,10 @@
 | `visit_count` | `Количество посещений` | bigint | нет | показатель | аддитивна | нет |
 | `club_minutes_total` | `Минуты в клубе` | numeric | нет | показатель | аддитивна | нет |
 
-`Календарь` и `Клубы` фильтруют факт `1:*`, однонаправленно.
+`Календарь` и `Клубы` фильтруют факт `1:*`, однонаправленно. По BR-019
+`age_years` равен `NULL`, если исходная дата рождения равна
+`0001-01-01 00:00:00`; соответствующая возрастная группа Power BI остаётся
+пустой. Это согласованное исключение из legacy M/DAX для этого факта.
 `mart.client_base_daily` и внешние мощности остаются отдельными фактами через
 те же измерения. DAX считает среднее время, `% от КБ`, LY, временные группы и
 максимальную ЧК. Незакрытый визит: минуты до `23:59:59`, `end_hour = NULL`.
