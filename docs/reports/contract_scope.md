@@ -40,7 +40,7 @@ data contract оформлены по 31 из 31 отчёта. Реализов�
 | 20 | Гостеприимство | Новички и гостевые визиты | COMPLETE — `newcomer_guest_visits` | COMPLETE — `newcomer_guest_visits` | DESIGNED — ADR-0020 | COMPLETE — `newcomer_guest_visits` | DEFERRED | DEFERRED — technical validation |
 | 21 | Гостеприимство | Отчет по обращениям | COMPLETE — `calls_report` | COMPLETE — `calls_report` | DESIGNED — ADR-0016 | COMPLETE — `calls_report` | DEFERRED | DEFERRED — technical validation |
 | 22 | Гостеприимство | Отчет по посещаемости клиентов с долгами | COMPLETE — `visits_debt` | COMPLETE — `visits_debt` | DESIGNED — ADR-0021 | COMPLETE — `visits_debt` | DEFERRED | DEFERRED — technical validation |
-| 23 | Гостеприимство | Посещения Пушкинский | COMPLETE | COMPLETE — `visits_pushkinsky` | DESIGNED — ADR-0003 | COMPLETE — `visits_pushkinsky` | DEFERRED | DEFERRED — technical validation |
+| 23 | Гостеприимство | Посещения Пушкинский | COMPLETE | COMPLETE — `visits_pushkinsky` | DESIGNED — ADR-0003 | COMPLETE — `visits_pushkinsky` | DEFERRED | PARTIALLY VALIDATED — SV-071; Stage 3 deferred |
 | 24 | Гостеприимство | Работа с посещаемостью | COMPLETE — `work_attendance` | COMPLETE — `work_attendance` | DESIGNED — ADR-0022 | COMPLETE — `work_attendance` | DEFERRED | DEFERRED — technical validation |
 | 25 | Гостеприимство | Карта администратора | COMPLETE | COMPLETE — `administrator_card` | DESIGNED — ADR-0023 | COMPLETE — `administrator_card` | DEFERRED | DEFERRED — technical verification |
 | 26 | Гостеприимство | Титульный лист | COMPLETE — `title_sheet` | COMPLETE — `title_sheet` | DESIGNED — ADR-0024 | COMPLETE — `title_sheet` | DEFERRED | COMPLETE — SV-062—SV-064 |

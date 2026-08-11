@@ -1,6 +1,6 @@
 # Data contract: «Посещения Пушкинский»
 
-Статус: `DESIGNED COMPOSITE MODEL / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION REQUIRED`.
+Статус: `DESIGNED COMPOSITE MODEL / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION PARTIALLY VALIDATED (SV-071)`.
 
 REUSE `mart.visit_client_day` и `mart.club_day_metrics` из ADR-0003. Отдельного
 факта Пушкинского нет.
@@ -22,3 +22,6 @@ text` и флаги `has_member_visit`, `has_guest_visit`, `has_vip_visit`,
 уникальные keys, reconciliation `base = visited + active_nonvisitor +
 inactive`, rerun и SLA.
 
+SV-071 подтвердил контрольную reconciliation `3 152 = 609 + 1 648 + 895`,
+уникальность текущей member-visit ветви и reuse ГП/купонов. Реализация
+запрещена до отдельного разрешения Stage 3.
