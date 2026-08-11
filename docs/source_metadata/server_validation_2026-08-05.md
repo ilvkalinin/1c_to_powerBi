@@ -1786,3 +1786,17 @@ Power BI snapshot не является обязательным входом St
 Полный scan `Reference106` не вернул подтверждаемого агрегата в лимите среды и
 не засчитывается. Не изменять current client-code/date attribution или
 stage-based `Есть запись` без отдельного решения.
+
+## SV-079 — «Фитнес воронка»: client-start cohort
+
+Статус: `PARTIALLY VALIDATED` на live read-only снимке 2026-08-11. SQL:
+[`fitness_funnel_2026-08-11.sql`](validation_sql/fitness_funnel_2026-08-11.sql).
+
+| Контроль | Фактический результат | Статус |
+|---|---|---|
+| FF-V02 | Bounded cohort: 100 eligible contract rows → 98 distinct client × start-date rows; 2 cohort-группы содержат по 2 контракта | VALIDATED: current client-start deduplication необходима |
+| FF-V04/V06/V07 | Переиспользованы SV-072/SV-073/SV-078 для InfoRg7006, VT4352, event keys и source-state рисков | PARTIALLY VALIDATED; outcome не атрибутировать контракту и не менять current filters |
+
+Полный cohort scan не вернул подтверждаемого агрегата в лимите среды. Bounded
+result не выбирает «главный» контракт: contract detail остаётся отдельно, а
+меры сохраняют утверждённый grain client × start-date.

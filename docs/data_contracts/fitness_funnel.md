@@ -1,6 +1,6 @@
 # Data contract: «Фитнес воронка»
 
-Статус: `DESIGNED COMPOSITE MODEL / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION REQUIRED`.
+Статус: `DESIGNED COMPOSITE MODEL / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION PARTIALLY VALIDATED (SV-079)`.
 
 ## Объекты
 
@@ -24,4 +24,3 @@ distinct клиентов и конверсии.
 Приёмка: уникальный cohort, source key исхода, несколько контрактов в одну
 дату схлопываются, один клиент может иметь несколько исходов, оконные границы,
 states, PII, rerun и SLA.
-

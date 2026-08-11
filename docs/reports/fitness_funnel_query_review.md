@@ -1,6 +1,6 @@
 # Query review: «Фитнес воронка»
 
-Статус: `BUSINESS REVIEW COMPLETE / TECHNICAL VALIDATION PENDING`.
+Статус: `BUSINESS REVIEW COMPLETE / TECHNICAL VALIDATION PARTIALLY VALIDATED (SV-079)`.
 Основание — полный доступный M/SQL/DAX из `Фитнесворонка.docx`,
 бизнес-описание `Фитнес воронка.docx` и PBIT `Фитнес воронка.pbit`, полученный
 2026-07-31. Запросы к БД не выполнялись; все шаблоны ниже имеют статус

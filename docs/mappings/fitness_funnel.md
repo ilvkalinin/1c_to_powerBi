@@ -1,6 +1,6 @@
 # Source-to-target mapping: фитнес воронка
 
-Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0026 / TECHNICAL VALIDATION REQUIRED`.
+Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0026 / TECHNICAL VALIDATION PARTIALLY VALIDATED (SV-079)`.
 Production SQL не создаётся. Все физические имена и поля ниже подтверждены
 только текущими SQL/M; их типы, ключи, состояния и кардинальности имеют статус
 `VALIDATION_PENDING`.

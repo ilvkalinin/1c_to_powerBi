@@ -1,7 +1,7 @@
 # Требования отчёта: «Фитнес воронка»
 
 Договорный отчёт № 11. Статус: `BUSINESS ANALYSIS COMPLETE / SOURCE MAPPING
-COMPLETE / ARCHITECTURE DESIGNED / TECHNICAL VALIDATION PENDING`.
+COMPLETE / ARCHITECTURE DESIGNED / TECHNICAL VALIDATION PARTIALLY VALIDATED (SV-079)`.
 
 Проект находится на `STAGE_1_LOCAL_ANALYSIS`: SQL-объекты, запросы к БД и
 проверки на сервере не выполнялись.
