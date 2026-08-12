@@ -48,7 +48,7 @@ data contract оформлены по 31 из 31 отчёта. Реализов�
 | 28 | Маркетинг | Клиентская база | COMPLETE | COMPLETE — `client_base`, `client_base_retention` | COMPLETE — ADR-0002 | COMPLETE — `client_base` | DEFERRED | DEFERRED — DB tests |
 | 29 | Для правления | Выручка ДПФУ | COMPLETE | COMPLETE — `dpfu_revenue` | DESIGNED — ADR-0005/0012/0025 | COMPLETE — `dpfu_revenue` | DEFERRED | COMPLETE — SV-054—SV-057 |
 | 30 | Для правления | Отчет членство для правления | COMPLETE — `membership_board` | COMPLETE — `membership_board` | DESIGNED — REUSE ADR-0017 | COMPLETE — `membership_board` | DEFERRED | PARTIALLY VALIDATED — SV-083; Stage 3 deferred |
-| 31 | Для правления | Свод выручка ГК | COMPLETE — `revenue_group_summary` | COMPLETE — `revenue_group_summary` | DESIGNED — ADR-0010 | COMPLETE — `revenue_group_summary` | DEFERRED | DEFERRED — technical validation |
+| 31 | Для правления | Свод выручка ГК | COMPLETE — `revenue_group_summary` | COMPLETE — `revenue_group_summary` | DESIGNED — ADR-0010 | COMPLETE — `revenue_group_summary` | DEFERRED | PARTIALLY VALIDATED — SV-035—SV-050, SV-066; Stage 3 deferred |
 
 Локальные бизнес-анализ, mapping, архитектура и Power BI-контракт завершены по
 31 из 31 отчёта. После завершения каждого отчёта обновляются все шесть статусов его строки;

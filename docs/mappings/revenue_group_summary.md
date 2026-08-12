@@ -1,6 +1,6 @@
 # Source-to-target mapping: Свод выручка ГК
 
-Статус: `DESIGNED / TECHNICAL VALIDATION REQUIRED / IMPLEMENTATION DEFERRED`.
+Статус: `DESIGNED / INTERNAL POSTGRESQL BRANCHES VALIDATED — SV-035—SV-050, SV-066 / IMPLEMENTATION DEFERRED`.
 
 Этот mapping фиксирует текущий отчётный результат, а не разрешает создание
 физической витрины. Никакого SQL/DDL для VM-1 или VM-2 не создано.
