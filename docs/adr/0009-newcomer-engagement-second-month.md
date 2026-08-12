@@ -1,6 +1,6 @@
 # ADR-0009: отдельный факт вовлечения новичков во втором месяце
 
-- Статус: `DESIGNED / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION REQUIRED`
+- Статус: `DESIGNED / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-076 / IMPLEMENTATION DEFERRED`
 - Дата: 2026-07-28
 - Отчёт: № 3 «Вовлечение новичков Второй месяц»
 
@@ -140,6 +140,12 @@ Excel-план не включается в объект и не использ�
   переносится.
 
 ## Техническая валидация перед SQL
+
+SV-076 (live read-only, 2026-08-11) подтвердил 11 physical relations и
+формулу второго месяца на bounded cohort из 100 контрактов: 100 строк, 0
+duplicate key, интервал `[2026-04-01, 2026-05-01)` и 0 выходов за границы.
+Повторные child-пары, orphan-ссылки и one-to-many match СПТ документированы
+как current-source evidence; исправление требует отдельного решения по BR-018.
 
 1. Уникальность ключа `(contract_id, client_id, month_of_engagement)` и
    отсутствие размножения в ветке детских пакетов.

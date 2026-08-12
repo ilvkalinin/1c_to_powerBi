@@ -7,5 +7,5 @@ customer_lifecycle_validation_2026-08-12	STAGE_2_SERVER_VALIDATION	ACTIVE	2026-0
 
 report_id	report_status	completion_commit
 newcomer_engagement	COMPLETE	SELF
-newcomer_engagement_second_month	IN_PROGRESS	-
-preparation_renewal	PENDING	-
+newcomer_engagement_second_month	COMPLETE	SELF
+preparation_renewal	IN_PROGRESS	-

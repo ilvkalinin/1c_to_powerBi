@@ -1,6 +1,11 @@
 # Data contract: «Вовлечение новичков Второй месяц»
 
-Статус: `DESIGNED / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION PARTIALLY VALIDATED (SV-076)`.
+Статус: `DESIGNED / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-076 / IMPLEMENTATION DEFERRED`.
+
+SV-076 подтвердил physical sources, bounded second-month interval и ключ
+контрольной выборки, но не уникальность child-кандидата и one-to-one match
+СПТ. Контракт сохраняет current source-логику по BR-018; физических объектов
+не создавалось.
 
 | Параметр | Значение | Статус / доказательство |
 |---|---|---|

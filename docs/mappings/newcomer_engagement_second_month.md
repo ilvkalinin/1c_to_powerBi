@@ -1,6 +1,6 @@
 # Source-to-target mapping: `newcomer_engagement_second_month`
 
-Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE ACCEPTED / TECHNICAL VALIDATION PARTIALLY VALIDATED (SV-076)`.
+Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE ACCEPTED / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-076`.
 Физический объект — `mart.newcomer_engagement_second_month` по ADR-0009.
 
 Гранулярность одной строки: подходящий контракт × клиент × месяц вовлечения.
@@ -45,6 +45,15 @@
 | `InfoRg7006`, `Document329`, `Enum448`, `Document325` | признак СПТ | CONFIRMED current source / relation pending | Power Query в приложенном DOCX |
 | `InfoRg6015` | календарь | CONFIRMED current source | Power Query в приложенном DOCX |
 | Excel «Доля выпускников с целевой регулярностью» | текущая Power Query-зависимость без подтверждённого потребителя | NOT_APPLICABLE к плановой формуле | Power Query в приложенном DOCX; решение пользователя 2026-07-28 |
+
+`SV-076` (live read-only, 2026-08-11) подтвердил существование 11 physical
+relations и технические ключи 3 180 662 visit-строк 2026. Но 240 296 строк
+имеют orphan-контракт, 146 131 — client-owner mismatch; child-ветка содержит
+3 144 повторные пары `contract × child` (7 093 строки, максимум 11) и 9 933
+orphan child-ссылки. История `InfoRg5654` имеет 1 084 849 строк, `NULL=0` и
+0 ties `client × period`. NM-V08 подтвердил формулу полного второго месяца
+на 100 мартовских контрактах без duplicate output key. Эти результаты не
+разрешают dedupe или изменение current-rule без отдельного решения по BR-018.
 
 ## Подтверждённые source-side правила текущего отчёта
 

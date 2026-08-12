@@ -1,6 +1,6 @@
 # Отчёт №3 «Вовлечение новичков Второй месяц»
 
-Статус: `BUSINESS ANALYSIS COMPLETE / ARCHITECTURE DESIGNED / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION PARTIALLY VALIDATED (SV-076)`.
+Статус: `BUSINESS ANALYSIS COMPLETE / ARCHITECTURE DESIGNED / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-076 / IMPLEMENTATION DEFERRED`.
 
 Доказательства: предоставленные пользователем документы
 `Вовлечение_новичков_Второй_месяц.docx` и
@@ -116,6 +116,22 @@ ADR-0009. Новый контрактный факт имеет несовмес
 Схема связей Power BI получена в PBIT. Перед реализацией по-прежнему нужны
 обычные технические проверки типов, ключей и фактической кардинальности
 источников; они не изменяют подтверждённую текущую логику отчёта.
+
+## Результат Stage 2: SV-076
+
+Read-only сверки выполнены на live-снимке 2026-08-11. Все 11 требуемых
+physical relations существуют; новые отсутствующие источники не обнаружены.
+
+| Контроль | Фактический результат | Статус |
+|---|---|---|
+| NM-V01—V03 | `Reference59`: 347 141 уникальный ID; 5 292 неположительных интервала, 51 105 длительностью ≤30 дней, 4 помеченные строки. `AccumRg7575`: 3 180 662 строк = техническим ключам; 240 296 orphan-контрактов, 146 131 client-owner mismatch | PARTIALLY VALIDATED; current filters обязательны |
+| NM-V05—V07 | `VT4913`: 46 470 уникальных строк, все связаны с чеком и контрактом; 9 933 child orphan; 3 144 повторные пары `contract × child` (7 093 строки, максимум 11). `InfoRg5654`: 1 084 849 строк, `NULL=0`, ties `client × period=0` | VALIDATION_FAILED для unique child candidate |
+| NM-V08 | Bounded cohort: 100 мартовских контрактов → 100 строк, 0 duplicate key; у всех второй месяц `[2026-04-01, 2026-05-01)`, 252 visit-строки, 25 пар `4+`, 0 выходов за интервал | VALIDATED bounded source-side control |
+| NM-V09—V10 | 1 orphan service; январский match СПТ/visit даёт 154 756 raw-пар из 91 383 state-events и 80 444 visits, максимум 33/24 события в client-day | VALIDATION_FAILED для полной reference integrity и one-to-one СПТ |
+
+По BR-018 сохраняются current `COUNT` строк, child `RANK()`/as-of и match
+СПТ по клиенту и дате. Никакие SQL/M/DAX, статусы 1С или объектная модель не
+изменялись; внешние Excel-файлы не анализировались.
 
 ## Следующий шаг
 
