@@ -25,7 +25,7 @@ data contract оформлены по 31 из 31 отчёта. Реализов�
 | 5 | Фитнес | Воронка лиды фитнес | COMPLETE — `fitness_leads_funnel` | COMPLETE — `fitness_leads_funnel` | DESIGNED — ADR-0011 | COMPLETE — `fitness_leads_funnel` | DEFERRED | PARTIALLY VALIDATED — SV-078; Stage 3 deferred |
 | 6 | Фитнес | Загрузка сотрудников | COMPLETE — `employee_workload` | COMPLETE — `employee_workload` | DESIGNED — ADR-0014 | COMPLETE — `employee_workload` | DEFERRED | PARTIALLY VALIDATED — SV-074; Stage 3 deferred |
 | 7 | Фитнес | Контроль предварительной записи | COMPLETE — `prebooking_control` | COMPLETE — `prebooking_control` | DESIGNED — ADR-0015 | COMPLETE — `prebooking_control` | DEFERRED | PARTIALLY VALIDATED — SV-072; Stage 3 deferred |
-| 8 | Фитнес | Отчет по ИП | COMPLETE | COMPLETE — `ip_training` | DESIGNED — ADR-0025 | COMPLETE — `ip_training` | DEFERRED | DEFERRED — technical validation |
+| 8 | Фитнес | Отчет по ИП | COMPLETE | COMPLETE — `ip_training` | DESIGNED — ADR-0025 | COMPLETE — `ip_training` | DEFERRED | PARTIALLY VALIDATED — SV-058, SV-068; Stage 3 deferred |
 | 9 | Фитнес | Посещения Физкульт | COMPLETE | COMPLETE — `visits_fizkult` | DESIGNED — ADR-0003 | COMPLETE — `visits_fizkult` | DEFERRED | PARTIALLY VALIDATED — SV-070; Stage 3 deferred |
 | 10 | Фитнес | Уроки и расписание | COMPLETE — `lessons_schedule` | COMPLETE — `lessons_schedule` | DESIGNED — ADR-0015 | COMPLETE — `lessons_schedule` | DEFERRED | PARTIALLY VALIDATED — SV-073; Stage 3 deferred |
 | 11 | Фитнес | Фитнес воронка | COMPLETE — `fitness_funnel` | COMPLETE — `fitness_funnel` | DESIGNED — ADR-0026 | COMPLETE — `fitness_funnel` | DEFERRED | PARTIALLY VALIDATED — SV-079; Stage 3 deferred |
