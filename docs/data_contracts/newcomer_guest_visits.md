@@ -1,11 +1,12 @@
 # Data contract: «Новички и гостевые визиты»
 
-Статус: `DESIGNED COMPOSITE MODEL / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-087`.
+Статус: `DESIGNED COMPOSITE MODEL / IMPLEMENTATION DEFERRED / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-087`.
 
 NV-V01/NV-V03/NV-V04/NV-V07/NV-V08 выполнены с зафиксированными ожиданиями.
 Physical guest key и CRM-tour grain подтверждены, но candidate guest key
 материально неуникален; статусы, ACCUNIQ и 0/44/45 outcomes не приняты.
-Контракт остаётся непринимаемым до Stage 3.
+Реализация остаётся отложенной: для материально неуникального candidate guest
+key требуется отдельное решение до Stage 3.
 
 ## Наборы
 

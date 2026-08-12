@@ -1,6 +1,6 @@
 # Требования отчёта: «Новички и гостевые визиты»
 
-Статус: `BUSINESS ANALYSIS COMPLETE / STAGE 2 PARTIALLY VALIDATED — SV-087 / IMPLEMENTATION DEFERRED`.
+Статус: `BUSINESS ANALYSIS COMPLETE / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-087 / IMPLEMENTATION DEFERRED`.
 
 Анализ выполнен локально по двум документам: описанию страниц
 `Новички и гостевые визиты.docx` и выгрузке текущих Power Query / DAX

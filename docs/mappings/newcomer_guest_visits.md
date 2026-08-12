@@ -5,10 +5,11 @@
 Ниже описаны наборы, для которых ADR-0020 проектирует
 `mart.new_first_visit`, `mart.guest_visit_conversion` и REUSE
 `mart.v_guest_tour`. Это не разрешение на SQL/DDL. Все проверки имеют статус
-`VALIDATION_PENDING`; NV-V01/NV-V03/NV-V04/NV-V07/NV-V08 выполнены в
-read-only snapshot 2026-08-11. Источники существуют, physical key гостевого
-регистра и history ties подтверждены, но candidate guest key повторяется, а
-семантика четырёх guest statuses, ACCUNIQ и 0/44/45 outcomes остаётся pending.
+`VALIDATION_PENDING`, кроме выполненных NV-V01/NV-V03/NV-V04/NV-V07/NV-V08
+на read-only snapshot 2026-08-11. Источники существуют, physical key гостевого
+регистра и history ties подтверждены, но candidate guest key имеет статус
+`VALIDATION_FAILED`; семантика четырёх guest statuses, ACCUNIQ и 0/44/45
+outcomes остаётся pending.
 SV-006 подтвердил наличие `InfoRg7064`; реестр отсутствующих объектов не
 изменяется.
 
@@ -52,7 +53,9 @@ production-правилом без этой проверки.
 ## Набор 2: гостевой визит и конверсия
 
 Гранулярность: гость × дата гостевого визита; candidate key
-`(guest_registration_id, client_id, guest_visit_date)`, `VALIDATION_PENDING`.
+`(guest_registration_id, client_id, guest_visit_date)`, `VALIDATION_FAILED`
+по SV-087 (111 578 duplicate groups). Правило выбора строки не принимается
+без отдельного решения.
 
 | Целевое поле | Описание / преобразование | PostgreSQL тип | NULL | Статус и проверка |
 |---|---|---|---|---|
