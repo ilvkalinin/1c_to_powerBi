@@ -24,6 +24,11 @@
 9. Пока активный пакет содержит незавершённый отчёт, работа не останавливается
    без реального `BLOCKER`: `ПРОДОЛЖАЮ РАБОТУ` допускается только в
    `commentary`, никогда в `final`.
+10. До предложения или открытия любого нового пакета обязательно проверь
+    `.agents/report_checkpoint_ledger.tsv` командой
+    `scripts/check_package_selection.sh`. Статус `PARTIALLY VALIDATED` не
+    разрешает повторный прогон: отчёт выбирается только при
+    `READY_FOR_NEW_CONTROL` с зафиксированным новым триггером.
 
 ## Маршрутизатор — читать ровно по событию
 
@@ -35,6 +40,7 @@
 | Stage 3 | `.agents/playbooks/stage_3.md` |
 | SQL, миграция, источник, безопасность | `.agents/playbooks/safety.md` |
 | Рабочее сообщение, пакет, коммит | `.agents/playbooks/communication.md` |
+| Выбор нового пакета | `.agents/report_checkpoint_ledger.tsv`, `scripts/check_package_selection.sh` |
 | Любой `final` | `.agents/playbooks/final_preflight.md` и `scripts/check_final_gate.sh` |
 | Редкий случай или точная прежняя формулировка | `.agents/playbooks/full_policy_reference_2026-08-11.md` |
 

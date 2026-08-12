@@ -1,9 +1,15 @@
 # Playbook: жизненный цикл отчёта
 
-Перед новым отчётом прочитай `source_objects.md`, `data_products.md` и
-`business_rules.md`. Для существующего отчёта сначала разбери полный SQL, M,
-DAX и model relationships. Зафиксируй потребителя, решения, grain строки и
+Перед новым отчётом сначала пройди gate
+`scripts/check_package_selection.sh <stage> <report_id>` и прочитай
+`source_objects.md`, `data_products.md` и `business_rules.md`. Для
+существующего отчёта сначала разбери полный SQL, M, DAX и model relationships.
+Зафиксируй потребителя, решения, grain строки и
 времени, единицы, метрики, срезы, фильтры, исключения, историю, SLA и controls.
+
+`CLOSED_CHECKPOINT` в ledger останавливает выбор отчёта даже при наличии
+`VALIDATION_PENDING`: без нового зафиксированного триггера отчёт не является
+новой работой.
 
 В mapping сначала выполни reuse review в порядке `REUSE → EXTEND → NEW`.
 Одинаковое имя Power Query не доказывает общий физический источник. Каждое поле

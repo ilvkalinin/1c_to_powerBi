@@ -1,0 +1,36 @@
+# Persistent package-selection ledger. One row is required for every contract report.
+# selection_state: CLOSED_CHECKPOINT, BLOCKED_SOURCE, READY_FOR_NEW_CONTROL, NOT_STARTED.
+# Only READY_FOR_NEW_CONTROL is allowed by scripts/check_package_selection.sh.
+# A pending risk is not a retry trigger. Update this file in the same commit as the report checkpoint.
+report_id	stage	last_checkpoint	checkpoint_commit	selection_state	new_trigger_or_remaining_controls
+kpi_fitness	STAGE_2_SERVER_VALIDATION	SV-054—SV-061	HISTORICAL_PRE_LEDGER	CLOSED_CHECKPOINT	New source-side control or explicit approved methodology change only
+newcomer_engagement	STAGE_2_SERVER_VALIDATION	SV-075	HISTORICAL_PRE_LEDGER	CLOSED_CHECKPOINT	New independent control value or source change only
+newcomer_engagement_second_month	STAGE_2_SERVER_VALIDATION	SV-076	20d9ee4	CLOSED_CHECKPOINT	New independent control value or source change only
+preparation_renewal	STAGE_2_SERVER_VALIDATION	SV-077	80d52f9	CLOSED_CHECKPOINT	New independent control value or source change only
+fitness_leads_funnel	STAGE_2_SERVER_VALIDATION	SV-078	3f1c821	CLOSED_CHECKPOINT	New attribution/state control with independently recorded expectation only
+employee_workload	STAGE_2_SERVER_VALIDATION	SV-074	HISTORICAL_PRE_LEDGER	CLOSED_CHECKPOINT	New source-side control or external dependency decision only
+prebooking_control	STAGE_2_SERVER_VALIDATION	SV-072	HISTORICAL_PRE_LEDGER	CLOSED_CHECKPOINT	New independent control value or source change only
+ip_training	STAGE_2_SERVER_VALIDATION	SV-058, SV-068	2670463	CLOSED_CHECKPOINT	New service-link control or source change only
+visits_fizkult	STAGE_2_SERVER_VALIDATION	SV-070	HISTORICAL_PRE_LEDGER	CLOSED_CHECKPOINT	New source-side control or source change only
+lessons_schedule	STAGE_2_SERVER_VALIDATION	SV-073	HISTORICAL_PRE_LEDGER	CLOSED_CHECKPOINT	New source-side control or source change only
+fitness_funnel	STAGE_2_SERVER_VALIDATION	SV-079	f674ba8	CLOSED_CHECKPOINT	New independently expected cohort/outcome control only
+sales_interactions	STAGE_2_SERVER_VALIDATION	SV-084	f51db65	CLOSED_CHECKPOINT	New CRM control or source change only
+membership_receipts	STAGE_2_SERVER_VALIDATION	SV-083	HISTORICAL_PRE_LEDGER	CLOSED_CHECKPOINT	New independent reconciliation or source change only
+promo_codes	STAGE_2_SERVER_VALIDATION	SV-006	HISTORICAL_PRE_LEDGER	BLOCKED_SOURCE	Await _document298_vt3596 in gymdb.public and record physical availability
+children_package_sales	STAGE_2_SERVER_VALIDATION	SV-085	HISTORICAL_PRE_LEDGER	CLOSED_CHECKPOINT	New payment/return control or source change only
+renewal_management	STAGE_2_SERVER_VALIDATION	SV-081	HISTORICAL_PRE_LEDGER	CLOSED_CHECKPOINT	New current-state control or source change only
+renew_contract_usage	STAGE_2_SERVER_VALIDATION	SV-082	HISTORICAL_PRE_LEDGER	CLOSED_CHECKPOINT	New independent usage control or source change only
+reception_revenue	STAGE_2_SERVER_VALIDATION	SV-050—SV-053	HISTORICAL_PRE_LEDGER	CLOSED_CHECKPOINT	New source change; _document294 remains registry evidence only
+administrator_bookings	STAGE_2_SERVER_VALIDATION	SV-086	HISTORICAL_PRE_LEDGER	CLOSED_CHECKPOINT	New employee-attribution decision/control or source change only
+newcomer_guest_visits	STAGE_2_SERVER_VALIDATION	SV-087	ccc695c	CLOSED_CHECKPOINT	New guest-key decision or source change only
+calls_report	STAGE_2_SERVER_VALIDATION	SV-088	f39dfd1	CLOSED_CHECKPOINT	New HTML/follow-up control with independent expectation only
+visits_debt	STAGE_2_SERVER_VALIDATION	SV-089	f8dfc9d	CLOSED_CHECKPOINT	New as-of control with independent control values only
+visits_pushkinsky	STAGE_2_SERVER_VALIDATION	SV-071	046828d	CLOSED_CHECKPOINT	New source change or explicitly approved category methodology only
+work_attendance	STAGE_2_SERVER_VALIDATION	SV-065, SV-067	8a92fad	CLOSED_CHECKPOINT	New daily-client-base evidence or historical performance control only
+administrator_card	STAGE_2_SERVER_VALIDATION	SV-002	6edf9ee	CLOSED_CHECKPOINT	New physical source/state evidence only
+title_sheet	STAGE_2_SERVER_VALIDATION	SV-062—SV-064	HISTORICAL_PRE_LEDGER	CLOSED_CHECKPOINT	New source-side control or external dependency decision only
+marketing_funnel	STAGE_2_SERVER_VALIDATION	SV-080	dbe037d	CLOSED_CHECKPOINT	New contract-aggregation decision/control or source change only
+client_base	STAGE_2_SERVER_VALIDATION	SV-069	8e69b49	CLOSED_CHECKPOINT	New retention control or source change only
+dpfu_revenue	STAGE_2_SERVER_VALIDATION	SV-054—SV-057	HISTORICAL_PRE_LEDGER	CLOSED_CHECKPOINT	New source-side control or methodology approval only
+membership_board	STAGE_2_SERVER_VALIDATION	SV-083	HISTORICAL_PRE_LEDGER	CLOSED_CHECKPOINT	New independent reconciliation or source change only
+revenue_group_summary	STAGE_2_SERVER_VALIDATION	SV-035—SV-050, SV-066	192c7c2	CLOSED_CHECKPOINT	New source-side control or external dependency decision only
