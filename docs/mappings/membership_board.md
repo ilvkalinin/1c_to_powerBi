@@ -1,7 +1,7 @@
 # Source-to-target mapping: «Отчёт членство для правления»
 
 Статус:
-`BUSINESS MAPPING COMPLETE / REUSE CONFIRMED / TECHNICAL VALIDATION DEFERRED`.
+`BUSINESS MAPPING COMPLETE / REUSE CONFIRMED / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-083 / IMPLEMENTATION DEFERRED`.
 
 ## Гранулярность и ключи
 
@@ -14,8 +14,9 @@
 - планы: отдельные факты Power BI на собственном grain;
 - визуальные агрегаты: производные и не меняют логический ключ.
 
-Физические movement key и recurring-payment key:
-`VALIDATION_PENDING`.
+SV-083 подтвердил bounded физические technical keys движения и отсутствие
+orphan-contract в двух исходных регистрах. Полный movement key и recurring-
+payment key остаются `VALIDATION_PENDING`.
 
 ## Повторно используемые целевые поля
 
@@ -26,7 +27,7 @@
 | Целевая колонка | Бизнес-описание | Исходная таблица / колонка | Преобразование | PostgreSQL тип | NULL | Grain | Статус | Доказательство | Тест |
 |---|---|---|---|---|---|---|---|---|---|
 | `source_kind` | ветка поступления | mapping `membership_receipts` | без изменения | `text` | нет | движение | CONFIRMED REUSE | MR mapping + PBIT | MR-V11 |
-| `source_movement_key` | технический ключ движения | `AccumRg7370/7739` | validated composite key | `text` candidate | нет | движение | VALIDATION_PENDING | MR mapping | MR-V02 |
+| `source_movement_key` | технический ключ движения | `AccumRg7370/7739` | bounded physical composite key; полный domain pending | `text` candidate | нет | движение | PARTIALLY VALIDATED — SV-083 | MR mapping | MR-V02/MR-V03 |
 | `receipt_date` | дата денежного движения | `Period` | `::date` | `date` | нет | движение | CONFIRMED REUSE | BR-015 | MB-V07 |
 | `metric_date` | дата контрактного KPI | movement / activation | recurring → movement; prepayment → activation | `date` | да у услуг | KPI unit | CONFIRMED REUSE | BR-015 | MB-V07 |
 | `kpi_unit_key` | единица количества | contract / recurring payment | BR-016 | `text` candidate | да у услуг | KPI unit | VALIDATION_PENDING physical key | user decision + MR mapping | MR-V02/MB-V01 |
@@ -60,7 +61,7 @@
 
 | Объект | Назначение | Статус | Доказательство |
 |---|---|---|---|
-| все источники `membership_receipts` | факты и измерения членства | CONFIRMED REUSE / technical validation pending | source catalogs + PBIT comparison |
+| все источники `membership_receipts` | факты и измерения членства | CONFIRMED REUSE / PARTIALLY VALIDATED — SV-083 | source catalogs + PBIT comparison + SV-083 |
 | текущий и среднесрочный планы | плановые сравнения | CONFIRMED external Power BI facts | оба PBIT |
 | годовой план (`Бюджет24 в 1С`) | база `план годовой` | CONFIRMED external Power BI fact | board PBIT |
 | `___Итого по сети` | calculated performance aggregate | CONFIRMED implementation artifact, not source of truth | board PBIT + user decision |
@@ -83,7 +84,7 @@
 
 | Статус | Элемент | Риск / причина | Проверка |
 |---|---|---|---|
-| VALIDATION_PENDING | физические ключи и состояния | наследуется от MR mapping | MR-V01–MR-V12 |
+| VALIDATION_PENDING | физические ключи и состояния | bounded keys/contract joins validated by SV-083; full domain and states inherit MR pending | MR-V01–MR-V12 |
 | VALIDATION_PENDING | равенство KPI | board-PBIT содержит 26 отличающихся общих мер | MB-V01 |
 | VALIDATION_PENDING | performance aggregate | может менять filter context и неаддитивные KPI | MB-V02/MB-V08 |
 | VALIDATION_PENDING | внешние планы | несовместимый grain может размножить факт | MB-V03/MB-V04 |

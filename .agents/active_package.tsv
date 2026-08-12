@@ -7,5 +7,5 @@ board_revenue_validation_2026-08-12	STAGE_2_SERVER_VALIDATION	ACTIVE	2026-08-12
 
 report_id	report_status	completion_commit
 dpfu_revenue	COMPLETE	SELF
-membership_board	IN_PROGRESS	-
-revenue_group_summary	PENDING	-
+membership_board	COMPLETE	SELF
+revenue_group_summary	IN_PROGRESS	-

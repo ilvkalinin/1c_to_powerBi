@@ -1,7 +1,7 @@
 # Query review: «Отчёт членство для правления»
 
 Статус:
-`LOCAL QUERY/MODEL REVIEW COMPLETE / TECHNICAL VALIDATION DEFERRED / NO DATABASE EXECUTION`.
+`LOCAL QUERY/MODEL REVIEW COMPLETE / SHARED SOURCE TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-083 / STAGE 3 BOARD RECONCILIATION DEFERRED`.
 
 Разобраны DOCX (16 отрендеренных страниц) и PBIT: 81 таблица, 88 связей,
 22 M-expression, 263 меры, 310 calculated columns и 29 видимых страниц.
@@ -90,8 +90,12 @@ Board-only меры переключателей, светофоров, доле
 
 ## Непроведённый пакет проверок
 
-Все проверки:
-`VALIDATION_PENDING / NOT_EXECUTED — ожидается подключение к корпоративной сети`.
+Общий source-side домен частично проверен в SV-083: оба регистра и контрактные
+справочники существуют, а в bounded срезах технические ключи уникальны и не
+имеют orphan-contract. Это не подтверждает business sign, recurring-payment
+key, состояния или полный полиморфный домен. Board-специфичные проверки ниже
+не выполнялись: им требуется будущий физический домен Stage 3 либо внешние
+планы, которые остаются вне границы проекта.
 
 Сначала выполняется полный пакет MR-V01–MR-V12 из
 `membership_receipts_query_review.md`. После него:
