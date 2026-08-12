@@ -1,6 +1,11 @@
 # Data contract: «Подготовка к продлению»
 
-Статус: `DESIGNED / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION PARTIALLY VALIDATED (SV-077)`.
+Статус: `DESIGNED / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-077 / IMPLEMENTATION DEFERRED`.
+
+SV-077 подтвердил bounded key `(contract_id, checkpoint_day)` и календарь,
+но не единственный valid join посещений/заморозок и не техническую роль
+отображаемых code/name. Контракт сохраняет current source-логику по BR-018;
+физических объектов не создавалось.
 
 ## Общие параметры
 

@@ -1,7 +1,7 @@
 # Требования отчёта: «Подготовка к продлению»
 
-Статус: `BUSINESS LOGIC COMPLETE / TECHNICAL VALIDATION PARTIALLY VALIDATED (SV-077)`.
-SQL, физические объекты и проверки на БД не создаются.
+Статус: `BUSINESS LOGIC COMPLETE / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-077 / IMPLEMENTATION DEFERRED`.
+SQL и физические объекты не создаются.
 
 ## Назначение
 
@@ -104,8 +104,24 @@ SQL-сервер он не переносится. KPI `4+`, его числит
 | CONFIRMED | Контрольные точки считаются текущей DAX-мерой: `end_date − 121 + checkpoint_day`; текстовый пример может быть ошибочным. | пользовательское решение 2026-07-29; DAX. | Сохранено как правило этого отчёта для будущих анализов. |
 | CONFIRMED | План — внешний Excel, не переносится на SQL; KPI `4+` считается по всем контрактам текущего отбора. | пользовательское решение 2026-07-29. | Оставить Excel отдельной таблицей Power BI. |
 | CONFIRMED | Возраст: `<14`, `14–17`, `18+` на дату активации. | пользовательское решение 2026-07-29; BR-008. | Заменить legacy-логику `<14/14+` при миграции. |
-| VALIDATION_PENDING | Одна строка `AccumRg7575` соответствует одному посещению, а ссылка на контракт и клиент корректны. | текущий SQL; каталог источников. | `NOT_EXECUTED — ожидается подключение к корпоративной сети`. |
-| VALIDATION_PENDING | Флаги `Active`, удаление, проведение, сторно и границы интервала не меняют числитель. | источники 1С; текущий SQL не фильтрует состояния. | `NOT_EXECUTED — ожидается подключение к корпоративной сети`. |
+| PARTIALLY VALIDATED | Технический ключ `AccumRg7575` уникален, но contract/client link не однозначен: 240 304 contract orphan и 146 139 client-owner mismatch в 2026. | SV-077. | Сохранять current pair contract + client по BR-018; не заменять join. |
+| VALIDATION_PENDING | Флаги `Active`, удаление, проведение, сторно и границы интервала не меняют числитель. | SV-077: 10 258 inactive freeze-строк; семантика states не доказана. | Не добавлять фильтры без отдельного доказательства. |
+
+## Результат Stage 2: SV-077
+
+Read-only сверки выполнены на live-снимке 2026-08-11. Все восемь required
+physical relations существуют; новых отсутствующих объектов не обнаружено.
+
+| Контроль | Фактический результат | Статус |
+|---|---|---|
+| PR-V01—V03 | `Reference59`: 675 447 уникальных ID, 90 384 интервала `<30`, 16 marked. `AccumRg7575`: 3 180 795 уникальных ключей, 240 304 contract orphan, 146 139 client-owner mismatch, 1 orphan услуги | PARTIALLY VALIDATED; current filters обязательны |
+| PR-V04/V06 | `InfoRg5859`: 1 602 786 строк, 71 обратный интервал, 22 998 duplicate groups. `AccumRg7478`: 1 801 015 уникальных ключей, 10 258 inactive, 59 contract orphan | VALIDATION_FAILED для единственного валидного join |
+| PR-V05 | 100 контрактов с окончанием 2026-07-31 → 500 уникальных точек; даты 2026-04-08/15/22/29 и 2026-05-01; 1 360 visit-строк, 54 frozen point | VALIDATED bounded source-side control |
+| PR-V07—V09 | 56 977 overlap-строк у 12 000 контрактов; 40 duplicate contract-code groups; 230 549 orphan club links. Календарь: 1 826 уникальных non-null дат, 2022-01-01—2026-12-31 | calendar key VALIDATED; code/name не технические ключи |
+
+Текущие DAX границы, `NATURALLEFTOUTERJOIN` и отсутствие новых state-фильтров
+сохранены по BR-018. Excel-план остаётся за пределами PostgreSQL и не
+анализировался.
 
 ## Связанные артефакты
 

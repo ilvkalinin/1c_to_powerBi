@@ -1,6 +1,6 @@
 # ADR-0013: контрольные точки подготовки к продлению
 
-- Статус: `DESIGNED / TECHNICAL VALIDATION REQUIRED / IMPLEMENTATION DEFERRED`
+- Статус: `DESIGNED / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-077 / IMPLEMENTATION DEFERRED`
 - Дата: 2026-08-03
 - Отчёт: №4 «Подготовка к продлению»
 
@@ -39,6 +39,12 @@ PostgreSQL рассчитывает checkpoint-даты, накопительн�
 
 ## Риски и пересмотр
 
+SV-077 (live read-only, 2026-08-11) подтвердил 500 checkpoint-строк без
+дубликатов для bounded cohort из 100 контрактов. В то же время зафиксированы
+orphan/mismatch visits, обратные и повторные интервалы заморозки, а также
+неуникальные отображаемые коды. По BR-018 это current-source evidence, а не
+разрешение менять join, DAX-границы или state-фильтры.
+
 До реализации подтверждаются связь посещения с контрактом, единица посещения,
 интервалы заморозки, source states и уникальность ключа. При доказанном общем
 потребителе с тем же окном продукт может быть переименован в общий; похожее
@@ -48,4 +54,3 @@ PostgreSQL рассчитывает checkpoint-даты, накопительн�
 
 - [Требования](../reports/preparation_renewal.md)
 - [Mapping](../mappings/preparation_renewal.md)
-

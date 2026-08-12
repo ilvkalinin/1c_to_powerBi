@@ -1,6 +1,6 @@
 # Source-to-target mapping: «Подготовка к продлению»
 
-Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0013 / TECHNICAL VALIDATION PARTIALLY VALIDATED (SV-077)`.
+Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0013 / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-077`.
 Спроектирован `mart.preparation_renewal_checkpoint`; SQL и физические объекты не создаются.
 
 ## Гранулярность
@@ -69,10 +69,18 @@
 | VALIDATION_PENDING | code/name joins | `Code` и название клуба не технические ключи | `NOT_EXECUTED — ожидается подключение к корпоративной сети`: uniqueness/null/orphan |
 | NOT_APPLICABLE | внешний план | внешний Excel намеренно не переносится на SQL-сервер | остаётся отдельной таблицей Power BI |
 
-## Подготовленные read-only проверки
+## Результат read-only проверок
 
-Все проверки ниже имеют статус `VALIDATION_PENDING` и
-`NOT_EXECUTED — ожидается подключение к корпоративной сети`.
+`SV-077` (live read-only, 2026-08-11) подтвердил существование восьми
+physical relations. Bounded cohort из 100 контрактов с окончанием 2026-07-31
+дала 500 уникальных checkpoint-строк без duplicate key; все даты равны
+2026-04-08/15/22/29 и 2026-05-01, 1 360 visit-строк и 54 frozen point.
+Одновременно `AccumRg7575` содержит 240 304 contract orphan и 146 139
+client-owner mismatch, а `InfoRg5859` — 71 обратный интервал и 22 998
+duplicate groups. Эти наблюдения не разрешают менять current joins, границы
+или state-фильтры без отдельного решения по BR-018.
+
+Остающиеся проверки перед SQL:
 
 1. Проверить `Reference59.ID`, `Code`, даты, null/sentinel и соответствие
    отбору M-кода.
