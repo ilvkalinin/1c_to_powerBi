@@ -1,6 +1,6 @@
 # ADR-0022: почасовая посещаемость клуба
 
-- Статус: `DESIGNED / TECHNICAL VALIDATION REQUIRED / IMPLEMENTATION DEFERRED`
+- Статус: `DESIGNED / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-065, SV-067 / IMPLEMENTATION DEFERRED`
 - Дата: 2026-08-03
 - Отчёты: №24 «Работа с посещаемостью», №26 «Титульный лист»
 
@@ -30,13 +30,14 @@ PostgreSQL считает возраст, длительность и агрег
 
 ## Риски
 
-Единица исходного посещения, кратность join, states, приоритет клуба и
-точность максимальной ЧК по часовым границам — `VALIDATION_PENDING`. Если
-часовой grain не воспроизводит текущую ЧК, только этот consumer пересматривается
-на более точный slot-grain после измерения объёма.
+Единица исходного посещения, кратность join и states current-M population
+2026-01—07, а также сохранение почасового grain на 2026-07-15 подтверждены
+SV-065/SV-067. Приоритет клуба, точность максимальной ЧК по часовым границам,
+upstream daily client base и historical SLA остаются `VALIDATION_PENDING` /
+`BLOCKED`. Если часовой grain не воспроизводит текущую ЧК, только этот
+consumer пересматривается на более точный slot-grain после измерения объёма.
 
 ## Доказательства
 
 - [Mapping посещаемости](../mappings/work_attendance.md)
 - [Mapping титульного листа](../mappings/title_sheet.md)
-

@@ -1,10 +1,25 @@
 # Требования отчёта: «Работа с посещаемостью»
 
-Статус: `BUSINESS LOGIC COMPLETE / TECHNICAL VALIDATION DEFERRED`.
+Статус: `BUSINESS LOGIC COMPLETE / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-065, SV-067; Stage 3 deferred`.
 
 Договорной отчёт №24, блок «Гостеприимство». Анализ выполнен локально по
 описанию отчёта, Power Query, DAX и изображениям модели/страниц Power BI.
 Подключений к 1С/PostgreSQL, SQL-запросов и создания объектов не было.
+
+## Stage 2: SV-065 and SV-067
+
+Выполненные read-only проверки подтвердили current-M population за каждый
+полный месяц 2026-01—07: join `AccumRg7575 → Document325` не размножает
+документы, а в этой когорте нет inactive/unposted/marked строк. Семь
+наблюдаемых аномалий интервалов сохранены по BR-018. На control date
+2026-07-15 почасовой агрегат сохранил число посещений и минуты без `NULL`
+обязательных компонентов; source baseline составил 230,571 мс execution.
+
+BR-019 отдельно заменяет source sentinel birth date `0001-01-01 00:00:00`
+на `NULL` возраста, а не на `85+`. WA-V06 и historical часть WA-V08 остаются
+`BLOCKED`: daily client-base dependency ещё не сформирована, а полный годовой
+exact query превысил `statement_timeout`. Внешние Excel-наборы не
+анализировались и не переносились.
 
 ## Назначение
 
