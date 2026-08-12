@@ -1,10 +1,9 @@
 # Требования отчёта: «Фитнес воронка»
 
 Договорный отчёт № 11. Статус: `BUSINESS ANALYSIS COMPLETE / SOURCE MAPPING
-COMPLETE / ARCHITECTURE DESIGNED / TECHNICAL VALIDATION PARTIALLY VALIDATED (SV-079)`.
+COMPLETE / ARCHITECTURE DESIGNED / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-079 / IMPLEMENTATION DEFERRED`.
 
-Проект находится на `STAGE_1_LOCAL_ANALYSIS`: SQL-объекты, запросы к БД и
-проверки на сервере не выполнялись.
+SQL-объекты не создаются; Stage 2 ограничен read-only source-side сверками.
 
 ## Доказательства
 
@@ -123,3 +122,17 @@ PBIT содержит девять содержательных таблиц, 33
 | VALIDATION_PENDING | Физические ключи и состояния `Reference59`, `InfoRg7006`, `Document325`, `AccumRg7575`, `AccumRg7646`, `Document329`, `Document279` не доказаны. | source catalog, SQL/M | V-01–V-08 из query review. |
 | CONFIRMED | Связи событий СПТ/ДПФУ с контрактом не нужны: исходы принадлежат клиенту когорты. | user decision 2026-07-30 | Удалить contract assignment из будущего набора. |
 | VALIDATION_PENDING | Физические ключи, состояния, факт отмены и единица события проверяются на источнике; бизнес-правила и окна уже зафиксированы. | source catalog, SQL/M/DAX | V-01, V-04, V-06–V-11. |
+
+## Результат Stage 2: SV-079
+
+Read-only bounded control на live-снимке 2026-08-11: 100 eligible contract
+rows дали 98 distinct cohort `client × start_date`; две cohort-группы содержат
+по два контракта. Это подтверждает необходимость current client-start dedupe
+и решение не назначать outcome контракту.
+
+`FF-V04/V06/V07` переиспользуют SV-072, SV-073 и SV-078 для state-events,
+`Document329.VT4352`, event keys и source-state рисков. Полный cohort scan
+не дал подтверждаемого агрегата в лимите среды; он не засчитывается как
+validation. Выбор «главного» контракта, изменение current filters или
+contract attribution не выполняются по BR-018. Новых отсутствующих источников
+не выявлено; внешние Excel-файлы не анализировались.

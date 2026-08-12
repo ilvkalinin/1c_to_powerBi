@@ -7,5 +7,5 @@ funnel_validation_2026-08-12	STAGE_2_SERVER_VALIDATION	ACTIVE	2026-08-12
 
 report_id	report_status	completion_commit
 fitness_leads_funnel	COMPLETE	SELF
-fitness_funnel	IN_PROGRESS	-
-marketing_funnel	PENDING	-
+fitness_funnel	COMPLETE	SELF
+marketing_funnel	IN_PROGRESS	-

@@ -1,6 +1,10 @@
 # Data contract: «Фитнес воронка»
 
-Статус: `DESIGNED COMPOSITE MODEL / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION PARTIALLY VALIDATED (SV-079)`.
+Статус: `DESIGNED COMPOSITE MODEL / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-079 / IMPLEMENTATION DEFERRED`.
+
+SV-079 подтверждает client-start dedupe bounded cohort, но не полный cohort
+или source-key исходов. Контракт сохраняет client-level outcome semantics;
+физические объекты не создавались.
 
 ## Объекты
 

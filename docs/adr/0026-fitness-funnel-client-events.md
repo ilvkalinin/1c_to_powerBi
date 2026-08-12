@@ -1,6 +1,6 @@
 # ADR-0026: клиентская фитнес-воронка через cohort и события исходов
 
-- Статус: `DESIGNED / TECHNICAL VALIDATION REQUIRED / IMPLEMENTATION DEFERRED`
+- Статус: `DESIGNED / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-079 / IMPLEMENTATION DEFERRED`
 - Дата: 2026-08-03
 - Отчёт: №11 «Фитнес воронка»
 
@@ -29,6 +29,11 @@ DAX считает cohort size, исходы в выбранном окне, к�
 BR-017.
 
 ## Риски
+
+SV-079 (live read-only, 2026-08-11) подтвердил на bounded cohort, что 100
+eligible contract rows дают 98 client-start строк: две cohort-группы содержат
+по два контракта. Это поддерживает выбранный client-start grain и не
+разрешает выбирать один контракт или атрибутировать ему исходы.
 
 Ключ исхода, client key, source states, связи документов и контрольные окна —
 `VALIDATION_PENDING`. Если один исход не имеет стабильного source key,

@@ -1,6 +1,6 @@
 # Source-to-target mapping: фитнес воронка
 
-Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0026 / TECHNICAL VALIDATION PARTIALLY VALIDATED (SV-079)`.
+Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0026 / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-079`.
 Production SQL не создаётся. Все физические имена и поля ниже подтверждены
 только текущими SQL/M; их типы, ключи, состояния и кардинальности имеют статус
 `VALIDATION_PENDING`.
@@ -79,3 +79,10 @@ cohort-строке.
 | VALIDATION_PENDING | статусы и отмены | Нет доказательства `Active`/`Posted`/`Marked` и ключа отмены. | V-07. |
 | CONFIRMED | Разные окна СПТ/ДПФУ | Периодные и as-of меры используют одну дату исхода, но разные DAX-фильтры. | SQL/M/DAX, user decision 2026-07-30 |
 | CONFIRMED | PII detail | ФИО и телефон нужны для работы с клиентом в detail-таблице; доступны всем пользователям с доступом к отчёту. | business description, user decisions 2026-07-30 and 2026-07-31; BR-017 |
+
+`SV-079` (live read-only, 2026-08-11) показал, что из 100 eligible contract
+rows образуются 98 distinct `client × start_date` cohort: две группы имеют
+по два контракта. Это подтверждает dedupe `client_key + membership_start_date`
+и запрет выбора «главного» контракта. Source-state и outcome controls
+переиспользуют SV-072/SV-073/SV-078; они не подтверждают contract attribution
+и не разрешают менять current filters по BR-018.
