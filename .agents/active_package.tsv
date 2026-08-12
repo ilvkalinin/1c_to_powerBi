@@ -3,9 +3,9 @@
 # the completion commit is the commit that contains this state update.
 # package_status must be ACTIVE or CLOSED; report_status must be PENDING, IN_PROGRESS, COMPLETE, or BLOCKED.
 package_id	stage	package_status	approved_at
-foundation_reports_validation_2026-08-12	STAGE_2_SERVER_VALIDATION	ACTIVE	2026-08-12
+foundation_reports_validation_2026-08-12	STAGE_2_SERVER_VALIDATION	CLOSED	2026-08-12
 
 report_id	report_status	completion_commit
 ip_training	COMPLETE	SELF
 administrator_card	COMPLETE	SELF
-client_base	IN_PROGRESS	-
+client_base	COMPLETE	SELF

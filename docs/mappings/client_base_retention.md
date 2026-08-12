@@ -1,6 +1,10 @@
 # Source-to-target mapping: retention клиентской базы
 
-Статус: `DRAFT`. Бизнес-семантика подтверждена; SQL заблокирован до проверки source statuses, физических типов и контрольных значений.
+Статус: `DRAFT / STAGE_2 FOUNDATION PARTIALLY VALIDATED — SV-069`.
+SV-069 подтверждает только общую для cohort membership-границу BR-005 и
+раздельные club/network dedupe на 2026-07-01; retention-пересечение и его
+атрибуты не выполнялись. SQL и реализация остаются отложенными до проверки
+source statuses, физических типов и контрольных значений.
 
 Предлагаемый объект: `mart.client_base_retention`.
 
