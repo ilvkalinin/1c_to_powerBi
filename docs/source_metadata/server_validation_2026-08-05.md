@@ -1961,3 +1961,23 @@ duplicates не отбрасываются: current SQL/M/DAX сохраняет
 `missing_source_objects.md` не меняется. Не добавлять фильтры `Marked`/archive,
 не превращать phone rows в technical duplicates и не менять current SQL/M/DAX
 без отдельного решения по BR-018; Stage 3 не начинается.
+
+## SV-089 — «Посещаемость клиентов с долгами»: debt-movement checkpoint
+
+Статус: `PARTIALLY VALIDATED` на переиспользуемом live read-only evidence
+2026-08-05—2026-08-11. Подготовленный SQL:
+[`visits_debt_2026-08-12.sql`](validation_sql/visits_debt_2026-08-12.sql).
+Скрипт не возвращает ПДн или raw identifiers.
+
+| Контроль | Фактический результат | Статус |
+|---|---|---|
+| DV-V01 relations | SV-002/SV-006: все 10 current-M relations существуют; `_reference141x1` — подтверждённый alias | VALIDATED by reused evidence |
+| DV-V01/V02 register fields | SV-008: `_accumrg7509._recordkind` = `numeric(1,0) NOT NULL`, наблюдаются 0/1; key и Active требуют отдельного контроля | PARTIALLY VALIDATED |
+| DV-V06 visit branch | SV-013: 3 062 623 из 3 112 779 visit movements 2026 matched `Document325`, matched rows posted/not marked; SV-017 confirms client/club/service PK-side dimensions | VALIDATED by reused evidence; не вводит новый state filter |
+| DV-V03—DV-V04/DV-V06 exact | Document branches, `client × prebooking`, text classifications и current-M row preservation имеют expected-result SQL, но не выполнены: current agent-runtime не имеет local PostgreSQL client/driver | NOT_EXECUTED; не засчитывается |
+| DV-V05/DV-V07 | Independent as-of Power BI control, repeat run и SLA evidence отсутствуют | VALIDATION_PENDING |
+
+Отсутствие local client/driver относится только к запуску новых запросов и не
+доказывает отсутствия `gymdb` relation. Реестр `missing_source_objects.md` не
+меняется. Не добавлять state filters, не исправлять inclusive year boundary и
+не менять signs/branches current M/DAX без отдельного решения по BR-018.

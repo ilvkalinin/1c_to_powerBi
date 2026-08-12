@@ -1,10 +1,25 @@
 # Требования отчёта: «Отчет по посещаемости клиентов с долгами»
 
-Статус: `BUSINESS ANALYSIS COMPLETE / TECHNICAL VALIDATION DEFERRED`.
+Статус: `BUSINESS ANALYSIS COMPLETE / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-089; Stage 3 deferred`.
 
 Договорный отчёт №22, блок «Гостеприимство». Анализ выполнен локально по
 бизнес-описанию, полному M/DAX, снимкам страницы и модели Power BI. Подключений
 к 1С/PostgreSQL, выполнения SQL и создания объектов не было.
+
+## Stage 2: SV-089 (2026-08-12)
+
+Переиспользуемое live read-only evidence подтверждает физическое существование
+всех current-M relations (SV-002/SV-006), поля `RecordKind` у
+`AccumRg7509` (SV-008), а также PK-side cardinality и состояния основной
+ветки посещений `AccumRg7575 → Document325` (SV-013/SV-017). Это не
+подтверждает business key долга, состояния `AccumRg7509`, document branches
+или DAX as-of calculation.
+
+[`SV-089 SQL`](../source_metadata/validation_sql/visits_debt_2026-08-12.sql)
+подготовлен с ожидаемыми агрегатами в `BEGIN READ ONLY`, но не выполнен: в
+текущем agent-runtime нет локального PostgreSQL-клиента/драйвера. Это не
+свидетельство отсутствия source relation. DDL/DML, Stage 3 и изменения
+текущего M/DAX не выполнялись.
 
 ## Назначение
 

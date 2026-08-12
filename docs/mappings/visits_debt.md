@@ -1,10 +1,25 @@
 # Source-to-target mapping: «Отчет по посещаемости клиентов с долгами»
 
-Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0021 / TECHNICAL VALIDATION DEFERRED`.
+Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0021 / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-089; Stage 3 deferred`.
 
 Спроектирован `mart.unconfirmed_service_debt_movement`; DDL и реализация
 отложены. Mapping описывает
 два несовместимых по grain логических набора, которые не должны смешиваться.
+
+## Stage 2 evidence — SV-089
+
+SV-002/SV-006 подтверждают физические relations current M; SV-008 —
+физический `RecordKind` `_accumrg7509`; SV-013/SV-017 — PK-side cardinality
+`_accumrg7575 → _document325` и reference dimensions основной visit-ветки.
+Следовательно, `mart.visit_client_day` остаётся допустимым reuse только для
+cohort, а `AccumRg7509` — отдельным movement fact. Уникальность ключа
+`AccumRg7509`, states, document-branches, client × prebooking consistency,
+text classifications и as-of controls остаются `VALIDATION_PENDING`.
+
+[`visits_debt_2026-08-12.sql`](../source_metadata/validation_sql/visits_debt_2026-08-12.sql)
+содержит expected-result checks, но не выполнен из-за отсутствия local
+PostgreSQL client/driver в current agent-runtime; это не доказывает отсутствия
+объекта и не меняет `missing_source_objects.md`.
 
 ## 1. Логический набор движений долга по услуге
 

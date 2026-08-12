@@ -1,6 +1,6 @@
 # ADR-0021: движения задолженности по неподтверждённым услугам
 
-- Статус: `DESIGNED / TECHNICAL VALIDATION REQUIRED / IMPLEMENTATION DEFERRED`
+- Статус: `DESIGNED / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-089 / IMPLEMENTATION DEFERRED`
 - Дата: 2026-08-03
 - Отчёт: №22 «Посещаемость клиентов с долгами»
 
@@ -29,12 +29,12 @@ detail; DAX считает остаток на начало/конец, пога
 
 ## Риски
 
-Ключ/state/sign регистра, полиморфные документы и контрольный as-of —
-`VALIDATION_PENDING`. При недоказанной общей форме client key модель не
+Физические relations, `RecordKind` и PK-side visit branch подтверждены
+SV-089 через existing source evidence; ключ/state/sign регистра, полиморфные
+документы и контрольный as-of — `VALIDATION_PENDING`. При недоказанной общей форме client key модель не
 связывает два факта скрытым many-to-many.
 
 ## Доказательства
 
 - [Требования](../reports/visits_debt.md)
 - [Mapping](../mappings/visits_debt.md)
-

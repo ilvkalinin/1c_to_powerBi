@@ -1,11 +1,24 @@
 # Разбор текущих запросов: «Отчет по посещаемости клиентов с долгами»
 
-Статус: `EVIDENCE REVIEWED / BUSINESS BLOCKERS CLOSED / TECHNICAL VALIDATION DEFERRED`.
+Статус: `EVIDENCE REVIEWED / BUSINESS BLOCKERS CLOSED / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-089`.
 
 Источники: технический DOCX SHA-256
 `8ce2ab127218be918c1ceb8ac05f2a59e308ce8e1942bff6595b90850e080d22`
 и бизнес-описание SHA-256
 `e5aa665a73da45286d4ffcbc51efa224afc36f43e52fa4b0e396a71307e31e24`.
+
+## Stage 2 checkpoint — SV-089 (2026-08-12)
+
+SV-002/SV-006 подтверждают relations current M, SV-008 — физический
+`RecordKind` `_accumrg7509`, SV-013/SV-017 — основную visit branch и её
+PK-side joins. Эти доказательства не интерпретируют знак movement, не
+назначают state filters и не подтверждают `client × prebooking` as-of key.
+
+[`visits_debt_2026-08-12.sql`](../source_metadata/validation_sql/visits_debt_2026-08-12.sql)
+содержит только aggregated `BEGIN READ ONLY` checks, но не выполнен: current
+agent-runtime не имеет local PostgreSQL client/driver. Нет нового вывода о
+missing source object; branch cardinality, states, signs, as-of controls и
+independent reconciliation остаются `VALIDATION_PENDING`.
 
 ## Power Query
 
