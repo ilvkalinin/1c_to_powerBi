@@ -1,10 +1,10 @@
 # Query review: «Воронка»
 
-Статус: `EVIDENCE REVIEWED / TECHNICAL VALIDATION PARTIALLY VALIDATED (SV-080)`.
+Статус: `EVIDENCE REVIEWED / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-080`.
 
-Рассмотрены полный текущий Power Query/SQL/DAX из `Воронка.docx` и
-бизнес-описание из `Воронка (2).docx`. Запросы не выполнялись. Все SQL ниже
-имеют статус `NOT_EXECUTED — ожидается подключение к корпоративной сети`.
+Рассмотрены текущие SQL/M/DAX и бизнес-описание. В gymdb выполнен только
+read-only bounded control `MF-V03` (`SV-080`); остальные шаблоны ниже имеют
+статус `VALIDATION_PENDING`.
 
 ## Power Query
 
@@ -47,7 +47,7 @@
 
 | Статус | Наблюдение | Влияние |
 |---|---|---|
-| `VALIDATION_PENDING` | `InfoRg6798` может содержать более одного подходящего контракта на задание. | Размножение задач и завышение контрактов/конверсии. |
+| `VALIDATION_FAILED` | `InfoRg6798` содержит более одного подходящего контракта на задание: SV-080 — 100 строк bridge, 36 заданий, 21 multi-contract task; 85 контрактов в multi-task groups, максимум 16. | Нельзя суммировать строки bridge в task-level `contract_count` или молча дедуплицировать контракт. Нужна отдельная decision до Stage 3. |
 | `VALIDATION_PENDING` | Связь task-to-contract выполняется по отображаемому `task_code`, а не по стабильному ID. | Код может быть неуникальным или изменяемым. |
 | `VALIDATION_PENDING` | Логика накопленного трафика использует разные таблицы и несколько вариантов тестовых мер. | Невозможно доказать один результат без контрольного периода. |
 | `VALIDATION_PENDING` | Задания для накопленного трафика в current DAX ограничены 2024–2025. | После 2026 требуется ручная корректировка, исторический результат может расходиться. |
@@ -70,11 +70,15 @@
 | MF-V09 | сверка Power BI | задания, абонементы, конверсия и план–факт совпадают для одного месяца/клуба/типа |
 | MF-V10 | изменения, удаления, rerun, объём и SLA | повторный запуск воспроизводим; окно исправлений и инкрементальный watermark обоснованы |
 
+`MF-V03` выполнен как `SV-080` в gymdb в read-only режиме. Это подтверждает
+не one-to-one bridge, но не изменяет текущие SQL/M/DAX по BR-018. Незапущенные
+проверки не считаются пройденными.
+
 ### SQL-шаблоны второго этапа
 
 ```sql
 -- MF-V02: ключи CRM-задачи.
--- NOT_EXECUTED — ожидается подключение к корпоративной сети
+-- VALIDATION_PENDING
 SELECT _IDRRef AS task_id, COUNT(*)
 FROM <source_schema>._Reference106
 GROUP BY _IDRRef
@@ -86,7 +90,7 @@ GROUP BY _Code
 HAVING COUNT(DISTINCT _IDRRef) > 1 OR _Code IS NULL;
 
 -- MF-V03: число подходящих контрактов на задачу.
--- NOT_EXECUTED — ожидается подключение к корпоративной сети
+-- VALIDATION_PENDING; bounded control executed as SV-080 and failed one-to-one
 SELECT r._Fld6799RRef AS task_id,
        COUNT(DISTINCT r._Fld6800_RRRef) AS contract_count
 FROM <source_schema>._InfoRg6798 r
@@ -104,7 +108,7 @@ GROUP BY r._Fld6799RRef
 HAVING COUNT(DISTINCT r._Fld6800_RRRef) > 1;
 
 -- MF-V04: после dimension joins не должно быть больше одной строки на задачу.
--- NOT_EXECUTED — ожидается подключение к корпоративной сети
+-- VALIDATION_PENDING
 SELECT COUNT(*) AS rows_after_joins,
        COUNT(DISTINCT t._IDRRef) AS distinct_tasks
 FROM <source_schema>._Reference106 t

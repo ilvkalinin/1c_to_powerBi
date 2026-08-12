@@ -1,6 +1,6 @@
 # Source-to-target mapping: маркетинговая воронка
 
-Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE REUSE CONFIRMED / TECHNICAL VALIDATION PARTIALLY VALIDATED (SV-080)`.
+Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE REUSE CONFIRMED / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-080`.
 
 Гранулярность одной строки: одно CRM-задание `Reference106.ID` в воронке
 «Продажа клубной карты». Логический ключ: `task_id`; физический тип и
@@ -64,8 +64,18 @@
 
 | Статус | Элемент | Риск / причина | Проверка / следующее действие |
 |---|---|---|---|
-| `VALIDATION_PENDING` | `task → contract` | возможен bridge `1:N`; число контрактов и конверсия могут быть размножены | MF-V03, MF-V04 |
+| `VALIDATION_FAILED` | `task → contract` | SV-080: 100 строк bridge соответствуют 36 заданиям; у 21 задания более одного контракта. | Не суммировать bridge в `contract_count` и не дедуплицировать молча; отдельное решение до Stage 3. |
 | `VALIDATION_PENDING` | task code в bridge | current SQL соединяет отображаемые коды | MF-V02; перейти на ID только после доказательства physical field |
 | `VALIDATION_PENDING` | когорты накопленного трафика | current DAX использует годовые таблицы и несколько промежуточных мер | MF-V08, MF-V09 |
 | `VALIDATION_PENDING` | сеть/кластер | общий mapping клуба подтверждён; физические поля и покрытие клубов ещё не проверены | MF-V01 |
 | `NOT_APPLICABLE` | внешние планы и watermark | Excel-планы остаются в Power BI | не включать в PostgreSQL SQL по решению пользователя 2026-07-30 |
+
+## Evidence Stage 2: SV-080
+
+Контроль выполнен в gymdb только на чтение после текущих фильтров
+`InfoRg6798`: 100 строк bridge дали 36 CRM-заданий; 21 задание имеет более
+одного контракта. В группах с несколькими заданиями — 85 контрактов, максимум
+16 заданий на один контракт. Поэтому one-to-one связь не подтверждена, а
+`contract_count` остаётся `VALIDATION_FAILED`. Это не изменяет current
+SQL/M/DAX по BR-018; проверенный task core по-прежнему повторно используется
+из `mart.fitness_leads_funnel_task` (SV-078).
