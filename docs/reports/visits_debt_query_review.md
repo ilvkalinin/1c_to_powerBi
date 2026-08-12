@@ -1,6 +1,6 @@
 # Разбор текущих запросов: «Отчет по посещаемости клиентов с долгами»
 
-Статус: `EVIDENCE REVIEWED / BUSINESS BLOCKERS CLOSED / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-089`.
+Статус: `EVIDENCE REVIEWED / BUSINESS BLOCKERS CLOSED / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-089`.
 
 Источники: технический DOCX SHA-256
 `8ce2ab127218be918c1ceb8ac05f2a59e308ce8e1942bff6595b90850e080d22`
@@ -64,7 +64,8 @@ PostgreSQL должен подготовить минимальные движе
 
 ## План read-only валидации
 
-Все проверки: `NOT_EXECUTED — ожидается подключение к корпоративной сети`.
+Новые проверки: `VALIDATION_PENDING`; переиспользуемые source-side controls
+зафиксированы в SV-089.
 
 | ID | Проверка | Ожидаемый результат для прохождения | Статус |
 |---|---|---|---|

@@ -1,6 +1,6 @@
 # ADR-0021: движения задолженности по неподтверждённым услугам
 
-- Статус: `DESIGNED / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-089 / IMPLEMENTATION DEFERRED`
+- Статус: `DESIGNED / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-089 / IMPLEMENTATION DEFERRED`
 - Дата: 2026-08-03
 - Отчёт: №22 «Посещаемость клиентов с долгами»
 

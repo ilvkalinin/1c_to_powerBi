@@ -1,6 +1,6 @@
 # Data contract: «Посещаемость клиентов с долгами»
 
-Статус: `DESIGNED COMPOSITE MODEL / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-089`.
+Статус: `DESIGNED COMPOSITE MODEL / IMPLEMENTATION DEFERRED / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-089`.
 
 SV-089 переиспользует physical evidence для relation, `RecordKind` и основной
 visit branch. Ключ движения долга, states/sign, полиморфные document branches,

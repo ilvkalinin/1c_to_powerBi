@@ -1,6 +1,6 @@
 # Source-to-target mapping: «Отчет по посещаемости клиентов с долгами»
 
-Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0021 / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-089; Stage 3 deferred`.
+Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0021 / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-089 / IMPLEMENTATION DEFERRED`.
 
 Спроектирован `mart.unconfirmed_service_debt_movement`; DDL и реализация
 отложены. Mapping описывает
@@ -100,8 +100,8 @@ PostgreSQL client/driver в current agent-runtime; это не доказыва�
 | CONFIRMED | Семантика графика «Количество посещений» | единица — уникальный клиент с посещением, а не число входов. | client-day grain и `DISTINCTCOUNT(client_key)`; решение пользователя 2026-07-31. |
 | CONFIRMED | Доставка PII | код и ФИО клиента допускаются в report-specific detail для всех, у кого уже есть доступ к данному Power BI-отчёту. | решение пользователя 2026-07-31; физический механизм ограничения выбирается на реализации. |
 | CONFIRMED | Частота обновления | ежедневная; Power BI доступен до 08:30 МСК, витрина завершается раньше. | BR-014 и решение пользователя 2026-07-31; производительность проверить DV-V07. |
-| VALIDATION_PENDING | ключ и state `AccumRg7509` | типы, `Active`, уникальность и знаки не проверены. | DV-V01–DV-V02; `NOT_EXECUTED — ожидается подключение к корпоративной сети`. |
-| VALIDATION_PENDING | документные ветки | join к `Document329/279/313` может терять или размножать строки. | DV-V03; `NOT_EXECUTED — ожидается подключение к корпоративной сети`. |
-| VALIDATION_PENDING | as-of остаток | не доказано контрольными датами, что формула закрывает каждую ПЗ. | DV-V04–DV-V05; `NOT_EXECUTED — ожидается подключение к корпоративной сети`. |
-| VALIDATION_PENDING | классификация и состояние посещения | `LIKE` и отсутствие status-фильтров не дают стабильную cohort. | DV-V02, DV-V06; `NOT_EXECUTED — ожидается подключение к корпоративной сети`. |
-| VALIDATION_PENDING | объём и SLA | без объёма нельзя выбрать физический объект или refresh. | DV-V07; `NOT_EXECUTED — ожидается подключение к корпоративной сети`. |
+| VALIDATION_PENDING | ключ и state `AccumRg7509` | `RecordKind` физически подтверждён, но `Active`, uniqueness и знаки не проверены. | DV-V01–DV-V02; новый control не выполнен без local PostgreSQL client/driver. |
+| VALIDATION_PENDING | документные ветки | join к `Document329/279/313` может терять или размножать строки. | DV-V03; новый control не выполнен без local PostgreSQL client/driver. |
+| VALIDATION_PENDING | as-of остаток | не доказано контрольными датами, что формула закрывает каждую ПЗ. | DV-V04–DV-V05; independent control отсутствует. |
+| VALIDATION_PENDING | классификация и состояние посещения | `LIKE` и отсутствие status-фильтров не дают стабильную cohort. | DV-V02, DV-V06; новый control не выполнен без local PostgreSQL client/driver. |
+| VALIDATION_PENDING | объём и SLA | без объёма нельзя выбрать физический объект или refresh. | DV-V07; independent performance evidence отсутствует. |

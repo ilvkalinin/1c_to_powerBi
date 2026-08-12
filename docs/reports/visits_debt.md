@@ -1,10 +1,11 @@
 # Требования отчёта: «Отчет по посещаемости клиентов с долгами»
 
-Статус: `BUSINESS ANALYSIS COMPLETE / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-089; Stage 3 deferred`.
+Статус: `BUSINESS ANALYSIS COMPLETE / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-089 / IMPLEMENTATION DEFERRED`.
 
 Договорный отчёт №22, блок «Гостеприимство». Анализ выполнен локально по
-бизнес-описанию, полному M/DAX, снимкам страницы и модели Power BI. Подключений
-к 1С/PostgreSQL, выполнения SQL и создания объектов не было.
+бизнес-описанию, current M/DAX и снимкам модели. Новые SQL-контроли не
+выполнялись; переиспользуемое live read-only evidence зафиксировано в SV-089.
+Объекты не создавались.
 
 ## Stage 2: SV-089 (2026-08-12)
 
