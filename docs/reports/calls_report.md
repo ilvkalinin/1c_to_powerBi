@@ -1,11 +1,27 @@
 # Требования отчёта: «Отчет по обращениям»
 
-Статус: `BUSINESS ANALYSIS COMPLETE / TECHNICAL VALIDATION DEFERRED`.
+Статус: `BUSINESS ANALYSIS COMPLETE / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-088; Stage 3 deferred`.
 
 Анализ выполнен локально по двум переданным документам: описанию страниц
 `Отчет по обращениям.docx` и выгрузке текущих Power Query / DAX
 `отчетпообращениям.docx`. Подключений к 1С/PostgreSQL и выполнения SQL не
 было.
+
+## Stage 2: SV-088 (2026-08-12)
+
+SV-024—SV-034 уже дают live read-only evidence для общей CRM-основы:
+`Reference67.ID` — physical PK; task/manager и task dimensions не размножают
+interaction на PK-side; phone rows имеют самостоятельный technical key и
+могут быть множественными. Для текущего отчёта это подтверждает core-grain и
+запрещает превращать phone rows в технические дубли. Кардинальность
+`Reference137` (HTML), first later non-feedback event, comment-update ties,
+точные шесть тем и visit denominator остаются `VALIDATION_PENDING`.
+
+Подготовленный [`SV-088 SQL`](../source_metadata/validation_sql/calls_report_2026-08-12.sql)
+содержит только агрегированные проверки в `BEGIN READ ONLY`; в текущем
+agent-runtime нет локального PostgreSQL-клиента/драйвера, поэтому он ещё не
+выполнен и не даёт ни нового результата, ни вывода об отсутствии relation.
+Stage 3, DDL/DML и изменения current SQL/M/DAX не выполнялись.
 
 ## Назначение
 

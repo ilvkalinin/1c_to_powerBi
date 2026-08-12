@@ -1,6 +1,6 @@
 # Разбор текущих запросов: «Отчет по обращениям»
 
-Статус: `BUSINESS REVIEW COMPLETE / TECHNICAL VALIDATION PENDING`.
+Статус: `BUSINESS REVIEW COMPLETE / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-088`.
 
 Источники:
 
@@ -9,6 +9,22 @@
 
 Ни один SQL-запрос не запускался. Все SQL ниже имеют статус
 `NOT_EXECUTED — ожидается подключение к корпоративной сети`.
+
+## Stage 2 checkpoint — SV-088 (2026-08-12)
+
+Для центрального CRM-path переиспользованы live read-only результаты
+SV-024—SV-034: `_reference67._idrref` — physical PK; task и task dimensions
+на PK-side не размножают interaction; `InfoRg7146` имеет отдельный technical
+key и 3 103 interactions с 2–3 phone rows в 2026. Это подтверждает, что
+current direct phone join нельзя схлопывать как технический duplicate.
+
+Новый SQL-контроль [`calls_report_2026-08-12.sql`](../source_metadata/validation_sql/calls_report_2026-08-12.sql)
+подготовлен с expected result и `BEGIN READ ONLY`, но не исполнен: в текущем
+agent-runtime отсутствует локальный PostgreSQL-клиент/драйвер. HTML cardinality,
+first non-feedback follow-up, comment ties, exact filter scopes, visit
+denominator и независимая Power BI reconciliation остаются
+`VALIDATION_PENDING`; отсутствие выполнения не доказывает отсутствие source
+objects.
 
 ## Наборы Power Query
 

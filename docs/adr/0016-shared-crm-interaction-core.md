@@ -1,6 +1,6 @@
 # ADR-0016: общий факт CRM-взаимодействий
 
-- Статус: `DESIGNED / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-084 / IMPLEMENTATION DEFERRED`
+- Статус: `DESIGNED / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-084, SV-087, SV-088 / IMPLEMENTATION DEFERRED`
 - Дата: 2026-08-03
 - Отчёты: №12 «Загрузка ОП», №20 «Новички и гостевые визиты», №21 «Отчёт по обращениям»
 
@@ -56,8 +56,9 @@ DAX считает медиану, нормативную загрузку, до
 
 SV-026 подтверждает 3 103 interaction с 2–3 phone rows за 2026 год; это
 отдельные звонки в рамках одного взаимодействия и report-view сохраняет их
-отдельными строками. Кадровая кардинальность, states и контрольные значения —
-`VALIDATION_PENDING`.
+отдельными строками. SV-088 применяет это evidence к feedback-view; HTML
+cardinality, first follow-up/comment tie-break, states и контрольные значения
+остаются `VALIDATION_PENDING`.
 
 ## Доказательства
 

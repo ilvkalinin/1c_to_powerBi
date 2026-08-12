@@ -1,6 +1,12 @@
 # Data contract: «Отчёт по обращениям»
 
-Статус: `DESIGNED / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION REQUIRED`.
+Статус: `DESIGNED / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-088`.
+
+SV-088 переиспользует SV-024—SV-034 для CRM core: ключ interaction,
+PK-side task dimensions и phone-row grain подтверждены source-side. Не
+подтверждены HTML aggregation, exact feedback filters, first follow-up,
+comment-update ties, visit denominator, rerun/SLA и independent Power BI
+control values. Физические объекты не создавались.
 
 ## Факт обратной связи
 
@@ -35,4 +41,3 @@ DAX считает distinct `comment_text × client_code`, медиану отв
 Приёмка: уникальный interaction, нормализованные phone/comment rows,
 правильный earliest followup/comment, nonnegative resolution/response,
 reconciliation visit count, отсутствие M2M, rerun и SLA.
-

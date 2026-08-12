@@ -1940,3 +1940,24 @@ SV-006 уже подтверждает физическое существова
 duplicates не отбрасываются: current SQL/M/DAX сохраняется по BR-018. Любое
 правило выбора гостевого события, статуса или outcome требует отдельного
 решения перед Stage 3.
+
+## SV-088 — «Отчёт по обращениям»: CRM feedback checkpoint
+
+Статус: `PARTIALLY VALIDATED` на переиспользуемом live read-only evidence
+2026-08-05—2026-08-11. Подготовленный SQL:
+[`calls_report_2026-08-12.sql`](validation_sql/calls_report_2026-08-12.sql).
+Результаты и сам скрипт не содержат ПДн или raw identifiers.
+
+| Контроль | Фактический результат | Статус |
+|---|---|---|
+| CR-V01 | Central CRM relations и зависимости mapping уже покрыты SV-006, SV-024—SV-025; alias клиента — `_reference141x1` | REUSED evidence |
+| CR-V02/CR-V04 | `_reference67._idrref` — PK; task/manager и task dimensions не размножают interaction на PK-side (SV-024, SV-027, SV-029) | VALIDATED by reused evidence |
+| CR-V03 phone | SV-026: 857 459 phone rows, 854 340 interactions; 3 103 interactions имеют 2–3 phone rows, orphan = 0 | VALIDATED by reused evidence; phone rows сохраняются по BR-018 |
+| CR-V03 HTML, CR-V06—CR-V07, CR-V09 | SQL с заранее указанными expected results сохранён, но не выполнен: в current agent-runtime нет local PostgreSQL client/driver | NOT_EXECUTED; не засчитывается |
+| CR-V05/CR-V08/CR-V10—CR-V11 | Exact topic/filter values, visit denominator, independent Power BI reconciliation, rerun и SLA не имеют independent control | VALIDATION_PENDING |
+
+Отсутствие local client/driver относится только к выполнению новой сверки и не
+доказывает недоступность `gymdb` или отсутствие relation. Реестр
+`missing_source_objects.md` не меняется. Не добавлять фильтры `Marked`/archive,
+не превращать phone rows в technical duplicates и не менять current SQL/M/DAX
+без отдельного решения по BR-018; Stage 3 не начинается.

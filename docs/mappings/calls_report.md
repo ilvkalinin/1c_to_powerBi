@@ -1,10 +1,26 @@
 # Source-to-target mapping: «Отчет по обращениям»
 
-Статус: `BUSINESS MAPPING COMPLETE / TECHNICAL VALIDATION DEFERRED`.
+Статус: `BUSINESS MAPPING COMPLETE / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-088; Stage 3 deferred`.
 
 Основание — переданные описание, Power Query и DAX. SQL и объект витрины не
 создаются. В этом mapping `CONFIRMED` означает подтверждённую текущую
 логику, но не техническую валидность 1С-источников.
+
+## Stage 2 evidence — SV-088
+
+Переиспользованы live read-only результаты SV-024—SV-034: physical PK
+`_reference67._idrref`, many-to-one joins задачи и её dimension, а также
+phone-row technical key и измеренная множественность. Поэтому current direct
+phone join сохраняется по BR-018 и решению 2026-08-05; это не основание
+схлопывать звонки до interaction. Проверки `_reference137`, точного
+first-followup/comment tie-break, six-topic/speed scopes, visit event grain,
+states и независимых control values остаются `VALIDATION_PENDING`.
+
+[`calls_report_2026-08-12.sql`](../source_metadata/validation_sql/calls_report_2026-08-12.sql)
+зафиксировал ожидаемые агрегированные проверки, но не выполнен: текущий
+agent-runtime не содержит локального PostgreSQL-клиента/драйвера. Это не
+доказательство отсутствия физического источника и не меняет реестр missing
+objects.
 
 ## Reuse review
 
@@ -90,8 +106,9 @@
 
 ## Блокеры и риски
 
-1. `VALIDATION_PENDING — implementation blocker`: техническая кардинальность `Reference67 → InfoRg7146` /
-   `Reference137`; без неё строка interaction не доказана.
+1. `PARTIALLY VALIDATED`: `Reference67 → InfoRg7146` имеет подтверждённую
+   source-side множественность; `Reference67 → Reference137` и его
+   deterministic aggregation остаются implementation blocker.
 2. `CONFIRMED`: для отработки current «звонок» — любое последующее
    не-feedback CRM-взаимодействие, не только телефонный звонок (решение
    пользователя 2026-07-30).
