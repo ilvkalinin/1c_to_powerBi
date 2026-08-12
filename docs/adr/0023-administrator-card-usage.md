@@ -1,6 +1,6 @@
 # ADR-0023: использования карты администратора
 
-- Статус: `DESIGNED / TECHNICAL VALIDATION REQUIRED / IMPLEMENTATION DEFERRED`
+- Статус: `DESIGNED / PHYSICAL SOURCE AVAILABILITY VALIDATED — SV-002 / IMPLEMENTATION DEFERRED`
 - Дата: 2026-08-03
 - Отчёт: №25 «Карта администратора»
 
@@ -30,12 +30,12 @@ Power Query нормализует малый Excel и append; DAX считае�
 
 ## Риски
 
-Соответствие кодов клубам, тип успешности и контрольные суммы —
-`VALIDATION_PENDING`. Схема Excel проверяется локально при получении файла и
-не является серверным блокером PostgreSQL-объекта.
+SV-002 подтвердил существование `public._inforg5836`. Соответствие кодов
+клубам, тип успешности и контрольные суммы — `VALIDATION_PENDING` для Stage 3.
+Схема Excel не анализируется по границе проекта и не является серверным
+блокером PostgreSQL-объекта.
 
 ## Доказательства
 
 - [Требования](../reports/administrator_card.md)
 - [Mapping](../mappings/administrator_card.md)
-

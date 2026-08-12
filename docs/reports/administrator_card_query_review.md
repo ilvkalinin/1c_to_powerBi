@@ -1,6 +1,6 @@
 # Разбор текущего запроса: «Карта администратора»
 
-Статус: `EVIDENCE REVIEWED / BUSINESS LOGIC COMPLETE`.
+Статус: `EVIDENCE REVIEWED / BUSINESS LOGIC COMPLETE / PHYSICAL SOURCE AVAILABILITY VALIDATED — SV-002`.
 
 Источники:
 
@@ -50,6 +50,10 @@ Power Query:
 > `(Period, Terminal, Client, EventID)`.
 
 Наличие соответствующего составного индекса подтверждено metadata; уникальность должна быть проверена на источнике.
+
+SV-002 дополнительно подтвердил наличие `public._inforg5836` в read-only
+каталоге gymdb. Это не является выполнением data controls и не доказывает
+гранулярность событий.
 
 ## Критические наблюдения
 

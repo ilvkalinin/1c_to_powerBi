@@ -1,10 +1,14 @@
 # Source-to-target mapping: карта администратора
 
-Статус: `BUSINESS MAPPING CONFIRMED / ARCHITECTURE DESIGNED — ADR-0023 / TECHNICAL VERIFICATION PENDING`.
+Статус: `BUSINESS MAPPING CONFIRMED / ARCHITECTURE DESIGNED — ADR-0023 / PHYSICAL SOURCE AVAILABILITY VALIDATED — SV-002 / STAGE 3 CONTROLS PENDING`.
 
 Mapping описывает одну семантическую таблицу Power BI из
 `mart.administrator_card_gymmy_daily` и внешнего журнала администраторов.
 PostgreSQL SQL не создаётся.
+
+SV-002 подтвердил наличие `public._inforg5836`; отсутствующий физический
+источник не выявлен. Это не подтверждает типы, ключ, значения успеха или
+mapping карт в клубы.
 
 ## Гранулярность
 

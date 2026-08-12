@@ -7,5 +7,5 @@ foundation_reports_validation_2026-08-12	STAGE_2_SERVER_VALIDATION	ACTIVE	2026-0
 
 report_id	report_status	completion_commit
 ip_training	COMPLETE	SELF
-administrator_card	IN_PROGRESS	-
-client_base	PENDING	-
+administrator_card	COMPLETE	SELF
+client_base	IN_PROGRESS	-
