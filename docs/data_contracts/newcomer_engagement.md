@@ -1,6 +1,11 @@
 # Data contract: «Вовлечение новичков»
 
-Статус: `DESIGNED / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION PARTIALLY VALIDATED (SV-075)`.
+Статус: `DESIGNED / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-075 / IMPLEMENTATION DEFERRED`.
+
+SV-075 подтвердил техническую уникальность строк посещений, но не подтвердил
+однозначную связь с контрактом и единственный валидный интервал заморозки.
+До реализации contract сохраняет текущую source-логику; объектов PostgreSQL
+не создавалось.
 
 ## Общие параметры
 

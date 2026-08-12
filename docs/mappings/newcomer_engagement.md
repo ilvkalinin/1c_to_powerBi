@@ -1,7 +1,9 @@
 # Source-to-target mapping: `newcomer_engagement_milestone`
 
-Статус: `BUSINESS MAPPING COMPLETE / TECHNICAL VALIDATION PARTIALLY VALIDATED (SV-075)`.
-SQL и физические объекты пока не создаются.
+Статус: `BUSINESS MAPPING COMPLETE / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-075`.
+SV-075 подтвердил технический ключ visit-строк, но выявил orphan/mismatch
+связи с контрактом и невалидные/повторные интервалы заморозки. SQL и
+физические объекты не создаются.
 
 Гранулярность одной строки:
 
@@ -71,6 +73,14 @@ SQL и физические объекты пока не создаются.
 | `AccumRg7478`, `InfoRg5859` | движения и интервалы заморозок | CONFIRMED source / join pending | metadata и текущий SQL |
 | `InfoRg6291`, `Reference225`, `Reference101` | периоды трудоустройства | CONFIRMED source / historical rule pending | metadata, текущий SQL, решение пользователя |
 | внешний Excel плана | доля плана по клубу и году | CONFIRMED external source | текущий M; в PostgreSQL-витрину не входит |
+
+`SV-075` (live read-only, 2026-08-11): в 2026 `AccumRg7575` содержит
+3 180 564 строк, равных числу технических ключей, но 240 290 строк имеют
+orphan-контракт и 146 127 — клиента, отличающегося от владельца контракта.
+В `InfoRg5859` обнаружены 1 602 769 интервалов, включая 71 обратный и
+12 274 точных повторных. Поэтому current join `contract + client` и
+текущая обработка заморозок сохраняются как доказанная legacy-логика;
+их замена требует отдельного решения по BR-018.
 
 ## Reuse review
 

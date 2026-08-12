@@ -1,6 +1,6 @@
 # ADR-0008: контрольные точки вовлечения новичков
 
-- Статус: `DESIGNED / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION REQUIRED`
+- Статус: `DESIGNED / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-075 / IMPLEMENTATION DEFERRED`
 - Дата: 2026-07-28
 - Отчёт: № 2 «Вовлечение новичков»
 
@@ -192,6 +192,11 @@ Power BI:
   всего удерживаемого горизонта.
 
 ## Блокеры перед SQL
+
+SV-075 (live read-only, 2026-08-11) подтвердил техническую уникальность
+3 180 564 строк `AccumRg7575`, но выявил 240 290 orphan-контрактов,
+146 127 несовпадений клиента владельцу и 71 обратный/12 274 повторных
+интервала `InfoRg5859`. Эти наблюдения не меняют current SQL/M/DAX по BR-018.
 
 1. Тип и кардинальность полиморфной ссылки
    `AccumRg7575.Fld7578 → Reference59.ID`.
