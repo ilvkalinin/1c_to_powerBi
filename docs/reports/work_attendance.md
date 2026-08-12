@@ -1,10 +1,11 @@
 # Требования отчёта: «Работа с посещаемостью»
 
-Статус: `BUSINESS LOGIC COMPLETE / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-065, SV-067; Stage 3 deferred`.
+Статус: `BUSINESS LOGIC COMPLETE / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-065, SV-067 / IMPLEMENTATION DEFERRED`.
 
 Договорной отчёт №24, блок «Гостеприимство». Анализ выполнен локально по
-описанию отчёта, Power Query, DAX и изображениям модели/страниц Power BI.
-Подключений к 1С/PostgreSQL, SQL-запросов и создания объектов не было.
+описанию отчёта, current M/DAX и изображениям модели/страниц Power BI.
+Новые controls не выполнялись; completed read-only controls зафиксированы в
+SV-065/SV-067. Объекты не создавались.
 
 ## Stage 2: SV-065 and SV-067
 

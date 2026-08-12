@@ -1,6 +1,6 @@
 # Разбор текущих запросов: «Работа с посещаемостью»
 
-Статус: `EVIDENCE REVIEWED / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED`.
+Статус: `EVIDENCE REVIEWED / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-065, SV-067`.
 
 ## Пакетный audit 2026-08-11
 

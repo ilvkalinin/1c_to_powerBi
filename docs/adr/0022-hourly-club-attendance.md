@@ -1,6 +1,6 @@
 # ADR-0022: почасовая посещаемость клуба
 
-- Статус: `DESIGNED / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-065, SV-067 / IMPLEMENTATION DEFERRED`
+- Статус: `DESIGNED / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-065, SV-067 / IMPLEMENTATION DEFERRED`
 - Дата: 2026-08-03
 - Отчёты: №24 «Работа с посещаемостью», №26 «Титульный лист»
 

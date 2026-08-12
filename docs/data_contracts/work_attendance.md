@@ -1,6 +1,6 @@
 # Data contract: «Работа с посещаемостью»
 
-Статус: `DESIGNED / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED / IMPLEMENTATION DEFERRED`.
+Статус: `DESIGNED / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-065, SV-067 / IMPLEMENTATION DEFERRED`.
 
 | Параметр | Значение | Статус |
 |---|---|---|
