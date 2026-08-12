@@ -1,6 +1,6 @@
 # ADR-0003: Общий компактный слой посещений
 
-- Статус: `DESIGNED / TECHNICAL VALIDATION REQUIRED / IMPLEMENTATION DEFERRED`
+- Статус: `DESIGNED / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-070, SV-071 / IMPLEMENTATION DEFERRED`
 - Дата: 2026-07-24
 - Отчёты-основания: «Посещения Физкульт», «Посещения Пушкинский»
 

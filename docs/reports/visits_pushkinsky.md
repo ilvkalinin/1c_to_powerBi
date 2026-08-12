@@ -1,6 +1,6 @@
 # Требования отчёта: «Посещения Пушкинский»
 
-Статус: `BUSINESS LOGIC COMPLETE / TECHNICAL VALIDATION PARTIALLY VALIDATED (SV-071)`. Получены бизнес-описание, SQL/M, DAX и два визуала. Все бизнес-решения подтверждены. Реальные таблицы и DB-тесты на этом этапе не создаются.
+Статус: `BUSINESS LOGIC COMPLETE / STAGE_2 SOURCE VALIDATION VALIDATED — SV-071 / IMPLEMENTATION DEFERRED`. Реальные таблицы не создаются.
 
 ## Подтверждённые факты
 

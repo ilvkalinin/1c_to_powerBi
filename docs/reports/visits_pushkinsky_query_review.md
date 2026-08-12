@@ -1,6 +1,6 @@
 # Разбор текущих запросов: «Посещения Пушкинский»
 
-Статус: `EVIDENCE AND MAIN DAX REVIEWED`.
+Статус: `EVIDENCE REVIEWED / STAGE_2 SOURCE VALIDATION VALIDATED — SV-071`.
 
 Источник: `docs/source_reports/visits_pushkinsky/Посещений Пушкинский.docx`, SHA-256 `7adf4a45451deed56b6a16a7064a8198444578bebcaade77ed2efffe17e9a799`.
 

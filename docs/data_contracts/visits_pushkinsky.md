@@ -1,6 +1,6 @@
 # Data contract: «Посещения Пушкинский»
 
-Статус: `DESIGNED COMPOSITE MODEL / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION PARTIALLY VALIDATED (SV-071)`.
+Статус: `DESIGNED COMPOSITE MODEL / IMPLEMENTATION DEFERRED / STAGE_2 SOURCE VALIDATION VALIDATED — SV-071`.
 
 REUSE `mart.visit_client_day` и `mart.club_day_metrics` из ADR-0003. Отдельного
 факта Пушкинского нет.

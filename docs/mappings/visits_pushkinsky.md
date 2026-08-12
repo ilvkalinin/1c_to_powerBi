@@ -1,6 +1,6 @@
 # Source-to-target mapping: «Посещения Пушкинский»
 
-Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0003 / TECHNICAL VALIDATION PARTIALLY VALIDATED (SV-071)`. Grain, формулы, состав КБ, категории и единое правило снимка 00:00 подтверждены.
+Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0003 / STAGE_2 SOURCE VALIDATION VALIDATED — SV-071 / IMPLEMENTATION DEFERRED`. Grain, формулы, состав КБ, категории и единое правило снимка 00:00 подтверждены.
 
 ## Логические наборы
 
