@@ -12,7 +12,8 @@ controls остаются перед реализацией.
 | Core | `mart.crm_interaction` | ADR-0016 |
 | Report view | `mart.v_sales_interaction` | ADR-0016 |
 | Таблица Power BI | `Взаимодействия с клиентами` | CONFIRMED |
-| Grain / ключ | одно `Reference67.ID` / `interaction_id` | CONFIRMED business; technical validation pending |
+| Core grain / key | одно `Reference67.ID` / `interaction_id` | CONFIRMED business |
+| Report-view grain / key | одна phone row `InfoRg7146`; без неё — одно interaction; `(interaction_id, phone technical key)` либо технический признак отсутствия phone row | CONFIRMED current / SV-026 |
 | Даты | активная `interaction_date`; неактивная `planned_date` | DESIGNED |
 | Обновление | `08,10,12,14,16,18,20,22` | CONFIRMED |
 | Power BI | Import | DESIGNED |
@@ -49,6 +50,6 @@ PostgreSQL нормализует телефонию и кадровый отб�
 manager-day, нормативные минуты, загрузку и backlog. PII доступна пользователям
 отчёта по BR-017.
 
-Приёмка: уникальный `interaction_id`, deterministic phone row, отсутствие
-размножения кадровыми интервалами, корректные статусы/воронки, обе роли даты,
-контрольные значения и каждый из восьми refresh.
+Приёмка: уникальный `interaction_id` в core, сохранение всех phone rows в
+report-view, отсутствие размножения кадровыми интервалами, корректные
+статусы/воронки, обе роли даты, контрольные значения и каждый из восьми refresh.
