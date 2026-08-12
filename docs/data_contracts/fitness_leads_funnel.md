@@ -1,8 +1,9 @@
 # Data contract: «Воронка. Лиды. Фитнес»
 
-Статус: `DESIGNED / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION REQUIRED`.
-Контракт проектный: физические типы 1С, ключи и source states ещё не
-подтверждены read-only проверками.
+Статус: `DESIGNED / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-078 / IMPLEMENTATION DEFERRED`.
+SV-078 подтвердил bounded task-to-service join без размножения строк, но не
+полный task-scan, физические типы, client-code attribution или source states.
+Контракт проектный; физических объектов не создавалось.
 
 ## Общие параметры
 

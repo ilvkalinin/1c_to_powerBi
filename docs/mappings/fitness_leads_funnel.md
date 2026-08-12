@@ -1,6 +1,6 @@
 # Source-to-target mapping: воронка лиды фитнес
 
-Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE ACCEPTED / TECHNICAL VALIDATION PARTIALLY VALIDATED (SV-078)`.
+Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE ACCEPTED / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-078`.
 Outcome-атрибуция подтверждена calculated columns текущей модели; физические
 ключи, типы, состояния и кардинальности остаются `VALIDATION_PENDING`.
 
@@ -72,3 +72,10 @@ Outcome-атрибуция подтверждена calculated columns теку�
 | VALIDATION_PENDING | сеть | Общий mapping клуба подтверждён; физические поля и покрытие клубов ещё не проверены. | V-13. |
 | UNKNOWN | PII-потребитель | SQL извлекает ФИО и телефон, визуалы их не показывают. | Подтвердить потребителя или исключить из будущего контракта. |
 | VALIDATION_PENDING | ключи, NULL, состояния, timestamps, объём | Физическая metadata и правила 1С не проверены. | V-01–V-07, V-10–V-13. |
+
+`SV-078` (live read-only, 2026-08-11) подтвердил bounded current task-to-
+service join: 100 задач → 100 строк, без join excess; у 82 задач отсутствует
+raw client-day match. Это не меняет stage-based семантику `Есть запись`.
+SV-072 дополнительно подтверждает технический ключ `InfoRg7006` и фиксирует
+legacy one-to-many `Document329.VT4352`. Полный task-scan, service fallback,
+стабильность client-code и source states остаются `VALIDATION_PENDING`.

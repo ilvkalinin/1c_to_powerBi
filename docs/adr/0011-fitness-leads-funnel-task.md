@@ -1,6 +1,6 @@
 # ADR-0011: task-level факт «Воронка. Лиды. Фитнес»
 
-- Статус: `ACCEPTED / TECHNICAL VALIDATION REQUIRED / IMPLEMENTATION DEFERRED`
+- Статус: `ACCEPTED / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-078 / IMPLEMENTATION DEFERRED`
 - Дата: 2026-07-29
 - Отчёт: №5 «Воронка лиды фитнес»
 
@@ -107,6 +107,12 @@ DAX: `DISTINCTCOUNT(task_id)`, фильтр-зависимые проценты,
   контракте.
 
 ## Риски и условия пересмотра
+
+SV-078 (live read-only, 2026-08-11) подтвердил на bounded cohort 100 задач
+без размножения current task-to-service join; 82 задачи не имели raw
+client-day match. SV-072 подтверждает технический ключ `InfoRg7006`, но
+фиксирует legacy one-to-many `Document329.VT4352`. Это evidence не меняет
+current client-code/date attribution или task-grain по BR-018.
 
 1. `Reference141X1.Code` может быть неуникален, изменяем или null; тогда
    client-code attribution нельзя переносить без отдельного решения.

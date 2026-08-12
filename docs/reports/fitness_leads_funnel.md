@@ -1,9 +1,9 @@
 # Требования отчёта: «Воронка. Лиды. Фитнес»
 
-Договорный отчёт № 5. Статус: `DESIGNED / IMPLEMENTATION DEFERRED /
-TECHNICAL VALIDATION REQUIRED`.
-Production SQL, объекты PostgreSQL и проверки на БД не создаются: проект
-находится на `STAGE_1_LOCAL_ANALYSIS`.
+Договорный отчёт № 5. Статус: `DESIGNED / STAGE_2 SOURCE VALIDATION
+PARTIALLY VALIDATED — SV-078 / IMPLEMENTATION DEFERRED`.
+Production SQL и объекты PostgreSQL не создаются; Stage 2 ограничен read-only
+source-side сверками.
 
 ## Доказательства
 
@@ -167,7 +167,18 @@ bridge после разбора потребителей.
 
 ## Открытые технические валидации
 
-Полный непроведённый пакет с ожидаемыми результатами —
+Полный пакет сверок и ожидаемые результаты —
 [`fitness_leads_funnel_query_review`](fitness_leads_funnel_query_review.md).
-Все проверки имеют статус `VALIDATION_PENDING`; SQL в них
-`NOT_EXECUTED — ожидается подключение к корпоративной сети`.
+
+## Результат Stage 2: SV-078
+
+Read-only `FL-V05` выполнен на live-снимке 2026-08-11 для bounded current
+cohort: 100 задач 2026 дали 100 joined-строк, `join_excess = 0`; 82 задачи не
+имеют raw client-day match. Это совместимо с stage-based DAX-флагом
+`Есть запись`, но не доказывает полный task-scan или outcome attribution.
+
+`FL-V06/V07` переиспользуют SV-072: технический ключ `InfoRg7006` уникален,
+а `Document329.VT4352` создаёт legacy one-to-many. Current client-code/date
+attribution, stage-based `Есть запись` и многократная атрибуция пересекающихся
+45-дневных окон сохраняются по BR-018. Новых физически отсутствующих
+источников не выявлено; Excel не анализировался.
