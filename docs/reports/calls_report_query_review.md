@@ -1,14 +1,16 @@
 # Разбор текущих запросов: «Отчет по обращениям»
 
-Статус: `BUSINESS REVIEW COMPLETE / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-088`.
+Статус: `BUSINESS REVIEW COMPLETE / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-088`.
 
 Источники:
 
 - `Отчет по обращениям.docx`, SHA-1 `bf981ed05fc109a6581c9b1f81c2434c3d332bf4` — описание четырёх страниц;
 - `отчетпообращениям.docx`, SHA-1 `9c084cf330d196edb9ec2906e70604fd285b0bff` — Power Query и DAX.
 
-Ни один SQL-запрос не запускался. Все SQL ниже имеют статус
-`NOT_EXECUTED — ожидается подключение к корпоративной сети`.
+Новые SQL-контроли ниже не запускались в текущем agent-runtime без локального
+PostgreSQL-клиента/драйвера. Переиспользуемые live read-only результаты
+SV-024—SV-034 имеют собственное доказательство; незапущенные controls имеют
+статус `VALIDATION_PENDING` и не считаются пройденными.
 
 ## Stage 2 checkpoint — SV-088 (2026-08-12)
 

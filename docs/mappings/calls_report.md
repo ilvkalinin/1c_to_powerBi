@@ -1,6 +1,6 @@
 # Source-to-target mapping: «Отчет по обращениям»
 
-Статус: `BUSINESS MAPPING COMPLETE / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-088; Stage 3 deferred`.
+Статус: `BUSINESS MAPPING COMPLETE / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-088 / IMPLEMENTATION DEFERRED`.
 
 Основание — переданные описание, Power Query и DAX. SQL и объект витрины не
 создаются. В этом mapping `CONFIRMED` означает подтверждённую текущую

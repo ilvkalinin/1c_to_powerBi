@@ -1,6 +1,6 @@
 # Требования отчёта: «Отчет по обращениям»
 
-Статус: `BUSINESS ANALYSIS COMPLETE / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-088; Stage 3 deferred`.
+Статус: `BUSINESS ANALYSIS COMPLETE / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-088 / IMPLEMENTATION DEFERRED`.
 
 Анализ выполнен локально по двум переданным документам: описанию страниц
 `Отчет по обращениям.docx` и выгрузке текущих Power Query / DAX
@@ -18,9 +18,9 @@ interaction на PK-side; phone rows имеют самостоятельный t
 точные шесть тем и visit denominator остаются `VALIDATION_PENDING`.
 
 Подготовленный [`SV-088 SQL`](../source_metadata/validation_sql/calls_report_2026-08-12.sql)
-содержит только агрегированные проверки в `BEGIN READ ONLY`; в текущем
-agent-runtime нет локального PostgreSQL-клиента/драйвера, поэтому он ещё не
-выполнен и не даёт ни нового результата, ни вывода об отсутствии relation.
+содержит только агрегированные проверки в `BEGIN READ ONLY`; новые проверки
+не выполнены в текущем agent-runtime без локального PostgreSQL-клиента/драйвера
+и не дают ни нового результата, ни вывода об отсутствии relation.
 Stage 3, DDL/DML и изменения current SQL/M/DAX не выполнялись.
 
 ## Назначение
