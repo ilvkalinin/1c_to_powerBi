@@ -17,8 +17,8 @@ renewal_management	COMPLETE	SELF
 administrator_bookings	COMPLETE	SELF
 newcomer_guest_visits	COMPLETE	SELF
 calls_report	COMPLETE	SELF
-visits_debt	IN_PROGRESS
-administrator_card	PENDING
+visits_debt	COMPLETE	SELF
+administrator_card	IN_PROGRESS
 marketing_funnel	PENDING
 client_base	PENDING
 membership_board	PENDING

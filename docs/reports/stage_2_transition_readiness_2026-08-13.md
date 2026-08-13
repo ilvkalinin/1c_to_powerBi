@@ -55,7 +55,7 @@ scope. Это не отменяет report-specific controls и не меняе�
 | 19 | Записи администраторов | PARTIALLY VALIDATED SV-086 | C | class-C review: сохранять document grain и current кадровое правило; SQL ждёт controls записи × движения, не автоматический historical match |
 | 20 | Новички и гостевые визиты | PARTIALLY VALIDATED SV-087 | C | class-C review: сохранять current `Distinct`/окна и отсутствие status-filter; SQL ждёт controls ключей, states и outcomes |
 | 21 | Отчёт по обращениям | PARTIALLY VALIDATED SV-088 | C | class-C review: сохранять current phone multiplicity, grouping и follow-up; SQL ждёт controls HTML/cardinality, не новую агрегацию |
-| 22 | Посещаемость клиентов с долгами | PARTIALLY VALIDATED SV-089 | C | подтвердить key/state `AccumRg7509`, document branches и as-of control values |
+| 22 | Посещаемость клиентов с долгами | PARTIALLY VALIDATED SV-089 | C | class-C review: сохранять current cohort, as-of границы и sign-case; SQL ждёт controls ключа/states/веток, не новую формулу |
 | 23 | Посещения Пушкинский | PARTIALLY VALIDATED SV-071 | B | class-B учёт закрыт: общий visit/day layer сохраняет snapshot, categories и approved DRC exclusion |
 | 24 | Работа с посещаемостью | PARTIALLY VALIDATED SV-065, SV-067 | B | class-B учёт закрыт: product plan сохраняет daily client-base и documented historical-performance control |
 | 25 | Карта администратора | PARTIALLY VALIDATED SV-002 | C | выполнить Stage-3 controls: Gymmy success, 12 club codes, sums before/after aggregation, rerun |
