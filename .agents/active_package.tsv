@@ -15,8 +15,8 @@ promo_codes	COMPLETE	SELF
 children_package_sales	COMPLETE	SELF
 renewal_management	COMPLETE	SELF
 administrator_bookings	COMPLETE	SELF
-newcomer_guest_visits	IN_PROGRESS
-calls_report	PENDING
+newcomer_guest_visits	COMPLETE	SELF
+calls_report	IN_PROGRESS
 visits_debt	PENDING
 administrator_card	PENDING
 marketing_funnel	PENDING
