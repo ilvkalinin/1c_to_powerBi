@@ -2,9 +2,10 @@
 
 Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE REUSE CONFIRMED / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-080`.
 
-Гранулярность одной строки: одно CRM-задание `Reference106.ID` в воронке
-«Продажа клубной карты». Логический ключ: `task_id`; физический тип и
-уникальность `VALIDATION_PENDING`.
+CRM core имеет grain одно задание `Reference106.ID`. Для метрики
+«Абонементы факт» используется отдельная логическая проекция: одна
+квалифицированная связь `task_id × contract_id`. Её состав задаёт BR-020;
+physical key и уникальность task code остаются `VALIDATION_PENDING`.
 
 Целевой набор повторно использует `mart.fitness_leads_funnel_task`; ниже
 зафиксирована только проекция, нужная маркетинговому отчёту. Планы остаются
@@ -30,13 +31,13 @@
 | `first_interaction_type_raw` | исходный тип первого взаимодействия | `Reference106.Fld8712` | mapping фиксированных GUID | text | да | task | CONFIRMED current | SQL/M | MF-V05 |
 | `first_interaction_type` | тип для визуала | `first_interaction_type_raw`, `parent_campaign_name` | M-классификация: выделенные типы; `Промо* → Мероприятия`; остальное → Прочие | text | нет | task | CONFIRMED current | M | MF-V05 |
 | `traffic_direction` | маркетинг/продажи и входящий/исходящий накопленный трафик | `first_interaction_type` | исходящий: звонок, чат, регистрация рекомендации; остальные — входящий | text | нет | task | CONFIRMED current DAX | DAX | MF-V08 |
-| `contract_id`, `contract_name` | атрибутированный контракт | `InfoRg6798.Fld6800_RRRef → Reference59.ID/Description` | `_Fld6802=true`, исключить клип-карту и бесплатный тип оплаты | UNKNOWN, text | да | task | CONFIRMED current / cardinality pending | SQL/M | MF-V03, MF-V06 |
-| `activation_date` | дата активации контракта | `Reference59.Fld670` | `::date`; current history с 2024-01-01 | date | да | task | CONFIRMED current | SQL/M | MF-V01, MF-V06 |
+| `contract_id`, `contract_name` | атрибутированный контракт | `InfoRg6798.Fld6800_RRRef → Reference59.ID/Description` | `_Fld6802=true`, исключить клип-карту и бесплатный тип оплаты; сохранить каждую qualified `task × contract` связь | UNKNOWN, text | да | task × contract | CONFIRMED — BR-020 / physical cardinality pending | user 2026-08-13, SQL/M | MF-V03, MF-V06 |
+| `activation_date` | дата активации контракта | `Reference59.Fld670` | `::date >= 2024-01-01` и `::date >= task_created_at::date` | date | да | task × contract | CONFIRMED — BR-020; first condition current SQL | SQL/M + user 2026-08-13 | MF-V01, MF-V06 |
 | `contract_age_group` | возрастная группа покупки | `Reference59.Fld696`, `Reference163.Fld1741` | current CASE: детские секции / взрослые / дети / юниоры; fallback взрослые | text | да | task | CONFIRMED current | SQL/M | MF-V05, MF-V07 |
 | `contract_payment_type` | тип оплаты покупки | `Reference59.Fld699` | GUID: рекарринг, иначе предоплата | text | да | task | CONFIRMED current | SQL/M | MF-V05, MF-V07 |
 | `contract_duration_group` | длительность покупки | `Reference59.Fld693` | дни: `001–007`, `008–030`, `031–180`, `181–364`, `365+` | text | да | task | CONFIRMED current | SQL/M | MF-V07 |
 | `task_count` | вклад в число заданий | `task_id` | `1`; мера — distinct task key и удаляет contract-фильтры | smallint | нет | task | CONFIRMED current | DAX | MF-V02, MF-V09 |
-| `contract_count` | вклад в число абонементов | `contract_id` | current bridge is 1:N; не реализовывать как строковую сумму без отдельного решения | smallint | UNKNOWN | task | VALIDATION_FAILED | SV-080 | MF-V03, MF-V09 |
+| `contract_count` | вклад в число абонементов | qualified `task_id × contract_id` | `1` для каждой связи, прошедшей BR-020; не применять global `DISTINCT(contract_id)` | smallint | нет | task × contract | CONFIRMED — user decision | BR-020 | MF-V03G, MF-V03H, MF-V09 |
 
 ## Подтверждённые источники
 
@@ -64,7 +65,7 @@
 
 | Статус | Элемент | Риск / причина | Проверка / следующее действие |
 |---|---|---|---|
-| `VALIDATION_FAILED` | `task → contract` | SV-080: 100 строк bridge соответствуют 36 заданиям; у 21 задания более одного контракта. | Не суммировать bridge в `contract_count` и не дедуплицировать молча; отдельное решение до Stage 3. |
+| `VALIDATED business rule / VALIDATION_PENDING physical` | `task → contract` | SV-080: 100 строк bridge соответствуют 36 заданиям; у 21 задания более одного контракта. | BR-020 разрешает считать каждую qualifying `task × contract` связь. До Stage 3 подтвердить physical key/code join и сохранение строк; не добавлять global dedup. |
 | `VALIDATION_PENDING` | task code в bridge | current SQL соединяет отображаемые коды | MF-V02; перейти на ID только после доказательства physical field |
 | `VALIDATION_PENDING` | когорты накопленного трафика | current DAX использует годовые таблицы и несколько промежуточных мер | MF-V08, MF-V09 |
 | `VALIDATION_PENDING` | сеть/кластер | общий mapping клуба подтверждён; физические поля и покрытие клубов ещё не проверены | MF-V01 |
@@ -77,9 +78,13 @@
 одного контракта. В заданиях с несколькими контрактами — 85 связей
 `task × contract`,
 максимум 16 контрактов на одно задание. Поэтому one-to-one связь не подтверждена, а
-`contract_count` остаётся `VALIDATION_FAILED`. Это не изменяет current
-SQL/M/DAX по BR-018; проверенный task core по-прежнему повторно используется
-из `mart.fitness_leads_funnel_task` (SV-078).
+BR-020 задаёт `contract_count = 1` на квалифицированной связи; проверенный task
+core по-прежнему повторно используется из `mart.fitness_leads_funnel_task`
+(SV-078). MF-V03G исключил ошибочную пару `0000302905`: 2 технические связи,
+0 после дат 2024-01-01 и создания задания. MF-V03H измерил временно
+квалифицированный source bridge после current contract filters: 199 450 rows,
+184 206 tasks, 12 537 multi-contract tasks, 199 093 contracts и 334
+multi-task contracts. Это observation без dedup, не итоговая отчётная мера.
 
 MF-V03 измерял только направление `task → contract`. Отдельный MF-V03F,
 выполненный в `BEGIN READ ONLY` 2026-08-13 по запросу пользователя, подтвердил

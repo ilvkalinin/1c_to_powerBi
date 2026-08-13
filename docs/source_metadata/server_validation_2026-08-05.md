@@ -1810,7 +1810,10 @@ result не выбирает «главный» контракт: contract detai
 | MF-V03 | Bounded current bridge: 100 rows → 36 tasks; 21 tasks имеют >1 contract, 85 task–contract connections в этих task groups, max=16 contracts per task | VALIDATION_FAILED для one-to-one task→contract |
 | MF-V02/MF-V04 | Task grain и CRM join controls переиспользуют SV-078 | PARTIALLY VALIDATED; task core остаётся `REUSE` |
 
-Нельзя суммировать contract rows как task-level `contract_count` или silently deduplicate bridge. Current SQL/M/DAX воспроизводится по BR-018; правило агрегации нескольких контрактов требует отдельного решения перед Stage 3.
+Первичный SV-080 не измерял temporal eligibility и не выбирал правило
+агрегации. Пользователь 2026-08-13 утвердил BR-020: каждая связь считается
+только при `activation_date >= task_created_at` и `activation_date >=
+2024-01-01`, без global dedup контракта. Это явное исключение из BR-018.
 
 MF-V03E выполнен 2026-08-13 по прямому запросу пользователя в `BEGIN READ
 ONLY` под `gymdb_readonly`; он вернул только коды, без ПДн. Пример одной
@@ -1822,6 +1825,16 @@ MF-V03 не проверял обратное направление `contract �
 контролем и исправлена. По прямому запросу пользователя отдельный MF-V03F
 выполнен 2026-08-13 в `BEGIN READ ONLY` под `gymdb_readonly`: абонемент
 `0000302905` связан с заданиями `008259075` и `008854940`.
+
+MF-V03G/MF-V03H выполнены 2026-08-13 в `BEGIN READ ONLY` под
+`gymdb_readonly` после явного решения пользователя. MF-V03G подтвердил
+исключение ошибочного примера по времени: 2 known links, 0 temporally eligible
+links.
+MF-V03H после обеих временных границ наблюдал 199 450 bridge rows, 184 206
+tasks, 12 537 multi-contract tasks, 199 093 contracts и 334 multi-task
+contracts после current contract filters. Это не reconciliation с Power BI и
+не итоговая отчётная мера; exact SQL и expected results сохранены в
+`marketing_funnel_2026-08-11.sql`.
 
 ## SV-081 — «Управление продлением»: current-contract cohort и продление
 

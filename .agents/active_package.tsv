@@ -19,6 +19,6 @@ newcomer_guest_visits	COMPLETE	SELF
 calls_report	COMPLETE	SELF
 visits_debt	COMPLETE	SELF
 administrator_card	COMPLETE	SELF
-marketing_funnel	IN_PROGRESS
-client_base	PENDING
+marketing_funnel	COMPLETE	SELF
+client_base	IN_PROGRESS
 membership_board	PENDING

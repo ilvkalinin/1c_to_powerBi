@@ -60,7 +60,7 @@ scope. Это не отменяет report-specific controls и не меняе�
 | 24 | Работа с посещаемостью | PARTIALLY VALIDATED SV-065, SV-067 | B | class-B учёт закрыт: product plan сохраняет daily client-base и documented historical-performance control |
 | 25 | Карта администратора | PARTIALLY VALIDATED SV-002 | C | class-C review: сохранять 12 карт, два направления и `SUM(usage_count)`; Gymmy SQL ждёт controls ключа/успеха/карта→клуб |
 | 26 | Титульный лист | COMPLETE SV-062—SV-064 | A | отдельный Stage-3 пакет реализации |
-| 27 | Маркетинговая воронка | PARTIALLY VALIDATED SV-080 | C | решение по aggregation/deduplication before implementation |
+| 27 | Маркетинговая воронка | PARTIALLY VALIDATED SV-080 | C | class-C review: BR-020 считает каждую qualified `task × contract` связь; SQL ждёт physical code/join/state controls |
 | 28 | Клиентская база | PARTIALLY VALIDATED SV-069 | C | states/types/keys и control values for both snapshot dates |
 | 29 | Выручка ДПФУ | COMPLETE SV-054—SV-057 | A | отдельный Stage-3 пакет реализации общего ancillary product |
 | 30 | Членство для правления | PARTIALLY VALIDATED SV-083 | C | inherited receipt key/states plus board KPI reconciliation and non-additive aggregation controls |
