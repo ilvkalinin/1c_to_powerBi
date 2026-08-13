@@ -6,7 +6,7 @@ report_id	stage	last_checkpoint	checkpoint_commit	selection_state	new_trigger_or
 kpi_fitness	STAGE_2_SERVER_VALIDATION	SV-054—SV-061	HISTORICAL_PRE_LEDGER	CLOSED_CHECKPOINT	New source-side control or explicit approved methodology change only
 newcomer_engagement	STAGE_2_SERVER_VALIDATION	SV-075, SV-092	SELF	CLOSED_CHECKPOINT	Class-B accounting closed 2026-08-13; no further Stage-2 rerun. New independent control value, source change or explicit approved methodology change only
 newcomer_engagement_second_month	STAGE_2_SERVER_VALIDATION	SV-076	20d9ee4	CLOSED_CHECKPOINT	New independent control value or source change only
-preparation_renewal	STAGE_2_SERVER_VALIDATION	SV-077	80d52f9	CLOSED_CHECKPOINT	New independent control value or source change only
+preparation_renewal	STAGE_2_SERVER_VALIDATION	SV-077	SELF	CLOSED_CHECKPOINT	Class-B accounting closed 2026-08-13; no further Stage-2 rerun. New independent control value, source change or explicit approved methodology change only
 fitness_leads_funnel	STAGE_2_SERVER_VALIDATION	SV-078	3f1c821	CLOSED_CHECKPOINT	New attribution/state control with independently recorded expectation only
 employee_workload	STAGE_2_SERVER_VALIDATION	SV-074	HISTORICAL_PRE_LEDGER	CLOSED_CHECKPOINT	New source-side control or external dependency decision only
 prebooking_control	STAGE_2_SERVER_VALIDATION	SV-072	HISTORICAL_PRE_LEDGER	CLOSED_CHECKPOINT	New independent control value or source change only
