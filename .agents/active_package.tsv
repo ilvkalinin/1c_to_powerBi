@@ -13,8 +13,8 @@ lessons_schedule	COMPLETE	SELF
 membership_receipts	COMPLETE	SELF
 promo_codes	COMPLETE	SELF
 children_package_sales	COMPLETE	SELF
-renewal_management	IN_PROGRESS
-administrator_bookings	PENDING
+renewal_management	COMPLETE	SELF
+administrator_bookings	IN_PROGRESS
 newcomer_guest_visits	PENDING
 calls_report	PENDING
 visits_debt	PENDING
