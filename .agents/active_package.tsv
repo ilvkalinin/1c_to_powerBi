@@ -3,7 +3,7 @@
 # the completion commit is the commit that contains this state update.
 # package_status must be ACTIVE or CLOSED; report_status must be PENDING, IN_PROGRESS, COMPLETE, or BLOCKED.
 package_id	stage	package_status	approved_at
-work_attendance_class_b_accounting_2026-08-13	STAGE_2_SERVER_VALIDATION	CLOSED	2026-08-13
+revenue_group_summary_class_b_accounting_2026-08-13	STAGE_2_SERVER_VALIDATION	CLOSED	2026-08-13
 
 report_id	report_status	completion_commit
-work_attendance	COMPLETE	SELF
+revenue_group_summary	COMPLETE	SELF

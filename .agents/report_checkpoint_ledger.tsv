@@ -33,4 +33,4 @@ marketing_funnel	STAGE_2_SERVER_VALIDATION	SV-080	dbe037d	CLOSED_CHECKPOINT	New 
 client_base	STAGE_2_SERVER_VALIDATION	SV-069	8e69b49	CLOSED_CHECKPOINT	New retention control or source change only
 dpfu_revenue	STAGE_2_SERVER_VALIDATION	SV-054—SV-057	HISTORICAL_PRE_LEDGER	CLOSED_CHECKPOINT	New source-side control or methodology approval only
 membership_board	STAGE_2_SERVER_VALIDATION	SV-083	HISTORICAL_PRE_LEDGER	CLOSED_CHECKPOINT	New independent reconciliation or source change only
-revenue_group_summary	STAGE_2_SERVER_VALIDATION	SV-035—SV-050, SV-066	192c7c2	CLOSED_CHECKPOINT	New source-side control or external dependency decision only
+revenue_group_summary	STAGE_2_SERVER_VALIDATION	SV-035—SV-050, SV-066	192c7c2	CLOSED_CHECKPOINT	Class-B accounting closed 2026-08-13; no further Stage-2 rerun. New independent control value, source change or explicit approved methodology change only

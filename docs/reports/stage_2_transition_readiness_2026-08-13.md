@@ -64,7 +64,7 @@ scope. Это не отменяет report-specific controls и не меняе�
 | 28 | Клиентская база | PARTIALLY VALIDATED SV-069 | C | states/types/keys и control values for both snapshot dates |
 | 29 | Выручка ДПФУ | COMPLETE SV-054—SV-057 | A | отдельный Stage-3 пакет реализации общего ancillary product |
 | 30 | Членство для правления | PARTIALLY VALIDATED SV-083 | C | inherited receipt key/states plus board KPI reconciliation and non-additive aggregation controls |
-| 31 | Свод выручка ГК | PARTIALLY VALIDATED SV-035—SV-050, SV-066 | B | реализовать только validated internal PostgreSQL branches; external Excel branches остаются в Power BI |
+| 31 | Свод выручка ГК | PARTIALLY VALIDATED SV-035—SV-050, SV-066 | B | class-B учёт закрыт: product plan реализует только validated internal PostgreSQL branches; external Excel branches остаются в Power BI |
 
 ## Очередность после разрешения Stage 3
 
