@@ -1807,10 +1807,15 @@ result не выбирает «главный» контракт: contract detai
 
 | Контроль | Фактический результат | Статус |
 |---|---|---|
-| MF-V03 | Bounded current bridge: 100 rows → 36 tasks; 21 tasks имеют >1 contract, 85 contracts в multi-task groups, max=16 | VALIDATION_FAILED для one-to-one task→contract |
+| MF-V03 | Bounded current bridge: 100 rows → 36 tasks; 21 tasks имеют >1 contract, 85 contracts в multi-contract task groups, max=16 contracts per task | VALIDATION_FAILED для one-to-one task→contract |
 | MF-V02/MF-V04 | Task grain и CRM join controls переиспользуют SV-078 | PARTIALLY VALIDATED; task core остаётся `REUSE` |
 
 Нельзя суммировать contract rows как task-level `contract_count` или silently deduplicate bridge. Current SQL/M/DAX воспроизводится по BR-018; правило агрегации нескольких контрактов требует отдельного решения перед Stage 3.
+
+MF-V03E выполнен 2026-08-13 по прямому запросу пользователя в `BEGIN READ
+ONLY` под `gymdb_readonly`; он вернул только коды, без ПДн. Пример одной
+многозначной связи: задание `000144962` связано с абонементами `СФ00118931`,
+`СФ00118985`, `СФ00118986`, `СФ00118987`.
 
 ## SV-081 — «Управление продлением»: current-contract cohort и продление
 
