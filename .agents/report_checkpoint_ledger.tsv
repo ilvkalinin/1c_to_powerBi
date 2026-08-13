@@ -7,7 +7,7 @@ kpi_fitness	STAGE_2_SERVER_VALIDATION	SV-054—SV-061	HISTORICAL_PRE_LEDGER	CLOS
 newcomer_engagement	STAGE_2_SERVER_VALIDATION	SV-075, SV-092	SELF	CLOSED_CHECKPOINT	Class-B accounting closed 2026-08-13; no further Stage-2 rerun. New independent control value, source change or explicit approved methodology change only
 newcomer_engagement_second_month	STAGE_2_SERVER_VALIDATION	SV-076	20d9ee4	CLOSED_CHECKPOINT	New independent control value or source change only
 preparation_renewal	STAGE_2_SERVER_VALIDATION	SV-077	SELF	CLOSED_CHECKPOINT	Class-B accounting closed 2026-08-13; no further Stage-2 rerun. New independent control value, source change or explicit approved methodology change only
-fitness_leads_funnel	STAGE_2_SERVER_VALIDATION	SV-078	3f1c821	CLOSED_CHECKPOINT	New attribution/state control with independently recorded expectation only
+fitness_leads_funnel	STAGE_2_SERVER_VALIDATION	SV-078	SELF	CLOSED_CHECKPOINT	Class-B accounting closed 2026-08-13; no further Stage-2 rerun. New independent control value, source change or explicit approved methodology change only
 employee_workload	STAGE_2_SERVER_VALIDATION	SV-074	HISTORICAL_PRE_LEDGER	CLOSED_CHECKPOINT	New source-side control or external dependency decision only
 prebooking_control	STAGE_2_SERVER_VALIDATION	SV-072	HISTORICAL_PRE_LEDGER	CLOSED_CHECKPOINT	New independent control value or source change only
 ip_training	STAGE_2_SERVER_VALIDATION	SV-058, SV-068	2670463	CLOSED_CHECKPOINT	New service-link control or source change only
