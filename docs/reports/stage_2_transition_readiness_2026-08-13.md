@@ -1,6 +1,6 @@
 # Readiness перехода из Stage 2 в Stage 3 — 2026-08-13
 
-Статус: `DECISION_REQUIRED — отдельное разрешение на STAGE_3_IMPLEMENTATION`.
+Статус: `PROGRAM ENTRY CONFIRMED 2026-08-13 / PRODUCT ADMISSION PENDING`.
 
 ## Граница решения
 
@@ -18,6 +18,19 @@ scope. Это не отменяет report-specific controls и не меняе�
 2. `PRODUCT ADMISSION` — разрешить конкретный продукт после выполнения его
    обязательных предреализационных условий. Строка класса `B` или `C` не
    становится SQL-задачей автоматически.
+
+## Подтверждённый PROGRAM ENTRY
+
+`CONFIRMED` 2026-08-13: пользователь разрешил самостоятельный пакет
+`STAGE_3_PROGRAM_ENTRY — Выручка ДПФУ`.
+
+Разрешение открывает только Stage 3 для отчёта класса A №29 и подготовку
+`PRODUCT ADMISSION` общего факта `mart.ancillary_revenue_movement`. Оно не
+является admission физического продукта, не разрешает DDL/DML и не переводит
+в Stage 3 остальные отчёты или остальные факты составной модели ДПФУ.
+Перед любой опасной операцией SQL показывается пользователю. Подробная
+граница и safeguards зафиксированы в
+[`dpfu_revenue_stage_3_program_entry.md`](dpfu_revenue_stage_3_program_entry.md).
 
 ## Классы готовности
 
