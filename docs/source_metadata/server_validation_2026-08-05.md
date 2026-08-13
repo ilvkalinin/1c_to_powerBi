@@ -1981,3 +1981,23 @@ duplicates не отбрасываются: current SQL/M/DAX сохраняет
 доказывает отсутствия `gymdb` relation. Реестр `missing_source_objects.md` не
 меняется. Не добавлять state filters, не исправлять inclusive year boundary и
 не менять signs/branches current M/DAX без отдельного решения по BR-018.
+
+## SV-090 — поставка ранее отсутствовавших relations
+
+Статус: `VALIDATED` на live `gymdb` в `BEGIN READ ONLY` 2026-08-13. Точный
+запрос с заранее записанным ожидаемым результатом:
+[`source_restore_availability_2026-08-13.sql`](validation_sql/source_restore_availability_2026-08-13.sql).
+Роль — `gymdb_readonly`; `transaction_read_only = on`. Запрос не возвращал
+ПДн или raw business identifiers.
+
+| Контроль | Ожидание | Фактический результат | Статус |
+|---|---|---|---|
+| SR-V01 | `gymdb`, `gymdb_readonly`, read-only transaction | `gymdb`; `gymdb_readonly`; `on` | VALIDATED |
+| SR-V02 | три relation существуют в `public` как ordinary table и имеют колонки | `_document294`: `r`, 28 колонок; `_document275`: `r`, 22; `_document298_vt3596`: `r`, 7 | VALIDATED |
+| SR-V03 | строки ранее найденной ветки `Document275` связываются с восстановленным документом либо ноль фиксируется как расхождение | 1 576 строк `AccumRg7575` типа `Document275`; 1 576 matched `_document275` | VALIDATED |
+
+SV-090 снимает только физическую недоступность трёх relations. Он не
+подтверждает новые связи, кассира, правило возврата, states или результат
+отчётов. В частности, `_document294` не добавляется в текущую логику «Выручки
+рецепции», а `_document275` не меняет включение возвратов без отдельной
+точечной проверки и решения по BR-018.

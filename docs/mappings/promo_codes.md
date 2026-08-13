@@ -1,6 +1,6 @@
 # Source-to-target mapping: применения промокодов
 
-Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0018 / TECHNICAL VALIDATION BLOCKED — source registry; Stage 3 deferred`.
+Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0018 / TECHNICAL VALIDATION PENDING — SV-090 availability; Stage 3 deferred`.
 Спроектирован `mart.promo_application`; SQL не создаётся.
 
 ## Гранулярность
@@ -66,7 +66,7 @@ SQL этих полей нет, поэтому уникальность и да�
 | Статус | Элемент | Риск / причина | Следующее действие |
 |---|---|---|---|
 | VALIDATION_PENDING | источник ключа и grain | current SQL агрегирует и не возвращает `Recorder`/`LineNo` | read-only проверка PC-V01 |
-| BLOCKED | связь с маркетинговой акцией `Document298.VT3596` | фактическая БД `gymdb` не содержит `_document298_vt3596`; заменять или исключать связь без решения нельзя | ожидается, что системный администратор предоставит/восстановит источник; затем повторить metadata-проверку и PC-V02 |
+| VALIDATION_PENDING | связь с маркетинговой акцией `Document298.VT3596` | SV-090 подтвердил `_document298_vt3596`; кардинальность и сохранение строк текущего join не проверены | выполнить PC-V02 и PC-V04 в отдельном read-only пакете |
 | VALIDATION_PENDING | joins и суммы скидки | возможна one-to-many связь строк документов | read-only проверка PC-V02 после снятия блокера источника |
 | VALIDATION_PENDING | состояния и сторно | current query не доказывает включаемые статусы | read-only проверка PC-V03 |
 | VALIDATION_PENDING | текстовые категории/дни | переименование и 100+ дней меняют DAX-результат | read-only проверки PC-V06–PC-V07 |

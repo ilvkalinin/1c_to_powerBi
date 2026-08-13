@@ -31,7 +31,7 @@ data contract оформлены по 31 из 31 отчёта. Реализов�
 | 11 | Фитнес | Фитнес воронка | COMPLETE — `fitness_funnel` | COMPLETE — `fitness_funnel` | DESIGNED — ADR-0026 | COMPLETE — `fitness_funnel` | DEFERRED | PARTIALLY VALIDATED — SV-079; Stage 3 deferred |
 | 12 | Продажи | Загрузка ОП | COMPLETE | COMPLETE — `sales_interactions` | DESIGNED — ADR-0016 | COMPLETE — `sales_interactions` | DEFERRED | PARTIALLY VALIDATED — SV-084; Stage 3 deferred |
 | 13 | Продажи | Отчет по поступлениям | COMPLETE — `membership_receipts` | COMPLETE — `membership_receipts` | DESIGNED — ADR-0017 | COMPLETE — `membership_receipts` | DEFERRED | PARTIALLY VALIDATED — SV-083; Stage 3 deferred |
-| 14 | Продажи | Отчет по промокодам | COMPLETE — `promo_codes` | COMPLETE — `promo_codes` | DESIGNED — ADR-0018 | COMPLETE — `promo_codes` | DEFERRED | BLOCKED — source registry; Stage 3 deferred |
+| 14 | Продажи | Отчет по промокодам | COMPLETE — `promo_codes` | COMPLETE — `promo_codes` | DESIGNED — ADR-0018 | COMPLETE — `promo_codes` | DEFERRED | VALIDATION_PENDING — SV-090 availability; PC-V01—PC-V07 pending; Stage 3 deferred |
 | 15 | Продажи | Продажа детских пакетов | COMPLETE | COMPLETE — `children_package_sales` | DESIGNED — ADR-0019 | COMPLETE — `children_package_sales` | DEFERRED | PARTIALLY VALIDATED — SV-085; Stage 3 deferred |
 | 16 | Продажи | Управление продлением | COMPLETE | COMPLETE | PROPOSED — ADR-0007 | COMPLETE — `renewal_management` | DEFERRED | PARTIALLY VALIDATED — SV-081; Stage 3 deferred |
 | 17 | Продажи | Отчет по %Renew | COMPLETE | COMPLETE | PROPOSED — ADR-0006 | COMPLETE — `renew_contract_usage` | DEFERRED | PARTIALLY VALIDATED — SV-082; Stage 3 deferred |
