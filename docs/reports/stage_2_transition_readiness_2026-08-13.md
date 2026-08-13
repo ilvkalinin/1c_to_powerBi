@@ -48,7 +48,7 @@ scope. Это не отменяет report-specific controls и не меняе�
 | 12 | Загрузка ОП | PARTIALLY VALIDATED SV-084 | B | class-B учёт закрыт: product plan сохраняет interaction/phone grain, role dates и внешние нормативы |
 | 13 | Отчёт по поступлениям | PARTIALLY VALIDATED SV-083 | C | class-C review: product plan сохраняет analytics_sequence, predecessor `MIN(ID)` и current state/sign cases; physical key remains control |
 | 14 | Отчёт по промокодам | PARTIALLY VALIDATED SV-090, SV-091 | C | class-C review: product plan сохраняет legacy MAX/SUM/Table.Distinct и DAX fallback; без silent document-line/action/gift dedup |
-| 15 | Продажа детских пакетов | PARTIALLY VALIDATED SV-085 | C | доказать line-to-line price/product, return sign и source states |
+| 15 | Продажа детских пакетов | PARTIALLY VALIDATED SV-085 | C | class-C review: no user decision; SQL remains blocked pending line-to-line price/product, return-sign and source-state control |
 | 16 | Управление продлением | PARTIALLY VALIDATED SV-081 | C | закрыть old/new contract tie-break, states/returns, contract code, rating/tenure/interaction cardinality и price/sign |
 | 17 | Отчёт по %Renew | PARTIALLY VALIDATED SV-082 | B | class-B учёт закрыт: product plan сохраняет current window/`COUNT(*)`, `Fld693` и closed-month finalization |
 | 18 | Выручка рецепции | COMPLETE SV-050—SV-053 | A | отдельный Stage-3 пакет; `_document294` не добавлять без решения о смене атрибуции |
