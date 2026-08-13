@@ -39,7 +39,7 @@ scope. Это не отменяет report-specific controls и не меняе�
 | 3 | Вовлечение новичков Второй месяц | PARTIALLY VALIDATED SV-076 | C | class-C review: нового решения нет — product plan сохраняет legacy `RANK()` ties и source-row identity; без silent dedup |
 | 4 | Подготовка к продлению | PARTIALLY VALIDATED SV-077 | B | class-B учёт закрыт: product plan сохраняет current pair/границы, technical keys и запрет silent state/dedup changes |
 | 5 | Воронка лиды фитнес | PARTIALLY VALIDATED SV-078 | B | class-B учёт закрыт: product plan сохраняет `task_id`, client-code/date attribution и observed task→service cardinality |
-| 6 | Загрузка сотрудников | PARTIALLY VALIDATED SV-074 | C | завершить EW-V01—EW-V07: key/overlap, СКУД, states и historical employment |
+| 6 | Загрузка сотрудников | PARTIALLY VALIDATED SV-074 | C | DECISION_REQUIRED: правило attribution при 185 перекрытиях historical employment; не выбирать rank автоматически |
 | 7 | Контроль предварительной записи | PARTIALLY VALIDATED SV-072 | C | зафиксировать legacy handling VT4352 multiplicity, orphan enum и document/registry differences |
 | 8 | Отчёт по ИП | PARTIALLY VALIDATED SV-058, SV-068 | B | class-B учёт закрыт: общий IP-факт сохраняет observed branch multiplicity по BR-018 |
 | 9 | Посещения Физкульт | PARTIALLY VALIDATED SV-070 | B | class-B учёт закрыт: product plan сохраняет client-day grain, actual club и пересекающиеся current categories |

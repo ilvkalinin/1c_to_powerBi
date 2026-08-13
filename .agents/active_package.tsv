@@ -7,7 +7,7 @@ class_c_critical_decision_review_2026-08-13	STAGE_2_SERVER_VALIDATION	ACTIVE	202
 
 report_id	report_status	completion_commit
 newcomer_engagement_second_month	COMPLETE	SELF
-employee_workload	IN_PROGRESS
+employee_workload	BLOCKED
 prebooking_control	PENDING
 lessons_schedule	PENDING
 membership_receipts	PENDING
