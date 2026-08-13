@@ -50,7 +50,7 @@ scope. Это не отменяет report-specific controls и не меняе�
 | 14 | Отчёт по промокодам | PARTIALLY VALIDATED SV-090, SV-091 | C | отдельное BR-018 решение о protection document-line/action/gift join multiplicity; current M не менять молча |
 | 15 | Продажа детских пакетов | PARTIALLY VALIDATED SV-085 | C | доказать line-to-line price/product, return sign и source states |
 | 16 | Управление продлением | PARTIALLY VALIDATED SV-081 | C | закрыть old/new contract tie-break, states/returns, contract code, rating/tenure/interaction cardinality и price/sign |
-| 17 | Отчёт по %Renew | PARTIALLY VALIDATED SV-082 | B | сохранить confirmed interval/current use rule; product plan фиксирует remaining physical controls |
+| 17 | Отчёт по %Renew | PARTIALLY VALIDATED SV-082 | B | class-B учёт закрыт: product plan сохраняет current window/`COUNT(*)`, `Fld693` и closed-month finalization |
 | 18 | Выручка рецепции | COMPLETE SV-050—SV-053 | A | отдельный Stage-3 пакет; `_document294` не добавлять без решения о смене атрибуции |
 | 19 | Записи администраторов | PARTIALLY VALIDATED SV-086 | C | решение об исторической атрибуции сотрудника; current M не заменять автоматическим match |
 | 20 | Новички и гостевые визиты | PARTIALLY VALIDATED SV-087 | C | решение о guest-event key/tie-break и rules first visit/outcome |

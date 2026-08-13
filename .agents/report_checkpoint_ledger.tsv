@@ -19,7 +19,7 @@ membership_receipts	STAGE_2_SERVER_VALIDATION	SV-083	HISTORICAL_PRE_LEDGER	CLOSE
 promo_codes	STAGE_2_SERVER_VALIDATION	SV-090, SV-091	SELF	CLOSED_CHECKPOINT	New independent control value, source change, or explicitly approved methodology decision on document-line/action/gift join multiplicity only
 children_package_sales	STAGE_2_SERVER_VALIDATION	SV-085	HISTORICAL_PRE_LEDGER	CLOSED_CHECKPOINT	New payment/return control or source change only
 renewal_management	STAGE_2_SERVER_VALIDATION	SV-081	HISTORICAL_PRE_LEDGER	CLOSED_CHECKPOINT	New current-state control or source change only
-renew_contract_usage	STAGE_2_SERVER_VALIDATION	SV-082	HISTORICAL_PRE_LEDGER	CLOSED_CHECKPOINT	New independent usage control or source change only
+renew_contract_usage	STAGE_2_SERVER_VALIDATION	SV-082	SELF	CLOSED_CHECKPOINT	Class-B accounting closed 2026-08-13; no further Stage-2 rerun. New independent control value, source change or explicit approved methodology change only
 reception_revenue	STAGE_2_SERVER_VALIDATION	SV-050—SV-053	HISTORICAL_PRE_LEDGER	CLOSED_CHECKPOINT	New source change; _document294 remains registry evidence only
 administrator_bookings	STAGE_2_SERVER_VALIDATION	SV-086	HISTORICAL_PRE_LEDGER	CLOSED_CHECKPOINT	New employee-attribution decision/control or source change only
 newcomer_guest_visits	STAGE_2_SERVER_VALIDATION	SV-087	ccc695c	CLOSED_CHECKPOINT	New guest-key decision or source change only
