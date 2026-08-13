@@ -35,7 +35,7 @@ scope. Это не отменяет report-specific controls и не меняе�
 | № | Отчёт | Stage 2 evidence | Класс | Условие перед product admission |
 |---:|---|---|---|---|
 | 1 | KPI Фитнеса | COMPLETE SV-054—SV-061 | A | отдельный Stage-3 пакет и разрешение опасных операций |
-| 2 | Вовлечение новичков | PARTIALLY VALIDATED SV-075 | B | зафиксировать только existing source controls в плане реализации |
+| 2 | Вовлечение новичков | PARTIALLY VALIDATED SV-075, SV-092 | B | class-B учёт закрыт: перенести existing source controls в план реализации, без нового user decision |
 | 3 | Вовлечение новичков Второй месяц | PARTIALLY VALIDATED SV-076 | C | решение о явной кратности child-пар contract × child; legacy `RANK()` не менять без BR-018 |
 | 4 | Подготовка к продлению | PARTIALLY VALIDATED SV-077 | B | выполнить предусмотренные contract/visit state controls в product plan |
 | 5 | Воронка лиды фитнес | PARTIALLY VALIDATED SV-078 | B | зафиксировать technical key, client-code attribution и task→service cardinality |

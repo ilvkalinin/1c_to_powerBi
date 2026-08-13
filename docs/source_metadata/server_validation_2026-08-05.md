@@ -2029,3 +2029,21 @@ SV-091 подтверждает физический ключ и границы 
 фильтры states. Это наблюдаемые расхождения текущего M с идеальной
 one-to-one моделью; первый релиз сохраняет их по BR-018. Независимый Power BI
 snapshot/export не требовался: сверки выполнены на точных source-side правилах.
+
+## SV-092 — «Вовлечение новичков»: учёт class-B условия
+
+Статус: `VALIDATED` как дополнительное агрегатное наблюдение на live `gymdb`
+в `BEGIN READ ONLY` 2026-08-13. SQL:
+[`newcomer_engagement_class_b_2026-08-13.sql`](validation_sql/newcomer_engagement_class_b_2026-08-13.sql).
+Роль — `gymdb_readonly`; `transaction_read_only = on`; ПДн и raw identifiers
+не возвращались.
+
+| Контроль | Ожидание | Фактический результат | Статус |
+|---|---|---|---|
+| NE-V02 | технический ключ строки посещения уникален; row/recorder/quantity измеряются без изменения legacy unit | 920 876 строк = 920 876 технических ключей = 920 876 recorder-пар; duplicate/inactive/NULL quantity/NULL business link = 0; `SUM(_fld7585)=920 876.00` | VALIDATED observation |
+
+SV-092 не отменяет SV-075 и не создаёт методического выбора: current
+`contract + client`, подсчёт строк регистра и правило заморозки сохраняются по
+BR-018. Запланированные ранее NE-V03/NE-V05/NE-V06 не выполнялись и сняты как
+не требующие повторной Stage-2 проверки. Для product admission остаётся только
+перенести уже подтверждённые source controls в Stage-3 plan.

@@ -4,7 +4,7 @@
 # A pending risk is not a retry trigger. Update this file in the same commit as the report checkpoint.
 report_id	stage	last_checkpoint	checkpoint_commit	selection_state	new_trigger_or_remaining_controls
 kpi_fitness	STAGE_2_SERVER_VALIDATION	SV-054—SV-061	HISTORICAL_PRE_LEDGER	CLOSED_CHECKPOINT	New source-side control or explicit approved methodology change only
-newcomer_engagement	STAGE_2_SERVER_VALIDATION	SV-075	HISTORICAL_PRE_LEDGER	CLOSED_CHECKPOINT	New independent control value or source change only
+newcomer_engagement	STAGE_2_SERVER_VALIDATION	SV-075, SV-092	SELF	CLOSED_CHECKPOINT	Class-B accounting closed 2026-08-13; no further Stage-2 rerun. New independent control value, source change or explicit approved methodology change only
 newcomer_engagement_second_month	STAGE_2_SERVER_VALIDATION	SV-076	20d9ee4	CLOSED_CHECKPOINT	New independent control value or source change only
 preparation_renewal	STAGE_2_SERVER_VALIDATION	SV-077	80d52f9	CLOSED_CHECKPOINT	New independent control value or source change only
 fitness_leads_funnel	STAGE_2_SERVER_VALIDATION	SV-078	3f1c821	CLOSED_CHECKPOINT	New attribution/state control with independently recorded expectation only
