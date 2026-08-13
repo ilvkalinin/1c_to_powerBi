@@ -47,7 +47,7 @@ scope. Это не отменяет report-specific controls и не меняе�
 | 11 | Фитнес воронка | PARTIALLY VALIDATED SV-079 | B | class-B учёт закрыт: product plan сохраняет cohort `client × start`, outcome dates и отсутствие contract attribution |
 | 12 | Загрузка ОП | PARTIALLY VALIDATED SV-084 | B | class-B учёт закрыт: product plan сохраняет interaction/phone grain, role dates и внешние нормативы |
 | 13 | Отчёт по поступлениям | PARTIALLY VALIDATED SV-083 | C | class-C review: product plan сохраняет analytics_sequence, predecessor `MIN(ID)` и current state/sign cases; physical key remains control |
-| 14 | Отчёт по промокодам | PARTIALLY VALIDATED SV-090, SV-091 | C | отдельное BR-018 решение о protection document-line/action/gift join multiplicity; current M не менять молча |
+| 14 | Отчёт по промокодам | PARTIALLY VALIDATED SV-090, SV-091 | C | class-C review: product plan сохраняет legacy MAX/SUM/Table.Distinct и DAX fallback; без silent document-line/action/gift dedup |
 | 15 | Продажа детских пакетов | PARTIALLY VALIDATED SV-085 | C | доказать line-to-line price/product, return sign и source states |
 | 16 | Управление продлением | PARTIALLY VALIDATED SV-081 | C | закрыть old/new contract tie-break, states/returns, contract code, rating/tenure/interaction cardinality и price/sign |
 | 17 | Отчёт по %Renew | PARTIALLY VALIDATED SV-082 | B | class-B учёт закрыт: product plan сохраняет current window/`COUNT(*)`, `Fld693` и closed-month finalization |

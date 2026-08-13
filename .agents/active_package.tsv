@@ -11,8 +11,8 @@ employee_workload	COMPLETE	SELF
 prebooking_control	COMPLETE	SELF
 lessons_schedule	COMPLETE	SELF
 membership_receipts	COMPLETE	SELF
-promo_codes	IN_PROGRESS
-children_package_sales	PENDING
+promo_codes	COMPLETE	SELF
+children_package_sales	IN_PROGRESS
 renewal_management	PENDING
 administrator_bookings	PENDING
 newcomer_guest_visits	PENDING
