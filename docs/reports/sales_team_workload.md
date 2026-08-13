@@ -147,6 +147,17 @@ Report-compatible phone-grain не нормализуется: если `InfoRg7
 - `Marked`/архивные признаки источников;
 - фактические типы, объёмы и контрольные значения.
 
+## Учёт class-B условия — 2026-08-13
+
+Пользовательское решение не требуется. Current core — одно взаимодействие
+`Reference67`, а report-view сохраняет отдельную строку каждого звонка
+`InfoRg7146` и одну interaction-строку при отсутствии звонка. Нормализация
+нескольких звонков и добавление archive/state filters запрещены без BR-018.
+
+В Stage-3 product plan фиксируются два role-date, historical employment
+semijoin на дату создания, неизменные внешние Excel-нормативы и ограниченная
+PII detail-выдача. Новый SQL-контроль не выполнялся.
+
 ## Источники
 
 - `docs/source_reports/sales_team_workload/Загрузка ОП (2).docx`;

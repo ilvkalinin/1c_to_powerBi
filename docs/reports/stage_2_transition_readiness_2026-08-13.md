@@ -45,7 +45,7 @@ scope. Это не отменяет report-specific controls и не меняе�
 | 9 | Посещения Физкульт | PARTIALLY VALIDATED SV-070 | B | class-B учёт закрыт: product plan сохраняет client-day grain, actual club и пересекающиеся current categories |
 | 10 | Уроки и расписание | PARTIALLY VALIDATED SV-073 | C | определить handling invalid intervals, cancellations и dimension orphans в рамках current rule |
 | 11 | Фитнес воронка | PARTIALLY VALIDATED SV-079 | B | class-B учёт закрыт: product plan сохраняет cohort `client × start`, outcome dates и отсутствие contract attribution |
-| 12 | Загрузка ОП | PARTIALLY VALIDATED SV-084 | B | сохранить current CRM grain и получить предусмотренные control values в product plan |
+| 12 | Загрузка ОП | PARTIALLY VALIDATED SV-084 | B | class-B учёт закрыт: product plan сохраняет interaction/phone grain, role dates и внешние нормативы |
 | 13 | Отчёт по поступлениям | PARTIALLY VALIDATED SV-083 | C | доказать recurring-payment key, source states/signs и predecessor tie-break |
 | 14 | Отчёт по промокодам | PARTIALLY VALIDATED SV-090, SV-091 | C | отдельное BR-018 решение о protection document-line/action/gift join multiplicity; current M не менять молча |
 | 15 | Продажа детских пакетов | PARTIALLY VALIDATED SV-085 | C | доказать line-to-line price/product, return sign и source states |
