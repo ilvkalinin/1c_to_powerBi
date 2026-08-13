@@ -26,7 +26,7 @@ newcomer_guest_visits	STAGE_2_SERVER_VALIDATION	SV-087	ccc695c	CLOSED_CHECKPOINT
 calls_report	STAGE_2_SERVER_VALIDATION	SV-088	f39dfd1	CLOSED_CHECKPOINT	New HTML/follow-up control with independent expectation only
 visits_debt	STAGE_2_SERVER_VALIDATION	SV-089	f8dfc9d	CLOSED_CHECKPOINT	New as-of control with independent control values only
 visits_pushkinsky	STAGE_2_SERVER_VALIDATION	SV-071	SELF	CLOSED_CHECKPOINT	Class-B accounting closed 2026-08-13; no further Stage-2 rerun. New independent control value, source change or explicit approved methodology change only
-work_attendance	STAGE_2_SERVER_VALIDATION	SV-065, SV-067	8a92fad	CLOSED_CHECKPOINT	New daily-client-base evidence or historical performance control only
+work_attendance	STAGE_2_SERVER_VALIDATION	SV-065, SV-067	8a92fad	CLOSED_CHECKPOINT	Class-B accounting closed 2026-08-13; no further Stage-2 rerun. New independent control value, source change or explicit approved methodology change only
 administrator_card	STAGE_2_SERVER_VALIDATION	SV-002	6edf9ee	CLOSED_CHECKPOINT	New physical source/state evidence only
 title_sheet	STAGE_2_SERVER_VALIDATION	SV-062—SV-064	HISTORICAL_PRE_LEDGER	CLOSED_CHECKPOINT	New source-side control or external dependency decision only
 marketing_funnel	STAGE_2_SERVER_VALIDATION	SV-080	dbe037d	CLOSED_CHECKPOINT	New contract-aggregation decision/control or source change only
