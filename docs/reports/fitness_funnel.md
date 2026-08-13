@@ -136,3 +136,15 @@ rows дали 98 distinct cohort `client × start_date`; две cohort-груп�
 validation. Выбор «главного» контракта, изменение current filters или
 contract attribution не выполняются по BR-018. Новых отсутствующих источников
 не выявлено; внешние Excel-файлы не анализировались.
+
+## Учёт class-B условия — 2026-08-13
+
+Пользовательское решение не требуется. `SV-079` подтверждает уже принятое
+правило cohort: два из 100 control-рядов сворачиваются в 98 уникальных
+`client × start_date`. Outcome не назначается контракту, а хранится как
+клиентское событие с отдельной датой для периодных и as-of мер.
+
+В Stage-3 product plan фиксируются safeguards: cohort dedupe до
+`client_key + membership_start_date`, дочерний contract-detail вне агрегатных
+мер и запрет выбирать «главный» контракт или менять current outcome filters.
+Новый SQL-контроль не выполнялся.

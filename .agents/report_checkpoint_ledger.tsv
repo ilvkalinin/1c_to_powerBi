@@ -13,7 +13,7 @@ prebooking_control	STAGE_2_SERVER_VALIDATION	SV-072	HISTORICAL_PRE_LEDGER	CLOSED
 ip_training	STAGE_2_SERVER_VALIDATION	SV-058, SV-068	SELF	CLOSED_CHECKPOINT	Class-B accounting closed 2026-08-13; no further Stage-2 rerun. New independent control value, source change or explicit approved methodology change only
 visits_fizkult	STAGE_2_SERVER_VALIDATION	SV-070	SELF	CLOSED_CHECKPOINT	Class-B accounting closed 2026-08-13; no further Stage-2 rerun. New independent control value, source change or explicit approved methodology change only
 lessons_schedule	STAGE_2_SERVER_VALIDATION	SV-073	HISTORICAL_PRE_LEDGER	CLOSED_CHECKPOINT	New source-side control or source change only
-fitness_funnel	STAGE_2_SERVER_VALIDATION	SV-079	f674ba8	CLOSED_CHECKPOINT	New independently expected cohort/outcome control only
+fitness_funnel	STAGE_2_SERVER_VALIDATION	SV-079	SELF	CLOSED_CHECKPOINT	Class-B accounting closed 2026-08-13; no further Stage-2 rerun. New independent control value, source change or explicit approved methodology change only
 sales_interactions	STAGE_2_SERVER_VALIDATION	SV-084	f51db65	CLOSED_CHECKPOINT	New CRM control or source change only
 membership_receipts	STAGE_2_SERVER_VALIDATION	SV-083	HISTORICAL_PRE_LEDGER	CLOSED_CHECKPOINT	New independent reconciliation or source change only
 promo_codes	STAGE_2_SERVER_VALIDATION	SV-090, SV-091	SELF	CLOSED_CHECKPOINT	New independent control value, source change, or explicitly approved methodology decision on document-line/action/gift join multiplicity only
