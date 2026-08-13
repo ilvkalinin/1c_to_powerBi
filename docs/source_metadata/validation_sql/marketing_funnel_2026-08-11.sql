@@ -23,3 +23,25 @@ GROUP BY task_code
 HAVING count(DISTINCT contract_code) > 1
 ORDER BY task_code
 LIMIT 1;
+
+-- MF-V03F, 2026-08-13. Reverse-direction user-requested example. This is a
+-- different control from MF-V03/MF-V03E: it groups the same current bridge by
+-- contract to prove one eligible contract linked to several task codes.
+WITH bridge AS (
+  SELECT c._code::text AS contract_code, t._code::text AS task_code
+  FROM public._inforg6798 AS r
+  JOIN public._reference59 AS c ON c._idrref = r._fld6800_rrref
+  JOIN public._reference106 AS t ON t._idrref = r._fld6799rref
+  JOIN public._reference89 AS f ON f._idrref = t._fld1191rref
+  WHERE r._fld6802 = true
+    AND c._fld696rref <> decode('9b656ee141a764e44de79e83cd30c1b2', 'hex')
+    AND c._fld699rref <> decode('96976725cebf51f7461429d74d3f6cbe', 'hex')
+    AND f._description = 'Продажа клубной карты'
+)
+SELECT contract_code,
+       string_agg(DISTINCT task_code, ', ' ORDER BY task_code) AS task_codes
+FROM bridge
+GROUP BY contract_code
+HAVING count(DISTINCT task_code) > 1
+ORDER BY contract_code
+LIMIT 1;
