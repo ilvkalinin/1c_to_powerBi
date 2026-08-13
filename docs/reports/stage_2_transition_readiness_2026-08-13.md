@@ -36,7 +36,7 @@ scope. Это не отменяет report-specific controls и не меняе�
 |---:|---|---|---|---|
 | 1 | KPI Фитнеса | COMPLETE SV-054—SV-061 | A | отдельный Stage-3 пакет и разрешение опасных операций |
 | 2 | Вовлечение новичков | PARTIALLY VALIDATED SV-075, SV-092 | B | class-B учёт закрыт: перенести existing source controls в план реализации, без нового user decision |
-| 3 | Вовлечение новичков Второй месяц | PARTIALLY VALIDATED SV-076 | C | решение о явной кратности child-пар contract × child; legacy `RANK()` не менять без BR-018 |
+| 3 | Вовлечение новичков Второй месяц | PARTIALLY VALIDATED SV-076 | C | class-C review: нового решения нет — product plan сохраняет legacy `RANK()` ties и source-row identity; без silent dedup |
 | 4 | Подготовка к продлению | PARTIALLY VALIDATED SV-077 | B | class-B учёт закрыт: product plan сохраняет current pair/границы, technical keys и запрет silent state/dedup changes |
 | 5 | Воронка лиды фитнес | PARTIALLY VALIDATED SV-078 | B | class-B учёт закрыт: product plan сохраняет `task_id`, client-code/date attribution и observed task→service cardinality |
 | 6 | Загрузка сотрудников | PARTIALLY VALIDATED SV-074 | C | завершить EW-V01—EW-V07: key/overlap, СКУД, states и historical employment |
