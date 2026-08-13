@@ -16,8 +16,8 @@ children_package_sales	COMPLETE	SELF
 renewal_management	COMPLETE	SELF
 administrator_bookings	COMPLETE	SELF
 newcomer_guest_visits	COMPLETE	SELF
-calls_report	IN_PROGRESS
-visits_debt	PENDING
+calls_report	COMPLETE	SELF
+visits_debt	IN_PROGRESS
 administrator_card	PENDING
 marketing_funnel	PENDING
 client_base	PENDING
