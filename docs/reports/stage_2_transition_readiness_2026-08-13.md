@@ -56,7 +56,7 @@ scope. Это не отменяет report-specific controls и не меняе�
 | 20 | Новички и гостевые визиты | PARTIALLY VALIDATED SV-087 | C | решение о guest-event key/tie-break и rules first visit/outcome |
 | 21 | Отчёт по обращениям | PARTIALLY VALIDATED SV-088 | C | определить deterministic aggregation `Reference67 → Reference137`; не скрывать source multiplicity |
 | 22 | Посещаемость клиентов с долгами | PARTIALLY VALIDATED SV-089 | C | подтвердить key/state `AccumRg7509`, document branches и as-of control values |
-| 23 | Посещения Пушкинский | PARTIALLY VALIDATED SV-071 | B | отдельный plan с existing category/source evidence; не менять approved category methodology |
+| 23 | Посещения Пушкинский | PARTIALLY VALIDATED SV-071 | B | class-B учёт закрыт: общий visit/day layer сохраняет snapshot, categories и approved DRC exclusion |
 | 24 | Работа с посещаемостью | PARTIALLY VALIDATED SV-065, SV-067 | B | подтвердить daily client-base coverage и historical performance control |
 | 25 | Карта администратора | PARTIALLY VALIDATED SV-002 | C | выполнить Stage-3 controls: Gymmy success, 12 club codes, sums before/after aggregation, rerun |
 | 26 | Титульный лист | COMPLETE SV-062—SV-064 | A | отдельный Stage-3 пакет реализации |
