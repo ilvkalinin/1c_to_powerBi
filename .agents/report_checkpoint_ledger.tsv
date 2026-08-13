@@ -16,7 +16,7 @@ lessons_schedule	STAGE_2_SERVER_VALIDATION	SV-073	HISTORICAL_PRE_LEDGER	CLOSED_C
 fitness_funnel	STAGE_2_SERVER_VALIDATION	SV-079	f674ba8	CLOSED_CHECKPOINT	New independently expected cohort/outcome control only
 sales_interactions	STAGE_2_SERVER_VALIDATION	SV-084	f51db65	CLOSED_CHECKPOINT	New CRM control or source change only
 membership_receipts	STAGE_2_SERVER_VALIDATION	SV-083	HISTORICAL_PRE_LEDGER	CLOSED_CHECKPOINT	New independent reconciliation or source change only
-promo_codes	STAGE_2_SERVER_VALIDATION	SV-006, SV-090 availability	SELF	READY_FOR_NEW_CONTROL	SV-090 confirmed _document298_vt3596 physical availability; run PC-V01 key, PC-V02 row/sum preservation, PC-V03 states, PC-V04 action cardinality, PC-V05 IDs/dates, PC-V06–PC-V07 categories; record each expected result before execution
+promo_codes	STAGE_2_SERVER_VALIDATION	SV-090, SV-091	SELF	CLOSED_CHECKPOINT	New independent control value, source change, or explicitly approved methodology decision on document-line/action/gift join multiplicity only
 children_package_sales	STAGE_2_SERVER_VALIDATION	SV-085	HISTORICAL_PRE_LEDGER	CLOSED_CHECKPOINT	New payment/return control or source change only
 renewal_management	STAGE_2_SERVER_VALIDATION	SV-081	HISTORICAL_PRE_LEDGER	CLOSED_CHECKPOINT	New current-state control or source change only
 renew_contract_usage	STAGE_2_SERVER_VALIDATION	SV-082	HISTORICAL_PRE_LEDGER	CLOSED_CHECKPOINT	New independent usage control or source change only

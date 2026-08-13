@@ -2001,3 +2001,31 @@ SV-090 снимает только физическую недоступност
 отчётов. В частности, `_document294` не добавляется в текущую логику «Выручки
 рецепции», а `_document275` не меняет включение возвратов без отдельной
 точечной проверки и решения по BR-018.
+
+## SV-091 — «Отчёт по промокодам»: keys, joins, states и outcome boundaries
+
+Статус: `PARTIALLY VALIDATED` на live `gymdb` в отдельных `BEGIN READ ONLY`
+транзакциях 2026-08-13. Точный SQL с ожидаемым результатом до запуска:
+[`promo_codes_2026-08-13.sql`](validation_sql/promo_codes_2026-08-13.sql).
+Роль — `gymdb_readonly`; `transaction_read_only = on`; результаты содержат
+только агрегаты без ПДн, названий объектов и raw identifiers. Полный
+исторический join PC-V02 был остановлен по `statement_timeout` до результата;
+проверка кратности поэтому выполнена на контрольном июне 2026. Это не
+является положительным или отрицательным результатом полного прогона.
+
+| Контроль | Ожидание | Фактический результат | Статус |
+|---|---|---|---|
+| PC-V00 | все 35 полей current M существуют | `_accumrg7606` 12/12, `_accumrg7615` 14/14, `_accumrg7553` 7/7, `_document298_vt3596` 2/2 | VALIDATED |
+| PC-V01 | `(RecorderTRef, RecorderRRef, LineNo)` не `NULL` и уникален | `promo_gift`: 423 658 ключей из 423 658 строк; `discount`: 550 504 из 550 504; duplicate/null groups = 0 | VALIDATED |
+| PC-V02 | current document-line joins сохраняют техническую строку скидки | июнь 2026: 7 535 ключей → 7 568 строк, excess 33; matched lines: 5 824 `VT4465`, 310 `VT4996`, 309 `VT4924` | VALIDATION_FAILED — one-to-many risk |
+| PC-V03 | измерить states, не вводя новый фильтр | все 423 658 promo/gift и 96 755 скидочных строк active; среди связанных `Document332`/`Document346` unposted/marked = 0; `promo_gift RecordKind=1`: 230 548, other: 193 110 | VALIDATED observation; legacy filters unchanged |
+| PC-V04 | action table имеет parent; наблюдать duplicate discount и gift join | 7 874 строк акции, parent/null-discount = 0/0; 902 duplicate discount groups; июньские 11 698 gift technical rows → 4 509 joined rows, excess 406 | VALIDATION_FAILED для one-to-many risks; current `Table.Distinct` unchanged |
+| PC-V05 | strict interval включает только дни 1–44 | membership: day 0/1/44/45 = 6 778/540/13/9, accepted 1 352; DPFU = 651/158/82/115, accepted 6 228; friend = 10/0/0/0, accepted 0 | VALIDATED boundary semantics |
+| PC-V06 | трёхзначные дни подарка отсутствуют либо фиксируются | 52 названия с шаблоном дней; 100+ дней = 0 | VALIDATED for current parser-width risk |
+| PC-V07 | current source input complete; DAX branch sequence total | июнь: discount 5 706, promo/gift 2 866; `NULL` client/club/promo = 0; predicates assigned 2 866 `gift_friend_membership` and 5 739 `other`; +33 = PC-V02 join excess | VALIDATED completeness / VALIDATION_FAILED for join-preservation dependency |
+
+SV-091 подтверждает физический ключ и границы 45-дневных outcomes, но не
+разрешает исправлять current aggregation, `Table.Distinct`, DAX fallback или
+фильтры states. Это наблюдаемые расхождения текущего M с идеальной
+one-to-one моделью; первый релиз сохраняет их по BR-018. Независимый Power BI
+snapshot/export не требовался: сверки выполнены на точных source-side правилах.

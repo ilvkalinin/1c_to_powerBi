@@ -1,6 +1,6 @@
 # Source-to-target mapping: применения промокодов
 
-Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0018 / TECHNICAL VALIDATION PENDING — SV-090 availability; Stage 3 deferred`.
+Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0018 / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-090, SV-091; Stage 3 deferred`.
 Спроектирован `mart.promo_application`; SQL не создаётся.
 
 ## Гранулярность
@@ -18,7 +18,7 @@ SQL этих полей нет, поэтому уникальность и да�
 |---|---|---|---|---|---|---|
 | `application_date` | дата применения | `AccumRg7606.Period::date` / `AccumRg7615.Period::date` | `date` | нет | CONFIRMED current SQL | timezone, sentinel |
 | `source_kind` | ветвь применения | константы `promo_gift` / `discount` по источнику | `text` | нет | CONFIRMED BY DESIGN | полнота union |
-| `recorder_id`, `line_no` | техническая идентификация движения | поля регистров, отсутствующие в текущем select | UNKNOWN | нет | VALIDATION_PENDING | уникальность |
+| `recorder_id`, `line_no` | техническая идентификация движения | physical `RecorderTRef`, `RecorderRRef`, `LineNo` | `bytea`, `bytea`, numeric | нет | VALIDATED — SV-091 | уникальность |
 | `client_key` | обезличенный клиент для distinct | ссылка регистра → `Reference141X1.ID`; не переносить код/ФИО | UNKNOWN | нет | CONFIRMED need / source pending | orphan, стабильность |
 | `club_id`, `club_name` | клуб применения | `Fld7612`/`Fld7616` → `Reference132` | UNKNOWN, `text` | да | CONFIRMED current SQL | смысл поля и orphan |
 | `membership_id`, `membership_code` | связанный исходный абонемент | `Fld7610`/`Fld7621` → `Reference59` | UNKNOWN, `text` | да | CONFIRMED current SQL | valid interval, orphan |
@@ -65,8 +65,8 @@ SQL этих полей нет, поэтому уникальность и да�
 
 | Статус | Элемент | Риск / причина | Следующее действие |
 |---|---|---|---|
-| VALIDATION_PENDING | источник ключа и grain | current SQL агрегирует и не возвращает `Recorder`/`LineNo` | read-only проверка PC-V01 |
+| VALIDATED | источник ключа и grain | candidate `(RecorderTRef, RecorderRRef, LineNo)` unique/non-null in both registers | SV-091; business grain retains current M aggregation |
 | VALIDATION_PENDING | связь с маркетинговой акцией `Document298.VT3596` | SV-090 подтвердил `_document298_vt3596`; кардинальность и сохранение строк текущего join не проверены | выполнить PC-V02 и PC-V04 в отдельном read-only пакете |
-| VALIDATION_PENDING | joins и суммы скидки | возможна one-to-many связь строк документов | read-only проверка PC-V02 после снятия блокера источника |
-| VALIDATION_PENDING | состояния и сторно | current query не доказывает включаемые статусы | read-only проверка PC-V03 |
-| VALIDATION_PENDING | текстовые категории/дни | переименование и 100+ дней меняют DAX-результат | read-only проверки PC-V06–PC-V07 |
+| VALIDATION_FAILED | joins и суммы скидки | SV-091: 33 excess rows after current June document-line joins; gift join also has excess 406 | preserve current `MAX`/`SUM`; methodology decision required before implementation |
+| VALIDATED observation | состояния и сторно | SV-091 measured active/posted/marked state; no new filter follows | preserve current source filters |
+| PARTIALLY VALIDATED | текстовые категории/дни | 100+ day gifts absent; source predicates total, but current DAX fallback and join multiplicity remain | preserve current DAX; methodology decision required for change |

@@ -1,6 +1,6 @@
 # ADR-0018: факт применений промокодов
 
-- Статус: `DESIGNED / TECHNICAL VALIDATION BLOCKED — source registry / IMPLEMENTATION DEFERRED`
+- Статус: `DESIGNED / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-090, SV-091 / IMPLEMENTATION DEFERRED`
 - Дата: 2026-08-03
 - Отчёт: №14 «Отчёт по промокодам»
 
@@ -30,8 +30,10 @@ filter-dependent конверсии. Технические ID скрыты, PII
 
 ## Риски
 
-Источник ключа, кратность строк документов, знак скидки, states и устойчивые
-ID категорий — `VALIDATION_PENDING`. Изменение grain до проверки запрещено.
+Physical source key, states and 1–44-day outcomes are validated in SV-091.
+Document-line and gift joins have observed one-to-many multiplicity; current
+M/DAX remains the first-release rule under BR-018. Any protection that changes
+aggregation, grain or category result requires a separate methodology decision.
 
 ## Доказательства
 

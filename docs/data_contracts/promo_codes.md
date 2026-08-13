@@ -1,6 +1,6 @@
 # Data contract: «Отчёт по промокодам»
 
-Статус: `DESIGNED / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION BLOCKED — source registry`.
+Статус: `DESIGNED / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-090, SV-091`.
 
 | Параметр | Значение |
 |---|---|
@@ -33,5 +33,8 @@
 выпуски и filter-dependent конверсии. PostgreSQL рассчитывает fixed outcomes.
 PII не входит.
 
-Приёмка: ключ, branch reconciliation, document-line joins, signs/states,
-границы 1/44/45, контрольные категории и дни, rerun и SLA.
+Приёмка Stage 2: physical key, states, 1/44/45 boundaries, source input and
+gift-day parser completed in SV-091. Document-line and gift joins have
+observed one-to-many risks; legacy result remains unchanged under BR-018.
+Stage 3 remains deferred and requires separate authorization plus a decision
+on source-side protection of those joins.
