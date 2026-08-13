@@ -9,8 +9,8 @@ report_id	report_status	completion_commit
 newcomer_engagement_second_month	COMPLETE	SELF
 employee_workload	COMPLETE	SELF
 prebooking_control	COMPLETE	SELF
-lessons_schedule	IN_PROGRESS
-membership_receipts	PENDING
+lessons_schedule	COMPLETE	SELF
+membership_receipts	IN_PROGRESS
 promo_codes	PENDING
 children_package_sales	PENDING
 renewal_management	PENDING

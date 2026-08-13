@@ -43,7 +43,7 @@ scope. Это не отменяет report-specific controls и не меняе�
 | 7 | Контроль предварительной записи | PARTIALLY VALIDATED SV-072 | C | class-C review: product plan сохраняет legacy VT4352 multiplicity, orphan-enum inner join и current document/registry branches |
 | 8 | Отчёт по ИП | PARTIALLY VALIDATED SV-058, SV-068 | B | class-B учёт закрыт: общий IP-факт сохраняет observed branch multiplicity по BR-018 |
 | 9 | Посещения Физкульт | PARTIALLY VALIDATED SV-070 | B | class-B учёт закрыт: product plan сохраняет client-day grain, actual club и пересекающиеся current categories |
-| 10 | Уроки и расписание | PARTIALLY VALIDATED SV-073 | C | определить handling invalid intervals, cancellations и dimension orphans в рамках current rule |
+| 10 | Уроки и расписание | PARTIALLY VALIDATED SV-073 | C | class-C review: product plan сохраняет current interval/state branches и orphan dimensions без silent normalization |
 | 11 | Фитнес воронка | PARTIALLY VALIDATED SV-079 | B | class-B учёт закрыт: product plan сохраняет cohort `client × start`, outcome dates и отсутствие contract attribution |
 | 12 | Загрузка ОП | PARTIALLY VALIDATED SV-084 | B | class-B учёт закрыт: product plan сохраняет interaction/phone grain, role dates и внешние нормативы |
 | 13 | Отчёт по поступлениям | PARTIALLY VALIDATED SV-083 | C | доказать recurring-payment key, source states/signs и predecessor tie-break |
