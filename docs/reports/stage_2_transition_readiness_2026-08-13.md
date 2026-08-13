@@ -41,7 +41,7 @@ scope. Это не отменяет report-specific controls и не меняе�
 | 5 | Воронка лиды фитнес | PARTIALLY VALIDATED SV-078 | B | class-B учёт закрыт: product plan сохраняет `task_id`, client-code/date attribution и observed task→service cardinality |
 | 6 | Загрузка сотрудников | PARTIALLY VALIDATED SV-074 | C | завершить EW-V01—EW-V07: key/overlap, СКУД, states и historical employment |
 | 7 | Контроль предварительной записи | PARTIALLY VALIDATED SV-072 | C | зафиксировать legacy handling VT4352 multiplicity, orphan enum и document/registry differences |
-| 8 | Отчёт по ИП | PARTIALLY VALIDATED SV-058, SV-068 | B | product plan должен сохранить observed coupon multiplicity по BR-018 |
+| 8 | Отчёт по ИП | PARTIALLY VALIDATED SV-058, SV-068 | B | class-B учёт закрыт: общий IP-факт сохраняет observed branch multiplicity по BR-018 |
 | 9 | Посещения Физкульт | PARTIALLY VALIDATED SV-070 | B | включить documented source controls и текущие categories без методической подмены |
 | 10 | Уроки и расписание | PARTIALLY VALIDATED SV-073 | C | определить handling invalid intervals, cancellations и dimension orphans в рамках current rule |
 | 11 | Фитнес воронка | PARTIALLY VALIDATED SV-079 | B | завершить plan states/cancellation controls без смены cohort logic |
