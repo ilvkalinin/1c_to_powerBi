@@ -58,7 +58,7 @@ scope. Это не отменяет report-specific controls и не меняе�
 | 22 | Посещаемость клиентов с долгами | PARTIALLY VALIDATED SV-089 | C | class-C review: сохранять current cohort, as-of границы и sign-case; SQL ждёт controls ключа/states/веток, не новую формулу |
 | 23 | Посещения Пушкинский | PARTIALLY VALIDATED SV-071 | B | class-B учёт закрыт: общий visit/day layer сохраняет snapshot, categories и approved DRC exclusion |
 | 24 | Работа с посещаемостью | PARTIALLY VALIDATED SV-065, SV-067 | B | class-B учёт закрыт: product plan сохраняет daily client-base и documented historical-performance control |
-| 25 | Карта администратора | PARTIALLY VALIDATED SV-002 | C | выполнить Stage-3 controls: Gymmy success, 12 club codes, sums before/after aggregation, rerun |
+| 25 | Карта администратора | PARTIALLY VALIDATED SV-002 | C | class-C review: сохранять 12 карт, два направления и `SUM(usage_count)`; Gymmy SQL ждёт controls ключа/успеха/карта→клуб |
 | 26 | Титульный лист | COMPLETE SV-062—SV-064 | A | отдельный Stage-3 пакет реализации |
 | 27 | Маркетинговая воронка | PARTIALLY VALIDATED SV-080 | C | решение по aggregation/deduplication before implementation |
 | 28 | Клиентская база | PARTIALLY VALIDATED SV-069 | C | states/types/keys и control values for both snapshot dates |
