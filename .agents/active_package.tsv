@@ -10,8 +10,8 @@ newcomer_engagement_second_month	COMPLETE	SELF
 employee_workload	COMPLETE	SELF
 prebooking_control	COMPLETE	SELF
 lessons_schedule	COMPLETE	SELF
-membership_receipts	IN_PROGRESS
-promo_codes	PENDING
+membership_receipts	COMPLETE	SELF
+promo_codes	IN_PROGRESS
 children_package_sales	PENDING
 renewal_management	PENDING
 administrator_bookings	PENDING
