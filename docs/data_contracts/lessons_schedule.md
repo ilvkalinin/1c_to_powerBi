@@ -1,6 +1,6 @@
 # Data contract: «Уроки и расписание»
 
-Статус: `STAGE 3 ADMISSION IN PROGRESS / SOURCE VALIDATED — SV-LS-001 / SLOT-EDGE POLICY CONFIRMED — BR-021`.
+Статус: `IMPLEMENTED / initial BR-003 load VALIDATED — S3-LS-001—003`.
 
 ## Основной объект
 

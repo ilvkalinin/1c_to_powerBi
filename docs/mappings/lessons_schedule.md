@@ -1,6 +1,6 @@
 # Source-to-target mapping: «Уроки и расписание»
 
-Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0015 / SOURCE VALIDATED — SV-LS-001 / SLOT-EDGE POLICY CONFIRMED`.
+Статус: `IMPLEMENTED / initial BR-003 load VALIDATED — S3-LS-001—003`.
 
 Спроектированы `mart.lesson_room_slot_5m` и REUSE `mart.group_lesson`.
 Production SQL не создаётся.

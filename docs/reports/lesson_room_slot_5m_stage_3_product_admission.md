@@ -1,6 +1,6 @@
 # Stage 3 PRODUCT ADMISSION: `mart.lesson_room_slot_5m`
 
-Статус: `ACTIVE — DDL APPLIED / DML NOT APPROVED`.
+Статус: `COMPLETE — initial BR-003 load VALIDATED — S3-LS-001—003`.
 
 Пользователь подтвердил пакет `STAGE_3_PRODUCT_ADMISSION` 2026-08-14.
 Граница — только физический факт занятости залов: одно квалифицированное
@@ -41,3 +41,18 @@ DDL и DML ещё не выполнялись.
 `mart.lesson_room_slot_5m`. Post-check: 16 колонок, 18 constraints, primary
 key `(source_kind, source_lesson_id, slot_start_at)`, rows = 0. Первая
 загрузка данных остаётся отдельным DML-разрешением.
+
+## Initial DML load and reconciliation
+
+После отдельного DML-разрешения loader взял один `REPEATABLE READ, READ ONLY`
+source snapshot и выполнил прямой binary COPY в одной target transaction.
+
+| Контроль | Результат | Статус |
+|---|---:|---|
+| Source → target rows | 5 424 234 = 5 424 234 | PASS |
+| ГЗ / ПЗ slots | 1 968 061 / 3 456 173 | PASS |
+| Retained ГЗ / ПЗ lessons | 187 435 / 384 089 | PASS |
+| Вне BR-003 / обязательные NULL / invalid slot | 0 / 0 / 0 | PASS |
+| Inconsistent lesson bounds / BR-021 slot mismatch | 0 / 0 | PASS |
+
+Воспроизводимые проверки: [lesson_room_slot_5m_reconciliation.sql](../../sql/tests/lesson_room_slot_5m_reconciliation.sql).

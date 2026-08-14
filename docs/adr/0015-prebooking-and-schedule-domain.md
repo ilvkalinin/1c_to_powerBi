@@ -1,6 +1,6 @@
 # ADR-0015: общий домен предзаписи, групповых занятий и расписания
 
-- Статус: `STAGE 3 ADMISSION IN PROGRESS / source validated — SV-LS-001 / BR-021 confirmed`
+- Статус: `IMPLEMENTED / initial BR-003 load VALIDATED — S3-LS-001—003`
 - Дата: 2026-08-03
 - Отчёты: №7 «Контроль предварительной записи», №10 «Уроки и расписание»
 
@@ -65,6 +65,14 @@ BR-021 является явным исключением к точной гра
 подтверждены SV-LS-001. Orphan dimensions остаются `NULL`; существующий
 дефект service-filter в loader `mart.group_lesson` записан как отдельная
 возможная доработка и не меняется этим пакетом.
+
+## Initial load — 2026-08-14
+
+После отдельных DDL и DML approvals `mart.lesson_room_slot_5m` загружена
+атомарно из одного source snapshot. `S3-LS-001—003` прошли: 5 424 234 строки,
+в том числе 1 968 061 ГЗ и 3 456 173 ПЗ; source-to-target snapshot controls,
+BR-003, обязательные поля, slot position и расчёт количества слотов BR-021
+для каждого занятия совпали. Все mismatch counts = 0.
 
 ## Доказательства
 

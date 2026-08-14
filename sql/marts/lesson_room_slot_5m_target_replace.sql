@@ -1,4 +1,5 @@
--- REVIEW ONLY. Requires a separate explicit DML approval before execution.
+-- APPLIED 2026-08-14 through scripts/load_lesson_room_slot_5m.py after
+-- separate explicit DML approval.
 -- The loader obtains a source REPEATABLE READ snapshot, verifies its narrow
 -- controls, then streams the extract with binary COPY directly into this table.
 BEGIN;
