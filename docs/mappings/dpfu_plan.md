@@ -1,6 +1,6 @@
 # Source-to-target mapping: план ДПФУ
 
-Статус: `STAGE_3 DML APPROVAL PENDING / empty target table CONFIRMED`.
+Статус: `IMPLEMENTED / initial BR-003 load VALIDATED`.
 
 ## Гранулярность и граница
 

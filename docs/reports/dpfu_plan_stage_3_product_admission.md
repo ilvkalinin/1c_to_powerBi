@@ -1,6 +1,6 @@
 # Stage 3 PRODUCT ADMISSION: `mart.dpfu_plan_assignment`
 
-Статус: `DML APPROVAL PENDING — empty target table created and verified`.
+Статус: `COMPLETE — initial BR-003 load VALIDATED`.
 
 Пользователь явно подтвердил самостоятельный пакет
 `STAGE_3_PRODUCT_ADMISSION — mart.dpfu_plan_assignment` 2026-08-14. Граница
@@ -42,3 +42,22 @@ primary key из шести logical-key components — passed.
 Следующее ограничение: первая загрузка данных на VM-2 остаётся отдельным DML
 approval. Loader выполнит bounded rebuild и source-to-target reconciliation
 в одной контролируемой операции.
+
+## Load and reconciliation result
+
+Пользователь отдельно одобрил DML 2026-08-14. Loader выполнил атомарный
+bounded rebuild из одного `REPEATABLE READ, READ ONLY` source snapshot.
+
+`S3-PLAN-001—004`, 2026-08-14, BR-003 `2025-01-01`—`2027-01-01`:
+
+| Контроль | Фактический результат | Статус |
+|---|---:|---|
+| Source → target rows | 528 482 → 528 482 | PASS |
+| Planned revenue source / target | 722 999 695,41 / 722 999 695,41 | PASS |
+| Staging and persistent key | duplicate keys 0; contract violations 0 | PASS |
+| Sign preservation | negative rows 30; zero rows 0 | PASS — BR-018 preserved |
+| BR-003 horizon | out-of-horizon rows 0 | PASS |
+
+`sql/tests/dpfu_plan_assignment_reconciliation.sql` фиксирует повторяемые
+read-only проверки. Subsequent refresh возможен только через
+`scripts/load_dpfu_plan_assignment.py --apply` при отдельном разрешении DML.

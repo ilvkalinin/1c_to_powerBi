@@ -1,6 +1,6 @@
 # ADR-0028: общий детальный план ДПФУ
 
-- Статус: `STAGE_3 DML APPROVAL PENDING / empty target table CONFIRMED`
+- Статус: `IMPLEMENTED / initial BR-003 load VALIDATED`
 - Дата: 2026-08-14
 - Потребители: KPI Фитнеса, «Выручка ДПФУ», контроль предзаписи, загрузка сотрудников
 
