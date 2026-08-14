@@ -15,8 +15,9 @@
 - визуальные агрегаты: производные и не меняют логический ключ.
 
 SV-083 подтвердил bounded физические technical keys движения и отсутствие
-orphan-contract в двух исходных регистрах. Полный movement key и recurring-
-payment key остаются `VALIDATION_PENDING`.
+orphan-contract в двух исходных регистрах. SV-094 подтвердил полный movement
+key по уникальному индексу, но отклонил оба кандидата recurring-payment key;
+контрактные KPI остаются заблокированы до согласованного physical key.
 
 ## Повторно используемые целевые поля
 

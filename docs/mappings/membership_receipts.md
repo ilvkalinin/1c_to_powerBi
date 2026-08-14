@@ -20,8 +20,9 @@
 
 Бизнес-grain второго уровня `CONFIRMED` решением пользователя 2026-07-31.
 Физический идентификатор ежемесячного рекаррингового платежа пока
-`VALIDATION_PENDING`: текущий кандидат — `contract_id × analytics_sequence`,
-но он должен быть доказан по source key и контрольным контрактам.
+`VALIDATION_FAILED`: `contract_id × analytics_sequence` не уникален (SV-094),
+как и `contract_id × recorder`. Нужен отдельный согласованный physical source
+key ежемесячного платежа; нельзя схлопывать движения эвристикой.
 
 Кандидат технического ключа движения:
 `(source_kind, recorder_id, line_no)` — `VALIDATION_PENDING`.

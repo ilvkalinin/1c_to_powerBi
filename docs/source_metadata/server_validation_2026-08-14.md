@@ -63,3 +63,22 @@ task-owner path, а не сканирует весь `Reference67` в поряд
 key и поэтому возвращал 101 technical key при 41 phone rows. Это дефект
 контрольной метрики, не логики отчёта; он сохранён как артефакт возможной
 доработки. В новом control null-placeholder явно исключён.
+
+## SV-094 — «Поступления» и «Членство для правления»: физический ключ платежа
+
+Статус: `VALIDATION_FAILED` для физического ключа ежемесячного рекаррингового
+платежа; read-only SQL:
+[membership_keys_global_review_2026-08-14.sql](validation_sql/membership_keys_global_review_2026-08-14.sql).
+
+| Контроль | Фактический результат | Вывод |
+|---|---|---|
+| Technical movement keys | В обоих регистрах уникальные индексы `(RecorderTRef, RecorderRRef, LineNo)`; за BR-003 нет пустых ключей или сумм | движение имеет доказанный ключ |
+| States/signs | `7370`: active `RecordKind 0/1` — 588 948/2 027 107, inactive — 10 462/35 967; `7739`: active `0/1` — 1 367 295/897 340 | это наблюдение, не основание менять current sign/filter rule |
+| `contract × analytics_sequence` | 307 517 candidates; `NULL=0`; 274 296 duplicate groups; максимум 119 843 движений | отклонён как payment key |
+| `contract × recorder` | 2 106 082 candidates; 337 638 duplicate groups; максимум 35 967 движений | отклонён как payment key |
+
+BR-016 требует считать рекарринг одной ежемесячной payment unit, однако
+физического идентификатора этой unit среди подтверждённых полей нет. Нельзя
+схлопнуть такие группы `MIN`, `MAX` или `DISTINCT` без нового согласованного
+правила. Денежное движение остаётся реализуемым с собственным ключом, а обе
+контрактные KPI-витрины блокируются ровно на этой единице.
