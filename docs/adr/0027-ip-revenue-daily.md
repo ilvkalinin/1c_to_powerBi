@@ -1,6 +1,6 @@
 # ADR-0027: общий факт выручки ИП
 
-- Статус: `STAGE_3 DDL APPROVAL PENDING / source admission controls CONFIRMED`
+- Статус: `STAGE_3 DML APPROVAL PENDING / empty target table CONFIRMED`
 - Дата: 2026-08-14
 - Потребители: KPI Фитнеса и «Выручка ДПФУ»
 
@@ -40,7 +40,9 @@ rebuild BR-003 выбран потому, что watermark/окно поздни
   услуги — отдельная техническая доработка;
 - подстановка клуба договора для строк без movement-club — отдельное явное
   методическое решение;
-- DDL и DML требуют отдельных approvals, а первый load — reconciliation.
+- DDL выполнен 2026-08-14: таблица пустая, пять согласованных колонок и
+  `UNIQUE NULLS NOT DISTINCT` post-check пройдены. DML требует отдельного
+  approval, а первый load — reconciliation.
 
 ## Evidence
 

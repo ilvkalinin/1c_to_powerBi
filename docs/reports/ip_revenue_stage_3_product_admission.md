@@ -1,6 +1,6 @@
 # Stage 3 PRODUCT ADMISSION: `mart.ip_revenue_daily`
 
-Статус: `DDL APPROVAL PENDING — source controls and target review passed`.
+Статус: `DML APPROVAL PENDING — empty target table created and verified`.
 
 Пользователь явно подтвердил самостоятельный пакет
 `STAGE_3_PRODUCT_ADMISSION — mart.ip_revenue_daily` 2026-08-14. Граница
@@ -47,14 +47,14 @@ Current Power Query делает `LEFT JOIN` к клубу движения и �
 договора не подставляется. Вариант такой атрибуции внесён в mapping как
 возможная методическая доработка и не меняет первый релиз.
 
-## DDL review completed
+## DDL review and application completed
 
 Из `sql/marts/ip_revenue_daily_extract.sql` в повторяемом read-only snapshot
 получены те же control values: 47 151 итоговая строка, 268 944 858,22,
 14 321 строка без клуба и 92 zero groups. VM-2 — PostgreSQL 18; схема `mart`
 доступна для создания, `mart.ip_revenue_daily` отсутствует.
 
-Для отдельного DDL approval подготовлены:
+Для отдельного DDL approval были подготовлены:
 
 - [DDL](ip_revenue_daily_ddl_review.sql): пять колонок и уникальность
   `(revenue_date, club_id, service_id)` с literal nullable `club_id`;
@@ -63,6 +63,10 @@ Current Power Query делает `LEFT JOIN` к клубу движения и �
 - [loader](../../scripts/load_ip_revenue_daily.py), который откажется от DML
   без `--apply` и сверяет grain, сумму, пустой клуб и zero groups.
 
-Следующее ограничение: создать одну новую пустую таблицу на VM-2 можно только
-после отдельного явного DDL approval; загрузка данных останется отдельным DML
-approval.
+После отдельного явного DDL approval 2026-08-14 создана
+`mart.ip_revenue_daily`. Post-check: пять колонок, table rows = 0 и
+`UNIQUE NULLS NOT DISTINCT (revenue_date, club_id, service_id)` — passed.
+
+Следующее ограничение: первая загрузка данных на VM-2 остаётся отдельным DML
+approval. Loader выполнит bounded rebuild и source-to-target reconciliation
+в одной контролируемой операции.

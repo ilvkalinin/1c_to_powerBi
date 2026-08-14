@@ -1,6 +1,6 @@
 # Source-to-target mapping: выручка ИП
 
-Статус: `STAGE_3 DDL REVIEW PENDING / current club rule CONFIRMED`.
+Статус: `STAGE_3 DML APPROVAL PENDING / current club rule CONFIRMED`.
 
 ## Гранулярность и граница
 

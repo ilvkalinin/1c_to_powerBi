@@ -1,6 +1,6 @@
 # Data contract: «Выручка ИП»
 
-Статус: `STAGE_3 DDL APPROVAL PENDING / source admission controls CONFIRMED`.
+Статус: `STAGE_3 DML APPROVAL PENDING / empty target table CONFIRMED`.
 
 | Параметр | Значение |
 |---|---|
