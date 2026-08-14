@@ -44,3 +44,22 @@
 Это зафиксировано как критичный артефакт возможной доработки. Он не меняет
 текущий объект, его refresh или результат первого релиза без отдельного
 решения пользователя по BR-018 и отдельного DML-разрешения.
+
+## SV-093 — «Загрузка ОП»: завершение bounded CRM controls
+
+Статус: `VALIDATED` на live `gymdb` в одном `REPEATABLE READ, READ ONLY`
+снимке 2026-08-14. Выполненный SQL:
+[sales_interactions_global_review_2026-08-14.sql](validation_sql/sales_interactions_global_review_2026-08-14.sql).
+Проверка идёт от трёх подтверждённых воронок к взаимодействиям через indexed
+task-owner path, а не сканирует весь `Reference67` в порядке первичного ключа.
+
+| Контроль | Фактический результат | Статус |
+|---|---|---|
+| SA-V02 | 100 interactions; 41 phone rows = 41 non-null technical phone keys; 1 interaction has two phone rows, max 2 | VALIDATED — phone rows сохраняются, `LEFT JOIN` null-placeholder не считается ключом |
+| SA-V03 | 58 interactions have qualifying employment; 33 have one match, 25 have 2–3, 42 have none | VALIDATED — current `EXISTS` не размножает interaction; name-based rule не заменяется на ID |
+| SA-V04 | 2 591 535 interactions in 2026; `marked = 0` | VALIDATED observation — новый state filter не вводится |
+
+Прежний SA-V02 считал `ROW(NULL,NULL)` от `LEFT JOIN` как отдельный distinct
+key и поэтому возвращал 101 technical key при 41 phone rows. Это дефект
+контрольной метрики, не логики отчёта; он сохранён как артефакт возможной
+доработки. В новом control null-placeholder явно исключён.

@@ -6,7 +6,7 @@ package_id	stage	package_status	approved_at
 global_stage_2_evidence_review_2026-08-14	STAGE_2_SERVER_VALIDATION	ACTIVE	2026-08-14
 
 report_id	report_status	completion_commit
-sales_interactions	PENDING	-
+sales_interactions	COMPLETE	SELF
 membership_receipts	PENDING	-
 children_package_sales	PENDING	-
 newcomer_guest_visits	PENDING	-
