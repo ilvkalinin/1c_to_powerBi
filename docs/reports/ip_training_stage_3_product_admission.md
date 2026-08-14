@@ -1,6 +1,6 @@
 # Stage 3 PRODUCT ADMISSION: `mart.ip_training_daily`
 
-Статус: `DDL REVIEW PENDING — DDL/DML not approved`.
+Статус: `DML APPROVAL PENDING — DDL applied and verified`.
 
 Пользователь явно подтвердил самостоятельный пакет
 `STAGE_3_PRODUCT_ADMISSION — mart.ip_training_daily` 2026-08-14. Граница
@@ -75,5 +75,7 @@ target-grain rows, `SUM(training_count)` = 142 639, PZ join excess = 135,
 остальные source safeguards — PASS. VM-2 precheck повторно подтвердил:
 `mart.ip_training_daily` отсутствует, право `CREATE` в схеме `mart` есть.
 
-Ни один из этих SQL не выполнялся на VM-2; отдельные approval DDL и DML
-остаются обязательными.
+Пользователь отдельно одобрил DDL 2026-08-14. `mart.ip_training_daily`
+создана на VM-2 и postcheck подтвердил все 9 колонок, PK и два `CHECK`;
+таблица пока содержит 0 строк. DML не выполнялся и требует отдельного
+approval.

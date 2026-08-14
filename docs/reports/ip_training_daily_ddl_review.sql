@@ -1,8 +1,8 @@
--- REVIEW ONLY — do not execute without separate explicit user approval.
+-- APPLIED 2026-08-14 after separate explicit user approval.
 -- Target: fitness_dwh on VM-2.
 -- Product: mart.ip_training_daily.
--- Preconditions: S3-IP-ADMISSION-001 passed; mart schema exists; this table
--- is absent; a backup point is available; the reviewed loader has not yet run.
+-- Preconditions used: S3-IP-ADMISSION-001 passed; mart schema existed; this
+-- table was absent; the reviewed loader had not yet run.
 
 BEGIN;
 

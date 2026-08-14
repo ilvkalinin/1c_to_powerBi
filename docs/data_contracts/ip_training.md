@@ -1,6 +1,6 @@
 # Data contract: «Тренировки ИП»
 
-Статус: `STAGE_3 DDL REVIEW PENDING / source admission controls CONFIRMED`.
+Статус: `STAGE_3 DDL APPLIED / initial DML pending`.
 
 | Параметр | Значение | Статус |
 |---|---|---|
