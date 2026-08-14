@@ -9,9 +9,10 @@ Mapping основан на текущем SQL/M/DAX, metadata и решения
 SV-076: `VT4913` содержит 46 470 unique physical rows; каждая имеет
 совпавшие чек и контракт, но 9 933 child-ссылки не совпали с
 `Reference141X1`. SV-083: bounded 100 `AccumRg7739` rows равны technical keys
-и не имеют orphan-contract. Следовательно, grain package row и source key
-имеют ограниченное физическое evidence, но `VT4913 → VT4924/AccumRg7739`,
-сумма/номенклатура, возврат и состояния остаются implementation blockers.
+и не имеют orphan-contract. SV-095 нашёл 38 package rows без строки
+`VT4924`; fallback `AccumRg7739` по чеку × контракту × ребёнку отсутствует.
+Следовательно, сумма/номенклатура полного набора не доказаны и остаются
+implementation blocker.
 
 ## Подтверждённая гранулярность
 
