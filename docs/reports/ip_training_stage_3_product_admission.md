@@ -1,6 +1,6 @@
 # Stage 3 PRODUCT ADMISSION: `mart.ip_training_daily`
 
-Статус: `DECISION REQUIRED — client_key method`.
+Статус: `DDL REVIEW PENDING — DDL/DML not approved`.
 
 Пользователь явно подтвердил самостоятельный пакет
 `STAGE_3_PRODUCT_ADMISSION — mart.ip_training_daily` 2026-08-14. Граница
@@ -57,9 +57,23 @@ reconciliation сверит загрузку с этим источником, �
 VM-2: схема `mart` существует, `mart.ip_training_daily` отсутствует, право
 создания в схеме есть. DDL/DML не выполнялись.
 
-## Единственное решение для продолжения
+## Решение и проекты для review
 
-Для `mart.ip_training_daily` требуется зафиксировать `client_key`:
-техническая проверка подтвердила, что `Reference141X1._Code::text` заполнен и
-уникален в полной ИП-когорте, но BR-007 пока утверждает этот метод только для
-DPFU. Без решения нельзя подготовить детерминированный DDL и загрузочный SQL.
+Пользователь подтвердил `Reference141X1._Code::text` как `client_key` для
+`mart.ip_training_daily` 2026-08-14. BR-007, mapping и contract обновлены.
+Проекты для review готовы:
+
+- `docs/reports/ip_training_daily_ddl_review.sql` — создание таблицы и PK;
+- `sql/marts/ip_training_daily_extract.sql` — bounded source extract;
+- `sql/marts/ip_training_daily_target_replace.sql` — временная stage,
+  проверки и атомарная замена.
+- `scripts/load_ip_training_daily.py` — загрузчик, который отказывается от
+  DML без явного `--apply` и берёт extract/controls из одного source snapshot.
+
+Повторный source control перед DDL review дал 142 639 raw rows → 141 327
+target-grain rows, `SUM(training_count)` = 142 639, PZ join excess = 135,
+остальные source safeguards — PASS. VM-2 precheck повторно подтвердил:
+`mart.ip_training_daily` отсутствует, право `CREATE` в схеме `mart` есть.
+
+Ни один из этих SQL не выполнялся на VM-2; отдельные approval DDL и DML
+остаются обязательными.

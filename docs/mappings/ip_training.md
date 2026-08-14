@@ -1,6 +1,6 @@
 # Source-to-target mapping: тренировки ИП
 
-Статус: `BUSINESS MAPPING COMPLETE / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED`.
+Статус: `BUSINESS MAPPING COMPLETE / STAGE_3 ADMISSION CONTROLS CONFIRMED / DDL REVIEW PENDING`.
 
 Mapping основан на текущих запросах, metadata и решениях пользователя 2026-07-24. Архитектура `mart.ip_training_daily` выбрана в ADR-0025; SV-058/SV-068 подтвердили current source cohort, кардинальность двух ветвей и итоговый grain. Реализация остаётся отложенной до отдельного разрешения Stage 3.
 
@@ -29,13 +29,13 @@ Mapping основан на текущих запросах, metadata и реш�
 | Целевая колонка | Бизнес-описание | Источник / преобразование | Тип PostgreSQL | NULL | Статус | Проверка до SQL |
 |---|---|---|---|---|---|---|
 | `training_date` | календарная дата тренировки | `Document329.Fld4306::date` либо `Document279.Fld3218::date`; не `InfoRg7006.Period` | `date` | нет | CONFIRMED — user decision / SV-068 | timezone и фактический тип |
-| `club_id` | клуб тренировки | `InfoRg7006.Fld7009`; сверить с клубом документа | UNKNOWN | нет | CONFIRMED source / SV-068 | расхождения клуба регистра и документа |
-| `employee_id` | стабильный тренер ИП | `Document329.Fld4322` / `Document279.Fld3223` | UNKNOWN | нет | CONFIRMED source / SV-068 | пустые/удалённые сотрудники |
-| `employee_name` | отображаемое имя сотрудника | `Reference225.Description` | `text` | нет | CONFIRMED need | дубли имён не являются ключом |
-| `client_key` | стабильный ключ клиента для `DISTINCTCOUNT` | `InfoRg7006.Fld7008` → `Reference141X1._Code::text` | `text` | нет | DECISION_REQUIRED — S3-IP-ADMISSION-001: 7 797 scoped client IDs имеют 0 `NULL`/пустых и 0 duplicate `_Code`; BR-007 пока утвердил этот метод только для DPFU | зафиксировать метод для `mart.ip_training_daily` до DDL |
-| `client_code` | код клиента в детальном визуале | `Reference141X1.Code` | `text` | нет | CONFIRMED need | доступ и маскирование |
-| `service_id` | стабильный тип услуги | `InfoRg7006.Fld7010`; связь со строкой услуги проверить | UNKNOWN | нет | CONFIRMED source / SV-068 | расхождения номенклатуры |
-| `service_name` | наименование услуги в структуре тренировок | `Reference163.Description` | `text` | нет | CONFIRMED need | переименования и история |
+| `club_id` | клуб тренировки | `encode(InfoRg7006.Fld7009, 'hex')` | `text` | нет | CONFIRMED — S3-IP-ADMISSION-001 physical metadata | расхождения клуба регистра и документа |
+| `employee_id` | стабильный тренер ИП | `encode(Document329.Fld4322 / Document279.Fld3223, 'hex')` | `text` | нет | CONFIRMED — S3-IP-ADMISSION-001 physical metadata | пустые/удалённые сотрудники |
+| `employee_name` | отображаемое имя сотрудника | `Reference225.Description::text` | `text` | нет | CONFIRMED — S3-IP-ADMISSION-002: blank/NULL 0 in source extract | дубли имён не являются ключом |
+| `client_key` | стабильный ключ клиента для `DISTINCTCOUNT` | `InfoRg7006.Fld7008` → `Reference141X1._Code::text` | `text` | нет | CONFIRMED — user decision 2026-08-14; S3-IP-ADMISSION-001: 7 797 scoped IDs have 0 NULL/blank/duplicate `_Code` | recheck on every load |
+| `client_code` | код клиента в детальном визуале | `Reference141X1._Code::text` | `text` | нет | CONFIRMED — same confirmed source representation as `client_key` | access policy BR-017 |
+| `service_id` | стабильный тип услуги | `encode(InfoRg7006.Fld7010, 'hex')` | `text` | нет | CONFIRMED — S3-IP-ADMISSION-001 physical metadata | source relation is inner-joined |
+| `service_name` | наименование услуги в структуре тренировок | `Reference163.Description::text` | `text` | нет | CONFIRMED — S3-IP-ADMISSION-002: blank/NULL 0 in source extract | переименования и история |
 | `training_count` | количество квалифицированных строк текущей логики в целевой комбинации | `COUNT` строк двух ветвей после текущих квалифицирующих условий; сохраняет legacy-кратность ПЗ | `integer`/`bigint` | нет | CONFIRMED current rule / SV-058 | сверка с текущим `COUNT(Контрагент)` |
 
 ## Источники и связи
@@ -109,9 +109,15 @@ Mapping основан на текущих запросах, metadata и реш�
 - 142 638 source rows агрегируются в 141 326 строк grain; сумма
   `training_count` = 142 638, `NULL` component — 0;
 - среди 7 797 scoped клиентов `_Code` не содержит `NULL`/пустых значений и не
-  имеет duplicate code. Техническая пригодность доказана; выбор метода для
-  этого продукта ждёт явного решения, поскольку BR-007 пока фиксирует его
-  реализацию только для DPFU.
+  имеет duplicate code. Пользователь подтвердил этот метод для
+  `mart.ip_training_daily` 2026-08-14; BR-007 обновлён.
+
+`S3-IP-ADMISSION-002` затем выполнил проект source extract в отдельном
+`REPEATABLE READ READ ONLY` snapshot: 142 639 raw rows → 141 327 target rows,
+`SUM(training_count)` = 142 639, duplicate target keys = 0; client code,
+employee name и service name не содержат `NULL`/пустых значений. Разница в
+одну строку относительно предыдущего snapshot отражает изменение live source;
+загрузчик получает extract и его controls из одной source-транзакции.
 
 SQL: `docs/source_metadata/validation_sql/ip_training_2026-08-11.sql`.
 

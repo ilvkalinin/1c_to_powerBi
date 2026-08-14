@@ -1,13 +1,13 @@
 # Data contract: «Тренировки ИП»
 
-Статус: `DESIGNED / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED / IMPLEMENTATION DEFERRED`.
+Статус: `STAGE_3 DDL REVIEW PENDING / source admission controls CONFIRMED`.
 
 | Параметр | Значение | Статус |
 |---|---|---|
 | Объект | `mart.ip_training_daily` | ADR-0025 |
 | Таблица Power BI | `Тренировки ИП` | CONFIRMED |
 | Grain | дата × клуб × сотрудник × клиент × услуга | CONFIRMED |
-| Ключ | полный состав grain | VALIDATED for current source cohort — SV-068; physical target constraint deferred to Stage 3 |
+| Ключ | полный состав grain | CONFIRMED — S3-IP-ADMISSION-001; DDL review defines physical PK |
 | Обновление | ежедневно, bounded rebuild BR-003 | DESIGNED |
 | Power BI | Import; общий календарь | DESIGNED |
 
@@ -27,9 +27,10 @@
 direction. DAX: сумма тренировок, distinct УЧК/тренеров, регулярность и доли.
 PostgreSQL: квалификация и агрегация текущих строк двух ветвей. `SV-058`
 подтвердил legacy-кратность `VT4352`, которая сохраняется по BR-018;
-`SV-068` подтвердил current source control: 197 109 PBIT-строк сворачиваются
-в 195 238 строк grain, `SUM(training_count)=197 109`, обязательные компоненты
-grain не `NULL`, а технические ключи ветвей не пересекаются. Нормализация до
-уникальных событий — отдельное улучшение. Реализация ожидает проверки
-физического типа и целевого объёма/refresh-окна, но не получает разрешения
+`S3-IP-ADMISSION-001` подтвердил BR-003 source control: 142 638 PBIT-строк
+сворачиваются в 141 326 строк grain, `SUM(training_count)=142 638`,
+обязательные компоненты grain не `NULL`, а технические ключи ветвей не
+пересекаются. `client_key` и `client_code` — один подтверждённый
+`Reference141X1._Code::text`; детализация разрешена BR-017. Нормализация до
+уникальных событий — отдельное улучшение. DDL и DML не получают разрешения
 автоматически.

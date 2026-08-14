@@ -29,8 +29,8 @@ WITH calendar_bounds AS (
     JOIN public._enum448 state ON state._idrref = i._fld7013rref
     LEFT JOIN public._document329_vt4352 vt ON vt._document329_idrref = d._idrref
     CROSS JOIN calendar_bounds b
-    WHERE d._fld4306::date >= b.date_from
-      AND d._fld4306::date < b.date_to
+    WHERE d._fld4306 >= b.date_from
+      AND d._fld4306 < b.date_to
       AND (encode(i._fld7010rref, 'hex') = 'bcd000505688c8b011ee0a8ba155d4a1'
         OR encode(vt._fld4358rref, 'hex') = 'a0f1524d502e0d5d4c1dfeb9d5bbb3fe')
       AND state._enumorder NOT IN (2, 3)
@@ -51,8 +51,8 @@ WITH calendar_bounds AS (
     JOIN public._reference225 employee ON employee._idrref = d._fld3223rref
     JOIN public._enum448 state ON state._idrref = i._fld7013rref
     CROSS JOIN calendar_bounds b
-    WHERE d._fld3218::date >= b.date_from
-      AND d._fld3218::date < b.date_to
+    WHERE d._fld3218 >= b.date_from
+      AND d._fld3218 < b.date_to
       AND encode(i._fld7010rref, 'hex') = 'bcd000505688c8b011ee0a8ba155d4a1'
       AND state._enumorder NOT IN (2, 3)
 ), raw AS (
