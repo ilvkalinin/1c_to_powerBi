@@ -1,6 +1,6 @@
 # Data contract: «Тренировки ИП»
 
-Статус: `STAGE_3 DDL APPLIED / initial DML pending`.
+Статус: `IMPLEMENTED / initial BR-003 load VALIDATED`.
 
 | Параметр | Значение | Статус |
 |---|---|---|

@@ -1,6 +1,6 @@
 # Stage 3 PRODUCT ADMISSION: `mart.ip_training_daily`
 
-Статус: `DML APPROVAL PENDING — DDL applied and verified`.
+Статус: `COMPLETE — initial BR-003 load VALIDATED`.
 
 Пользователь явно подтвердил самостоятельный пакет
 `STAGE_3_PRODUCT_ADMISSION — mart.ip_training_daily` 2026-08-14. Граница
@@ -69,13 +69,30 @@ VM-2: схема `mart` существует, `mart.ip_training_daily` отсу�
   проверки и атомарная замена.
 - `scripts/load_ip_training_daily.py` — загрузчик, который отказывается от
   DML без явного `--apply` и берёт extract/controls из одного source snapshot.
+- `sql/marts/ip_training_daily_client_key_control.sql` — source-side guard:
+  на каждом запуске требует непустой и однозначный `_Code` клиента.
 
 Повторный source control перед DDL review дал 142 639 raw rows → 141 327
 target-grain rows, `SUM(training_count)` = 142 639, PZ join excess = 135,
 остальные source safeguards — PASS. VM-2 precheck повторно подтвердил:
 `mart.ip_training_daily` отсутствует, право `CREATE` в схеме `mart` есть.
 
-Пользователь отдельно одобрил DDL 2026-08-14. `mart.ip_training_daily`
-создана на VM-2 и postcheck подтвердил все 9 колонок, PK и два `CHECK`;
-таблица пока содержит 0 строк. DML не выполнялся и требует отдельного
-approval.
+Пользователь отдельно одобрил DDL и DML 2026-08-14. `mart.ip_training_daily`
+создана на VM-2, затем загружена атомарно из одного source snapshot.
+
+## Load and reconciliation result
+
+`S3-IP-LOAD-001—004`, 2026-08-14, BR-003 `2025-01-01`—`2027-01-01`:
+
+| Контроль | Фактический результат | Статус |
+|---|---:|---|
+| Source → target | 142 639 source rows → 141 327 target-grain rows; `SUM(training_count)` = 142 639 | PASS |
+| Staging | 141 327 rows; duplicate keys 0; contract violations 0 | PASS |
+| Persistent target | 141 327 rows; `SUM(training_count)` = 142 639 | PASS |
+| BR-003 horizon | out-of-horizon rows 0 | PASS |
+| `_Code` client guard | 7 797 scoped codes; blank 0; duplicate 0 | PASS |
+
+`sql/tests/ip_training_daily_reconciliation.sql` фиксирует повторяемые
+read-only проверки. Initial load закрыт; последующие refresh запускаются
+только через `scripts/load_ip_training_daily.py --apply` при отдельном
+разрешении на DML.

@@ -1,6 +1,6 @@
 # ADR-0025: общий факт тренировок ИП
 
-- Статус: `STAGE_3 DDL APPLIED / initial DML pending — S3-IP-ADMISSION-001, 002`
+- Статус: `IMPLEMENTED / initial BR-003 load VALIDATED — S3-IP-ADMISSION-001, 002; S3-IP-LOAD-001—004`
 - Дата: 2026-08-03
 - Отчёты: №8 «Отчёт по ИП», №1 «KPI Фитнеса», №6 «Загрузка сотрудников», №29 «Выручка ДПФУ»
 

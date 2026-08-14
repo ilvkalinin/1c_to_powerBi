@@ -14,6 +14,7 @@ import psycopg
 
 ROOT = Path(__file__).resolve().parents[1]
 EXTRACT = ROOT / "sql/marts/ip_training_daily_extract.sql"
+CLIENT_KEY_CONTROL = ROOT / "sql/marts/ip_training_daily_client_key_control.sql"
 COLUMNS = """
 training_date, club_id, employee_id, employee_name, client_key,
 client_code, service_id, service_name, training_count
@@ -52,6 +53,16 @@ def extract_sql(horizon_start: date, horizon_end: date) -> str:
     )
 
 
+def bound_sql(path: Path, horizon_start: date, horizon_end: date) -> str:
+    return (
+        path.read_text(encoding="utf-8")
+        .replace("$1::date", f"DATE '{horizon_start.isoformat()}'")
+        .replace("$2::date", f"DATE '{horizon_end.isoformat()}'")
+        .strip()
+        .rstrip(";")
+    )
+
+
 def source_controls(cursor, query: str) -> tuple[int, int, int]:
     cursor.execute(
         f"""
@@ -65,6 +76,13 @@ def source_controls(cursor, query: str) -> tuple[int, int, int]:
     if not target_rows or source_rows <= 0 or invalid_counts:
         raise RuntimeError("Unexpected source aggregate control")
     return source_rows, target_rows, source_rows
+
+
+def require_client_key_quality(cursor, query: str) -> None:
+    cursor.execute(query)
+    total_clients, blank_codes, duplicate_codes = cursor.fetchone()
+    if not total_clients or blank_codes or duplicate_codes:
+        raise RuntimeError("Client code is blank or not unique in the source snapshot")
 
 
 def require_stage_integrity(cursor) -> None:
@@ -120,12 +138,14 @@ def main() -> None:
         datetime.now(ZoneInfo("Europe/Moscow")).date()
     )
     query = extract_sql(horizon_start, horizon_end)
+    client_key_query = bound_sql(CLIENT_KEY_CONTROL, horizon_start, horizon_end)
 
     with psycopg.connect(**config("SOURCE_")) as source, psycopg.connect(
         **config("MART_")
     ) as target:
         with source.cursor() as source_cur, target.cursor() as target_cur:
             source_cur.execute("BEGIN ISOLATION LEVEL REPEATABLE READ, READ ONLY")
+            require_client_key_quality(source_cur, client_key_query)
             expected_source_rows, expected_target_rows, expected_training_count = (
                 source_controls(source_cur, query)
             )

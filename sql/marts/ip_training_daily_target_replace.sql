@@ -22,6 +22,8 @@ CREATE TEMP TABLE _ip_training_daily_expected (
 --     client_code, service_id, service_name, training_count
 -- ) FROM STDIN;
 -- INSERT INTO _ip_training_daily_expected VALUES (...source snapshot controls...);
+-- Before this target transaction, the runner also verifies source-side that
+-- every scoped client_key is nonblank and maps to exactly one source client ID.
 
 DO $$
 BEGIN

@@ -1,6 +1,6 @@
 # Source-to-target mapping: тренировки ИП
 
-Статус: `BUSINESS MAPPING COMPLETE / STAGE_3 ADMISSION CONTROLS CONFIRMED / DDL REVIEW PENDING`.
+Статус: `IMPLEMENTED / initial BR-003 load VALIDATED`.
 
 Mapping основан на текущих запросах, metadata и решениях пользователя 2026-07-24. Архитектура `mart.ip_training_daily` выбрана в ADR-0025; SV-058/SV-068 подтвердили current source cohort, кардинальность двух ветвей и итоговый grain. Реализация остаётся отложенной до отдельного разрешения Stage 3.
 
