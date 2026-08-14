@@ -1,6 +1,6 @@
 # Data contract: «События предзаписи»
 
-Статус: `STAGE_3 ADMISSION / DDL REVIEW PENDING`.
+Статус: `STAGE_3 DML APPROVAL PENDING / empty target table CONFIRMED`.
 
 | Параметр | Значение |
 |---|---|

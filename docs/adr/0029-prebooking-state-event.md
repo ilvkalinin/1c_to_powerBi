@@ -1,6 +1,6 @@
 # ADR-0029: факт событий предзаписи с legacy-кратностью ПЗ
 
-- Статус: `STAGE_3 ADMISSION / DDL REVIEW PENDING`
+- Статус: `STAGE_3 DML APPROVAL PENDING / empty target table CONFIRMED`
 - Дата: 2026-08-14
 - Потребитель: «Контроль предварительной записи»
 
@@ -30,7 +30,9 @@ DAX сохраняет net measures, доли, рейтинги и план-фа
 
 - physical rows ПЗ не равны unique state-events по намеренному BR-018;
 - orphan-enum, unposted/marked и document mismatches не «исправляются»;
-- DDL и DML потребуют отдельных approvals; initial load — reconciliation.
+- DDL выполнен 2026-08-14: пустая таблица, 21 согласованная колонка и
+  nullable legacy-key post-check пройдены. DML требует отдельного approval;
+  initial load — reconciliation.
 
 ## Evidence
 

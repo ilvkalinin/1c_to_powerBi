@@ -1,6 +1,6 @@
 # Source-to-target mapping: события предзаписи
 
-Статус: `STAGE_3 ADMISSION / current-rule source mapping CONFIRMED`.
+Статус: `STAGE_3 DML APPROVAL PENDING / empty target table CONFIRMED`.
 
 ## Гранулярность и граница
 

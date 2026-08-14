@@ -1,6 +1,6 @@
 # Stage 3 PRODUCT ADMISSION: `mart.prebooking_state_event`
 
-Статус: `DDL APPROVAL PENDING — mapping and target review completed`.
+Статус: `DML APPROVAL PENDING — empty target table created and verified`.
 
 Пользователь явно подтвердил самостоятельный пакет
 `STAGE_3_PRODUCT_ADMISSION — mart.prebooking_state_event` 2026-08-14.
@@ -25,12 +25,16 @@ all 21 mapped columns without reading data. DDL/DML have not been performed.
 
 ## DDL review completed
 
-Prepared [DDL](prebooking_state_event_ddl_review.sql),
+For separate DDL approval prepared [DDL](prebooking_state_event_ddl_review.sql),
 [source extract](../../sql/marts/prebooking_state_event_extract.sql),
 [atomic target replace](../../sql/marts/prebooking_state_event_target_replace.sql)
 and [loader](../../scripts/load_prebooking_state_event.py). The loader refuses
 DML without `--apply` and reconciles source rows, PZ/GZ rows, arrivals, net
 delta, the nullable legacy key and contract violations.
 
-Next constraint: only a separate explicit DDL approval may create this empty
-VM-2 table. Its first load remains a separate DML approval.
+After separate explicit DDL approval 2026-08-14, created
+`mart.prebooking_state_event`. Post-check: 21 columns, table rows = 0 and
+`UNIQUE NULLS NOT DISTINCT` legacy key — passed.
+
+Next constraint: first event load remains a separate DML approval. The loader
+will perform a bounded rebuild and source-to-target reconciliation atomically.

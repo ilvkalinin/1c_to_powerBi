@@ -1,4 +1,4 @@
--- REVIEW ONLY — not applied. Target: VM-2 / fitness_dwh.
+-- APPLIED 2026-08-14 after separate explicit user approval.
 -- Execute only after separate explicit DDL approval; initial load requires its
 -- own separate DML approval.
 
