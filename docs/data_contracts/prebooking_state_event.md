@@ -1,6 +1,6 @@
 # Data contract: «События предзаписи»
 
-Статус: `STAGE_3 DML APPROVAL PENDING / empty target table CONFIRMED`.
+Статус: `IMPLEMENTED / initial BR-003 load VALIDATED — S3-PB-001—004`.
 
 | Параметр | Значение |
 |---|---|

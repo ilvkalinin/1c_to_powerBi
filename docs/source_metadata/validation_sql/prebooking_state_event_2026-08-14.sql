@@ -25,7 +25,8 @@ WITH calendar_bounds AS (
       AND e._enumorder IN (1, 2, 3)
       AND document_service._parentidrref IS DISTINCT FROM '\\x4296a4bf013441d111e7cae05001072c'::bytea
 ), gz AS (
-    SELECT s._recordertref, s._recorderrref, s._lineno, e._enumorder,
+    SELECT s._recordertref, s._recorderrref, s._lineno,
+           NULL::numeric(5,0) AS _lineno4353, e._enumorder,
            s._period AS state_event_at, g._fld3218 AS lesson_start_at
     FROM public._inforg7006 s
     JOIN public._document279 g ON g._idrref = s._fld7007_rrref
@@ -38,9 +39,15 @@ WITH calendar_bounds AS (
       AND s._fld7010rref <> '\\xbcd000505688c8b011ee0a8ba155d4a1'::bytea
       AND e._enumorder IN (1, 2, 3, 4)
 ), target_rows AS (
-    SELECT 'PZ'::text AS booking_kind, * FROM pz
+    SELECT 'PZ'::text AS booking_kind,
+           _recordertref, _recorderrref, _lineno, _lineno4353, _enumorder,
+           state_event_at, lesson_start_at
+    FROM pz
     UNION ALL
-    SELECT 'GZ'::text, * FROM gz
+    SELECT 'GZ'::text,
+           _recordertref, _recorderrref, _lineno, _lineno4353, _enumorder,
+           state_event_at, lesson_start_at
+    FROM gz
 )
 SELECT booking_kind, _enumorder::integer AS state_order,
        count(*)::bigint AS target_rows,

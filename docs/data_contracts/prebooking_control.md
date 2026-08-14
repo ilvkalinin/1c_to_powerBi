@@ -1,6 +1,6 @@
 # Data contract: «Контроль предварительной записи»
 
-Статус: `DESIGNED COMPOSITE MODEL / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION REQUIRED`.
+Статус: `COMPOSITE MODEL / state-event and plan IMPLEMENTED / group-lesson admission READY`.
 
 ## Объекты
 
@@ -43,4 +43,3 @@ event category, delta и lesson aggregates; DAX — нетто-записи, д�
 Приёмка: ключ/история состояния, взаимоисключимые document branches,
 отсутствие размножения `VT4352`, уникальный план и lesson ID, корректные
 enum/states, контрольные значения, rerun и SLA.
-

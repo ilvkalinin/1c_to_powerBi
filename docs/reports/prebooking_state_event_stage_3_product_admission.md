@@ -1,6 +1,6 @@
 # Stage 3 PRODUCT ADMISSION: `mart.prebooking_state_event`
 
-Статус: `DML APPROVAL PENDING — empty target table created and verified`.
+Статус: `IMPLEMENTED / initial BR-003 load VALIDATED — S3-PB-001—004`.
 
 Пользователь явно подтвердил самостоятельный пакет
 `STAGE_3_PRODUCT_ADMISSION — mart.prebooking_state_event` 2026-08-14.
@@ -21,7 +21,7 @@
 
 VM-2 precheck: PostgreSQL 18, schema `mart` is createable and
 `mart.prebooking_state_event` is absent. Source extract typecheck confirmed
-all 21 mapped columns without reading data. DDL/DML have not been performed.
+all 21 mapped columns without reading data.
 
 ## DDL review completed
 
@@ -36,5 +36,24 @@ After separate explicit DDL approval 2026-08-14, created
 `mart.prebooking_state_event`. Post-check: 21 columns, table rows = 0 and
 `UNIQUE NULLS NOT DISTINCT` legacy key — passed.
 
-Next constraint: first event load remains a separate DML approval. The loader
-will perform a bounded rebuild and source-to-target reconciliation atomically.
+## Initial DML load and reconciliation completed
+
+After separate explicit DML approval 2026-08-14, the loader completed one
+atomic BR-003 rebuild. The source snapshot before target `COPY` contained
+2,389,981 rows: PZ 575,206; GZ 1,814,775; arrived 133,284; net
+`booking_delta` 1,686,747. Persisted mart controls matched exactly.
+
+`S3-PB-001` source-to-target controls — `PASS`; `S3-PB-002` nullable legacy
+key duplicates = 0 — `PASS`; `S3-PB-003` BR-003 out-of-horizon rows,
+required contract nulls and invalid state delta = 0 — `PASS`; `S3-PB-004`
+branch/status totals retained — `PASS`. Reproducible read-only SQL:
+[`prebooking_state_event_reconciliation.sql`](../../sql/tests/prebooking_state_event_reconciliation.sql).
+ПЗ сохраняет 16,749 строк legacy-кратности `VT4352`: 558,457 state-events →
+575,206 физических строк; это подтверждает BR-018 для initial load.
+
+Performance review: all 21 fields remain contract-required. A narrow
+source-control query was independently proven equivalent to the full extract
+in one repeatable-read snapshot (2,389,967 rows / delta 1,686,736), while
+running in 30.2 s versus 34.9 s. The load performs binary `COPY` directly to
+the protected mart after that source control, avoiding the former second
+staging-to-table write; any error rolls back the whole rebuild.

@@ -1,6 +1,6 @@
 # ADR-0029: факт событий предзаписи с legacy-кратностью ПЗ
 
-- Статус: `STAGE_3 DML APPROVAL PENDING / empty target table CONFIRMED`
+- Статус: `IMPLEMENTED / initial BR-003 load VALIDATED — S3-PB-001—004`
 - Дата: 2026-08-14
 - Потребитель: «Контроль предварительной записи»
 
@@ -18,9 +18,12 @@ SV-072 доказал, что документные club/service иногда �
 
 ## Архитектура и refresh
 
-`read-only source qualification → temporary target stage → mart table → Power
-BI Import`. Полный atomic rebuild BR-003 хранит записи для занятий внутри
-dynamic horizon. Постоянный staging, raw replication и watermark не создаются.
+`read-only source qualification → protected mart COPY → Power BI Import`.
+Полный atomic rebuild BR-003 хранит записи для занятий внутри dynamic horizon.
+Узкий source-control воспроизводит только inclusion joins и контрольные
+показатели; затем binary `COPY` записывает все 21 контрактное поле напрямую в
+mart внутри той же транзакции. Постоянный staging, raw replication и watermark
+не создаются.
 
 PostgreSQL рассчитывает текущую категорию времени, delta и признаки branches;
 DAX сохраняет net measures, доли, рейтинги и план-факт. Fact-to-fact joins не
@@ -31,8 +34,8 @@ DAX сохраняет net measures, доли, рейтинги и план-фа
 - physical rows ПЗ не равны unique state-events по намеренному BR-018;
 - orphan-enum, unposted/marked и document mismatches не «исправляются»;
 - DDL выполнен 2026-08-14: пустая таблица, 21 согласованная колонка и
-  nullable legacy-key post-check пройдены. DML требует отдельного approval;
-  initial load — reconciliation.
+  nullable legacy-key post-check пройдены. После отдельного DML approval
+  initial load 2,389,981 rows / delta 1,686,747 reconciled exactly.
 
 ## Evidence
 

@@ -1,6 +1,6 @@
 # Source-to-target mapping: события предзаписи
 
-Статус: `STAGE_3 DML APPROVAL PENDING / empty target table CONFIRMED`.
+Статус: `IMPLEMENTED / initial BR-003 load VALIDATED — S3-PB-001—004`.
 
 ## Гранулярность и граница
 
