@@ -1,0 +1,4 @@
+# Global project gate. Only OPEN permits selection of any new report package.
+# It can be changed only after a documented full review and explicit user decision.
+gate_id	state	reason
+global_stage_gate	BLOCKED	User directive 2026-08-14: do not start any new package, Stage 2 control, Stage 3 transition or mart creation until every critical question across all reports and tables is resolved.

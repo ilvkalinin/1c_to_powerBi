@@ -10,6 +10,19 @@ fi
 stage="$1"
 shift
 ledger=".agents/report_checkpoint_ledger.tsv"
+project_gate=".agents/project_stage_gate.tsv"
+
+if [ ! -r "$project_gate" ]; then
+  echo "PACKAGE SELECTION REJECTED: missing $project_gate" >&2
+  exit 2
+fi
+
+project_state=$(awk -F '\t' '$1 !~ /^#/ && $1 == "global_stage_gate" { print $2; exit }' "$project_gate")
+project_reason=$(awk -F '\t' '$1 !~ /^#/ && $1 == "global_stage_gate" { print $3; exit }' "$project_gate")
+if [ "$project_state" != "OPEN" ]; then
+  echo "PACKAGE SELECTION REJECTED: global stage gate is ${project_state:-MISSING}; ${project_reason:-no documented release}" >&2
+  exit 1
+fi
 
 if [ ! -r "$ledger" ]; then
   echo "PACKAGE SELECTION REJECTED: missing $ledger" >&2
