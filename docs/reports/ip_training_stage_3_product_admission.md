@@ -1,6 +1,6 @@
 # Stage 3 PRODUCT ADMISSION: `mart.ip_training_daily`
 
-Статус: `IN PROGRESS — source admission controls`.
+Статус: `DECISION REQUIRED — client_key method`.
 
 Пользователь явно подтвердил самостоятельный пакет
 `STAGE_3_PRODUCT_ADMISSION — mart.ip_training_daily` 2026-08-14. Граница
@@ -34,3 +34,32 @@ views потребителей, внешние источники, DDL или DM
 3. сверить source-row count с `SUM(training_count)` после целевой агрегации;
 4. проверить цель VM-2, затем подготовить DDL и reconciliation для отдельного
    review. Никаких DDL/DML в этом admission не выполняется.
+
+## Выполненное evidence
+
+`S3-IP-ADMISSION-001`, source `REPEATABLE READ READ ONLY`, 2026-08-14,
+dynamic BR-003 horizon на дату запуска `2025-01-01`—`2027-01-01`:
+
+| Контроль | Фактический результат | Статус |
+|---|---:|---|
+| Физические типы | IDs — `bytea`; даты документов — `timestamp`; `_Code` доступен | PASS |
+| ПЗ | 39 532 rows; 39 397 events; legacy `VT4352` excess 135 | PASS — BR-018 preserved |
+| ГП | 103 106 rows; 103 106 events; excess 0 | PASS |
+| Технический ключ между ветвями | overlap 0 | PASS |
+| Состояния строк | inactive / unposted / marked = 0 в обеих ветвях | PASS |
+| Итоговый grain | 142 638 source rows → 141 326 rows; `SUM(training_count)` = 142 638; NULL components 0 | PASS |
+| `_Code` клиента | 7 797 scoped clients; NULL/blank 0; duplicates 0 | PASS — техническая пригодность |
+
+Источник проверки: `docs/source_metadata/validation_sql/ip_training_2026-08-11.sql`.
+Контрольные значения получены из независимого source snapshot; будущая
+reconciliation сверит загрузку с этим источником, а не с самой загрузочной SQL.
+
+VM-2: схема `mart` существует, `mart.ip_training_daily` отсутствует, право
+создания в схеме есть. DDL/DML не выполнялись.
+
+## Единственное решение для продолжения
+
+Для `mart.ip_training_daily` требуется зафиксировать `client_key`:
+техническая проверка подтвердила, что `Reference141X1._Code::text` заполнен и
+уникален в полной ИП-когорте, но BR-007 пока утверждает этот метод только для
+DPFU. Без решения нельзя подготовить детерминированный DDL и загрузочный SQL.

@@ -32,7 +32,7 @@ Mapping основан на текущих запросах, metadata и реш�
 | `club_id` | клуб тренировки | `InfoRg7006.Fld7009`; сверить с клубом документа | UNKNOWN | нет | CONFIRMED source / SV-068 | расхождения клуба регистра и документа |
 | `employee_id` | стабильный тренер ИП | `Document329.Fld4322` / `Document279.Fld3223` | UNKNOWN | нет | CONFIRMED source / SV-068 | пустые/удалённые сотрудники |
 | `employee_name` | отображаемое имя сотрудника | `Reference225.Description` | `text` | нет | CONFIRMED need | дубли имён не являются ключом |
-| `client_key` | стабильный ключ клиента для `DISTINCTCOUNT` | `InfoRg7006.Fld7008` → согласованное стабильное представление | UNKNOWN | нет | CONFIRMED need / SV-068 | способ защиты исходного ID |
+| `client_key` | стабильный ключ клиента для `DISTINCTCOUNT` | `InfoRg7006.Fld7008` → `Reference141X1._Code::text` | `text` | нет | DECISION_REQUIRED — S3-IP-ADMISSION-001: 7 797 scoped client IDs имеют 0 `NULL`/пустых и 0 duplicate `_Code`; BR-007 пока утвердил этот метод только для DPFU | зафиксировать метод для `mart.ip_training_daily` до DDL |
 | `client_code` | код клиента в детальном визуале | `Reference141X1.Code` | `text` | нет | CONFIRMED need | доступ и маскирование |
 | `service_id` | стабильный тип услуги | `InfoRg7006.Fld7010`; связь со строкой услуги проверить | UNKNOWN | нет | CONFIRMED source / SV-068 | расхождения номенклатуры |
 | `service_name` | наименование услуги в структуре тренировок | `Reference163.Description` | `text` | нет | CONFIRMED need | переименования и история |
@@ -56,7 +56,7 @@ Mapping основан на текущих запросах, metadata и реш�
 
 | Правило | Текущая реализация | Целевой статус |
 |---|---|---|
-| период | `InfoRg7006.Period >= 2024-01-01` | отбирать по дате начала тренировки и общей календарной политике; CONFIRMED |
+| период | legacy использовал `InfoRg7006.Period >= 2024-01-01` | отбирать по дате документа тренировки и динамической BR-003; legacy static date не переносится в загрузку; CONFIRMED |
 | ИП, ветка ПЗ | специальная услуга ИП или тип взаиморасчётов «с сотрудником» | CONFIRMED current rule; one-to-many `VT4352` сохраняет observed multiplicity SV-058 |
 | ИП, ветка ГП | специальная услуга ИП | source confirmed |
 | состояние | исключить enum order 2 и 3 | CONFIRMED — оставить текущее правило |
@@ -95,14 +95,34 @@ Mapping основан на текущих запросах, metadata и реш�
 - история следует общей календарной политике проекта;
 - пересчёт изменяемого окна около двух месяцев остаётся кандидатом до технической проверки изменений и удалений.
 
+## Stage 3 admission evidence — 2026-08-14
+
+`S3-IP-ADMISSION-001` выполнен в одной source `REPEATABLE READ READ ONLY`
+сессии по динамической BR-003 (на дату запуска `2025-01-01`—`2027-01-01`):
+
+- физические ID всех компонентов grain — `bytea`; даты документов —
+  `timestamp without time zone`; `_Code`/`_Description` требуемых справочников
+  доступны как `mvarchar`;
+- ПЗ: 39 532 current result rows, 39 397 technical source events и 135
+  legacy-добавочных строк `VT4352`; ГП: 103 106 строк и 103 106 events;
+- ветви не пересекаются, inactive/unposted/marked rows — 0 в обеих ветвях;
+- 142 638 source rows агрегируются в 141 326 строк grain; сумма
+  `training_count` = 142 638, `NULL` component — 0;
+- среди 7 797 scoped клиентов `_Code` не содержит `NULL`/пустых значений и не
+  имеет duplicate code. Техническая пригодность доказана; выбор метода для
+  этого продукта ждёт явного решения, поскольку BR-007 пока фиксирует его
+  реализацию только для DPFU.
+
+SQL: `docs/source_metadata/validation_sql/ip_training_2026-08-11.sql`.
+
 ## Техническая валидация до реализации
 
 1. Физические типы и полиморфная ссылка `InfoRg7006.Fld7007`; `SV-068`
    подтвердил нулевое пересечение ветвей по техническому ключу, но не заменяет
    metadata-проверку типов перед реализацией.
 2. Фактические объёмы и контрольные значения итогового дневного агрегата для
-   утверждённого refresh-окна. `SV-068` уже подтвердил current full cohort:
-   197 109 legacy-строк → 195 238 строк target grain, без NULL-компонентов.
+   утверждённого refresh-окна. `S3-IP-ADMISSION-001` подтвердил текущий
+   BR-003 horizon: 142 638 source rows → 141 326 target-grain rows, без NULL.
 
 Кардинальность `VT4352` для текущего результата уже доказана SV-058 и не
 служит причиной скрытой дедупликации.
