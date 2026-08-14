@@ -1,6 +1,6 @@
 # Data contract: «Уроки и расписание»
 
-Статус: `DESIGNED COMPOSITE MODEL / SOURCE VALIDATED — SV-LS-001 / SLOT-EDGE POLICY CONFIRMED — BR-021 / IMPLEMENTATION DEFERRED`.
+Статус: `STAGE 3 ADMISSION IN PROGRESS / SOURCE VALIDATED — SV-LS-001 / SLOT-EDGE POLICY CONFIRMED — BR-021`.
 
 ## Основной объект
 
@@ -26,10 +26,11 @@
 | `is_cancelled_current` | `Отменено` | boolean | да | фильтр | не мера | да |
 | `occupied_slot_count` | `Занятый слот` | smallint | нет | показатель | аддитивна | да |
 
-REUSE `mart.group_lesson` из контракта предзаписи для вместимости и пришедших;
-эти показатели не повторяются на слотах. Связи общих измерений — `1:*`, single
-direction. PostgreSQL разворачивает `[start,end)` в слоты; DAX считает часы,
-структуру занятости, рейтинги и доли.
+`mart.group_lesson` и `mart.prebooking_state_event` остаются отдельными
+фактами для вместимости, записей и пришедших; эти показатели не повторяются
+на слотах. Связи общих измерений — `1:*`, single direction. PostgreSQL
+разворачивает интервалы в слоты; DAX считает часы, структуру занятости,
+рейтинги и доли.
 
 Приёмка: один document before slot expansion, точное число слотов, корректные
 отмены/классы, отсутствие дублей, контрольная занятость и SLA. BR-021 требует
