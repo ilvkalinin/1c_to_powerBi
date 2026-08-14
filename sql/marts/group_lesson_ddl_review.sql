@@ -1,4 +1,4 @@
--- REVIEW ONLY. Execute only after separate explicit DDL approval.
+-- APPLIED 2026-08-14 after separate explicit DDL approval.
 BEGIN;
 
 CREATE TABLE mart.group_lesson (
