@@ -1,6 +1,6 @@
 # Source-to-target mapping: «Уроки и расписание»
 
-Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0015 / SOURCE VALIDATED — SV-LS-001 / SLOT-EDGE POLICY DECISION_REQUIRED`.
+Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0015 / SOURCE VALIDATED — SV-LS-001 / SLOT-EDGE POLICY CONFIRMED`.
 
 Спроектированы `mart.lesson_room_slot_5m` и REUSE `mart.group_lesson`.
 Production SQL не создаётся.
@@ -19,7 +19,8 @@ Production SQL не создаётся.
 Гранулярность нового логического набора: одно расписанное занятие из одной
 документной ветви, развёрнутое на один 5-минутный интервал. Логический ключ
 `(source_kind, source_lesson_id, slot_start_at)` подтверждён для точных
-пятиминутных интервалов; граница остальных 855 document rows требует решения.
+пятиминутных интервалов. BR-021 расширяет положительную неполную границу до
+полного последнего слота; два неположительных интервала остаются source control.
 
 ## Колонки «расписание и занятость зала»
 
@@ -30,7 +31,7 @@ Production SQL не создаётся.
 | `created_at` | момент внесения документа | `_Date_Time` обеих таблиц | без округления | `timestamp` | нет | VALIDATED | LS5-V01 |
 | `lesson_start_at` | начало занятия | `Document279.Fld3218` / `Document329.Fld4306` | по `source_kind` | `timestamp` | нет | VALIDATED | LS5-V01/02 |
 | `lesson_end_at` | окончание занятия | `Document279.Fld3219` / `Document329.Fld4307` | по `source_kind`; интервал `[start,end)` | `timestamp` | нет | VALIDATED for positive 5m intervals | LS5-V02/03 |
-| `slot_start_at` | начало 5-минутного занятого интервала | `lesson_start_at`, `lesson_end_at` | серия с шагом 5 мин, начало включено, конец исключён | `timestamp` | нет | DECISION_REQUIRED for 855 source intervals | LS5-V02/03 |
+| `slot_start_at` | начало 5-минутного занятого интервала | `lesson_start_at`, `lesson_end_at` | серия с шагом 5 мин; положительный неполный конец округляется вверх по BR-021 | `timestamp` | нет | CONFIRMED user decision | BR-021, LS5-V02/03 |
 | `club_id` | клуб занятия | `Fld3224` / `Fld4310` | `encode(..., 'hex')`, не описание | `text` | нет | VALIDATED | LS5-V01/04 |
 | `room_id` | помещение | `Fld3227` / `Fld4320` | `encode(..., 'hex')`; orphan остаётся NULL | `text` | да | VALIDATED WITH NULL RISK | LS5-V01/04 |
 | `employee_id` | ведущий сотрудник | `Fld3223` / `Fld4322` | `encode(..., 'hex')`; orphan остаётся NULL | `text` | да | VALIDATED WITH NULL RISK | LS5-V01/04 |
@@ -75,5 +76,5 @@ Power BI поверх подтверждённой вместимости и с�
 Слот-контроль из SV-LS-001 использует полный арифметический контроль горизонта
 и фактический разворот только контрольной недели, чтобы не материализовать
 миллионы строк исключительно ради read-only валидации. Параметры и физические
-имена схемы сверены. Некратные пяти минутам интервалы не принимаются как
-скрытое правило: их обработка требует отдельного решения.
+имена схемы сверены. BR-021 задаёт явное округление положительного неполного
+конца вверх; два неположительных интервала остаются отдельным source control.
