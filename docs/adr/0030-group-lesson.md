@@ -1,6 +1,6 @@
 # ADR-0030: факт группового занятия
 
-- Статус: `STAGE_3 DDL APPROVAL PENDING`
+- Статус: `IMPLEMENTED / initial BR-003 load VALIDATED — S3-GL-001—003`
 - Дата: 2026-08-14
 - Потребители: «Контроль предварительной записи», «Уроки и расписание»
 
@@ -31,3 +31,6 @@ watermark не создаются.
 - нет fact-to-fact relation: Power BI использует общие calendar и dimensions;
 - полный rebuild выбран без непроверенного watermark; индекс помимо unique key
   пока не добавляется — performance evidence отсутствует.
+
+Initial load 2026-08-14 reconciled 301,237 lessons, capacity sum 5,951,952
+and free-program arrivals 1,351,360 exactly to the source snapshot.

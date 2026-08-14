@@ -1,6 +1,6 @@
 # Data contract: «Групповые занятия»
 
-Статус: `STAGE_3 DDL APPROVAL PENDING`.
+Статус: `IMPLEMENTED / initial BR-003 load VALIDATED — S3-GL-001—003`.
 
 | Параметр | Значение |
 |---|---|

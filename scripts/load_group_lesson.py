@@ -3,13 +3,17 @@
 from __future__ import annotations
 
 import argparse
+import sys
 from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 from scripts.load_prebooking_state_event import br003_horizon, connect_with_retry
 
-ROOT = Path(__file__).resolve().parents[1]
 EXTRACT = ROOT / "sql/marts/group_lesson_source_extract.sql"
 CONTROLS = ROOT / "sql/marts/group_lesson_source_controls.sql"
 COLUMNS = """group_lesson_id, lesson_created_at, lesson_start_at, lesson_end_at,
