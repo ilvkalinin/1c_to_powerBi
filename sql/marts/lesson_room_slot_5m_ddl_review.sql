@@ -1,5 +1,5 @@
--- REVIEW ONLY. Requires a separate explicit DDL approval before execution.
--- Target confirmed absent on VM-2, PostgreSQL 18.3, 2026-08-14.
+-- APPLIED 2026-08-14 after separate explicit DDL approval.
+-- Target was absent on VM-2, PostgreSQL 18.3, before execution.
 BEGIN;
 
 CREATE TABLE mart.lesson_room_slot_5m (

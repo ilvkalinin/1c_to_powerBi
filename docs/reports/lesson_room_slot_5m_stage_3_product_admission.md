@@ -1,6 +1,6 @@
 # Stage 3 PRODUCT ADMISSION: `mart.lesson_room_slot_5m`
 
-Статус: `ACTIVE — DDL/DML NOT APPROVED`.
+Статус: `ACTIVE — DDL APPLIED / DML NOT APPROVED`.
 
 Пользователь подтвердил пакет `STAGE_3_PRODUCT_ADMISSION` 2026-08-14.
 Граница — только физический факт занятости залов: одно квалифицированное
@@ -32,5 +32,12 @@ VM-2: PostgreSQL 18.3, схема `mart` существует, target table от
 [source controls](../../sql/marts/lesson_room_slot_5m_source_controls.sql),
 [DDL review](../../sql/marts/lesson_room_slot_5m_ddl_review.sql),
 [target replace](../../sql/marts/lesson_room_slot_5m_target_replace.sql) и
-[DML loader](../../scripts/load_lesson_room_slot_5m.py). DDL и DML не
-выполнялись.
+[DML loader](../../scripts/load_lesson_room_slot_5m.py). На момент подготовки
+DDL и DML ещё не выполнялись.
+
+## DDL applied
+
+После отдельного явного DDL-разрешения 2026-08-14 создана пустая
+`mart.lesson_room_slot_5m`. Post-check: 16 колонок, 18 constraints, primary
+key `(source_kind, source_lesson_id, slot_start_at)`, rows = 0. Первая
+загрузка данных остаётся отдельным DML-разрешением.
