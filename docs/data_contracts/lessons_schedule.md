@@ -1,6 +1,6 @@
 # Data contract: «Уроки и расписание»
 
-Статус: `DESIGNED COMPOSITE MODEL / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION REQUIRED`.
+Статус: `DESIGNED COMPOSITE MODEL / SOURCE VALIDATED — SV-LS-001 / IMPLEMENTATION DEFERRED PENDING SLOT-EDGE DECISION`.
 
 ## Основной объект
 
@@ -32,4 +32,6 @@ direction. PostgreSQL разворачивает `[start,end)` в слоты; DA
 структуру занятости, рейтинги и доли.
 
 Приёмка: один document before slot expansion, точное число слотов, корректные
-отмены/классы, отсутствие дублей, контрольная занятость и SLA.
+отмены/классы, отсутствие дублей, контрольная занятость и SLA. До реализации
+нужно отдельно выбрать способ представления 855 документных интервалов,
+некратных пяти минутам; скрытое округление или исключение запрещено.
