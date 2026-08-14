@@ -1,6 +1,6 @@
 # Source-to-target mapping: выручка ИП
 
-Статус: `STAGE_3 ADMISSION / DECISION REQUIRED — club attribution`.
+Статус: `STAGE_3 DDL REVIEW PENDING / current club rule CONFIRMED`.
 
 ## Гранулярность и граница
 
@@ -17,8 +17,9 @@
 | Колонка | Источник / преобразование | Тип | NULL | Статус / evidence |
 |---|---|---|---|---|
 | `revenue_date` | `AccumRg7370._Period::date` | `date` | нет | CONFIRMED — current M; S3-IP-REVENUE-001 physical type `timestamp` |
-| `club_id` | `encode(AccumRg7370._Fld7372RRef, 'hex')` либо отдельное согласованное правило | `text` | DECISION_REQUIRED | 92 049 из 178 022 current qualified payments не имеют movement-club; current M сохраняет их с пустым клубом |
+| `club_id` | `encode(AccumRg7370._Fld7372RRef, 'hex')` | `text` | да | CONFIRMED — current M делает `LEFT JOIN` и сохраняет пустой клуб; BR-018 запрещает подстановку клуба договора без отдельного решения |
 | `service_id` | `AccumRg7370._Fld7371RRef → Reference59._Fld685RRef → Reference163._IDRRef`, encoded | `text` | нет | CONFIRMED — SV-019—SV-022, S3-IP-REVENUE-001; прямой `_Fld7378RRef` не является fallback |
+| `service_name` | `Reference163._Description::text` через тот же путь договора | `text` | нет | CONFIRMED — current M uses the same field in its qualification; `ILIKE '%ИП%'` ensures it is not blank |
 | `revenue_amount` | `SUM(AccumRg7370._Fld7377)` | `numeric(18,2)` | нет | CONFIRMED — source `numeric`; знак сохраняется |
 
 ## Current-rule qualification
@@ -50,5 +51,12 @@ source snapshot:
 `Reference59._Fld687RRef` покрывает все 178 022 qualified payments, но это
 клуб договора. Current M использует `LEFT JOIN` от `AccumRg7370._Fld7372RRef`
 к `Reference132` и сохраняет `NULL` клуба; подстановка клуба договора изменит
-атрибуцию 92 049 строк. Выбор необходим до DDL, потому что он задаёт `NULL`
-policy и физический ключ.
+атрибуцию 92 049 строк. BR-018 требует сохранить пустой `club_id` в первом
+релизе; физический ключ должен технически различать такую строку без подмены
+значения для Power BI.
+
+## Пул возможных методических доработок
+
+| Идея | Наблюдаемый эффект | Статус |
+|---|---|---|
+| Заполнять пустой movement-club клубом договора `Reference59._Fld687RRef` | изменит клубную атрибуцию 92 049 current qualified оплат на 1 973 090,65; 19 строк с обоими клубами уже различаются | NOT FIRST RELEASE — отдельное явное бизнес-решение |
