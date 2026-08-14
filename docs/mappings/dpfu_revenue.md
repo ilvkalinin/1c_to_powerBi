@@ -20,24 +20,26 @@ Mapping основан на текущих SQL/M/DAX, бизнес-описан�
 |---|---|---|---|---|---|---|
 | `service_date` | дата оказания/учёта услуги | `AccumRg7575.Period::date` / `AccumRg7646.Period::date` | `date` | нет | CONFIRMED current source | timezone, дата события |
 | `source_kind` | ветка посещения/продажи/ИП | константа по исходному регистру | `smallint`/`text` | нет | CONFIRMED BY DESIGN | взаимоисключаемость |
-| `club_id` | фактический клуб операции | `Fld7577` / `Fld7653` | `bytea` source → protected/text key | нет | VALIDATED physical type and 100% coverage SV-054 | orphan и расхождения |
-| `client_key` | стабильный обезличенный клиент для УЧК | `Fld7576` / `Fld7648` → защищённый ключ | `bytea` source → protected/text key | да | VALIDATED physical type and 100% coverage SV-054 | стабильность, защита |
-| `employee_id` | стабильный тренер для KPI Фитнеса | `Fld7582` / `Fld7652`; ID сохраняется без подмены | `bytea` source → protected/text key | да | CONFIRMED — consumer `KPI Фитнеса`; SV-054: 3 580 7575-ссылок не покрыты `Reference225` | orphan, deleted, null |
+| `recorder_id` | технический идентификатор регистратора для ключа движения | `RecorderRRef` → `encode(..., 'hex')` | `text` | нет | VALIDATED S3-ADMISSION-002: уникален вместе с `source_kind` и `line_no` | key stability |
+| `line_no` | номер строки регистратора для ключа движения | `LineNo::integer` | `integer` | нет | VALIDATED S3-ADMISSION-003: source `numeric(9,0)` | key stability |
+| `club_id` | фактический клуб операции | `Fld7577` / `Fld7653` → `encode(..., 'hex')` | `text` | нет | VALIDATED physical type and 100% coverage SV-054 | orphan и расхождения |
+| `client_key` | стабильный клиент для УЧК | `Fld7576` / `Fld7648` → `Reference141X1._Code::text`; raw reference остаётся только source-side | `text` | нет | VALIDATED — S3-ADMISSION-001: 41 682 scoped ID, без null/blank/duplicate `_Code` | стабильность между ветвями и refresh |
+| `employee_id` | стабильный тренер для KPI Фитнеса | `Fld7582` / `Fld7652` → `encode(..., 'hex')`; ID сохраняется без подмены | `text` | да | CONFIRMED — consumer `KPI Фитнеса`; SV-054: 3 580 7575-ссылок не покрыты `Reference225` | orphan, deleted, null |
 | `employee_name` | отображаемое ФИО тренера | `Reference225.Description` | `text` | да | CONFIRMED — consumer `KPI Фитнеса`; nullable при непокрытой ссылке | дубли имён не являются ключом |
-| `client_code` | детальный код клиента для страницы дневного плана KPI | `Reference141X1.Code` | `text` | да | CONFIRMED — consumer `KPI Фитнеса` | доступ, маскирование и null |
-| `service_id` | стабильная номенклатура | `Fld7579` / `Fld7649` | `bytea` source → protected/text key | нет | VALIDATED physical type and 100% coverage SV-054 | orphan, deleted |
+| `client_code` | детальный код клиента для страницы дневного плана KPI | `Reference141X1._Code::text`; в первом релизе совпадает с `client_key` | `text` | нет | VALIDATED — S3-ADMISSION-001; доступ допускается BR-017 | доступ и маскирование |
+| `service_id` | стабильная номенклатура | `Fld7579` / `Fld7649` → `encode(..., 'hex')` | `text` | нет | VALIDATED physical type and 100% coverage SV-054 | orphan, deleted |
 | `service_name` | наименование для иерархии | `Reference163.Fld1761` для штатного факта; `Description` остаётся только текущим фильтром/именем ветки ИП | `text` | нет | CONFIRMED current SQL | переименования |
-| `activity_id` | вид деятельности/подразделение | `Reference163.Fld1733 → Reference70.ID` | `bytea` source → protected/text key | нет | VALIDATED physical type and 100% coverage SV-054 | соответствие списку |
+| `activity_id` | вид деятельности/подразделение | `Reference163.Fld1733 → Reference70.ID → encode(..., 'hex')` | `text` | нет | VALIDATED physical type and 100% coverage SV-054 | соответствие списку |
 | `activity_name` | русское название подразделения | `Reference70.Description`; тренажёрный зал штата переименовать целевым правилом | `text` | нет | CONFIRMED current | варианты написания |
-| `training_format_id` | формат тренировки | `Reference163.Fld1803`; ID сохраняется без подмены | `bytea` source → protected/text key | да | VALIDATED physical type; SV-054: 2 967 ссылок 7575 и 891 ссылок 7646 не покрыты `Reference248` | null и удалённые |
+| `training_format_id` | формат тренировки | `Reference163.Fld1803 → encode(..., 'hex')`; ID сохраняется без подмены | `text` | да | VALIDATED physical type; SV-054: 2 967 ссылок 7575 и 891 ссылок 7646 не покрыты `Reference248` | null и удалённые |
 | `training_format_name` | русское название формата | `Reference248.Description`; `Платный урок → Групповое занятие` по текущему M | `text` | да | CONFIRMED current; nullable при непокрытой ссылке | варианты и null |
 | `service_group` | группа для структуры услуг | внешний Excel-справочник `Структура услуг фитнес` | `text` | да | EXTERNAL / остаётся в Power BI | решение пользователя 2026-07-30 |
 | `client_category` | клиент/сотрудник/прочие | `Fld7583/Fld7656` и `Reference141X1.Fld1532` | `text`/`smallint` | нет | NOT_FIRST_RELEASE: текущие меры не исключают эти категории, показанные страницы не используют поле как разрез | не переносить без нового потребителя |
 | `payment_category` | чек/купон/клип-карта | основание `Reference59` и `Fld696` | `text`/`smallint` | да | NOT_FIRST_RELEASE: поле есть в старом source SQL, но у показанных страниц и текущих мер нет подтверждённого потребителя | не переносить без нового потребителя |
 | `calculation_category` | прочая услуга/аренда/ИП | подтверждённая классификация без повторного text matching в Power BI | `text`/`smallint` | нет | CONFIRMED current + user | классификация |
 | `age_category` | `Дети`, `Юниоры`, `Взрослые` на дату движения | точный целочисленный возраст: `<14`, `14–17`, `18+` | `text`/`smallint` | нет | CONFIRMED — user decision | границы дней рождения |
-| `service_quantity` | число оказанных услуг со знаком | `SUM(Fld7585)` / `SUM(Fld7657)`; возвраты уменьшают значение | `numeric` | нет | VALIDATED physical type, signs and control sum SV-054 | сторно и контроль |
-| `revenue_amount` | выручка ДПФУ со знаком | `SUM(Fld7586)` / `SUM(Fld7659)` на дату движения; возвраты уменьшают значение | `numeric` | нет | VALIDATED physical type, signs and control sum SV-054 | контроль |
+| `service_quantity` | число оказанных услуг со знаком | `Fld7585` / `Fld7657`; возвраты уменьшают значение | `numeric(15,3)` | нет | VALIDATED physical type, signs and control sum SV-054/S3-ADMISSION-003 | сторно и контроль |
+| `revenue_amount` | выручка ДПФУ со знаком | `Fld7586` / `Fld7659`; возвраты уменьшают значение | `numeric(15,2)` | нет | VALIDATED physical type, signs and control sum SV-054/S3-ADMISSION-003 | контроль |
 
 ## Компонент B: количество услуг ИП
 

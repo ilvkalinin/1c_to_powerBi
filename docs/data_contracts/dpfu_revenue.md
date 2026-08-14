@@ -13,6 +13,11 @@ BI. План содержит date/club/activity/employee/planned client, `plann
 бюджетные количества/УЧК/регулярность остаются external. IP revenue содержит
 date/club/service/amount.
 
+Для `mart.ancillary_revenue_movement` первого релиза `client_key` и
+`client_code` равны `Reference141X1._Code::text`. S3-ADMISSION-001 подтвердил
+в квалифицированном факте ДПФУ 41 682 клиента без пустых или повторяющихся
+кодов; исходный `bytea` ID клиента в Power BI не передаётся.
+
 Общие календарь, клуб, сотрудник, услуга, деятельность и формат фильтруют
 применимые факты `1:*`, single direction. Fact-to-fact нет. PostgreSQL
 рассчитывает signs и fixed categories; DAX — выручку, количество, УЧК,
