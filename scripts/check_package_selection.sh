@@ -18,8 +18,14 @@ if [ ! -r "$project_gate" ]; then
 fi
 
 project_state=$(awk -F '\t' '$1 !~ /^#/ && $1 == "global_stage_gate" { print $2; exit }' "$project_gate")
-project_reason=$(awk -F '\t' '$1 !~ /^#/ && $1 == "global_stage_gate" { print $3; exit }' "$project_gate")
-if [ "$project_state" != "OPEN" ]; then
+allowed_stage=$(awk -F '\t' '$1 !~ /^#/ && $1 == "global_stage_gate" { print $3; exit }' "$project_gate")
+allowed_report_ids=$(awk -F '\t' '$1 !~ /^#/ && $1 == "global_stage_gate" { print $4; exit }' "$project_gate")
+project_reason=$(awk -F '\t' '$1 !~ /^#/ && $1 == "global_stage_gate" { print $5; exit }' "$project_gate")
+if [ "$project_state" = "OPEN" ]; then
+  :
+elif [ "$project_state" = "READONLY_REVIEW_AUTHORIZED" ] && [ "$stage" = "$allowed_stage" ]; then
+  :
+else
   echo "PACKAGE SELECTION REJECTED: global stage gate is ${project_state:-MISSING}; ${project_reason:-no documented release}" >&2
   exit 1
 fi
@@ -31,6 +37,17 @@ fi
 
 failed=0
 for report_id in "$@"; do
+  if [ "$project_state" = "READONLY_REVIEW_AUTHORIZED" ]; then
+    case ",$allowed_report_ids," in
+      *,"$report_id",*) ;;
+      *)
+        echo "PACKAGE SELECTION REJECTED: $report_id is outside the authorized global read-only review" >&2
+        failed=1
+        continue
+        ;;
+    esac
+  fi
+
   row=$(awk -F '\t' -v id="$report_id" -v wanted_stage="$stage" \
     '$1 !~ /^#/ && $1 == id && $2 == wanted_stage { print; exit }' "$ledger")
   if [ -z "$row" ]; then

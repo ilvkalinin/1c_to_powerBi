@@ -1,4 +1,4 @@
-# Global project gate. Only OPEN permits selection of any new report package.
-# It can be changed only after a documented full review and explicit user decision.
-gate_id	state	reason
-global_stage_gate	BLOCKED	User directive 2026-08-14: do not start any new package, Stage 2 control, Stage 3 transition or mart creation until every critical question across all reports and tables is resolved; inventory: docs/reports/global_unresolved_questions_register_2026-08-14.md.
+# Global project gate. Only OPEN permits normal package selection.
+# READONLY_REVIEW_AUTHORIZED permits only its exact Stage 2 report list.
+gate_id	state	allowed_stage	allowed_report_ids	reason
+global_stage_gate	READONLY_REVIEW_AUTHORIZED	STAGE_2_SERVER_VALIDATION	sales_interactions,membership_receipts,children_package_sales,newcomer_guest_visits,calls_report,visits_debt,work_attendance,administrator_card,marketing_funnel,membership_board	User approved 2026-08-14 one global read-only evidence package for the ten TECHNICAL_GAP reports in docs/reports/evidence_reconciliation_2026-08-14.md; no Stage 3, DDL, DML or mart creation.
