@@ -1,6 +1,6 @@
 # Source-to-target mapping: план ДПФУ
 
-Статус: `STAGE_3 ADMISSION / source controls CONFIRMED`.
+Статус: `STAGE_3 DML APPROVAL PENDING / empty target table CONFIRMED`.
 
 ## Гранулярность и граница
 

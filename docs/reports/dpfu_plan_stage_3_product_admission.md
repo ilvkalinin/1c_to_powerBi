@@ -1,6 +1,6 @@
 # Stage 3 PRODUCT ADMISSION: `mart.dpfu_plan_assignment`
 
-Статус: `DDL APPROVAL PENDING — source controls and target review passed`.
+Статус: `DML APPROVAL PENDING — empty target table created and verified`.
 
 Пользователь явно подтвердил самостоятельный пакет
 `STAGE_3_PRODUCT_ADMISSION — mart.dpfu_plan_assignment` 2026-08-14. Граница
@@ -26,15 +26,19 @@ DDL/DML требуют отдельных явных разрешений.
 VM-2: PostgreSQL 18, схема `mart` доступна для создания;
 `mart.dpfu_plan_assignment` отсутствует. DDL/DML не выполнялись.
 
-## DDL review completed
+## DDL review and application completed
 
-Подготовлены [DDL](dpfu_plan_assignment_ddl_review.sql),
+Для отдельного DDL approval были подготовлены [DDL](dpfu_plan_assignment_ddl_review.sql),
 [source extract](../../sql/marts/dpfu_plan_assignment_extract.sql),
 [atomic target replace](../../sql/marts/dpfu_plan_assignment_target_replace.sql)
 и [loader](../../scripts/load_dpfu_plan_assignment.py). Loader отказывается
 от DML без `--apply` и сверяет строки, сумму, отрицательные и нулевые суммы,
 logical key и контракт.
 
-Следующее ограничение: создать одну новую пустую таблицу на VM-2 можно только
-после отдельного явного DDL approval; первая загрузка данных останется
-отдельным DML approval.
+После отдельного явного DDL approval 2026-08-14 создана
+`mart.dpfu_plan_assignment`. Post-check: восемь колонок, table rows = 0 и
+primary key из шести logical-key components — passed.
+
+Следующее ограничение: первая загрузка данных на VM-2 остаётся отдельным DML
+approval. Loader выполнит bounded rebuild и source-to-target reconciliation
+в одной контролируемой операции.

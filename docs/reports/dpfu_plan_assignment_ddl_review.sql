@@ -1,4 +1,4 @@
--- REVIEW ONLY — not applied.
+-- APPLIED 2026-08-14 after separate explicit user approval.
 -- Target: VM-2 / fitness_dwh. Product: mart.dpfu_plan_assignment.
 -- Preconditions: S3-PLAN-001 passed; mart schema exists; table is absent.
 -- Execute only after separate explicit DDL approval. The first data load needs

@@ -1,6 +1,6 @@
 # ADR-0028: общий детальный план ДПФУ
 
-- Статус: `STAGE_3 ADMISSION / DDL REVIEW PENDING`
+- Статус: `STAGE_3 DML APPROVAL PENDING / empty target table CONFIRMED`
 - Дата: 2026-08-14
 - Потребители: KPI Фитнеса, «Выручка ДПФУ», контроль предзаписи, загрузка сотрудников
 
@@ -30,7 +30,9 @@ rebuild BR-003 выбран, поскольку watermark и правила по
   не становится фильтром без нового решения;
 - `planned_client_key` — encoded source ID. `planned_client_code` — только
   отдельное detail-поле; BR-007 не расширяется на новый ключ без решения;
-- DDL и DML потребуют отдельных approvals, а initial load — reconciliation.
+- DDL выполнен 2026-08-14: таблица пустая, восемь согласованных колонок и
+  primary-key post-check пройдены. DML требует отдельного approval, а initial
+  load — reconciliation.
 
 ## Evidence
 
