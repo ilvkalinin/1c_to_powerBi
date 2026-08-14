@@ -1,6 +1,6 @@
 # Stage 3 PRODUCT ADMISSION: `mart.ip_revenue_daily`
 
-Статус: `DML APPROVAL PENDING — empty target table created and verified`.
+Статус: `COMPLETE — initial BR-003 load VALIDATED`.
 
 Пользователь явно подтвердил самостоятельный пакет
 `STAGE_3_PRODUCT_ADMISSION — mart.ip_revenue_daily` 2026-08-14. Граница
@@ -70,3 +70,22 @@ Current Power Query делает `LEFT JOIN` к клубу движения и �
 Следующее ограничение: первая загрузка данных на VM-2 остаётся отдельным DML
 approval. Loader выполнит bounded rebuild и source-to-target reconciliation
 в одной контролируемой операции.
+
+## Load and reconciliation result
+
+Пользователь отдельно одобрил DML 2026-08-14. Loader выполнил атомарный
+bounded rebuild из одного `REPEATABLE READ, READ ONLY` source snapshot.
+
+`S3-IP-REVENUE-001—004`, 2026-08-14, BR-003 `2025-01-01`—`2027-01-01`:
+
+| Контроль | Фактический результат | Статус |
+|---|---:|---|
+| Source → target grain | 178 022 source movements → 47 151 target rows | PASS |
+| Выручка source / stage / target | 268 944 858,22 / 268 944 858,22 / 268 944 858,22 | PASS |
+| Staging | 47 151 rows; duplicate keys 0; contract violations 0 | PASS |
+| Nullable movement-club | 14 321 target rows; сумма 1 973 090,65 | PASS — BR-018 preserved |
+| Zero groups / BR-003 horizon | 92 / out-of-horizon rows 0 | PASS |
+
+`sql/tests/ip_revenue_daily_reconciliation.sql` фиксирует повторяемые
+read-only проверки. Subsequent refresh возможен только через
+`scripts/load_ip_revenue_daily.py --apply` при отдельном разрешении на DML.

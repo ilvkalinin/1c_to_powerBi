@@ -1,6 +1,6 @@
 # ADR-0027: общий факт выручки ИП
 
-- Статус: `STAGE_3 DML APPROVAL PENDING / empty target table CONFIRMED`
+- Статус: `IMPLEMENTED / initial BR-003 load VALIDATED`
 - Дата: 2026-08-14
 - Потребители: KPI Фитнеса и «Выручка ДПФУ»
 

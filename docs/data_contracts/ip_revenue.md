@@ -1,6 +1,6 @@
 # Data contract: «Выручка ИП»
 
-Статус: `STAGE_3 DML APPROVAL PENDING / empty target table CONFIRMED`.
+Статус: `IMPLEMENTED / initial BR-003 load VALIDATED`.
 
 | Параметр | Значение |
 |---|---|
