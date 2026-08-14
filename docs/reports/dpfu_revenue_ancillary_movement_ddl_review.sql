@@ -1,4 +1,4 @@
--- REVIEW ONLY — NOT EXECUTED.
+-- APPLIED 2026-08-14 after separate user approval.
 --
 -- Target: fitness_dwh on VM-2.
 -- Product: mart.ancillary_revenue_movement.
@@ -6,8 +6,8 @@
 -- reads the two confirmed source branches in one REPEATABLE READ, READ ONLY
 -- snapshot and fills a temporary target table before the first refresh.
 --
--- This is the first persistent object on VM-2. Execute only through the
--- approved migration mechanism after the user has reviewed this file.
+-- This was the first persistent object on VM-2. Retain the file as the
+-- executed migration evidence; do not run it again against the existing DB.
 
 BEGIN;
 

@@ -1,4 +1,4 @@
--- DML REVIEW ONLY — NOT EXECUTED.
+-- Approved refresh procedure. Its first run completed 2026-08-14.
 --
 -- This script is the VM-2 half of one full atomic rebuild of
 -- mart.ancillary_revenue_movement for the BR-003 horizon. It may be run only
@@ -13,6 +13,9 @@
 -- skip the temporary-stage checks or replace the fact with a partial source read.
 
 BEGIN;
+
+-- Only one refresh of this fact may replace the table at a time.
+SELECT pg_advisory_xact_lock(hashtext('mart.ancillary_revenue_movement:refresh'));
 
 CREATE TEMP TABLE _ancillary_revenue_movement_stage (
     LIKE mart.ancillary_revenue_movement INCLUDING DEFAULTS

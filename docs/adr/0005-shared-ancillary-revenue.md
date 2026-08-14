@@ -1,6 +1,6 @@
 # ADR-0005: общий факт дополнительных услуг и товаров
 
-- Статус: `PROPOSED / STAGE 2 VALIDATED / STAGE 3 APPROVAL REQUIRED`
+- Статус: `IMPLEMENTED — mart.ancillary_revenue_movement initial load validated 2026-08-14 / report views deferred`
 - Дата: 2026-07-27
 - Отчёт: № 18 «Выручка рецепции»
 

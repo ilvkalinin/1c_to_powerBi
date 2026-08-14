@@ -1,6 +1,6 @@
 # Stage 3 PROGRAM ENTRY: «Выручка ДПФУ»
 
-Статус: `CONFIRMED — PROGRAM ENTRY 2026-08-13 / PRODUCT ADMISSION PENDING`.
+Статус: `COMPLETED — PRODUCT ADMISSION AND INITIAL LOAD 2026-08-14`.
 
 ## Решение и граница пакета
 

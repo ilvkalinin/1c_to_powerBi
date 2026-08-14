@@ -1,6 +1,6 @@
 # Source-to-target mapping: выручка ДПФУ
 
-Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0005/0012/0025 / FIRST-RELEASE TECHNICAL VALIDATION COMPLETE / IMPLEMENTATION DEFERRED`.
+Статус: `BUSINESS MAPPING COMPLETE / COMPONENT A IMPLEMENTED AND VALIDATED — S3-LOAD-001—005 / COMPONENTS B–D DEFERRED`.
 
 Mapping основан на текущих SQL/M/DAX, бизнес-описании и metadata. Это логическое сопоставление, а не решение о числе физических таблиц. SQL и DDL не создаются.
 

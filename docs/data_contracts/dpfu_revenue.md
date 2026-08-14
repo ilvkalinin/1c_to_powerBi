@@ -1,6 +1,6 @@
 # Data contract: «Выручка ДПФУ»
 
-Статус: `DESIGNED COMPOSITE MODEL / FIRST-RELEASE TECHNICAL VALIDATION COMPLETE / IMPLEMENTATION DEFERRED`.
+Статус: `DESIGNED COMPOSITE MODEL / mart.ancillary_revenue_movement IMPLEMENTED / remaining products deferred`.
 
 Модель REUSE `mart.ancillary_revenue_movement`, `mart.ip_training_daily`,
 `mart.ip_revenue_daily` и `mart.dpfu_plan_assignment` по ADR-0005/0012.
