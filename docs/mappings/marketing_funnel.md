@@ -1,11 +1,12 @@
 # Source-to-target mapping: маркетинговая воронка
 
-Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE REUSE CONFIRMED / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-080`.
+Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE REUSE CONFIRMED / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-080, SV-101`.
 
 CRM core имеет grain одно задание `Reference106.ID`. Для метрики
 «Абонементы факт» используется отдельная логическая проекция: одна
 квалифицированная связь `task_id × contract_id`. Её состав задаёт BR-020;
-physical key и уникальность task code остаются `VALIDATION_PENDING`.
+physical bridge key остаётся `VALIDATION_PENDING`; task code подтверждён в
+отчётном scope по SV-101.
 
 Целевой набор повторно использует `mart.fitness_leads_funnel_task`; ниже
 зафиксирована только проекция, нужная маркетинговому отчёту. Планы остаются

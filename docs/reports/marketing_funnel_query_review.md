@@ -1,6 +1,6 @@
 # Query review: «Воронка»
 
-Статус: `EVIDENCE REVIEWED / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-080`.
+Статус: `EVIDENCE REVIEWED / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-080, SV-101`.
 
 Рассмотрены текущие SQL/M/DAX и бизнес-описание. В gymdb выполнен только
 read-only bounded control `MF-V03` (`SV-080`); остальные шаблоны ниже имеют
@@ -54,7 +54,7 @@ Raw current SQL отбирает `ДатаАктивации >= 2024-01-01`, н�
 | Статус | Наблюдение | Влияние |
 |---|---|---|
 | `CONFIRMED business rule / VALIDATION_PENDING physical` | `InfoRg6798` содержит более одного контракта на задание. Ошибочный technical пример `0000302905 → 008259075/008854940` исключён: MF-V03G дал 2 связи и 0 qualifying по BR-020. | BR-020 задаёт counting unit `task × contract`; старый абонемент не может быть конверсией более позднего задания. Перед Stage 3 остаются physical code/join/state controls. |
-| `VALIDATION_PENDING` | Связь task-to-contract выполняется по отображаемому `task_code`, а не по стабильному ID. | Код может быть неуникальным или изменяемым. |
+| `VALIDATED in report scope` | Current DAX uses `task_code`; SV-101 found no null or duplicate code among 1 382 845 tasks in the report funnel. Physical task-to-contract join remains `InfoRg6798.Fld6799RRef → Reference106.ID`. | Code remains a display/DAX field, not a physical bridge key. |
 | `VALIDATION_PENDING` | Логика накопленного трафика использует разные таблицы и несколько вариантов тестовых мер. | Невозможно доказать один результат без контрольного периода. |
 | `VALIDATION_PENDING` | Задания для накопленного трафика в current DAX ограничены 2024–2025. | После 2026 требуется ручная корректировка, исторический результат может расходиться. |
 | `VALIDATION_PENDING` | Общий mapping сети/кластера клуба подтверждён пользователем 2026-07-30; физические поля и покрытие клубов ещё не проверены. Excel-планы остаются в Power BI. | Не проектировать загрузку и watermark планов в PostgreSQL; на MF-V01 проверить mapping клуба. |

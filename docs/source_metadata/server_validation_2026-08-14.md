@@ -194,3 +194,17 @@ Excel и Power Query остаются вне scope. Выполненный read-
 клубов и независимая сверка дневных чисел с Power BI остаются
 `VALIDATION_PENDING`. Никакие Excel-артефакты для этого не запрашивались и не
 использовались.
+
+## SV-101 — «Маркетинговая воронка»: task code in report scope
+
+Статус: `PARTIALLY VALIDATED`. Read-only SQL:
+[marketing_funnel_global_review_2026-08-17.sql](validation_sql/marketing_funnel_global_review_2026-08-17.sql).
+В единственной воронке отчёта «Продажа клубной карты» 1 382 845 task rows =
+1 382 845 physical task IDs = 1 382 845 codes; `NULL`/duplicate code = 0.
+Следовательно, current DAX distinct по коду воспроизводим в этом scope.
+
+Физическая связь с `InfoRg6798` остаётся по task ID (`Fld6799RRef`), а не по
+отображаемому коду. Полный all-CRM aggregate намеренно не продолжался после
+30-second limit: он не требуется для отчётного scope. CRM joins, states,
+накопленный трафик, Power BI reconciliation и SLA остаются
+`VALIDATION_PENDING`.
