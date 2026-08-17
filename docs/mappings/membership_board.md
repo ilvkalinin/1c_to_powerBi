@@ -16,8 +16,9 @@
 
 SV-083 подтвердил bounded физические technical keys движения и отсутствие
 orphan-contract в двух исходных регистрах. SV-094 подтвердил полный movement
-key по уникальному индексу, но отклонил оба кандидата recurring-payment key;
-контрактные KPI остаются заблокированы до согласованного physical key.
+key по уникальному индексу; SV-096 уточнил, что множественность строк
+`contract × payment_period` — ожидаемая сумма движений одного платежа, а не
+ошибка ключа.
 
 ## Повторно используемые целевые поля
 
@@ -31,7 +32,7 @@ key по уникальному индексу, но отклонил оба к�
 | `source_movement_key` | технический ключ движения | `AccumRg7370/7739` | bounded physical composite key; полный domain pending | `text` candidate | нет | движение | PARTIALLY VALIDATED — SV-083 | MR mapping | MR-V02/MR-V03 |
 | `receipt_date` | дата денежного движения | `Period` | `::date` | `date` | нет | движение | CONFIRMED REUSE | BR-015 | MB-V07 |
 | `metric_date` | дата контрактного KPI | movement / activation | recurring → movement; prepayment → activation | `date` | да у услуг | KPI unit | CONFIRMED REUSE | BR-015 | MB-V07 |
-| `kpi_unit_key` | единица количества | contract / recurring payment | BR-016 | `text` candidate | да у услуг | KPI unit | VALIDATION_PENDING physical key | user decision + MR mapping | MR-V02/MB-V01 |
+| `kpi_unit_key` | единица количества | contract / `payment_period` | предоплата → contract; рекарринг → `contract × payment_period` | `text` candidate | да у услуг | KPI unit | CONFIRMED REUSE | BR-016 + MR mapping | SV-096/MB-V01 |
 | `receipt_amount_net` | чистое поступление | registers + co-access | эталонная MR-логика | `numeric` | нет | движение | CONFIRMED REUSE | MR mapping | MB-V01 |
 | `calculation_price` | сумма для средней цены | movement / contract price | эталонное правило по типу расчёта | `numeric` | да | KPI unit | CONFIRMED REUSE | MR mapping | MB-V01 |
 | `effective_duration_days` | длительность KPI | contract term + freeze | BR-016 | `numeric` | да | KPI unit | CONFIRMED REUSE | MR mapping | MB-V01 |
@@ -51,7 +52,7 @@ key по уникальному индексу, но отклонил оба к�
 | Мера | Формула | Статус |
 |---|---|---|
 | `Поступления` | `SUM(receipt_amount_net)` + утверждённые membership-услуги | CONFIRMED REUSE |
-| `Количество` | `DISTINCTCOUNT(kpi_unit_key)` | CONFIRMED business / key pending |
+| `Количество` | один предоплатный контракт или одна группа `contract × payment_period` рекарринга | CONFIRMED REUSE |
 | `Средняя цена контракта` | `SUM(calculation_price) / Количество` | CONFIRMED REUSE |
 | `Продолжительность` | `AVERAGE(effective_duration_days) / 30.42` по тому же KPI-набору | CONFIRMED REUSE |
 | `Средняя цена месяца` | `Средняя цена контракта / Продолжительность` | CONFIRMED REUSE |
@@ -75,7 +76,7 @@ key по уникальному индексу, но отклонил оба к�
 | Продукты из `data_products` | detailed membership domain полностью покрывает board KPI; group summary слишком грубый | CONFIRMED |
 | Правила из `business_rules` | BR-001/002/003/013/014/015/016; BR-008 не применяется | CONFIRMED |
 | Сравнение гранулярности | пять KPI, роли дат и срезы совпадают с отчётом по поступлениям | CONFIRMED user decision + PBIT |
-| Сравнение ключей | movement и KPI keys те же; physical keys pending | CONFIRMED business / VALIDATION_PENDING physical |
+| Сравнение ключей | movement key и KPI-grain повторяют `membership_receipts`; рекарринг агрегирует движения по `contract × payment_period` | CONFIRMED REUSE / SV-096 |
 | Сравнение семантики | общие KPI обязаны совпадать; board добавляет только presentation logic | CONFIRMED user decision |
 | Решение | `REUSE` detailed membership domain and common dimensions; `NOT_APPLICABLE` для нового board-факта | CONFIRMED |
 | Причина | отдельный факт дублировал бы расчёты и создал второй источник истины | CONFIRMED |

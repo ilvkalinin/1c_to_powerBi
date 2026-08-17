@@ -2,7 +2,7 @@
 
 Статус: `BUSINESS RULES CONFIRMED / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-085; Stage 3 deferred`.
 
-Mapping основан на текущем SQL/M/DAX, metadata и решениях пользователя от 2026-07-24. `mart.children_package_sale` спроектирован в ADR-0019; реализация заблокирована до проверки связи строки с суммой/номенклатурой, возврата и source states.
+Mapping основан на текущем SQL/M/DAX, metadata и решениях пользователя от 2026-07-24. Для 38 строк без доказанной цены/номенклатуры пользователь 2026-08-17 подтвердил fallback `0`; source-артефакт сохранён. `mart.children_package_sale` спроектирован в ADR-0019; реализация по-прежнему требует проверки возврата и source states.
 
 ## Stage 2 evidence — SV-085
 
@@ -11,8 +11,10 @@ SV-076: `VT4913` содержит 46 470 unique physical rows; каждая им
 `Reference141X1`. SV-083: bounded 100 `AccumRg7739` rows равны technical keys
 и не имеют orphan-contract. SV-095 нашёл 38 package rows без строки
 `VT4924`; fallback `AccumRg7739` по чеку × контракту × ребёнку отсутствует.
-Следовательно, сумма/номенклатура полного набора не доказаны и остаются
-implementation blocker.
+Для этих 38 строк согласован fallback `product_id = '0'`,
+`product_name = '0'`, `package_amount = 0`; для остальных строк сохраняется
+источник `VT4924`. Это закрывает именно gap покрытия цены/номенклатуры, но не
+доказывает отдельные правила возврата и source states.
 
 ## Подтверждённая гранулярность
 
@@ -46,9 +48,9 @@ implementation blocker.
 | `child_client_key` | стабильный ребёнок | `VT4913.Fld4916` | UNKNOWN | нет | CONFIRMED source | orphan rows |
 | `child_client_code` | код ребёнка | `child.Reference141X1.Code` | `text` | нет | CONFIRMED need | PII access |
 | `child_client_name` | ФИО ребёнка | `child.Reference141X1.Description` | `text` | нет | CONFIRMED need | PII access |
-| `product_id` | номенклатура пакета | `AccumRg7739.Fld7743` либо `VT4924.Fld4932` | UNKNOWN | нет | VALIDATION_PENDING — implementation blocker | доказать приоритет и связь |
-| `product_name` | название пакета | `Reference163.Description` | `text` | нет | CONFIRMED need / source pending | стабильный product ID |
-| `package_amount` | итоговая стоимость строки; возврат отражается отрицательной суммой | `AccumRg7739.Fld7749` либо `VT4924.Fld4938` | `numeric` | нет | CONFIRMED rule / source VALIDATION_PENDING — implementation blocker | связь строки, скидки, знак возврата |
+| `product_id` | номенклатура пакета | `VT4924.Fld4932`; для отсутствующей строки `VT4924` → `'0'` | `text` | нет | CONFIRMED user fallback 2026-08-17 | SV-095 coverage |
+| `product_name` | название пакета | `Reference163.Description`; для отсутствующей строки `VT4924` → `'0'` | `text` | нет | CONFIRMED user fallback 2026-08-17 | SV-095 coverage |
+| `package_amount` | итоговая стоимость строки; возврат отражается отрицательной суммой | `VT4924.Fld4938`; для отсутствующей строки `VT4924` → `0` | `numeric` | нет | CONFIRMED user fallback 2026-08-17 | SV-095 coverage; возврат отдельно |
 | `package_count` | одна продажная строка ребёнка — один пакет; возврат использует доказанный знак движения источника | `1` для подтверждённой продажи; знак возврата из `AccumRg7739.Fld7748` либо иного доказанного признака | `integer` | нет | CONFIRMED grain / source VALIDATION_PENDING — implementation blocker | количество > 1, знак возврата |
 | `sold_correctly_flag` | продажа в том же месяце и году, что приобретение взрослого абонемента | `date_trunc('month', sale_at) = date_trunc('month', Reference59.Fld674)`; активация не участвует | `boolean` | нет | CONFIRMED — report description | null/sentinel purchase date |
 
@@ -93,11 +95,17 @@ implementation blocker.
 
 ## Блокеры
 
-1. Доказанная связь `VT4913` с `AccumRg7739`/`VT4924`.
-2. Стоимость после скидок и несколько строк номенклатуры.
-3. Технический признак и знак количества возврата.
-4. Бизнес-наименование статуса чека и состояния проведения/удаления/архивности/активности.
-5. Контрольные значения.
+1. Технический признак и знак количества возврата.
+2. Бизнес-наименование статуса чека и состояния проведения/удаления/архивности/активности.
+3. Контрольные значения.
+
+## Пул возможных методических доработок
+
+`SV-095` сохраняет 38 строк, для которых источник не дал строки
+`VT4924` и не подтвердил fallback в `AccumRg7739`. В первом релизе для них
+применяется согласованный fallback `0`; при появлении физического источника
+цены/номенклатуры его нужно сверить с этими строками отдельным control, не
+меняя историческое правило без нового решения.
 
 ## Обновление
 

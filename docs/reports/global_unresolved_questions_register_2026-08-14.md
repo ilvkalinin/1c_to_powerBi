@@ -46,9 +46,9 @@ blocker: после documentary audit глобальный gate остаётся
 | 10 | Уроки и расписание | `DECISION_REQUIRED` | Interval/state ветви и orphan dimensions должны воспроизводить legacy; room slots не подтверждают все агрегаты расписания. | `mart.group_lesson`, `mart.lesson_room_slot_5m`; SV-073; ADR-0015 |
 | 11 | Фитнес воронка | `VALIDATION_REQUIRED` | Когорта client×start подтверждена частично; ключи outcome и отсутствие contract attribution остаются к проверке. | `mart.fitness_funnel_client_start`, `mart.fitness_funnel_client_outcome`; SV-079; ADR-0026 |
 | 12 | Загрузка ОП | `VALIDATION_REQUIRED` | Interaction/phone grain, кадровые даты и full-population/state controls CRM. | `mart.crm_interaction`, `mart.v_sales_interaction`; SV-084; ADR-0016 |
-| 13 | Отчёт по поступлениям | `DECISION_REQUIRED` | Физический ключ, states/sign и recurring KPI-unit; нельзя заменять `analytics_sequence` и predecessor `MIN(ID)`. | `mart.membership_receipt_movement`, `mart.membership_contract_kpi_unit`; SV-083; ADR-0017 |
+| 13 | Отчёт по поступлениям | `VALIDATION_REQUIRED` | States/sign и predecessor `MIN(ID)` остаются к проверке. Recurring KPI-unit подтверждён как `contract × payment_period` с суммой движений (SV-096). | `mart.membership_receipt_movement`, `mart.membership_contract_kpi_unit`; SV-083/096; ADR-0017 |
 | 14 | Отчёт по промокодам | `DECISION_REQUIRED` | Join размножает движения; legacy `MAX/SUM/Table.Distinct` и DAX fallback нельзя заменить дедупликацией. | `mart.promo_application`; SV-090/091; ADR-0018 |
-| 15 | Продажа детских пакетов | `VALIDATION_REQUIRED` | Line-to-line price/product, знак возврата и source states не подтверждены. | `mart.children_package_sale`; SV-085; ADR-0019 |
+| 15 | Продажа детских пакетов | `VALIDATION_REQUIRED` | Для 38 строк без line-to-line price/product согласован fallback `0`; знак возврата и source states остаются к проверке. | `mart.children_package_sale`; SV-085/095; ADR-0019 |
 | 16 | Управление продлением | `VALIDATION_REQUIRED` | Требуются полные cardinality controls для same-client/first-start, статусов и CRM; текущая эвристика не становится прямой ссылкой. | `mart.renewal_management_contract`; SV-081; ADR-0007 |
 | 17 | Отчёт по %Renew | `VALIDATION_REQUIRED` | Contract key, current window/`COUNT(*)`, `Fld693` и финализация закрытого месяца. | `mart.contract_usage`; SV-082; ADR-0006 |
 | 18 | Выручка рецепции | `VALIDATION_REQUIRED` | Атрибуция продавца и точный report view поверх общего факта; `_document294` не добавляется без решения об изменении атрибуции. | `mart.v_reception_revenue_daily`; SV-050—053; ADR-0005 |
@@ -63,7 +63,7 @@ blocker: после documentary audit глобальный gate остаётся
 | 27 | Маркетинговая воронка | `VALIDATION_REQUIRED` | Physical code/join/state controls для task×contract; BR-020 требует считать каждую qualified связь. | `mart.fitness_leads_funnel_task`; SV-080; ADR-0011 |
 | 28 | Клиентская база | `DECISION_REQUIRED` | Package/visit/state controls, control values и физическое представление `NULL/Не определено`; retention имеет отдельный grain. | `mart.client_base_snapshot`, `mart.client_base_retention`, `mart.client_base_daily`; SV-069; ADR-0002 |
 | 29 | Выручка ДПФУ | `OPEN` | Четыре shared products загружены, но report-specific model/reconciliation целиком ещё не закрыты; не создавать вторые копии движений. | `mart.ancillary_revenue_movement`, `mart.dpfu_plan_assignment`, `mart.ip_training_daily`, `mart.ip_revenue_daily`; ADR-0005/0012 |
-| 30 | Членство для правления | `DECISION_REQUIRED` | Physical key/state, board reconciliation и non-additive KPI controls; BR-015/016 и recurring unit не заменяются. | `mart.membership_receipt_movement`, `mart.membership_contract_kpi_unit`; SV-083; ADR-0017 |
+| 30 | Членство для правления | `VALIDATION_REQUIRED` | States, board reconciliation и non-additive KPI controls остаются к проверке; recurring unit наследует подтверждённое `contract × payment_period` (SV-096). | `mart.membership_receipt_movement`, `mart.membership_contract_kpi_unit`; SV-083/096; ADR-0017 |
 | 31 | Свод выручка ГК | `VALIDATION_REQUIRED` | Ключ дневной статьи, internal branches и граница с внешними Excel-ветвями без их переноса. | `mart.revenue_group_summary_daily`; SV-035—050/066; ADR-0010 |
 
 ## Шесть строк вне договорного scope
@@ -109,8 +109,8 @@ blocker: после documentary audit глобальный gate остаётся
 | `mart.v_administrator_bookings_daily` | `VALIDATION_REQUIRED` | Booking→movement cardinality/sum и кадровая атрибуция. |
 | `mart.v_reception_revenue_daily` | `VALIDATION_REQUIRED` | Seller attribution и report-view grain. |
 | `mart.revenue_group_summary_daily` | `VALIDATION_REQUIRED` | Daily article key и validated internal branches. |
-| `mart.membership_receipt_movement` | `DECISION_REQUIRED` | Physical key, states/sign и legacy sequence. |
-| `mart.membership_contract_kpi_unit` | `VALIDATION_REQUIRED` | Recurring key и KPI-unit grain. |
+| `mart.membership_receipt_movement` | `VALIDATION_REQUIRED` | States/sign и other source controls; movement key is evidenced. |
+| `mart.membership_contract_kpi_unit` | `VALIDATION_REQUIRED` | KPI-unit uses confirmed `contract × payment_period`; state/price/reconciliation controls remain. |
 | `mart.preparation_renewal_checkpoint` | `VALIDATION_REQUIRED` | Freeze/visit joins, states и interval integrity. |
 | `mart.ip_revenue_daily` | `IMPLEMENTED` | Собственный admission закрыт; payment-date grain не заменяет другие факты. |
 | `mart.contract_usage` | `VALIDATION_REQUIRED` | Contract key/window, `COUNT(*)`, `Fld693` и closed-month finalization. |

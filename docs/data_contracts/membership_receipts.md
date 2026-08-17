@@ -32,7 +32,7 @@ watermark нет. Планы остаются внешними Power BI-факт
 |---|---|---|
 | `kpi_unit_key`, `kpi_unit_kind` | text | ключ/тип; key скрыть |
 | `metric_date` | date | активный FK календаря |
-| `contract_id`, `client_key`, `analytics_sequence` | text, text, integer | technical; скрыть |
+| `contract_id`, `client_key`, `payment_period` | text, text, integer | technical; скрыть; рекарринг агрегируется по `contract_id × payment_period` |
 | `access_club_id`, `sales_point_club_id`, `manager_id`, `product_id` | text | FK; скрыть |
 | `contract_activation_date`, `contract_start_date`, `contract_end_date` | date | attributes; end — неактивная роль даты |
 | `contract_term_days`, `free_freeze_before_activation_days`, `effective_duration_days` | numeric | helpers; не суммировать |

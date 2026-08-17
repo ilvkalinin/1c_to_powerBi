@@ -18,11 +18,12 @@
    - рекарринг — один квалифицированный ежемесячный платёж контракта;
    - membership-услуги не входят в этот набор.
 
-Бизнес-grain второго уровня `CONFIRMED` решением пользователя 2026-07-31.
-Физический идентификатор ежемесячного рекаррингового платежа пока
-`VALIDATION_FAILED`: `contract_id × analytics_sequence` не уникален (SV-094),
-как и `contract_id × recorder`. Нужен отдельный согласованный physical source
-key ежемесячного платежа; нельзя схлопывать движения эвристикой.
+Бизнес-grain второго уровня `CONFIRMED`. Для рекарринга это
+`contract_id × payment_period`: `payment_period` — текущий PBI-столбец
+`Текст после разделителя`, полученный из `АналитикаУчета`. Все движения одной
+группы суммируются; уникальность отдельных строк внутри неё не требуется.
+SV-094 корректно зафиксировал множественность движений, но ошибочно назвал её
+ошибкой ключа; исправление интерпретации — SV-096.
 
 Кандидат технического ключа движения:
 `(source_kind, recorder_id, line_no)` — `VALIDATION_PENDING`.
@@ -38,9 +39,9 @@ key ежемесячного платежа; нельзя схлопывать �
 | `metric_date` | дата количества/цен/длительности | movement + `Reference59` | `Period`, `Fld670` | recurring → movement date; prepayment → activation date; service → NULL | `date` | да у услуг | контрактная единица | CONFIRMED target rule | DAX + user decision 2026-07-31 | MR-V12 |
 | `contract_id` | устойчивый ID контракта | registers → `Reference59` | `Fld7371/Fld7741/Fld7655` → `ID` | канонический ID | `text` candidate | да у услуг | движение / контракт | CONFIRMED current source | SQL/M | orphan test |
 | `client_key` | обезличенный ключ клиента для predecessor и менеджерских срезов | `Reference59`, `AccumRg7739` | `Fld681`, `Fld7740` | стабильный protected key; без ФИО | `text` | да у услуг | движение | CONFIRMED need / method pending | DAX predecessor | duplicate/client test |
-| `analytics_sequence` | последовательность начисления/списания | `Reference134` через `AccumRg7370.Fld7376` | `Description` | число после последнего `"; "` | `integer` | да | контрактная единица | CONFIRMED current M | `Text.AfterDelimiter` | parse coverage |
+| `payment_period` | платёжный период рекарринга | `Reference134` через `AccumRg7370.Fld7376` | `Description` | текущий M: `Text.AfterDelimiter(АналитикаУчета, "; ", {0, RelativePosition.FromEnd})`, затем numeric | `integer` | да | контрактная единица | CONFIRMED current M/DAX | PBIT `Текст после разделителя` | SV-096 |
 | `kpi_unit_kind` | тип единицы количества | вычисление | `payment_type` | предоплата → `contract`; рекарринг → `recurring_payment`; услуга → NULL | `text` | да | контрактная единица | CONFIRMED user decision 2026-07-31 | user decision | scenario matrix |
-| `kpi_unit_key` | логический ключ единицы количества | вычисление | `contract_id`, recurring source key | предоплата → contract ID; рекарринг → доказанный ID ежемесячного платежа | `text` candidate | да | контрактная единица | CONFIRMED business grain / physical recurring key pending | user decision + current M | MR-V02/MR-V11 |
+| `kpi_unit_key` | логический ключ единицы количества | вычисление | `contract_id`, `payment_period` | предоплата → contract ID; рекарринг → `contract_id × payment_period`; сумма движений — `SUM(amount_signed)` по этой группе | `text` candidate | да | контрактная единица | CONFIRMED current M/DAX | PBIT + BR-016 | SV-096/MR-V11 |
 | `movement_kind` | приход/расход регистра | registers | `RecordKind` | текущий код; значение проверяется | `smallint` candidate | нет | движение | CONFIRMED source / semantics pending | M | MR-V03 |
 | `recorder_type` | передача/перевод/возврат/карта/чек/безнал/ПКО/РКО и т. п. | 14 document joins | наличие документа | текущий приоритет M | `text` | да | движение | CONFIRMED current M / exclusivity pending | M | MR-V04 |
 | `amount_raw` | исходная сумма | `AccumRg7370/7739` | `Fld7377/Fld7749` | без знакового CASE | `numeric` | нет | движение | CONFIRMED source | M | MR-V03 |
@@ -78,7 +79,7 @@ key ежемесячного платежа; нельзя схлопывать �
 | Русское имя меры | Формула над целевым набором | Статус |
 |---|---|---|
 | `Поступления всего` | все квалифицированные движения контрактов + только семь утверждённых membership-услуг; прочие направления исключаются | CONFIRMED user decision 2026-07-31 |
-| `Количество` | distinct `kpi_unit_key`: контракт предоплаты или ежемесячный платёж рекарринга; услуги исключаются | CONFIRMED business rule / physical recurring key pending |
+| `Количество` | один `contract_id` предоплаты или одна группа `contract_id × payment_period` рекарринга; услуги исключаются | CONFIRMED current M/DAX + BR-016 |
 | `Средняя цена контракта` | сумма расчётной цены квалифицированных KPI-единиц / `Количество` | CONFIRMED target rule |
 | `Продолжительность` | average `effective_duration_days` по тому же квалифицированному KPI-набору / 30.42 | CONFIRMED target rule |
 | `Средняя цена месяца` | `Средняя цена контракта / Продолжительность` | CONFIRMED current formula |
@@ -96,7 +97,7 @@ key ежемесячного платежа; нельзя схлопывать �
 | `AccumRg7478` | движения заморозки | CONFIRMED current source / interval and states pending | supplied M |
 | `AccumRg7646` | цена продажи и продажа заморозки | CONFIRMED current source / cardinality pending | supplied M |
 | `Reference59` | контракт, клиент, даты, клубы, стаж и типы | CONFIRMED current source | supplied SQL/M |
-| `Reference134` | аналитическая последовательность аванса | CONFIRMED current source / parsing pending | supplied SQL/M |
+| `Reference134` | источник `АналитикаУчета`, из которого текущий M извлекает платёжный период | CONFIRMED current M/DAX | supplied PBIT |
 | `Reference141X1`, `Reference163`, `Reference132`, `Reference225` | клиент, продукт, клуб, сотрудник | CONFIRMED current source / states pending | supplied SQL/M |
 | `InfoRg5596` | базовая цена клуба | CONFIRMED current source / as-of tie pending | supplied M |
 | `InfoRg8595` и `Reference109` | индекс параметров номенклатуры | CONFIRMED current source / uniqueness pending | supplied M |
@@ -138,7 +139,7 @@ PBIT подтверждает общую звезду и одновременн�
 | Проверенные продукты из `data_products` | `mart.revenue_group_summary_daily`, `mart.contract_usage`, `mart.renewal_management_contract`, newcomer facts, children sales, ancillary revenue | CONFIRMED catalog |
 | Проверенные правила из `business_rules` | BR-001/002/003/007/010/012/013/014/015/016 | CONFIRMED; BR-008 не применяется к продуктовой категории возраста этого отчёта |
 | Сравнение гранулярности | group summary is date×club×article; contract usage is contract; ancillary uses other revenue movements; this report needs payment movement plus contract KPI unit | CONFIRMED mismatch |
-| Сравнение ключей | group summary loses contract/recorder; contract_usage lacks payment movement; current report drops LineNo | business count grain CONFIRMED; technical movement and recurring-payment keys pending |
+| Сравнение ключей | group summary loses contract/recorder; contract_usage lacks payment movement; current report drops LineNo | recurring KPI-grain `contract × payment_period` CONFIRMED; movement states and full-domain controls remain pending |
 | Сравнение бизнес-семантики | membership branch of group summary shares 7370/7739 sign/source rules, but cannot serve product/manager/stage/price/duration slices | CONFIRMED |
 | Решение (`REUSE` / `EXTEND` / `NEW`) | `EXTEND` source-rule membership branches of revenue summary; `REUSE` dimensions; `NEW` `mart.membership_receipt_movement` и `mart.membership_contract_kpi_unit` | DESIGNED — ADR-0017 |
 | Причина решения | daily group aggregate is too coarse; contract usage measures visits, not money; copying raw registers into separate report tables would duplicate logic | CONFIRMED comparison |
@@ -148,7 +149,7 @@ PBIT подтверждает общую звезду и одновременн�
 
 | Статус | Элемент | Риск / причина | Проверка / следующее действие |
 |---|---|---|---|
-| VALIDATION_PENDING | recurring-payment key | `analytics_sequence` must equal one monthly payment without duplicates | MR-V02/MR-V11 |
+| CONFIRMED | рекарринговая KPI-единица | текущий PBI суммирует все движения `contract_id × payment_period`; множественность строк в группе ожидаема | SV-096 / BR-016 |
 | VALIDATION_PENDING | source keys/states/signs | current aggregation can hide duplicates/deletions | MR-V01–MR-V05 |
 | VALIDATION_PENDING | predecessor contract | ties resolved by `MIN(ID)` without business proof | MR-V08 |
 | VALIDATION_PENDING | `InfoRg8595` | arbitrary row after `Table.Distinct(product_id)` | uniqueness/priority query |
@@ -166,5 +167,5 @@ PBIT подтверждает общую звезду и одновременн�
 `AccumRg7370`, `AccumRg7739`, `Reference59` и `Reference134` существуют. В
 bounded 2026 выборках по 100 строк оба регистра имеют 100 technical keys и 0
 orphan-contract. Наблюдаемые `RecordKind` не интерпретируются без current M
-sign CASE; recurring key, recorder exclusivity, states, freeze and price joins
+sign CASE; recorder exclusivity, states, freeze and price joins
 остаются `VALIDATION_PENDING` перед реализацией.

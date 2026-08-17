@@ -7,12 +7,12 @@ global_stage_2_evidence_review_2026-08-14	STAGE_2_SERVER_VALIDATION	ACTIVE	2026-
 
 report_id	report_status	completion_commit
 sales_interactions	COMPLETE	SELF
-membership_receipts	BLOCKED	SELF
-children_package_sales	BLOCKED	SELF
+membership_receipts	COMPLETE	SELF
+children_package_sales	COMPLETE	SELF
 newcomer_guest_visits	PENDING	-
 calls_report	PENDING	-
 visits_debt	PENDING	-
 work_attendance	PENDING	-
 administrator_card	PENDING	-
 marketing_funnel	PENDING	-
-membership_board	BLOCKED	SELF
+membership_board	COMPLETE	SELF
