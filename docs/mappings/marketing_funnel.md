@@ -69,6 +69,7 @@ physical bridge key остаётся `VALIDATION_PENDING`; task code подтв�
 | `VALIDATED business rule / VALIDATION_PENDING physical` | `task → contract` | SV-080: 100 строк bridge соответствуют 36 заданиям; у 21 задания более одного контракта. | BR-020 разрешает считать каждую qualifying `task × contract` связь. До Stage 3 подтвердить physical key/code join и сохранение строк; не добавлять global dedup. |
 | `VALIDATION_PENDING` | task code в bridge | current SQL соединяет отображаемые коды | MF-V02; перейти на ID только после доказательства physical field |
 | `VALIDATION_PENDING` | когорты накопленного трафика | current DAX использует годовые таблицы и несколько промежуточных мер | MF-V08, MF-V09 |
+| `VALIDATED WITH NULL RISK` | CRM dimension joins | SV-101: joins не размножают task; незаполненные club/campaign/reason/stage сохраняются как `NULL`, не фильтруются. | MF-V04 |
 | `VALIDATION_PENDING` | сеть/кластер | общий mapping клуба подтверждён; физические поля и покрытие клубов ещё не проверены | MF-V01 |
 | `NOT_APPLICABLE` | внешние планы и watermark | Excel-планы остаются в Power BI | не включать в PostgreSQL SQL по решению пользователя 2026-07-30 |
 

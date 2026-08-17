@@ -208,3 +208,8 @@ Excel и Power Query остаются вне scope. Выполненный read-
 30-second limit: он не требуется для отчётного scope. CRM joins, states,
 накопленный трафик, Power BI reconciliation и SLA остаются
 `VALIDATION_PENDING`.
+
+MF-V04 дополнительно выполнен на том же scope: 1 382 848 joined rows =
+1 382 848 task IDs, join excess = 0. `NULL` dimensions наблюдаются и
+сохраняются: club = 152, campaign = 951 739, reason = 393 295, stage = 66.
+Это `VALIDATED WITH NULL RISK`, не новый фильтр отчёта.
