@@ -53,14 +53,14 @@ blocker: после documentary audit глобальный gate остаётся
 | 17 | Отчёт по %Renew | `VALIDATION_REQUIRED` | Contract key, current window/`COUNT(*)`, `Fld693` и финализация закрытого месяца. | `mart.contract_usage`; SV-082; ADR-0006 |
 | 18 | Выручка рецепции | `VALIDATION_REQUIRED` | Атрибуция продавца и точный report view поверх общего факта; `_document294` не добавляется без решения об изменении атрибуции. | `mart.v_reception_revenue_daily`; SV-050—053; ADR-0005 |
 | 19 | Записи администраторов | `VALIDATION_REQUIRED` | Booking→movement cardinality/sum и кадровая атрибуция: уже найдено 99 документов с одним match и один с четырьмя. | `mart.v_administrator_bookings_daily`; SV-086; ADR-0004 |
-| 20 | Новички и гостевые визиты | `DECISION_REQUIRED` | Guest candidate key дублируется; status, first-rank и 0–44-day outcome нельзя выбрать эвристикой. | `mart.v_guest_tour`, `mart.new_first_visit`, `mart.guest_visit_conversion`; SV-087; ADR-0020 |
-| 21 | Отчёт по обращениям | `VALIDATION_REQUIRED` | HTML/follow-up, feedback cardinality и знаменатель посещений; сохраняется current phone multiplicity. | `mart.crm_interaction`, `mart.v_feedback_interaction`; SV-088; ADR-0016 |
-| 22 | Посещаемость клиентов с долгами | `VALIDATION_REQUIRED` | Технический key, source states, document branches, as-of границы, RecordKind/sign и cardinality сотрудника. | `mart.unconfirmed_service_debt_movement`, `mart.visit_client_day`; SV-089; ADR-0021 |
+| 20 | Новички и гостевые визиты | `BLOCKED` | Точный PBI-артефакт со списком 12 ACCUNIQ-услуг и выбором записи отсутствует; без него нельзя подтвердить filter/status/first-rank и 0–44-day outcome. | `mart.v_guest_tour`, `mart.new_first_visit`, `mart.guest_visit_conversion`; SV-087/097; ADR-0020 |
+| 21 | Отчёт по обращениям | `VALIDATION_REQUIRED` | Physical feedback/HTML/follow-up ordering подтверждены bounded controls; остаются точные scope GUID, business-grain знаменателя посещений, Power BI reconciliation и rerun/SLA. | `mart.crm_interaction`, `mart.v_feedback_interaction`; SV-088/098; ADR-0016 |
+| 22 | Посещаемость клиентов с долгами | `DECISION_REQUIRED` | Ключ движения и client × prebooking подтверждены; остаются правило для 1 970 quantity `other`, стабильная классификация посещения вместо имени, as-of controls и SLA. | `mart.unconfirmed_service_debt_movement`, `mart.visit_client_day`; SV-089/099; ADR-0021 |
 | 23 | Посещения Пушкинский | `VALIDATION_REQUIRED` | Snapshot, категории и исключение ДРЦ должны быть подтверждены на полном scope. | `mart.visit_client_day`, `mart.club_day_metrics`; SV-071; ADR-0003 |
 | 24 | Работа с посещаемостью | `VALIDATION_REQUIRED` | Не сформирован daily client-base denominator; годовой source query превысил timeout, SLA не измерен; шкафчики остаются вне PostgreSQL. | `mart.club_attendance_hourly`, `mart.client_base_daily`; SV-065/067; ADR-0022 |
-| 25 | Карта администратора | `VALIDATION_REQUIRED` | Gymmy key, successful-event, card→club и daily count; сохраняются 12 карт, два направления и `SUM(usage_count)`. | `mart.administrator_card_gymmy_daily`; SV-002; ADR-0023 |
+| 25 | Карта администратора | `VALIDATION_REQUIRED` | Gymmy key/success и bounded cards/directions подтверждены; остаются канонический card→club mapping и независимая дневная сверка. Внешний журнал не анализируется. | `mart.administrator_card_gymmy_daily`; SV-002/100; ADR-0023 |
 | 26 | Титульный лист | `OPEN` | Внутренние source controls пройдены, но свод требует готовых shared dependencies; внешние Excel-ветви остаются в Power BI. | `mart.revenue_group_summary_daily`, `mart.client_base_daily`, `mart.club_attendance_hourly`; SV-062—064; ADR-0024 |
-| 27 | Маркетинговая воронка | `VALIDATION_REQUIRED` | Physical code/join/state controls для task×contract; BR-020 требует считать каждую qualified связь. | `mart.fitness_leads_funnel_task`; SV-080; ADR-0011 |
+| 27 | Маркетинговая воронка | `VALIDATION_REQUIRED` | Code уникален в report funnel; CRM joins не размножают task, states наблюдены. Остаются накопленный трафик, Power BI reconciliation и rerun/SLA; BR-020 сохраняет каждую qualified связь. | `mart.fitness_leads_funnel_task`; SV-080/101; ADR-0011 |
 | 28 | Клиентская база | `DECISION_REQUIRED` | Package/visit/state controls, control values и физическое представление `NULL/Не определено`; retention имеет отдельный grain. | `mart.client_base_snapshot`, `mart.client_base_retention`, `mart.client_base_daily`; SV-069; ADR-0002 |
 | 29 | Выручка ДПФУ | `OPEN` | Четыре shared products загружены, но report-specific model/reconciliation целиком ещё не закрыты; не создавать вторые копии движений. | `mart.ancillary_revenue_movement`, `mart.dpfu_plan_assignment`, `mart.ip_training_daily`, `mart.ip_revenue_daily`; ADR-0005/0012 |
 | 30 | Членство для правления | `VALIDATION_REQUIRED` | States, board reconciliation и non-additive KPI controls остаются к проверке; recurring unit наследует подтверждённое `contract × payment_period` (SV-096). | `mart.membership_receipt_movement`, `mart.membership_contract_kpi_unit`; SV-083/096; ADR-0017 |
@@ -92,20 +92,20 @@ blocker: после documentary audit глобальный gate остаётся
 | `mart.employee_presence_day` | `VALIDATION_REQUIRED` | Однозначная СКУД→сотрудник связь и отсутствие размножения часов. |
 | `mart.crm_interaction` | `VALIDATION_REQUIRED` | States, full population и идентичность interaction key. |
 | `mart.v_sales_interaction` | `VALIDATION_REQUIRED` | Phone-row semantics и кадровый отбор. |
-| `mart.v_feedback_interaction` | `VALIDATION_REQUIRED` | HTML/follow-up/cardinality и visit denominator. |
+| `mart.v_feedback_interaction` | `VALIDATION_REQUIRED` | Bounded HTML/follow-up/cardinality подтверждены; точные report scopes, visit denominator, reconciliation и SLA остаются. |
 | `mart.v_guest_tour` | `VALIDATION_REQUIRED` | Filter/state и 44-day outcome controls. |
 | `mart.new_first_visit` | `VALIDATION_REQUIRED` | First-rank tie-break и PII-detail grain. |
-| `mart.guest_visit_conversion` | `DECISION_REQUIRED` | Дубли candidate key и правило статуса/конверсии. |
-| `mart.fitness_leads_funnel_task` | `VALIDATION_REQUIRED` | Task key и physical task×contract controls. |
+| `mart.guest_visit_conversion` | `BLOCKED` | Точный PBI service/rank artifact отсутствует; статус/конверсия не выбираются эвристикой. |
+| `mart.fitness_leads_funnel_task` | `VALIDATION_REQUIRED` | Task code уникален в report scope; CRM joins/states наблюдены. Остаются traffic/reconciliation/SLA controls. |
 | `mart.children_package_sale` | `VALIDATION_REQUIRED` | Check-line price/product, возвраты и states. |
 | `mart.promo_application` | `DECISION_REQUIRED` | Устранение join-multiplicity без изменения legacy результата. |
 | `mart.ancillary_revenue_movement` | `IMPLEMENTED` | Собственный admission закрыт; повторная загрузка запрещена без нового триггера. |
 | `mart.dpfu_plan_assignment` | `IMPLEMENTED` | Собственный admission закрыт; плановые потребители ещё требуют report-level controls. |
 | `mart.prebooking_state_event` | `IMPLEMENTED` | Собственный admission закрыт; legacy multiplicity остаётся границей потребителей. |
-| `mart.unconfirmed_service_debt_movement` | `VALIDATION_REQUIRED` | Key, states, as-of/document branches и sign. |
+| `mart.unconfirmed_service_debt_movement` | `DECISION_REQUIRED` | Key and client × prebooking доказаны; нужно правило для quantity `other`, visit classification и as-of reconciliation. |
 | `mart.group_lesson` | `IMPLEMENTED` | Собственный admission закрыт; не заменяет правила полного расписания. |
 | `mart.lesson_room_slot_5m` | `IMPLEMENTED` | Собственный admission закрыт; BR-021 и два nonpositive source controls зафиксированы. |
-| `mart.administrator_card_gymmy_daily` | `VALIDATION_REQUIRED` | Key, success, card→club и count. |
+| `mart.administrator_card_gymmy_daily` | `VALIDATION_REQUIRED` | Gymmy key/success validated bounded; canonical card→club mapping и independent daily count остаются. |
 | `mart.v_administrator_bookings_daily` | `VALIDATION_REQUIRED` | Booking→movement cardinality/sum и кадровая атрибуция. |
 | `mart.v_reception_revenue_daily` | `VALIDATION_REQUIRED` | Seller attribution и report-view grain. |
 | `mart.revenue_group_summary_daily` | `VALIDATION_REQUIRED` | Daily article key и validated internal branches. |
