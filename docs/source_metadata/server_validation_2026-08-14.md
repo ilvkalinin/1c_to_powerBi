@@ -124,3 +124,30 @@ KPI-единицу на `Контракт × Текст после раздел�
 Точный PBI-артефакт со списком 12 ACCUNIQ-услуг и выбором записи не найден в
 проекте. Поэтому NV-V05/NV-V09 и полная сверка NVG-V06 остаются `BLOCKED`:
 подбор услуг по именам или подстановка нового фильтра запрещены.
+
+## SV-098 — «Отчёт по обращениям»: CRM core and comment controls
+
+Статус: `PARTIALLY VALIDATED`. Read-only SQL:
+[calls_report_global_review_2026-08-17.sql](validation_sql/calls_report_global_review_2026-08-17.sql).
+Каждый запрос запускался отдельно с ограничением 20–30 секунд; поэтому
+полногодовые числа — снимки изменяющегося источника, а не единый баланс.
+
+| Контроль | Фактический результат | Статус |
+|---|---|---|
+| CR-V02 | В раннем снимке 59 380 feedback rows = 59 380 physical interaction IDs; duplicates, orphan task, `NULL`/future creation = 0 | VALIDATED physical core |
+| CR-V03 | Phone rows и non-null phone technical keys = 0; HTML rows = 105 276, в 38 799 interactions больше одного HTML, максимум 15 | VALIDATED multiplicity observation — текущую агрегацию HTML нельзя убрать |
+| CR-V04 | В следующем live-снимке 59 384 joined rows = 59 384 interaction IDs; dimension excess, missing task/funnel = 0; missing club = 1, client = 4 | VALIDATED WITH NULL RISK — unmatched dimensions не фильтруются |
+| CR-V06 | Bounded 100-row control: no follow-up = 11; earlier follow-up = 0; same-timestamp ties = 0 | VALIDATED bounded ordering of current task-owner path |
+| CR-V07 | Bounded 100-row control: 41 interactions have >1 post-creation comment, pre-creation and timestamp ties = 0, max = 6 | VALIDATED bounded comment ordering; `MIN` current aggregation materially needed |
+| CR-V09 | Next live-snapshot: 59 385 feedback rows; marked = 0, archived = 34 330, future = 1 | OBSERVED — no state/date filter is added |
+
+Первоначальная CR-V03 метрика из `calls_report_2026-08-12.sql` считала
+`ROW(NULL,NULL)` от `LEFT JOIN` как один distinct phone key и давала 59 380
+ложных keys при нуле phone rows. Это дефект контрольной метрики, не логики
+отчёта; исходный запрос сохранён как критичный артефакт возможной доработки.
+В SV-098 null-placeholder явно исключён.
+
+Остаются `VALIDATION_PENDING`: точные GUID-наборы шести тем, speed/quality,
+воронок и Jivo (CR-V05), полный business-grain знаменателя посещений
+(CR-V08), независимая сверка с Power BI и rerun/refresh controls. Эти
+проверки не подменяются наблюдениями SV-098.

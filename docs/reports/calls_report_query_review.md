@@ -1,16 +1,16 @@
 # Разбор текущих запросов: «Отчет по обращениям»
 
-Статус: `BUSINESS REVIEW COMPLETE / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-088`.
+Статус: `BUSINESS REVIEW COMPLETE / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-088, SV-098`.
 
 Источники:
 
 - `Отчет по обращениям.docx`, SHA-1 `bf981ed05fc109a6581c9b1f81c2434c3d332bf4` — описание четырёх страниц;
 - `отчетпообращениям.docx`, SHA-1 `9c084cf330d196edb9ec2906e70604fd285b0bff` — Power Query и DAX.
 
-Новые SQL-контроли ниже не запускались в текущем agent-runtime без локального
-PostgreSQL-клиента/драйвера. Переиспользуемые live read-only результаты
-SV-024—SV-034 имеют собственное доказательство; незапущенные controls имеют
-статус `VALIDATION_PENDING` и не считаются пройденными.
+SV-098 добавил narrow read-only evidence для feedback core, HTML,
+PK-side dimensions, first-followup ordering, comments и source states.
+Непройденные controls сохраняют статус `VALIDATION_PENDING` и не считаются
+пройденными по косвенным результатам.
 
 ## Stage 2 checkpoint — SV-088 (2026-08-12)
 
@@ -21,12 +21,11 @@ key и 3 103 interactions с 2–3 phone rows в 2026. Это подтвержд
 current direct phone join нельзя схлопывать как технический duplicate.
 
 Новый SQL-контроль [`calls_report_2026-08-12.sql`](../source_metadata/validation_sql/calls_report_2026-08-12.sql)
-подготовлен с expected result и `BEGIN READ ONLY`, но не исполнен: в текущем
-agent-runtime отсутствует локальный PostgreSQL-клиент/драйвер. HTML cardinality,
-first non-feedback follow-up, comment ties, exact filter scopes, visit
-denominator и независимая Power BI reconciliation остаются
-`VALIDATION_PENDING`; отсутствие выполнения не доказывает отсутствие source
-objects.
+сохраняется как исходный артефакт. Выполненный
+[`SV-098 SQL`](../source_metadata/validation_sql/calls_report_global_review_2026-08-17.sql)
+подтвердил HTML cardinality, first non-feedback follow-up ordering и comment
+ties на bounded controls. Точные filter scopes, visit denominator и
+независимая Power BI reconciliation остаются `VALIDATION_PENDING`.
 
 ## Наборы Power Query
 

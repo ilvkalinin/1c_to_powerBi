@@ -1,26 +1,26 @@
 # Source-to-target mapping: «Отчет по обращениям»
 
-Статус: `BUSINESS MAPPING COMPLETE / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-088 / IMPLEMENTATION DEFERRED`.
+Статус: `BUSINESS MAPPING COMPLETE / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-088, SV-098 / IMPLEMENTATION DEFERRED`.
 
 Основание — переданные описание, Power Query и DAX. SQL и объект витрины не
 создаются. В этом mapping `CONFIRMED` означает подтверждённую текущую
 логику, но не техническую валидность 1С-источников.
 
-## Stage 2 evidence — SV-088
+## Stage 2 evidence — SV-088, SV-098
 
 Переиспользованы live read-only результаты SV-024—SV-034: physical PK
 `_reference67._idrref`, many-to-one joins задачи и её dimension, а также
 phone-row technical key и измеренная множественность. Поэтому current direct
 phone join сохраняется по BR-018 и решению 2026-08-05; это не основание
-схлопывать звонки до interaction. Проверки `_reference137`, точного
-first-followup/comment tie-break, six-topic/speed scopes, visit event grain,
-states и независимых control values остаются `VALIDATION_PENDING`.
+схлопывать звонки до interaction. SV-098 добавляет bounded evidence по HTML,
+first-followup/comment ordering и states; он не закрывает scope-фильтры,
+visit event grain, Power BI reconciliation или refresh/re-run.
 
-[`calls_report_2026-08-12.sql`](../source_metadata/validation_sql/calls_report_2026-08-12.sql)
-зафиксировал ожидаемые агрегированные проверки, но не выполнен: текущий
-agent-runtime не содержит локального PostgreSQL-клиента/драйвера. Это не
-доказательство отсутствия физического источника и не меняет реестр missing
-objects.
+Полные результаты SV-098 зафиксированы в
+[`server validation`](../source_metadata/server_validation_2026-08-14.md#sv-098--отчёт-по-обращениям-crm-core-and-comment-controls);
+исправленный null-safe control и bounded first-followup path — в
+[`calls_report_global_review_2026-08-17.sql`](../source_metadata/validation_sql/calls_report_global_review_2026-08-17.sql).
+Статус реализации не меняется.
 
 ## Reuse review
 
