@@ -213,3 +213,7 @@ MF-V04 дополнительно выполнен на том же scope: 1 382
 1 382 848 task IDs, join excess = 0. `NULL` dimensions наблюдаются и
 сохраняются: club = 152, campaign = 951 739, reason = 393 295, stage = 66.
 Это `VALIDATED WITH NULL RISK`, не новый фильтр отчёта.
+
+MF-V06: в live-снимке BR-020 bridge 200 626 связей, `marked task = 0`,
+`marked contract = 1`. У `InfoRg6798` физически нет `_active`, поэтому state
+bridge не выдумывается. Это `OBSERVED`; новый `Marked` filter не вводится.
