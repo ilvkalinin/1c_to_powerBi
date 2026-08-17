@@ -1,6 +1,6 @@
 # Разбор текущего запроса: «Карта администратора»
 
-Статус: `EVIDENCE REVIEWED / BUSINESS LOGIC COMPLETE / PHYSICAL SOURCE AVAILABILITY VALIDATED — SV-002`.
+Статус: `EVIDENCE REVIEWED / BUSINESS LOGIC COMPLETE / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-002, SV-100`.
 
 Источники:
 
@@ -54,6 +54,11 @@ Power Query:
 SV-002 дополнительно подтвердил наличие `public._inforg5836` в read-only
 каталоге gymdb. Это не является выполнением data controls и не доказывает
 гранулярность событий.
+
+SV-100 выполнил bounded control Gymmy за июль 2026: 9 082 события по
+подтверждённым 12 картам и двум направлениям, без `false`/`NULL` успеха.
+Unique source index подтверждает physical event key. Внешний журнал не
+открывался; last-word club остаётся text observation, а не canonical club key.
 
 ## Критические наблюдения
 
