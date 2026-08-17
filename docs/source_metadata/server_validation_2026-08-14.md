@@ -151,3 +151,27 @@ KPI-единицу на `Контракт × Текст после раздел�
 воронок и Jivo (CR-V05), полный business-grain знаменателя посещений
 (CR-V08), независимая сверка с Power BI и rerun/refresh controls. Эти
 проверки не подменяются наблюдениями SV-098.
+
+## SV-099 — «Посещаемость клиентов с долгами»: movement and branch controls
+
+Статус: `PARTIALLY VALIDATED`. Read-only SQL:
+[visits_debt_global_review_2026-08-17.sql](validation_sql/visits_debt_global_review_2026-08-17.sql).
+
+| Контроль | Фактический результат | Статус |
+|---|---|---|
+| DV-V01 | 482 347 movements за 2026 = столько же technical keys; inactive, null client/prebooking и null quantity/amount = 0 | VALIDATED physical movement key |
+| DV-V04 | 236 274 client × prebooking pairs; 24 208 prebookings относятся к >1 клиенту, максимум 56; 233 733 пары имеют несколько движений | VALIDATED — `prebooking_id` не является ключом клиента; as-of key остаётся парой |
+| DV-V02 | Current DAX classes `RecordKind 0/1 × quantity ±1` есть; вне этих четырёх классов 1 970 movements | VALIDATED observation / DECISION_REQUIRED — новое значение им не назначается |
+| DV-V03 | После text-cast observation: 457 556 base rows, 456 639 current branch rows и keys; branch excess = 0, не выведено 917 | VALIDATED WITH ROW-LOSS RISK — current inner branch не меняется |
+| DV-V06 | Source-side cast observation текстового visit filter: 35 rows = 35 technical keys, 32 client-day-club, missing/mismatched club = 0 | BLOCKED as cohort evidence — результат не подтверждает Power Query classification |
+
+Старый DV-V03/DV-V06 SQL напрямую применял `ILIKE` к 1С-типу `mvarchar` и
+не выполняется в PostgreSQL (`operator does not exist: mvarchar !~~* unknown`).
+`::text` в SV-099 нужен только для безопасного read-only наблюдения; он не
+заменяет current Power Query и не создаёт стабильный filter. Оригинальный SQL
+сохранён как критичный артефакт возможной доработки.
+
+До готовности отчёта остаются: подтверждённый ключ классификации посещения
+вместо имени, правило для quantity `other`, независимые as-of controls на
+контрольных датах из Power BI и rerun/SLA. Никакая из этих границ не закрыта
+догадкой или новым фильтром.

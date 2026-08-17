@@ -1,6 +1,6 @@
 # Разбор текущих запросов: «Отчет по посещаемости клиентов с долгами»
 
-Статус: `EVIDENCE REVIEWED / BUSINESS BLOCKERS CLOSED / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-089`.
+Статус: `EVIDENCE REVIEWED / BUSINESS BLOCKERS CLOSED / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-089, SV-099`.
 
 Источники: технический DOCX SHA-256
 `8ce2ab127218be918c1ceb8ac05f2a59e308ce8e1942bff6595b90850e080d22`
@@ -11,14 +11,16 @@
 
 SV-002/SV-006 подтверждают relations current M, SV-008 — физический
 `RecordKind` `_accumrg7509`, SV-013/SV-017 — основную visit branch и её
-PK-side joins. Эти доказательства не интерпретируют знак movement, не
-назначают state filters и не подтверждают `client × prebooking` as-of key.
+PK-side joins. SV-099 добавляет live read-only evidence: движения имеют
+уникальный physical key, но prebooking не уникален по клиенту; document
+branches не размножают строки и могут их терять. Эти доказательства не
+назначают state filters и не создают правило для quantity `other`.
 
-[`visits_debt_2026-08-12.sql`](../source_metadata/validation_sql/visits_debt_2026-08-12.sql)
-содержит только aggregated `BEGIN READ ONLY` checks, но не выполнен: current
-agent-runtime не имеет local PostgreSQL client/driver. Нет нового вывода о
-missing source object; branch cardinality, states, signs, as-of controls и
-independent reconciliation остаются `VALIDATION_PENDING`.
+[`SV-099 SQL`](../source_metadata/validation_sql/visits_debt_global_review_2026-08-17.sql)
+выполнен read-only. Current name filter не переносится SQL-оператором напрямую
+из-за 1С-типа `mvarchar`; cast observation не считается подтверждением cohort.
+Полные результаты — в
+[`SV-099`](../source_metadata/server_validation_2026-08-14.md#sv-099--посещаемость-клиентов-с-долгами-movement-and-branch-controls).
 
 ## Power Query
 
