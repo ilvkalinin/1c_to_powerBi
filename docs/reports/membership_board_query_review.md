@@ -40,6 +40,10 @@ SV-112 подтвердил для board-reused contract-advance branch current-
 ветка `ПКО × RecordKind=1` не встретилась в 2025–2026 и остаётся preserved,
 но не наблюдённой.
 
+SV-113 подтвердил, что 14 document-recorder joins shared contract-advance
+ветви не размножают строки и суммы. Другие joins и board-reconciliation
+остаются отдельными проверками.
+
 ## Board-специфичные объекты
 
 | Объект | Тип / grain | Назначение | Решение |

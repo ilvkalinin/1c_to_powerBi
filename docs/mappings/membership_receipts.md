@@ -150,7 +150,7 @@ PBIT подтверждает общую звезду и одновременн�
 | Статус | Элемент | Риск / причина | Проверка / следующее действие |
 |---|---|---|---|
 | CONFIRMED | рекарринговая KPI-единица | текущий PBI суммирует все движения `contract_id × payment_period`; множественность строк в группе ожидаема | SV-096 / BR-016 |
-| VALIDATION_PENDING | source keys/states/signs | current aggregation can hide duplicates/deletions | MR-V01–MR-V05 |
+| PARTIALLY VALIDATED | source keys/states/signs | SV-112/113 подтвердили current state/sign и отсутствие размножения 14 document joins; другие joins и непредставленная ветка ПКО остаются открыты | MR-V01–MR-V05 |
 | VALIDATION_PENDING | predecessor contract | ties resolved by `MIN(ID)` without business proof | MR-V08 |
 | VALIDATION_PENDING | `InfoRg8595` | arbitrary row after `Table.Distinct(product_id)` | uniqueness/priority query |
 | CONFIRMED MODEL RISK | manager and sales-club propagation | current calculated KPI table lacks the corresponding shared-dimension relationships | require both keys/relationships in future KPI fact |

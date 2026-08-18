@@ -223,3 +223,58 @@ JOIN public._document331 d ON d._idrref = a._recorderrref
 WHERE a._period >= DATE '2025-01-01' AND a._period < DATE '2027-01-01'
 GROUP BY 1
 ORDER BY 1;
+
+-- MR-V05A: validate that the 14 one-to-one recorder joins themselves do not
+-- multiply the 2026 advance register.  The recognised-current-M subset is
+-- reported separately: excluding unrecognised rows and sale is a preserved
+-- report rule, not a join-preservation failure.
+WITH movements AS MATERIALIZED (
+  SELECT _recorderrref AS recorder_id, _lineno AS line_no, _fld7377 AS amount_raw
+  FROM public._accumrg7370
+  WHERE _period >= DATE '2026-01-01' AND _period < DATE '2027-01-01'
+), joined AS (
+  SELECT m.*,
+         CASE
+           WHEN d317._idrref IS NOT NULL THEN 'transfer'
+           WHEN d316._idrref IS NOT NULL THEN 'transfer_contract'
+           WHEN d332._idrref IS NOT NULL THEN 'sale'
+           WHEN d285._idrref IS NOT NULL THEN 'return'
+           WHEN d304._idrref IS NOT NULL THEN 'card'
+           WHEN d346._idrref IS NOT NULL THEN 'cash_receipt'
+           WHEN d327._idrref IS NOT NULL THEN 'cashless'
+           WHEN d315._idrref IS NOT NULL THEN 'sales_report'
+           WHEN d331._idrref IS NOT NULL THEN 'pko'
+           WHEN d305._idrref IS NOT NULL THEN 'certificate'
+           WHEN d333._idrref IS NOT NULL THEN 'rko'
+           WHEN d339._idrref IS NOT NULL THEN 'advance_writeoff'
+           WHEN d340._idrref IS NOT NULL THEN 'cashless_writeoff'
+           WHEN d296._idrref IS NOT NULL THEN 'recurring_correction'
+         END AS recorder_type
+  FROM movements m
+  LEFT JOIN public._document317 d317 ON d317._idrref = m.recorder_id
+  LEFT JOIN public._document316 d316 ON d316._idrref = m.recorder_id
+  LEFT JOIN public._document332 d332 ON d332._idrref = m.recorder_id
+  LEFT JOIN public._document285 d285 ON d285._idrref = m.recorder_id
+  LEFT JOIN public._document304 d304 ON d304._idrref = m.recorder_id
+  LEFT JOIN public._document346 d346 ON d346._idrref = m.recorder_id
+  LEFT JOIN public._document327 d327 ON d327._idrref = m.recorder_id
+  LEFT JOIN public._document315 d315 ON d315._idrref = m.recorder_id
+  LEFT JOIN public._document331 d331 ON d331._idrref = m.recorder_id
+  LEFT JOIN public._document305 d305 ON d305._idrref = m.recorder_id
+  LEFT JOIN public._document333 d333 ON d333._idrref = m.recorder_id
+  LEFT JOIN public._document339 d339 ON d339._idrref = m.recorder_id
+  LEFT JOIN public._document340 d340 ON d340._idrref = m.recorder_id
+  LEFT JOIN public._document296 d296 ON d296._idrref = m.recorder_id
+)
+SELECT (SELECT count(*) FROM movements) AS source_rows,
+       count(*) AS joined_rows,
+       count(*) - (SELECT count(*) FROM movements) AS join_row_excess,
+       round((SELECT sum(amount_raw)::numeric FROM movements), 2) AS source_amount_total,
+       round(sum(amount_raw)::numeric, 2) AS joined_amount_total,
+       round(sum(amount_raw)::numeric - (SELECT sum(amount_raw)::numeric FROM movements), 2)
+         AS join_amount_difference,
+       count(*) FILTER (WHERE recorder_type IS NOT NULL AND recorder_type <> 'sale')
+         AS current_m_included_rows,
+       round(sum(amount_raw) FILTER (WHERE recorder_type IS NOT NULL AND recorder_type <> 'sale')::numeric, 2)
+         AS current_m_included_raw_amount
+FROM joined;
