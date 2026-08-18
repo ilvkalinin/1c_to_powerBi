@@ -188,4 +188,16 @@ WHERE _fld831rref = decode('9db9fdbf6bd80f2044eb2835157b3bc8', 'hex')
   AND _fld823 >= DATE '2026-07-01'
   AND _fld823 < DATE '2026-08-01';
 
+-- CR-V05G, executed 2026-08-18 as seven independent monthly transactions.
+-- The date index makes each closed month selective; do not replace this with
+-- an annual text scan. Run once for each [start_date, end_date) pair.
+SELECT count(*) AS feedback_rows,
+       count(*) FILTER (WHERE _description::text LIKE '%Jivo%') AS jivo_named_rows,
+       count(DISTINCT _fld830rref) AS nonnull_status_values,
+       count(*) FILTER (WHERE _fld830rref IS NULL) AS null_status_rows
+FROM public._reference67
+WHERE _fld831rref = decode('9db9fdbf6bd80f2044eb2835157b3bc8', 'hex')
+  AND _fld823 >= :start_date
+  AND _fld823 < :end_date;
+
 ROLLBACK;
