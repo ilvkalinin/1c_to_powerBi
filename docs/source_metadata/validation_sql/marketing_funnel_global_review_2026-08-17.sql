@@ -87,4 +87,26 @@ SELECT count(*) AS qualified_bridge_rows,
        count(*) FILTER (WHERE payment_type_id IS NULL) AS null_payment_type_rows
 FROM eligible_bridge;
 
+-- MF-V07C, executed 2026-08-18. BR-024 reuses the exact recurring mapping
+-- confirmed in the current membership-receipts M code; this checks coverage
+-- in the marketing report scope without inferring a label from source order.
+WITH eligible_bridge AS MATERIALIZED (
+  SELECT c._fld699rref AS payment_type_id
+  FROM public._inforg6798 r
+  JOIN public._reference59 c ON c._idrref = r._fld6800_rrref
+  JOIN public._reference106 t ON t._idrref = r._fld6799rref
+  JOIN public._reference89 f ON f._idrref = t._fld1191rref
+  WHERE r._fld6802
+    AND f._description::text = 'Продажа клубной карты'
+    AND c._fld696rref <> decode('9b656ee141a764e44de79e83cd30c1b2', 'hex')
+    AND c._fld699rref <> decode('96976725cebf51f7461429d74d3f6cbe', 'hex')
+    AND c._fld670::date >= DATE '2024-01-01'
+    AND c._fld670::date >= t._fld1193::date
+)
+SELECT count(*) AS qualified_bridge_rows,
+       count(*) FILTER (WHERE payment_type_id = decode('9bd3ea4748457ee94b2011de6d9687d7', 'hex')) AS recurring_rows,
+       count(*) FILTER (WHERE payment_type_id <> decode('9bd3ea4748457ee94b2011de6d9687d7', 'hex')) AS prepayment_rows,
+       count(*) FILTER (WHERE payment_type_id IS NULL) AS null_payment_type_rows
+FROM eligible_bridge;
+
 ROLLBACK;
