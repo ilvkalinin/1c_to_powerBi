@@ -167,4 +167,15 @@ SELECT count(*) AS resolved_funnel_rows,
 FROM public._reference89
 WHERE _idrref = decode('99d7928e75e3805f11f0310981642c71', 'hex');
 
+-- CR-V05E, executed 2026-08-18. Bounded July control for the current Jivo
+-- exclusion. It observes the existing text predicate; it neither replaces it
+-- with another rule nor generalises the monthly count to the full history.
+SELECT count(*) AS feedback_rows,
+       count(*) FILTER (WHERE _description::text LIKE '%Jivo%') AS jivo_named_rows,
+       count(*) FILTER (WHERE _description IS NULL) AS null_description_rows
+FROM public._reference67
+WHERE _fld831rref = decode('9db9fdbf6bd80f2044eb2835157b3bc8', 'hex')
+  AND _fld823 >= DATE '2026-07-01'
+  AND _fld823 < DATE '2026-08-01';
+
 ROLLBACK;
