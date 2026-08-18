@@ -186,6 +186,11 @@ rows, из них 919 с `Jivo` в имени; `NULL` имён = 0. Поэтом
 отменён по `statement_timeout`, поэтому число 919 не обобщается на историю;
 speed/quality и status GUID scopes остаются `VALIDATION_PENDING`.
 
+CR-V05F: в том же bounded июле у 6 326 feedback rows три непустых физических
+значения `Fld830`, `NULL` = 0. Это согласуется со структурой трёх current
+категорий статуса, но не связывает их ID с именами «Выполнено», «Не выполнено»
+и «Отменено»; label mapping остаётся `VALIDATION_PENDING`.
+
 ## SV-099 — «Посещаемость клиентов с долгами»: movement and branch controls
 
 Статус: `PARTIALLY VALIDATED`. Read-only SQL:

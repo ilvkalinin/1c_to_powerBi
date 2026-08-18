@@ -178,4 +178,14 @@ WHERE _fld831rref = decode('9db9fdbf6bd80f2044eb2835157b3bc8', 'hex')
   AND _fld823 >= DATE '2026-07-01'
   AND _fld823 < DATE '2026-08-01';
 
+-- CR-V05F, executed 2026-08-18. Bounded status-structure observation: it
+-- counts physical values but does not assign report labels to their IDs.
+SELECT count(*) AS feedback_rows,
+       count(DISTINCT _fld830rref) AS nonnull_status_values,
+       count(*) FILTER (WHERE _fld830rref IS NULL) AS null_status_rows
+FROM public._reference67
+WHERE _fld831rref = decode('9db9fdbf6bd80f2044eb2835157b3bc8', 'hex')
+  AND _fld823 >= DATE '2026-07-01'
+  AND _fld823 < DATE '2026-08-01';
+
 ROLLBACK;
