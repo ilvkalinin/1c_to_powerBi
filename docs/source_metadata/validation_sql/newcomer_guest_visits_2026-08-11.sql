@@ -203,4 +203,58 @@ SELECT (SELECT count(*) FROM base) AS source_rows,
        (SELECT count(*) FROM current_pbit_rows) -
          (SELECT count(*) FROM client_date) AS client_date_duplicate_excess;
 
+-- NV-V06. Expected: reproduce the current PBIT suitable-contract predicate
+-- and the inclusive [0, 44] activation window after a guest visit. Lag 45 is
+-- measured separately and must not be admitted by this control. The first
+-- candidate remains MIN(lag_days) per client × guest date, as in current M;
+-- no contract ID tie-break is introduced.
+WITH guest_days AS MATERIALIZED (
+  SELECT DISTINCT g._fld7065rref AS client_id,
+         g._fld7068::date AS guest_date
+  FROM public._inforg7064 g
+  JOIN public._document325 d ON d._idrref = g._recorderrref
+  JOIN public._reference141x1 client ON client._idrref = g._fld7065rref
+  WHERE g._period > TIMESTAMP '2025-01-01'
+    AND g._fld7068 IS NOT NULL
+),
+suitable_contracts AS MATERIALIZED (
+  SELECT c._idrref AS contract_id,
+         c._fld681rref AS client_id,
+         c._fld670::date AS activation_date
+  FROM public._reference59 c
+  JOIN public._reference141x1 client ON client._idrref = c._fld681rref
+  WHERE c._fld696rref <> decode('9b656ee141a764e44de79e83cd30c1b2', 'hex')
+    AND c._fld699rref <> decode('96976725cebf51f7461429d74d3f6cbe', 'hex')
+    AND c._fld672 > TIMESTAMP '2025-01-01'
+    AND c._fld693 >= 30
+    AND c._fld672 - c._fld671 >= INTERVAL '30 days'
+    AND c._description::text NOT LIKE '%ИП%'
+    AND c._description::text NOT LIKE '%сотрудн%'
+    AND client._code IS NOT NULL
+    AND c._fld670 IS NOT NULL
+),
+candidate_lags AS MATERIALIZED (
+  SELECT gd.client_id, gd.guest_date, sc.contract_id,
+         (sc.activation_date - gd.guest_date) AS lag_days
+  FROM guest_days gd
+  JOIN suitable_contracts sc ON sc.client_id = gd.client_id
+  WHERE sc.activation_date >= gd.guest_date
+    AND sc.activation_date <= gd.guest_date + 45
+),
+current_pbit_candidates AS (
+  SELECT client_id, guest_date, min(lag_days) AS first_lag_days
+  FROM candidate_lags
+  WHERE lag_days BETWEEN 0 AND 44
+  GROUP BY 1, 2
+)
+SELECT (SELECT count(*) FROM guest_days) AS guest_client_date_keys,
+       (SELECT count(*) FROM candidate_lags WHERE lag_days = 0) AS lag_0_contract_rows,
+       (SELECT count(*) FROM candidate_lags WHERE lag_days = 44) AS lag_44_contract_rows,
+       (SELECT count(*) FROM candidate_lags WHERE lag_days = 45) AS lag_45_contract_rows,
+       (SELECT count(*) FROM current_pbit_candidates) AS current_pbit_converted_guest_days,
+       (SELECT count(*) FILTER (WHERE first_lag_days = 0)
+        FROM current_pbit_candidates) AS converted_at_lag_0,
+       (SELECT count(*) FILTER (WHERE first_lag_days = 44)
+        FROM current_pbit_candidates) AS converted_at_lag_44;
+
 ROLLBACK;
