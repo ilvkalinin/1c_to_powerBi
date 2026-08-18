@@ -310,3 +310,34 @@ SELECT (SELECT count(*) FROM current_m_grouped) AS current_m_grouped_rows,
        coalesce(sum(grouped_rows - 1) FILTER (WHERE grouped_rows > 1), 0) AS relationship_key_excess_rows,
        round(sum(amount_total)::numeric, 2) AS co_access_amount_total
 FROM per_relationship_key;
+
+-- MR-V06A: test the cardinality of the current-PBIT sales-price branch over
+-- the agreed BR-003 history.  The predicates and two price fields repeat the
+-- PBIT source; only its legacy lower date is replaced by the project horizon.
+-- Expected: at most one distinct price pair per contract, or observed ties are
+-- preserved for a later explicit tie-break decision.  No Table.Distinct-style
+-- arbitrary pick is applied here.
+WITH current_pbit_sales AS (
+  SELECT a._fld7655rref AS contract_id,
+         a._fld7659 AS price_field_7659,
+         a._fld7660 AS price_field_7660
+  FROM public._accumrg7646 a
+  LEFT JOIN public._reference163 p ON p._idrref = a._fld7649rref
+  WHERE a._period >= DATE '2025-01-01' AND a._period < DATE '2027-01-01'
+    AND a._fld7657 IS NOT NULL AND a._fld7657 = 1
+    AND a._fld7655rref <> decode('00000000000000000000000000000000', 'hex')
+    AND p._description::text NOT LIKE 'Заморозка%'
+    AND p._description::text NOT LIKE 'со-доступ%'
+), per_contract AS (
+  SELECT contract_id,
+         count(*) AS sales_rows,
+         count(DISTINCT (price_field_7659, price_field_7660)) AS distinct_price_pairs
+  FROM current_pbit_sales
+  GROUP BY 1
+)
+SELECT (SELECT count(*) FROM current_pbit_sales) AS sales_rows,
+       count(*) AS contracts,
+       count(*) FILTER (WHERE sales_rows > 1) AS contracts_with_multiple_sales_rows,
+       coalesce(sum(sales_rows - 1) FILTER (WHERE sales_rows > 1), 0) AS sales_row_excess,
+       count(*) FILTER (WHERE distinct_price_pairs > 1) AS contracts_with_multiple_price_pairs
+FROM per_contract;

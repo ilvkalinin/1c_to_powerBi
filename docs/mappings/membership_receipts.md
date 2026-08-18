@@ -71,7 +71,7 @@ SV-094 корректно зафиксировал множественност�
 | `club_access_type` | сетевой/локальный | `Reference59`, `InfoRg8595` | `Fld697`, `Fld8603/8597...` | product override then contract GUID | `text` | да | контракт | CONFIRMED current DAX / source uniqueness pending | DAX | product mapping uniqueness |
 | `access_time_type` | дневной/безлимитный/ограничение | `InfoRg8595`, product name | `Fld8599`, description | current text override then index | `text` | да | контракт | CONFIRMED current DAX / source uniqueness pending | DAX | coverage |
 | `access_zone` | VIP/Exclusive/кандидат/весь клуб | product name + club | `Description` | current ordered text search | `text` | нет | контракт | CONFIRMED current DAX | DAX | scenario matrix |
-| `list_contract_price` | полная цена для режима П | `AccumRg7646/7739` → `_Спр Абонементы.price` | `Fld7659/Fld7749` | текущая contract aggregation; tie-break pending | `numeric` | да | контрактная единица | CONFIRMED current consumer / validation pending | SQL/M/DAX | MR-V06 |
+| `list_contract_price` | полная цена для режима П | `AccumRg7646/7739` → `_Спр Абонементы.price` | `Fld7659/Fld7749` | текущая contract aggregation; tie-break pending | `numeric` | да | контрактная единица | VALIDATED RISK — SV-115: multiple price pairs, current `Table.Distinct` preserved | SQL/M/DAX | MR-V06 |
 | `calculation_mode` | правило цены по клубу | club mapping | club name | Пушкинский=`П`, УК/ДРЦ=`УК`, прочие=`Ф` | `text` | нет | контракт | CONFIRMED current DAX / hard-code risk | DAX | all clubs covered |
 
 ## Производные меры Power BI
