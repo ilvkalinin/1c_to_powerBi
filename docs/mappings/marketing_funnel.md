@@ -36,7 +36,7 @@ physical bridge key остаётся `VALIDATION_PENDING`; task code подтв�
 | `activation_date` | дата активации контракта | `Reference59.Fld670` | `::date >= 2024-01-01` и `::date >= task_created_at::date` | date | да | task × contract | CONFIRMED — BR-020; first condition current SQL | SQL/M + user 2026-08-13 | MF-V01, MF-V06 |
 | `contract_age_group` | возрастная группа покупки | `Reference59.Fld696`, `Reference163.Fld1741` | current CASE: детские секции / взрослые / дети / юниоры; fallback взрослые | text | да | task | CONFIRMED current | SQL/M | MF-V05, MF-V07 |
 | `contract_payment_type` | тип оплаты покупки | `Reference59.Fld699` | GUID: рекарринг, иначе предоплата | text | да | task | CONFIRMED current | SQL/M | MF-V05, MF-V07 |
-| `contract_duration_group` | длительность покупки | `Reference59.Fld693` | дни: `001–007`, `008–030`, `031–180`, `181–364`, `365+` | text | да | task | CONFIRMED current | SQL/M | MF-V07 |
+| `contract_duration_group` | длительность покупки | `Reference59.Fld693` | дни: `001–007`, `008–030`, `031–180`, `181–364`, `365+`; неположительное значение не переклассифицируется без правила | text | да | task | VALIDATED WITH ANOMALY — MF-V07 | SQL/M | MF-V07 |
 | `task_count` | вклад в число заданий | `task_id` | `1`; мера — distinct task key и удаляет contract-фильтры | smallint | нет | task | CONFIRMED current | DAX | MF-V02, MF-V09 |
 | `contract_count` | вклад в число абонементов | qualified `task_id × contract_id` | `1` для каждой связи, прошедшей BR-020; не применять global `DISTINCT(contract_id)` | smallint | нет | task × contract | CONFIRMED — user decision | BR-020 | MF-V03G, MF-V03H, MF-V09 |
 
@@ -69,6 +69,7 @@ physical bridge key остаётся `VALIDATION_PENDING`; task code подтв�
 | `VALIDATED business rule / VALIDATION_PENDING physical` | `task → contract` | SV-080: 100 строк bridge соответствуют 36 заданиям; у 21 задания более одного контракта. | BR-020 разрешает считать каждую qualifying `task × contract` связь. До Stage 3 подтвердить physical key/code join и сохранение строк; не добавлять global dedup. |
 | `VALIDATION_PENDING` | task code в bridge | current SQL соединяет отображаемые коды | MF-V02; перейти на ID только после доказательства physical field |
 | `VALIDATION_PENDING` | когорты накопленного трафика | current DAX использует годовые таблицы и несколько промежуточных мер | MF-V08, MF-V09 |
+| `VALIDATED WITH ANOMALY` | длительность контракта | В report funnel одна qualified связь имеет неположительную `Fld693`; `NULL` нет. | MF-V07; current boundaries сохраняются, строка не исключается без решения. |
 | `VALIDATED WITH NULL RISK` | CRM dimension joins | SV-101: joins не размножают task; незаполненные club/campaign/reason/stage сохраняются как `NULL`, не фильтруются. | MF-V04 |
 | `VALIDATION_PENDING` | сеть/кластер | общий mapping клуба подтверждён; физические поля и покрытие клубов ещё не проверены | MF-V01 |
 | `NOT_APPLICABLE` | внешние планы и watermark | Excel-планы остаются в Power BI | не включать в PostgreSQL SQL по решению пользователя 2026-07-30 |
