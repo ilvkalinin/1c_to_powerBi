@@ -150,8 +150,8 @@ PBIT может быть использован как дополнительн�
 отчёта; исходный запрос сохранён как критичный артефакт возможной доработки.
 В SV-098 null-placeholder явно исключён.
 
-Остаются `VALIDATION_PENDING`: точные GUID-наборы шести тем, speed/quality,
-воронок и states (CR-V05), полный business-grain знаменателя посещений
+Остаются `VALIDATION_PENDING`: точные GUID-наборы speed/quality и воронок
+(CR-V05), полный business-grain знаменателя посещений
 (CR-V08), независимая сверка с Power BI и rerun/refresh controls. Эти
 проверки не подменяются наблюдениями SV-098.
 
@@ -176,8 +176,8 @@ scope.
 нужная воронка. CR-V05D фиксирует её единственный physical ID
 `99d7928e75e3805f11f0310981642c71`; по BR-023 дальнейший source filter
 использует этот ID, а не текст. Базовый funnel scope больше не `BLOCKED`.
-Остаются `VALIDATION_PENDING`: остальные GUID-наборы V-05 (speed/quality и
-states), business-grain знаменателя посещений, Power BI reconciliation
+Остаются `VALIDATION_PENDING`: remaining GUID-набор speed/quality, business-grain
+знаменателя посещений, Power BI reconciliation
 и rerun/refresh controls.
 
 CR-V05E подтвердил current Jivo-exclusion на bounded июле 2026: 6 326 feedback

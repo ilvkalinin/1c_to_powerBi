@@ -130,7 +130,7 @@ HTML из `Reference137` очищается регулярными выраже�
 | V-02 | уникальность `Reference67.ID`, `Reference106.ID` и кодов | ID без дублей; код не используется как ключ, если не уникален |
 | V-03 | кардинальность phone и HTML по interaction | правило агрегации даёт ровно одну строку на interaction |
 | V-04 | candidate fact после всех dimension joins | `COUNT(*) = COUNT(DISTINCT interaction_id)` до intentional bridges |
-| V-05 | точный набор type/status/theme/funnel/campaign GUID и Jivo-исключений отдельно для набора шести тем и набора скорости/качества | CR-V05A: шесть тем и четыре воронки имеют ровно один physical match; BR-023 фиксирует пятую воронку через единственный `Reference89._idrref`. Speed/quality, Jivo и state scopes остаются pending. |
+| V-05 | точный набор type/status/theme/funnel/campaign GUID и Jivo-исключений отдельно для набора шести тем и набора скорости/качества | CR-V05A: шесть тем и четыре воронки имеют ровно один physical match; BR-023 фиксирует пятую воронку через единственный `Reference89._idrref`. Jivo и три статуса подтверждены; pending остаётся только отдельный speed/quality scope. |
 | V-06 | первый event после feedback | event имеет подтверждённый type «Исходящий звонок», либо правило уточнено |
 | V-07 | HTML update и follow-up call | даты не предшествуют creation, ties имеют deterministic tie-break |
 | V-08 | посещения | один и тот же business visit не дублируется join контрактов; дневная сумма сверяется |
