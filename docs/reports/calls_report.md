@@ -20,8 +20,10 @@ feedback, поэтому current `MIN` даты изменения нужен; �
 matches для шести тем и четырёх из пяти документированных воронок; точное имя
 `Продажа клип-карт Рецепция` в `Reference89` отсутствует. Похожее имя не
 подставляется, поэтому базовый funnel scope `BLOCKED` до подтверждённого
-current SQL/M/DAX-правила. Visit denominator, Power BI reconciliation и
-refresh/re-run остаются `VALIDATION_PENDING`.
+current SQL/M/DAX-правила. Source содержит возможный вариант `Продажа клип
+карты Рецепция`, но без исходного current SQL/M/DAX среди материалов проекта
+он остаётся `ASSUMPTION`, а не заменой. Visit denominator, Power BI
+reconciliation и refresh/re-run остаются `VALIDATION_PENDING`.
 
 Выполненный [`SV-098 SQL`](../source_metadata/validation_sql/calls_report_global_review_2026-08-17.sql)
 содержит только агрегированные read-only проверки. Их числа и остающиеся

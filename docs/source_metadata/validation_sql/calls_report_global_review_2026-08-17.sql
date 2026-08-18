@@ -128,4 +128,12 @@ SELECT (SELECT count(*) FROM topic_matches WHERE physical_matches = 1) AS topics
        (SELECT count(*) FROM funnel_matches WHERE physical_matches = 1) AS funnels_with_one_match,
        (SELECT count(*) FROM funnel_matches WHERE physical_matches = 0) AS missing_funnels;
 
+-- CR-V05B, executed 2026-08-18. This observation may identify a renamed or
+-- differently punctuated candidate, but it must not substitute the documented
+-- funnel name without the current SQL/M/DAX rule.
+SELECT _description::text AS funnel_name
+FROM public._reference89
+WHERE _description::text ILIKE '%клип%'
+ORDER BY 1;
+
 ROLLBACK;
