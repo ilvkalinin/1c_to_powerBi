@@ -81,7 +81,7 @@ joins в общей contract-advance ветви. Это не закрывает 
 
 | Объект | Назначение | Статус | Доказательство |
 |---|---|---|---|
-| все источники `membership_receipts` | факты и измерения членства | CONFIRMED REUSE / PARTIALLY VALIDATED — SV-083 | source catalogs + PBIT comparison + SV-083 |
+| все источники `membership_receipts` | факты и измерения членства | CONFIRMED REUSE / PARTIALLY VALIDATED — SV-083, SV-112—SV-116 | source catalogs + PBIT comparison + source controls |
 | текущий и среднесрочный планы | плановые сравнения | CONFIRMED external Power BI facts | оба PBIT |
 | годовой план (`Бюджет24 в 1С`) | база `план годовой` | CONFIRMED external Power BI fact | board PBIT |
 | `___Итого по сети` | calculated performance aggregate | CONFIRMED implementation artifact, not source of truth | board PBIT + user decision |

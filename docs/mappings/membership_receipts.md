@@ -38,7 +38,7 @@ SV-094 корректно зафиксировал множественност�
 | `receipt_date` | дата поступления | `AccumRg7370/7739` | `Period` | `::date` | `date` | нет | движение | CONFIRMED current DAX | M/DAX | MR-V12 |
 | `metric_date` | дата количества/цен/длительности | movement + `Reference59` | `Period`, `Fld670` | recurring → movement date; prepayment → activation date; service → NULL | `date` | да у услуг | контрактная единица | CONFIRMED target rule | DAX + user decision 2026-07-31 | MR-V12 |
 | `contract_id` | устойчивый ID контракта | registers → `Reference59` | `Fld7371/Fld7741/Fld7655` → `ID` | канонический ID | `text` candidate | да у услуг | движение / контракт | CONFIRMED current source | SQL/M | orphan test |
-| `client_key` | обезличенный ключ клиента для predecessor и менеджерских срезов | `Reference59`, `AccumRg7739` | `Fld681`, `Fld7740` | стабильный protected key; без ФИО | `text` | да у услуг | движение | CONFIRMED need / method pending | DAX predecessor | duplicate/client test |
+| `client_key` | обезличенный ключ клиента для predecessor и менеджерских срезов | `Reference59`, `AccumRg7739` | `Fld681`, `Fld7740` | стабильный protected key; без ФИО | `text` | да у услуг | движение | VALIDATED RISK — SV-116: одинаковые даты активации не имеют второго порядка | DAX predecessor | MR-V08 |
 | `payment_period` | платёжный период рекарринга | `Reference134` через `AccumRg7370.Fld7376` | `Description` | текущий M: `Text.AfterDelimiter(АналитикаУчета, "; ", {0, RelativePosition.FromEnd})`, затем numeric | `integer` | да | контрактная единица | CONFIRMED current M/DAX | PBIT `Текст после разделителя` | SV-096 |
 | `kpi_unit_kind` | тип единицы количества | вычисление | `payment_type` | предоплата → `contract`; рекарринг → `recurring_payment`; услуга → NULL | `text` | да | контрактная единица | CONFIRMED user decision 2026-07-31 | user decision | scenario matrix |
 | `kpi_unit_key` | логический ключ единицы количества | вычисление | `contract_id`, `payment_period` | предоплата → contract ID; рекарринг → `contract_id × payment_period`; сумма движений — `SUM(amount_signed)` по этой группе | `text` candidate | да | контрактная единица | CONFIRMED current M/DAX | PBIT + BR-016 | SV-096/MR-V11 |
@@ -151,7 +151,7 @@ PBIT подтверждает общую звезду и одновременн�
 |---|---|---|---|
 | CONFIRMED | рекарринговая KPI-единица | текущий PBI суммирует все движения `contract_id × payment_period`; множественность строк в группе ожидаема | SV-096 / BR-016 |
 | PARTIALLY VALIDATED | source keys/states/signs | SV-112/113 подтвердили current state/sign и отсутствие размножения 14 document joins; другие joins и непредставленная ветка ПКО остаются открыты | MR-V01–MR-V05 |
-| VALIDATION_PENDING | predecessor contract | ties resolved by `MIN(ID)` without business proof | MR-V08 |
+| VALIDATED RISK | predecessor contract | SV-116: 508 пар `клиент × дата активации` имеют несколько договоров; PBIT сортирует только по дате и не имеет business tie-break | сохранять current order по BR-018; решение о tie-break — отдельная доработка |
 | VALIDATION_PENDING | `InfoRg8595` | arbitrary row after `Table.Distinct(product_id)` | uniqueness/priority query |
 | CONFIRMED MODEL RISK | manager and sales-club propagation | current calculated KPI table lacks the corresponding shared-dimension relationships | require both keys/relationships in future KPI fact |
 | CONFIRMED MODEL RISK | field visibility | 205 columns across five main facts/plans are all visible in PBIT | expose only Russian business fields; hide technical keys and nonadditive helpers |

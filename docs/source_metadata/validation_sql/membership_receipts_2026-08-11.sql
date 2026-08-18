@@ -341,3 +341,29 @@ SELECT (SELECT count(*) FROM current_pbit_sales) AS sales_rows,
        coalesce(sum(sales_rows - 1) FILTER (WHERE sales_rows > 1), 0) AS sales_row_excess,
        count(*) FILTER (WHERE distinct_price_pairs > 1) AS contracts_with_multiple_price_pairs
 FROM per_contract;
+
+-- MR-V08A: the PBIT predecessor index is assigned after sorting contracts by
+-- activation date without a secondary order.  Measure same-client activation
+-- ties in the current contract scope; do not invent an ID tie-break.
+WITH current_pbit_contracts AS (
+  SELECT c._fld681rref AS client_id, c._idrref AS contract_id,
+         c._fld670::date AS activation_date
+  FROM public._reference59 c
+  WHERE c._fld670 >= DATE '2025-01-01' AND c._fld670 < DATE '2027-01-01'
+    AND c._fld681rref <> decode('00000000000000000000000000000000', 'hex')
+    AND c._fld696rref <> decode('9b656ee141a764e44de79e83cd30c1b2', 'hex')
+    AND c._fld699rref <> decode('96976725cebf51f7461429d74d3f6cbe', 'hex')
+    AND c._description::text NOT LIKE '%ИП%'
+    AND c._description::text NOT LIKE '%клип%'
+    AND c._description::text NOT LIKE '%Клип%'
+), ties AS (
+  SELECT client_id, activation_date, count(*) AS contract_rows
+  FROM current_pbit_contracts
+  GROUP BY 1, 2
+  HAVING count(*) > 1
+)
+SELECT (SELECT count(*) FROM current_pbit_contracts) AS contracts,
+       count(*) AS client_activation_ties,
+       coalesce(sum(contract_rows - 1), 0) AS tied_contract_excess,
+       max(contract_rows) AS max_contracts_per_client_activation
+FROM ties;
