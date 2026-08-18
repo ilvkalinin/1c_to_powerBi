@@ -257,4 +257,40 @@ SELECT (SELECT count(*) FROM guest_days) AS guest_client_date_keys,
        (SELECT count(*) FILTER (WHERE first_lag_days = 44)
         FROM current_pbit_candidates) AS converted_at_lag_44;
 
+-- NV-V02, closed control month 2026-07. Expected: exact current PBIT
+-- first-visit candidate preserves one earliest movement per contract, unless
+-- several movements have the same earliest timestamp. Such ties are observed,
+-- never given an invented order. The full 2025+ window exceeded the safe
+-- source timeout and is not presented as a result.
+WITH candidates AS MATERIALIZED (
+  SELECT a._period, a._fld7578_rrref AS contract_id,
+         a._recorderrref AS visit_document_id,
+         row_number() OVER (
+           PARTITION BY a._fld7578_rrref ORDER BY a._period
+         ) AS rn,
+         min(a._period) OVER (PARTITION BY a._fld7578_rrref) AS first_period
+  FROM public._accumrg7575 a
+  JOIN public._document325 d ON d._idrref = a._recorderrref
+  JOIN public._reference59 contract ON contract._idrref = a._fld7578_rrref
+  WHERE a._period >= TIMESTAMP '2026-07-01'
+    AND a._period < TIMESTAMP '2026-08-01'
+    AND contract._fld694rref = decode('bc06e4b21430ebfb44a67a65c46d41f9', 'hex')
+    AND d._fld4164rref = decode('9a5a4c90d2b1aede4b91dcd1abe84c43', 'hex')
+),
+first_ties AS (
+  SELECT contract_id, count(*) AS rows_at_first_period
+  FROM candidates
+  WHERE _period = first_period
+  GROUP BY 1
+  HAVING count(*) > 1
+)
+SELECT (SELECT count(*) FROM candidates) AS candidate_movement_rows,
+       (SELECT count(DISTINCT contract_id) FROM candidates) AS contracts,
+       (SELECT count(*) FROM candidates WHERE rn = 1) AS current_pbit_first_rows,
+       (SELECT count(*) FROM first_ties) AS contracts_with_first_period_tie,
+       COALESCE((SELECT sum(rows_at_first_period) FROM first_ties), 0)
+         AS rows_in_first_period_ties,
+       COALESCE((SELECT max(rows_at_first_period) FROM first_ties), 0)
+         AS max_rows_in_first_period_tie;
+
 ROLLBACK;
