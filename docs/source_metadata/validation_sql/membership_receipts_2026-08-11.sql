@@ -278,3 +278,35 @@ SELECT (SELECT count(*) FROM movements) AS source_rows,
        round(sum(amount_raw) FILTER (WHERE recorder_type IS NOT NULL AND recorder_type <> 'sale')::numeric, 2)
          AS current_m_included_raw_amount
 FROM joined;
+
+-- MR-V07A: exact current-PBIT co-access scope and its relationship key.
+-- Expected: the PBIT relation uses contract + day.  If the current M grouping
+-- leaves multiple rows per that key, a future source-side aggregate is required
+-- before the relation; no rows are silently dropped.
+WITH current_m_grouped AS (
+  SELECT a._period::date AS event_date,
+         a._fld7741rref AS contract_id,
+         a._fld7744rref AS counterparty_id,
+         c._fld687rref AS access_club_id,
+         p._description::text AS product_name,
+         sum(a._fld7749) AS amount_total
+  FROM public._accumrg7739 a
+  JOIN public._reference163 p ON p._idrref = a._fld7743rref
+  JOIN public._reference59 c ON c._idrref = a._fld7741rref
+  WHERE a._period >= DATE '2026-01-01' AND a._period < DATE '2027-01-01'
+    AND a._fld7743rref <> decode('00000000000000000000000000000000', 'hex')
+    AND a._recordkind = 1
+    AND (p._description::text LIKE '%Со-д%' OR p._description::text LIKE '%со-д%')
+    AND c._fld687rref IS NOT NULL
+  GROUP BY 1, 2, 3, 4, 5
+), per_relationship_key AS (
+  SELECT event_date, contract_id, count(*) AS grouped_rows, sum(amount_total) AS amount_total
+  FROM current_m_grouped
+  GROUP BY 1, 2
+)
+SELECT (SELECT count(*) FROM current_m_grouped) AS current_m_grouped_rows,
+       count(*) AS contract_day_keys,
+       count(*) FILTER (WHERE grouped_rows > 1) AS multirow_contract_day_keys,
+       coalesce(sum(grouped_rows - 1) FILTER (WHERE grouped_rows > 1), 0) AS relationship_key_excess_rows,
+       round(sum(amount_total)::numeric, 2) AS co_access_amount_total
+FROM per_relationship_key;
