@@ -8,16 +8,16 @@
 `VALIDATION_PENDING`, кроме выполненных NV-V01/NV-V03/NV-V04/NV-V07/NV-V08
 на read-only snapshot 2026-08-11. Источники существуют, physical key гостевого
 регистра и history ties подтверждены, но candidate guest key имеет статус
-`VALIDATION_FAILED`; семантика четырёх guest statuses и 0/44/45 outcomes
-остаётся pending. PBIT 2026-08-18 подтвердил точный список ACCUNIQ-услуг и
-current правило их выбора; физическая проверка движений всё ещё pending.
+`VALIDATION_FAILED`; семантика четырёх guest statuses, ACCUNIQ и 0/44/45
+outcomes остаётся pending. Архивный PBIT 2026-08-18 сохранил возможный список
+ACCUNIQ-услуг и правило выбора, но не заменяет согласованную current логику.
 SV-006 подтвердил наличие `InfoRg7064`; реестр отсутствующих объектов не
 изменяется.
 SV-097 дополнительно подтвердил bounded путь документ посещения → движение →
-контракт без потери или расхождения клиента. Точная PBI-спецификация ACCUNIQ
-получена из `Pbit_old/Новички и гостевые визиты.pbit` (SHA-256
-`3d54a392bec0d3feed21f998c91bf4607886ca101eac7b0adc94d6bbce180796`):
-12 service codes, знаковая нормализация `Fld7585` и итоговое количество 1/2.
+контракт без потери или расхождения клиента. `Pbit_old/Новички и гостевые
+визиты.pbit` (SHA-256 `3d54a392bec0d3feed21f998c91bf4607886ca101eac7b0adc94d6bbce180796`)
+сохраняет потенциальный артефакт: 12 service codes, знаковую нормализацию
+`Fld7585` и итог 1/2. Он не является основанием применить это правило.
 
 История следует `BR-003`; refresh — ежедневно (`CONFIRMED — решение
 пользователя 2026-07-30`).
@@ -73,7 +73,7 @@ production-правилом без этой проверки.
 | `client_id` | `InfoRg7064.Fld7065 → Reference141X1.ID` | UNKNOWN | нет | CONFIRMED source / V-03 |
 | `client_code`, `client_name` | код и ФИО в текущей детализации гостевых визитов | `Reference141X1.Code`, `Reference141X1.Description` | `text`, `text` | да | CONFIRMED current consumer / PII разрешены пользователем 2026-07-30; V-03 |
 | `tenure_at_registration` | latest `InfoRg5654` before `registered_at` | `text` | UNKNOWN | CONFIRMED current rule / V-07 |
-| `accuniq_same_day_flag` | exists `AccumRg7575` after 2025-01-01 for client and `Period::date = guest_visit_date`, `Reference163.Code` in 12-code PBIT list; grouped signed `Fld7585` total is 1 or 2 | `boolean` | нет | CONFIRMED current PBIT rule / V-05 physical |
+| `accuniq_same_day_flag` | exists qualified `AccumRg7575` for client and `Period::date = guest_visit_date`; архивный PBIT 12-code/sign rule сохранён отдельно и не применяется | `boolean` | нет | CONFIRMED current rule / V-05 |
 | `accuniq_date` | дата квалифицированного ACCUNIQ | `date` | да | CONFIRMED current target / V-05 |
 | `purchase_contract_id` | первый подходящий `Reference59` в окне `[0,44]` дней | UNKNOWN | да | CONFIRMED current rule / V-06 |
 | `purchase_activation_date` | `Reference59.Fld670::date` выбранного контракта | `date` | да | CONFIRMED current rule / V-06 |
