@@ -9,8 +9,11 @@
 
 SV-098 добавил narrow read-only evidence для feedback core, HTML,
 PK-side dimensions, first-followup ordering, comments и source states.
-Непройденные controls сохраняют статус `VALIDATION_PENDING` и не считаются
-пройденными по косвенным результатам.
+CR-V05A подтвердил шесть тем и четыре из пяти документированных воронок, но
+точное имя `Продажа клип-карт Рецепция` в `Reference89` отсутствует; базовый
+funnel scope поэтому `BLOCKED`, без подстановки похожего имени. Непройденные
+controls сохраняют свой статус и не считаются пройденными по косвенным
+результатам.
 
 ## Stage 2 checkpoint — SV-088 (2026-08-12)
 
@@ -121,7 +124,7 @@ HTML из `Reference137` очищается регулярными выраже�
 | V-02 | уникальность `Reference67.ID`, `Reference106.ID` и кодов | ID без дублей; код не используется как ключ, если не уникален |
 | V-03 | кардинальность phone и HTML по interaction | правило агрегации даёт ровно одну строку на interaction |
 | V-04 | candidate fact после всех dimension joins | `COUNT(*) = COUNT(DISTINCT interaction_id)` до intentional bridges |
-| V-05 | точный набор type/status/theme/funnel/campaign GUID и Jivo-исключений отдельно для набора шести тем и набора скорости/качества | оба охвата воспроизводят свои контрольные значения владельца за месяц |
+| V-05 | точный набор type/status/theme/funnel/campaign GUID и Jivo-исключений отдельно для набора шести тем и набора скорости/качества | CR-V05A: шесть тем и четыре воронки имеют ровно один physical match; `Продажа клип-карт Рецепция` отсутствует, поэтому базовый funnel scope `BLOCKED` до current SQL/M/DAX-правила |
 | V-06 | первый event после feedback | event имеет подтверждённый type «Исходящий звонок», либо правило уточнено |
 | V-07 | HTML update и follow-up call | даты не предшествуют creation, ties имеют deterministic tie-break |
 | V-08 | посещения | один и тот же business visit не дублируется join контрактов; дневная сумма сверяется |

@@ -18,9 +18,12 @@ visit event grain, Power BI reconciliation или refresh/re-run.
 
 Полные результаты SV-098 зафиксированы в
 [`server validation`](../source_metadata/server_validation_2026-08-14.md#sv-098--отчёт-по-обращениям-crm-core-and-comment-controls);
-исправленный null-safe control и bounded first-followup path — в
+исправленный null-safe control, bounded first-followup path и CR-V05A — в
 [`calls_report_global_review_2026-08-17.sql`](../source_metadata/validation_sql/calls_report_global_review_2026-08-17.sql).
-Статус реализации не меняется.
+CR-V05A подтверждает шесть тем и четыре из пяти документированных воронок;
+точное имя `Продажа клип-карт Рецепция` в `Reference89` отсутствует. Похожее
+имя не подставляется, поэтому базовый funnel scope `BLOCKED` до
+подтверждённого current SQL/M/DAX-правила. Статус реализации не меняется.
 
 ## Reuse review
 
@@ -115,6 +118,10 @@ visit event grain, Power BI reconciliation или refresh/re-run.
 3. `VALIDATION_PENDING`: техническая кардинальность связей Power BI и
    контрольные значения. Проектные связи зафиксированы в data contract;
    данные доступны не позднее 08:30 по Москве (`CONFIRMED`, BR-014).
+4. `BLOCKED`: CR-V05A нашёл точные physical matches для шести тем и четырёх
+   воронок, но не для документированного фильтра `Продажа клип-карт Рецепция`.
+   Неизвестную замену не выбирать: до подтверждённого current SQL/M/DAX
+   правила нельзя воспроизвести базовый funnel scope.
 
 ## Refresh
 

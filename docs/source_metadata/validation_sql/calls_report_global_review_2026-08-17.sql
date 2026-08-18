@@ -62,4 +62,70 @@ SELECT count(*) AS sampled_feedback,
        count(*) FILTER (WHERE same_timestamp_candidates > 1) AS ambiguous_same_timestamp_ties
 FROM examined;
 
+-- CR-V05A. Expected: all six documented topics and five documented funnels
+-- exist once in their reference tables. The feedback scope keeps a physical
+-- interaction grain and does not introduce a new filter beyond the report's
+-- documented names.
+WITH requested_topics(topic_name) AS (
+  VALUES ('Благодарность'), ('Замечание'), ('Консультация'),
+         ('Предложение'), ('Пропажа'), ('Травма')
+), requested_funnels(funnel_name) AS (
+  VALUES ('Продажа клубной карты'), ('Сервисный звонок'),
+         ('Корпоративная продажа'), ('Сервисная воронка ОП'),
+         ('Продажа клип-карт Рецепция')
+), topic_matches AS (
+  SELECT q.topic_name, count(t._idrref) AS physical_matches
+  FROM requested_topics q
+  LEFT JOIN public._reference8628 t ON t._description::text = q.topic_name
+  GROUP BY 1
+), funnel_matches AS (
+  SELECT q.funnel_name, count(f._idrref) AS physical_matches
+  FROM requested_funnels q
+  LEFT JOIN public._reference89 f ON f._description::text = q.funnel_name
+  GROUP BY 1
+), scoped_feedback AS (
+  SELECT i._idrref AS interaction_id
+  FROM public._reference67 i
+  JOIN public._reference106 task ON task._idrref = i._owneridrref
+  JOIN public._reference8628 topic ON topic._idrref = task._fld8643rref
+  JOIN public._reference89 funnel ON funnel._idrref = task._fld1191rref
+  JOIN requested_topics rt ON rt.topic_name = topic._description::text
+  JOIN requested_funnels rf ON rf.funnel_name = funnel._description::text
+  WHERE i._fld831rref = decode('9db9fdbf6bd80f2044eb2835157b3bc8', 'hex')
+    AND i._fld823 >= DATE '2026-01-01' AND i._fld823 < DATE '2027-01-01'
+)
+SELECT (SELECT count(*) FROM topic_matches WHERE physical_matches = 1) AS topics_with_one_match,
+       (SELECT count(*) FROM topic_matches WHERE physical_matches = 0) AS missing_topics,
+       (SELECT count(*) FROM funnel_matches WHERE physical_matches = 1) AS funnels_with_one_match,
+       (SELECT count(*) FROM funnel_matches WHERE physical_matches = 0) AS missing_funnels,
+       (SELECT count(*) FROM scoped_feedback) AS scoped_feedback_rows,
+       (SELECT count(DISTINCT interaction_id) FROM scoped_feedback) AS scoped_feedback_ids,
+       (SELECT count(*) FROM scoped_feedback) - (SELECT count(DISTINCT interaction_id) FROM scoped_feedback) AS scope_join_excess;
+
+-- CR-V05A executed separately on 2026-08-18. The narrow reference control is
+-- retained separately because it does not replace the later scoped-feedback
+-- cardinality check.
+WITH requested_topics(topic_name) AS (
+  VALUES ('Благодарность'), ('Замечание'), ('Консультация'),
+         ('Предложение'), ('Пропажа'), ('Травма')
+), requested_funnels(funnel_name) AS (
+  VALUES ('Продажа клубной карты'), ('Сервисный звонок'),
+         ('Корпоративная продажа'), ('Сервисная воронка ОП'),
+         ('Продажа клип-карт Рецепция')
+), topic_matches AS (
+  SELECT q.topic_name, count(t._idrref) AS physical_matches
+  FROM requested_topics q
+  LEFT JOIN public._reference8628 t ON t._description::text = q.topic_name
+  GROUP BY 1
+), funnel_matches AS (
+  SELECT q.funnel_name, count(f._idrref) AS physical_matches
+  FROM requested_funnels q
+  LEFT JOIN public._reference89 f ON f._description::text = q.funnel_name
+  GROUP BY 1
+)
+SELECT (SELECT count(*) FROM topic_matches WHERE physical_matches = 1) AS topics_with_one_match,
+       (SELECT count(*) FROM topic_matches WHERE physical_matches = 0) AS missing_topics,
+       (SELECT count(*) FROM funnel_matches WHERE physical_matches = 1) AS funnels_with_one_match,
+       (SELECT count(*) FROM funnel_matches WHERE physical_matches = 0) AS missing_funnels;
+
 ROLLBACK;

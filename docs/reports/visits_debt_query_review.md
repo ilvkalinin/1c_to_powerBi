@@ -13,8 +13,10 @@ SV-002/SV-006 подтверждают relations current M, SV-008 — физи�
 `RecordKind` `_accumrg7509`, SV-013/SV-017 — основную visit branch и её
 PK-side joins. SV-099 добавляет live read-only evidence: движения имеют
 уникальный physical key, но prebooking не уникален по клиенту; document
-branches не размножают строки и могут их терять. Эти доказательства не
-назначают state filters и не создают правило для quantity `other`.
+branches не размножают строки и могут их терять. Исходный TXT DAX задаёт
+quantity `other`: строка не меняет `unconfirmed`, но остаётся в
+`СуммаИтог_ориг` непогашенной группы. Эти доказательства не назначают state
+filters.
 
 [`SV-099 SQL`](../source_metadata/validation_sql/visits_debt_global_review_2026-08-17.sql)
 выполнен read-only. Current name filter не переносится SQL-оператором напрямую

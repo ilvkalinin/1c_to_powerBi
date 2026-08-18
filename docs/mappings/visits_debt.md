@@ -15,8 +15,9 @@ SV-002/SV-006 подтверждают физические relations current M;
 cohort, а `AccumRg7509` — отдельным movement fact. SV-099 подтвердил
 уникальность ключа, отсутствие пустых ключевых ссылок и отсутствие branch
 multiplication. `prebooking_id` не уникален по клиенту, поэтому as-of key
-остаётся `client × prebooking`. Стабильная visit classification, правило для
-quantity `other`, as-of controls и SLA остаются открытыми.
+остаётся `client × prebooking`. Стабильная visit classification, as-of
+controls и SLA остаются открытыми. `quantity other` воспроизводится current
+DAX: не участвует в `unconfirmed`, но остаётся в сумме непогашенной группы.
 
 [`SV-099 SQL`](../source_metadata/validation_sql/visits_debt_global_review_2026-08-17.sql)
 выполнен read-only. Его полный результат и критичный артефакт `mvarchar` — в
@@ -44,7 +45,7 @@ quantity `other`, as-of controls и SLA остаются открытыми.
 | `service_id`, `service_name` | услуга долга и название в detail | `AccumRg7509.Fld7513`, `Reference163.Description` | ID — всегда; имя — только detail | `UNKNOWN`, `text` | да | CONFIRMED current consumer | DV-V03, DV-V06 |
 | `employee_id`, `employee_name` | оказавший услугу сотрудник | `Document329.Fld4322` / `Document279.Fld3223` → `Reference225` | выбрать ветку по типу регистратора | `UNKNOWN`, `text` | да | CONFIRMED current source / branch pending | DV-V03 |
 | `service_start_at`, `service_end_at` | время услуги | `AccumRg7509.Fld7514`, `Fld7515` | без замены на период движения | `timestamp` UNKNOWN | да | CONFIRMED source | DV-V03 |
-| `quantity_delta` | вклад в статус неподтверждённой услуги | `AccumRg7509.Fld7516`, `RecordKind` | классы базовой/подтверждения/двух отмен — по DAX | `numeric` UNKNOWN | нет | CONFIRMED current calculation | DV-V05 |
+| `quantity_delta` | вклад в статус неподтверждённой услуги | `AccumRg7509.Fld7516`, `RecordKind` | только `RecordKind × ±1` участвуют в DAX `unconfirmed`; другие quantity не меняют его, но их amount не исключается из суммы открытой группы | `numeric` UNKNOWN | нет | CONFIRMED current DAX | DV-V02, DV-V05 |
 | `amount_delta` | знаковая сумма движения | `AccumRg7509.Fld7517`, `RecordKind` | current M: `RecordKind = 1` умножить на `-1`, иначе оставить знак | `numeric` UNKNOWN | нет | CONFIRMED current calculation | DV-V05 |
 
 ## 2. Когорта посетителей
@@ -102,8 +103,8 @@ quantity `other`, as-of controls и SLA остаются открытыми.
 | CONFIRMED | Семантика графика «Количество посещений» | единица — уникальный клиент с посещением, а не число входов. | client-day grain и `DISTINCTCOUNT(client_key)`; решение пользователя 2026-07-31. |
 | CONFIRMED | Доставка PII | код и ФИО клиента допускаются в report-specific detail для всех, у кого уже есть доступ к данному Power BI-отчёту. | решение пользователя 2026-07-31; физический механизм ограничения выбирается на реализации. |
 | CONFIRMED | Частота обновления | ежедневная; Power BI доступен до 08:30 МСК, витрина завершается раньше. | BR-014 и решение пользователя 2026-07-31; производительность проверить DV-V07. |
-| VALIDATION_PENDING | ключ и state `AccumRg7509` | `RecordKind` физически подтверждён, но `Active`, uniqueness и знаки не проверены. | DV-V01–DV-V02; новый control не выполнен без local PostgreSQL client/driver. |
-| VALIDATION_PENDING | документные ветки | join к `Document329/279/313` может терять или размножать строки. | DV-V03; новый control не выполнен без local PostgreSQL client/driver. |
+| VALIDATED WITH OBSERVATION | ключ и state `AccumRg7509` | 482 347 movements имеют уникальный physical key; inactive/null ключи = 0. DAX sign и quantity `other` воспроизводятся по TXT; новый state-filter не вводится. | SV-099; дальнейшая as-of сверка — DV-V05. |
+| VALIDATED WITH ROW-LOSS RISK | документные ветки | current branches не размножают движения, но 917 из 457 556 base rows не выводятся через ветвление/inner employee join. | SV-099; current branch не меняется без отдельного решения. |
 | VALIDATION_PENDING | as-of остаток | не доказано контрольными датами, что формула закрывает каждую ПЗ. | DV-V04–DV-V05; independent control отсутствует. |
-| VALIDATION_PENDING | классификация и состояние посещения | `LIKE` и отсутствие status-фильтров не дают стабильную cohort. | DV-V02, DV-V06; новый control не выполнен без local PostgreSQL client/driver. |
+| VALIDATION_PENDING | классификация и состояние посещения | `LIKE` и отсутствие status-фильтров не дают стабильную cohort; source `mvarchar` не поддерживает исходный `ILIKE` напрямую. | SV-099 DV-V06; нужен подтверждённый стабильный ключ, новый фильтр не выводится. |
 | VALIDATION_PENDING | объём и SLA | без объёма нельзя выбрать физический объект или refresh. | DV-V07; independent performance evidence отсутствует. |

@@ -16,11 +16,12 @@
 подтверждает business key долга, состояния `AccumRg7509`, document branches
 или DAX as-of calculation.
 
-[`SV-089 SQL`](../source_metadata/validation_sql/visits_debt_2026-08-12.sql)
-подготовлен с ожидаемыми агрегатами в `BEGIN READ ONLY`, но не выполнен: в
-текущем agent-runtime нет локального PostgreSQL-клиента/драйвера. Это не
-свидетельство отсутствия source relation. DDL/DML, Stage 3 и изменения
-текущего M/DAX не выполнялись.
+[`SV-099 SQL`](../source_metadata/validation_sql/visits_debt_global_review_2026-08-17.sql)
+выполнен read-only: подтверждены physical key, client × prebooking и
+document-branch multiplicity. Current DAX treatment quantity `other` также
+подтверждён исходным TXT. Стабильная visit classification, as-of control и
+SLA остаются открытыми. DDL/DML, Stage 3 и изменения текущего M/DAX не
+выполнялись.
 
 ## Учёт class-C критичности — 2026-08-13
 

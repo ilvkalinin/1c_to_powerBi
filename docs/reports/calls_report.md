@@ -16,8 +16,12 @@ interaction на PK-side; phone rows имеют самостоятельный t
 запрещает превращать phone rows в технические дубли. Кардинальность
 SV-098 добавляет bounded evidence: HTML имеет до шести post-creation строк на
 feedback, поэтому current `MIN` даты изменения нужен; в first-followup sample
-нет ранних событий и timestamp ties. Точные шесть тем, visit denominator,
-Power BI reconciliation и refresh/re-run остаются `VALIDATION_PENDING`.
+нет ранних событий и timestamp ties. CR-V05A подтвердил точные physical
+matches для шести тем и четырёх из пяти документированных воронок; точное имя
+`Продажа клип-карт Рецепция` в `Reference89` отсутствует. Похожее имя не
+подставляется, поэтому базовый funnel scope `BLOCKED` до подтверждённого
+current SQL/M/DAX-правила. Visit denominator, Power BI reconciliation и
+refresh/re-run остаются `VALIDATION_PENDING`.
 
 Выполненный [`SV-098 SQL`](../source_metadata/validation_sql/calls_report_global_review_2026-08-17.sql)
 содержит только агрегированные read-only проверки. Их числа и остающиеся

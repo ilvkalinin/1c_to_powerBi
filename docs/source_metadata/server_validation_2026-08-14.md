@@ -121,9 +121,12 @@ KPI-единицу на `Контракт × Текст после раздел�
 | NVG-V02 | в bounded current document path нет отсутствующего документа/контракта и расхождения клиента | 100 июльских документов → 100 движений = 100 technical keys; без документа/движения, `NULL` контракта и mismatch клиента — 0 | VALIDATED bounded physical path |
 | NVG-V06 | наблюдать физические даты для правила `[0,44]`, не создавая новый eligible-contract filter | 100 гостевых строк → 12 кандидатов на 0–45 дней; lag 0 = 6, lag 44 = 0, lag 45 = 0, вне окна = 0 | OBSERVED; границы 44/45 не доказаны этой выборкой |
 
-Точный PBI-артефакт со списком 12 ACCUNIQ-услуг и выбором записи не найден в
-проекте. Поэтому NV-V05/NV-V09 и полная сверка NVG-V06 остаются `BLOCKED`:
-подбор услуг по именам или подстановка нового фильтра запрещены.
+Точный перечень 12 ACCUNIQ-услуг и правило выбора записи не найдены среди
+материалов проекта. Поэтому NV-V05/NV-V09 и полная сверка NVG-V06 остаются
+`BLOCKED`: подбор услуг по именам или подстановка нового фильтра запрещены.
+PBIT может быть использован как дополнительное доказательство, но не является
+обязательным входом от пользователя: работа по остальным доступным артефактам
+продолжается.
 
 ## SV-098 — «Отчёт по обращениям»: CRM core and comment controls
 
@@ -152,6 +155,13 @@ KPI-единицу на `Контракт × Текст после раздел�
 (CR-V08), независимая сверка с Power BI и rerun/refresh controls. Эти
 проверки не подменяются наблюдениями SV-098.
 
+CR-V05A (2026-08-18): все шесть документированных тем имеют ровно одно
+physical match. Из пяти документированных воронок имеют match четыре; строка
+`Продажа клип-карт Рецепция` отсутствует в `Reference89`. Похожее имя или
+другая воронка не подставляются. Поэтому базовый funnel scope остаётся
+`BLOCKED` до подтверждённого current SQL/M/DAX-правила; это не отсутствие
+физического source object.
+
 ## SV-099 — «Посещаемость клиентов с долгами»: movement and branch controls
 
 Статус: `PARTIALLY VALIDATED`. Read-only SQL:
@@ -161,7 +171,7 @@ KPI-единицу на `Контракт × Текст после раздел�
 |---|---|---|
 | DV-V01 | 482 347 movements за 2026 = столько же technical keys; inactive, null client/prebooking и null quantity/amount = 0 | VALIDATED physical movement key |
 | DV-V04 | 236 274 client × prebooking pairs; 24 208 prebookings относятся к >1 клиенту, максимум 56; 233 733 пары имеют несколько движений | VALIDATED — `prebooking_id` не является ключом клиента; as-of key остаётся парой |
-| DV-V02 | Current DAX classes `RecordKind 0/1 × quantity ±1` есть; вне этих четырёх классов 1 970 movements | VALIDATED observation / DECISION_REQUIRED — новое значение им не назначается |
+| DV-V02 | Current DAX classes `RecordKind 0/1 × quantity ±1` есть; вне этих четырёх классов 1 970 movements | VALIDATED — эти строки не меняют DAX-признак `unconfirmed`, но их `СуммаИтог` остаётся в сумме группы, если она признана непогашенной |
 | DV-V03 | После text-cast observation: 457 556 base rows, 456 639 current branch rows и keys; branch excess = 0, не выведено 917 | VALIDATED WITH ROW-LOSS RISK — current inner branch не меняется |
 | DV-V06 | Source-side cast observation текстового visit filter: 35 rows = 35 technical keys, 32 client-day-club, missing/mismatched club = 0 | BLOCKED as cohort evidence — результат не подтверждает Power Query classification |
 
@@ -171,10 +181,14 @@ KPI-единицу на `Контракт × Текст после раздел�
 заменяет current Power Query и не создаёт стабильный filter. Оригинальный SQL
 сохранён как критичный артефакт возможной доработки.
 
+TXT `Посещения клиентов с долгами.txt` подтверждает обработку quantity `other`:
+четыре условия `RecordKind × ±1` участвуют только в вычислении `unconfirmed`;
+`СуммаИтог_ориг` суммирует все движения группы и возвращается лишь при
+`unconfirmed > 0`. Поэтому новое правило для 1 970 строк не требуется.
+
 До готовности отчёта остаются: подтверждённый ключ классификации посещения
-вместо имени, правило для quantity `other`, независимые as-of controls на
-контрольных датах из Power BI и rerun/SLA. Никакая из этих границ не закрыта
-догадкой или новым фильтром.
+вместо имени, независимые as-of controls на контрольных датах из Power BI и
+rerun/SLA. Никакая из этих границ не закрыта догадкой или новым фильтром.
 
 ## SV-100 — «Карта администратора»: Gymmy bounded controls
 

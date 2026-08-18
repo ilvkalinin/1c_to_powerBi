@@ -53,9 +53,9 @@ blocker: после documentary audit глобальный gate остаётся
 | 17 | Отчёт по %Renew | `VALIDATION_REQUIRED` | Contract key, current window/`COUNT(*)`, `Fld693` и финализация закрытого месяца. | `mart.contract_usage`; SV-082; ADR-0006 |
 | 18 | Выручка рецепции | `VALIDATION_REQUIRED` | Атрибуция продавца и точный report view поверх общего факта; `_document294` не добавляется без решения об изменении атрибуции. | `mart.v_reception_revenue_daily`; SV-050—053; ADR-0005 |
 | 19 | Записи администраторов | `VALIDATION_REQUIRED` | Booking→movement cardinality/sum и кадровая атрибуция: уже найдено 99 документов с одним match и один с четырьмя. | `mart.v_administrator_bookings_daily`; SV-086; ADR-0004 |
-| 20 | Новички и гостевые визиты | `BLOCKED` | Точный PBI-артефакт со списком 12 ACCUNIQ-услуг и выбором записи отсутствует; без него нельзя подтвердить filter/status/first-rank и 0–44-day outcome. | `mart.v_guest_tour`, `mart.new_first_visit`, `mart.guest_visit_conversion`; SV-087/097; ADR-0020 |
-| 21 | Отчёт по обращениям | `VALIDATION_REQUIRED` | Physical feedback/HTML/follow-up ordering подтверждены bounded controls; остаются точные scope GUID, business-grain знаменателя посещений, Power BI reconciliation и rerun/SLA. | `mart.crm_interaction`, `mart.v_feedback_interaction`; SV-088/098; ADR-0016 |
-| 22 | Посещаемость клиентов с долгами | `DECISION_REQUIRED` | Ключ движения и client × prebooking подтверждены; остаются правило для 1 970 quantity `other`, стабильная классификация посещения вместо имени, as-of controls и SLA. | `mart.unconfirmed_service_debt_movement`, `mart.visit_client_day`; SV-089/099; ADR-0021 |
+| 20 | Новички и гостевые визиты | `BLOCKED` | Среди материалов проекта нет точного списка 12 ACCUNIQ-услуг и правила выбора записи; без них нельзя подтвердить filter/status/first-rank и 0–44-day outcome. PBIT — возможное дополнительное evidence, не обязательный пользовательский вход. | `mart.v_guest_tour`, `mart.new_first_visit`, `mart.guest_visit_conversion`; SV-087/097; ADR-0020 |
+| 21 | Отчёт по обращениям | `BLOCKED` | Physical feedback/HTML/follow-up ordering подтверждены bounded controls. Шесть тем и четыре воронки имеют exact match, но документированный фильтр `Продажа клип-карт Рецепция` отсутствует в `Reference89`; базовый funnel scope нельзя воспроизвести без подтверждённого current SQL/M/DAX-правила. Также остаются знаменатель посещений, Power BI reconciliation и rerun/SLA. | `mart.crm_interaction`, `mart.v_feedback_interaction`; SV-088/098; ADR-0016 |
+| 22 | Посещаемость клиентов с долгами | `VALIDATION_REQUIRED` | Ключ движения, client × prebooking и current DAX treatment quantity `other` подтверждены; остаются стабильная классификация посещения вместо имени, as-of controls и SLA. | `mart.unconfirmed_service_debt_movement`, `mart.visit_client_day`; SV-089/099; ADR-0021 |
 | 23 | Посещения Пушкинский | `VALIDATION_REQUIRED` | Snapshot, категории и исключение ДРЦ должны быть подтверждены на полном scope. | `mart.visit_client_day`, `mart.club_day_metrics`; SV-071; ADR-0003 |
 | 24 | Работа с посещаемостью | `VALIDATION_REQUIRED` | Не сформирован daily client-base denominator; годовой source query превысил timeout, SLA не измерен; шкафчики остаются вне PostgreSQL. | `mart.club_attendance_hourly`, `mart.client_base_daily`; SV-065/067; ADR-0022 |
 | 25 | Карта администратора | `VALIDATION_REQUIRED` | Gymmy key/success и bounded cards/directions подтверждены; остаются канонический card→club mapping и независимая дневная сверка. Внешний журнал не анализируется. | `mart.administrator_card_gymmy_daily`; SV-002/100; ADR-0023 |
@@ -92,7 +92,7 @@ blocker: после documentary audit глобальный gate остаётся
 | `mart.employee_presence_day` | `VALIDATION_REQUIRED` | Однозначная СКУД→сотрудник связь и отсутствие размножения часов. |
 | `mart.crm_interaction` | `VALIDATION_REQUIRED` | States, full population и идентичность interaction key. |
 | `mart.v_sales_interaction` | `VALIDATION_REQUIRED` | Phone-row semantics и кадровый отбор. |
-| `mart.v_feedback_interaction` | `VALIDATION_REQUIRED` | Bounded HTML/follow-up/cardinality подтверждены; точные report scopes, visit denominator, reconciliation и SLA остаются. |
+| `mart.v_feedback_interaction` | `BLOCKED` | Bounded HTML/follow-up/cardinality подтверждены; документированная воронка `Продажа клип-карт Рецепция` отсутствует в `Reference89`, поэтому base scope не выбирается эвристикой. Остаются visit denominator, reconciliation и SLA. |
 | `mart.v_guest_tour` | `VALIDATION_REQUIRED` | Filter/state и 44-day outcome controls. |
 | `mart.new_first_visit` | `VALIDATION_REQUIRED` | First-rank tie-break и PII-detail grain. |
 | `mart.guest_visit_conversion` | `BLOCKED` | Точный PBI service/rank artifact отсутствует; статус/конверсия не выбираются эвристикой. |
@@ -102,7 +102,7 @@ blocker: после documentary audit глобальный gate остаётся
 | `mart.ancillary_revenue_movement` | `IMPLEMENTED` | Собственный admission закрыт; повторная загрузка запрещена без нового триггера. |
 | `mart.dpfu_plan_assignment` | `IMPLEMENTED` | Собственный admission закрыт; плановые потребители ещё требуют report-level controls. |
 | `mart.prebooking_state_event` | `IMPLEMENTED` | Собственный admission закрыт; legacy multiplicity остаётся границей потребителей. |
-| `mart.unconfirmed_service_debt_movement` | `DECISION_REQUIRED` | Key and client × prebooking доказаны; нужно правило для quantity `other`, visit classification и as-of reconciliation. |
+| `mart.unconfirmed_service_debt_movement` | `VALIDATION_REQUIRED` | Key, client × prebooking и quantity `other` воспроизводят current DAX; остаются visit classification, as-of reconciliation и SLA. |
 | `mart.group_lesson` | `IMPLEMENTED` | Собственный admission закрыт; не заменяет правила полного расписания. |
 | `mart.lesson_room_slot_5m` | `IMPLEMENTED` | Собственный admission закрыт; BR-021 и два nonpositive source controls зафиксированы. |
 | `mart.administrator_card_gymmy_daily` | `VALIDATION_REQUIRED` | Gymmy key/success validated bounded; canonical card→club mapping и independent daily count остаются. |
