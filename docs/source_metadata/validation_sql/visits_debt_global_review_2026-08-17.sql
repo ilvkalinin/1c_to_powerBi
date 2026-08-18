@@ -91,4 +91,33 @@ SELECT count(*) AS current_m_visit_rows,
        count(*) FILTER (WHERE movement_club_id IS DISTINCT FROM document_club_id) AS movement_vs_document_club_mismatch
 FROM visits;
 
+-- DV-V06B. Expected: measure, rather than assume, whether the legacy service
+-- name predicate identifies the same visit movements as the existing exact
+-- Document325 operation ID used by other visit reports. Any difference keeps
+-- the legacy predicate in place until a business decision; this query creates
+-- no new cohort filter.
+WITH legacy_service AS MATERIALIZED (
+  SELECT a._recordertref, a._recorderrref, a._lineno
+  FROM public._accumrg7575 a
+  JOIN public._reference163 s ON s._idrref = a._fld7579rref
+  WHERE a._period >= DATE '2026-01-01' AND a._period < DATE '2027-01-01'
+    AND s._description::text LIKE '%Посещение%'
+), operation_visit AS MATERIALIZED (
+  SELECT a._recordertref, a._recorderrref, a._lineno
+  FROM public._accumrg7575 a
+  JOIN public._document325 d ON d._idrref = a._recorderrref
+  WHERE a._period >= DATE '2026-01-01' AND a._period < DATE '2027-01-01'
+    AND d._fld4164rref = decode('9a5a4c90d2b1aede4b91dcd1abe84c43', 'hex')
+)
+SELECT (SELECT count(*) FROM legacy_service) AS legacy_service_rows,
+       (SELECT count(*) FROM operation_visit) AS operation_visit_rows,
+       (SELECT count(*) FROM legacy_service l
+        JOIN operation_visit o USING (_recordertref, _recorderrref, _lineno)) AS intersect_rows,
+       (SELECT count(*) FROM legacy_service l
+        LEFT JOIN operation_visit o USING (_recordertref, _recorderrref, _lineno)
+        WHERE o._recorderrref IS NULL) AS legacy_only_rows,
+       (SELECT count(*) FROM operation_visit o
+        LEFT JOIN legacy_service l USING (_recordertref, _recorderrref, _lineno)
+        WHERE l._recorderrref IS NULL) AS operation_only_rows;
+
 ROLLBACK;

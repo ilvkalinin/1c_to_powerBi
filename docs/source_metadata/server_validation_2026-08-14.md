@@ -213,6 +213,7 @@ Jivo scope и трёх статусов закрытых месяцев 2026-01�
 | DV-V02 | Current DAX classes `RecordKind 0/1 × quantity ±1` есть; вне этих четырёх классов 1 970 movements | VALIDATED — эти строки не меняют DAX-признак `unconfirmed`, но их `СуммаИтог` остаётся в сумме группы, если она признана непогашенной |
 | DV-V03 | После text-cast observation: 457 556 base rows, 456 639 current branch rows и keys; branch excess = 0, не выведено 917 | VALIDATED WITH ROW-LOSS RISK — current inner branch не меняется |
 | DV-V06 | Source-side cast observation текстового visit filter: 35 rows = 35 technical keys, 32 client-day-club, missing/mismatched club = 0 | BLOCKED as cohort evidence — результат не подтверждает Power Query classification |
+| DV-V06B | Поздний read-only срез 2026: legacy `service name LIKE '%Посещение%'` = 36 строк, operation ID «посещение» = 3 003 981; пересечение = 0 | VALIDATED rejected candidate — ID операции не эквивалентен текущей service-name когорте и не вводится как новый filter |
 
 Старый DV-V03/DV-V06 SQL напрямую применял `ILIKE` к 1С-типу `mvarchar` и
 не выполняется в PostgreSQL (`operator does not exist: mvarchar !~~* unknown`).
@@ -224,6 +225,13 @@ TXT `Посещения клиентов с долгами.txt` подтверж
 четыре условия `RecordKind × ±1` участвуют только в вычислении `unconfirmed`;
 `СуммаИтог_ориг` суммирует все движения группы и возвращается лишь при
 `unconfirmed > 0`. Поэтому новое правило для 1 970 строк не требуется.
+
+DV-V06B проверил единственный подтверждённый в других посещенческих отчётах
+кандидат `Document325.Fld4164 = 9a5a4c90d2b1aede4b91dcd1abe84c43`. Он не
+эквивалентен текущей когорте долга: поздний срез дал 36 legacy service-name
+строк, 3 003 981 строку по ID операции и нулевое пересечение. Расхождение
+сохраняется как критичный артефакт возможной доработки; новое правило или
+фильтр не вводятся без отдельного решения по BR-018.
 
 До готовности отчёта остаются: подтверждённый ключ классификации посещения
 вместо имени, независимые as-of controls на контрольных датах из Power BI и
