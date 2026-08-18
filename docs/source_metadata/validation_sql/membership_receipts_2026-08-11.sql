@@ -367,3 +367,158 @@ SELECT (SELECT count(*) FROM current_pbit_contracts) AS contracts,
        coalesce(sum(contract_rows - 1), 0) AS tied_contract_excess,
        max(contract_rows) AS max_contracts_per_client_activation
 FROM ties;
+
+-- MR-V09A: physical cardinality of the three exact current-PBIT freeze
+-- branches.  Horizon follows BR-003; current M adds no source-state filter.
+WITH freeze_movements AS (
+  SELECT a._recorderrref AS recorder_id, a._lineno AS line_no,
+         a._period, a._fld7479rref AS contract_id, a._fld7481 AS freeze_days
+  FROM public._accumrg7478 a
+  WHERE a._period >= TIMESTAMP '2025-01-01'
+    AND a._period < TIMESTAMP '2027-01-01'
+    AND a._recordkind = 0
+), free_freeze AS (
+  SELECT m.*
+  FROM freeze_movements m
+  JOIN public._document266 d ON d._idrref = m.recorder_id
+  JOIN public._reference59 c ON c._idrref = m.contract_id
+  WHERE m._period::date BETWEEN c._fld674::date AND c._fld670::date
+), paid_freeze_orp AS (
+  SELECT m.*
+  FROM freeze_movements m
+  JOIN public._document315_vt3894 o
+    ON o._document315_idrref = m.recorder_id
+   AND o._fld3896rref = m.contract_id
+  JOIN public._reference59 c ON c._idrref = m.contract_id
+  WHERE m._period::date BETWEEN c._fld674::date AND c._fld670::date
+), paid_freeze_cash AS (
+  SELECT p.*, v._fld4938 AS cash_amount
+  FROM paid_freeze_orp p
+  JOIN public._document315_vt3894 o
+    ON o._document315_idrref = p.recorder_id
+   AND o._fld3896rref = p.contract_id
+  JOIN public._document346 d ON d._idrref = o._fld3897rref
+  JOIN public._document346_vt4924 v ON v._document346_idrref = d._idrref
+  JOIN public._reference163 n ON n._idrref = v._fld4932rref
+  WHERE d._date_time = p._period
+    AND n._fld1756 * v._fld4930 = p.freeze_days
+    AND v._fld4938 <> 0
+), sold_freeze AS (
+  SELECT a._recorderrref AS recorder_id, a._lineno AS line_no,
+         a._fld7655rref AS contract_id, a._fld7659 AS sale_amount,
+         n._fld1756 AS freeze_days
+  FROM public._accumrg7646 a
+  JOIN public._document332 d ON d._idrref = a._recorderrref
+  JOIN public._reference163 n ON n._idrref = a._fld7649rref
+  LEFT JOIN public._reference59 c ON c._idrref = a._fld7655rref
+  WHERE a._period >= TIMESTAMP '2025-01-01'
+    AND a._period < TIMESTAMP '2027-01-01'
+    AND n._fld1795rref = decode('82595a6eb69e532e454747ab1bc61f6a', 'hex')
+    AND a._fld7659 <> 0
+)
+SELECT branch,
+       count(*) AS rows_after_current_branch_join,
+       count(DISTINCT (recorder_id, line_no)) AS movement_keys,
+       count(*) - count(DISTINCT (recorder_id, line_no)) AS join_row_excess,
+       sum(days)::numeric(18,2) AS days_sum,
+       sum(amount)::numeric(18,2) AS amount_sum
+FROM (
+  SELECT 'free_activation'::text AS branch, recorder_id, line_no,
+         freeze_days AS days, 0::numeric AS amount FROM free_freeze
+  UNION ALL
+  SELECT 'paid_orp'::text, recorder_id, line_no, freeze_days, 0::numeric
+  FROM paid_freeze_orp
+  UNION ALL
+  SELECT 'paid_cash'::text, recorder_id, line_no, freeze_days, cash_amount
+  FROM paid_freeze_cash
+  UNION ALL
+  SELECT 'sold_with_contract'::text, recorder_id, line_no, freeze_days, sale_amount
+  FROM sold_freeze
+) x
+GROUP BY branch
+ORDER BY branch;
+
+-- MR-V09B: reproduce the Table.Distinct columns of the two PBIT freeze
+-- queries.  Compare only within the source query scope, without new filters.
+WITH movement AS (
+  SELECT a._recorderrref AS recorder_id, a._lineno AS line_no, a._period,
+         a._recordkind, a._fld7479rref AS contract_id, a._fld7481 AS freeze_days,
+         a._fld644rref AS author_id
+  FROM public._accumrg7478 a
+  WHERE a._period >= TIMESTAMP '2025-01-01'
+    AND a._period < TIMESTAMP '2027-01-01'
+    AND a._recordkind = 0
+), early_raw AS (
+  SELECT m._period, m.line_no, m._recordkind, m.contract_id, m.freeze_days,
+         m.author_id, c._fld694rref AS stage_id, sales._description::text AS sales_point,
+         c._fld671 AS start_date, c._fld670 AS activation_date, c._fld674 AS acquisition_date,
+         source266._description::text AS source_object, c._description::text AS contract_name
+  FROM movement m
+  JOIN public._document266 d ON d._idrref = m.recorder_id
+  LEFT JOIN public._reference59 c ON c._idrref = m.contract_id
+  LEFT JOIN public._document332 d332 ON d332._idrref = c._fld677_rrref
+  LEFT JOIN public._reference124 source266 ON source266._idrref = d332._fld4433rref
+  LEFT JOIN public._reference132 sales ON sales._idrref = c._fld701rref
+  UNION ALL
+  SELECT m._period, m.line_no, m._recordkind, m.contract_id, m.freeze_days,
+         m.author_id, c._fld694rref, sales._description::text,
+         c._fld671, c._fld670, c._fld674,
+         source315._description::text, c._description::text
+  FROM movement m
+  JOIN public._document315_vt3894 o
+    ON o._document315_idrref = m.recorder_id
+   AND o._fld3896rref = m.contract_id
+  LEFT JOIN public._reference59 c ON c._idrref = m.contract_id
+  LEFT JOIN public._reference132 sales ON sales._idrref = c._fld701rref
+  LEFT JOIN public._document346_vt4924 v ON v._document346_idrref = o._fld3897rref
+  LEFT JOIN public._document346 d ON d._idrref = o._fld3897rref
+  LEFT JOIN public._reference127 r127 ON r127._idrref = d._fld4892rref
+  LEFT JOIN public._reference237 source315 ON source315._idrref = r127._fld1357rref
+), early_distinct AS (
+  SELECT DISTINCT * FROM early_raw
+), paid_raw AS (
+  SELECT m._period, m.contract_id, m.freeze_days, c._fld671 AS start_date,
+         c._fld670 AS activation_date, c._fld674 AS acquisition_date,
+         c._description::text AS contract_name, v._fld4938 AS amount,
+         v._fld4939 AS automatic_discount
+  FROM movement m
+  JOIN public._document315_vt3894 o
+    ON o._document315_idrref = m.recorder_id
+   AND o._fld3896rref = m.contract_id
+  LEFT JOIN public._reference59 c ON c._idrref = m.contract_id
+  LEFT JOIN public._document346_vt4924 v ON v._document346_idrref = o._fld3897rref
+  LEFT JOIN public._document346 d ON d._idrref = o._fld3897rref
+  LEFT JOIN public._reference163 n ON n._idrref = v._fld4932rref
+  WHERE d._date_time = m._period
+    AND n._fld1756 * v._fld4930 = m.freeze_days
+), paid_distinct AS (
+  SELECT DISTINCT * FROM paid_raw
+)
+SELECT branch, raw_rows, distinct_rows, raw_days, distinct_days, raw_amount, distinct_amount
+FROM (
+  SELECT 'early_freeze'::text AS branch,
+         (SELECT count(*) FROM early_raw
+          WHERE _period::date BETWEEN acquisition_date::date AND activation_date::date) AS raw_rows,
+         (SELECT count(*) FROM early_distinct
+          WHERE _period::date BETWEEN acquisition_date::date AND activation_date::date) AS distinct_rows,
+         (SELECT coalesce(sum(freeze_days), 0) FROM early_raw
+          WHERE _period::date BETWEEN acquisition_date::date AND activation_date::date) AS raw_days,
+         (SELECT coalesce(sum(freeze_days), 0) FROM early_distinct
+          WHERE _period::date BETWEEN acquisition_date::date AND activation_date::date) AS distinct_days,
+         0::numeric AS raw_amount, 0::numeric AS distinct_amount
+  UNION ALL
+  SELECT 'paid_orp'::text,
+         (SELECT count(*) FROM paid_raw
+          WHERE _period::date BETWEEN acquisition_date::date AND activation_date::date AND amount <> 0),
+         (SELECT count(*) FROM paid_distinct
+          WHERE _period::date BETWEEN acquisition_date::date AND activation_date::date AND amount <> 0),
+         (SELECT coalesce(sum(freeze_days), 0) FROM paid_raw
+          WHERE _period::date BETWEEN acquisition_date::date AND activation_date::date AND amount <> 0),
+         (SELECT coalesce(sum(freeze_days), 0) FROM paid_distinct
+          WHERE _period::date BETWEEN acquisition_date::date AND activation_date::date AND amount <> 0),
+         (SELECT coalesce(sum(amount), 0) FROM paid_raw
+          WHERE _period::date BETWEEN acquisition_date::date AND activation_date::date AND amount <> 0),
+         (SELECT coalesce(sum(amount), 0) FROM paid_distinct
+          WHERE _period::date BETWEEN acquisition_date::date AND activation_date::date AND amount <> 0)
+) result
+ORDER BY branch;
