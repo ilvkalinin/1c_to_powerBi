@@ -68,3 +68,47 @@ FROM (
   GROUP BY 1, 2, 3
 ) states
 ORDER BY source_kind, active, record_kind;
+
+-- MR-V04 / MB-V-recorder. Expected: every 2026 contract-advance movement is
+-- recognised by at most one of the 14 document recorder relations listed in
+-- the current PBIT. This validates technical classification coverage only;
+-- the current M precedence and its sign/exclusion CASE are not changed.
+WITH movements AS MATERIALIZED (
+  SELECT _recorderrref AS recorder_id
+  FROM public._accumrg7370
+  WHERE _period >= DATE '2026-01-01' AND _period < DATE '2027-01-01'
+),
+recognition AS (
+  SELECT m.recorder_id,
+         ((d317._idrref IS NOT NULL)::int + (d316._idrref IS NOT NULL)::int +
+          (d332._idrref IS NOT NULL)::int + (d285._idrref IS NOT NULL)::int +
+          (d304._idrref IS NOT NULL)::int + (d346._idrref IS NOT NULL)::int +
+          (d327._idrref IS NOT NULL)::int + (d315._idrref IS NOT NULL)::int +
+          (d331._idrref IS NOT NULL)::int + (d305._idrref IS NOT NULL)::int +
+          (d333._idrref IS NOT NULL)::int + (d339._idrref IS NOT NULL)::int +
+          (d340._idrref IS NOT NULL)::int + (d296._idrref IS NOT NULL)::int)
+            AS matching_document_types
+  FROM movements m
+  LEFT JOIN public._document317 d317 ON d317._idrref = m.recorder_id
+  LEFT JOIN public._document316 d316 ON d316._idrref = m.recorder_id
+  LEFT JOIN public._document332 d332 ON d332._idrref = m.recorder_id
+  LEFT JOIN public._document285 d285 ON d285._idrref = m.recorder_id
+  LEFT JOIN public._document304 d304 ON d304._idrref = m.recorder_id
+  LEFT JOIN public._document346 d346 ON d346._idrref = m.recorder_id
+  LEFT JOIN public._document327 d327 ON d327._idrref = m.recorder_id
+  LEFT JOIN public._document315 d315 ON d315._idrref = m.recorder_id
+  LEFT JOIN public._document331 d331 ON d331._idrref = m.recorder_id
+  LEFT JOIN public._document305 d305 ON d305._idrref = m.recorder_id
+  LEFT JOIN public._document333 d333 ON d333._idrref = m.recorder_id
+  LEFT JOIN public._document339 d339 ON d339._idrref = m.recorder_id
+  LEFT JOIN public._document340 d340 ON d340._idrref = m.recorder_id
+  LEFT JOIN public._document296 d296 ON d296._idrref = m.recorder_id
+)
+SELECT count(*) AS movement_rows,
+       count(*) FILTER (WHERE matching_document_types = 1)
+         AS exactly_one_recorder_type,
+       count(*) FILTER (WHERE matching_document_types = 0)
+         AS unrecognised_recorder_rows,
+       count(*) FILTER (WHERE matching_document_types > 1)
+         AS multiple_recorder_type_rows
+FROM recognition;

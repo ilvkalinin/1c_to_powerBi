@@ -440,3 +440,26 @@ document-recorder rule. Для membership-услуг в срезе неакти�
 latest/state path проверен, но корректность бизнес-атрибуции по паре клиента
 и даты всё ещё не доказана отдельным правилом. NV-V06 остаётся `BLOCKED` из-за
 отсутствия полного source predicate «подходящего абонемента».
+
+## SV-107 — «Поступления» и «Членство для правления»: тип регистратора аванса
+
+Статус: `VALIDATED WITH CURRENT-SCOPE EXCLUSION`. Выполнен 2026-08-18 на
+live `gymdb` в `BEGIN READ ONLY` под `gymdb_readonly`,
+`statement_timeout = 30s`. Точный SQL сохранён как MR-V04 / MB-V-recorder в
+[membership_receipts_2026-08-11.sql](validation_sql/membership_receipts_2026-08-11.sql).
+
+Проверка использует ровно 14 document-relations и их порядок из текущего
+PBIT. После исправления технической контрольной колонки соединение выполняется
+по идентификатору регистратора `_recorderrref`, а не по типу `_recordertref`.
+
+| Контроль | Фактический результат | Статус |
+|---|---:|---|
+| Движения авансов за 2026 | 983 320 | OBSERVED |
+| Ровно один из 14 текущих типов документа | 112 973 | VALIDATED technical recognition |
+| Более одного типа документа | 0 | VALIDATED |
+| Не распознаны списком 14 типов | 870 347 | VALIDATED WITH CURRENT-SCOPE EXCLUSION |
+
+Текущий M уже исключает нераспознанные строки до расчёта; этот control не
+расширяет список документов и не назначает им знак. Значит техническая
+однозначность распознанной части подтверждена, но полнота бизнес-scope и
+document-specific state/sign rules остаются `VALIDATION_PENDING`.
