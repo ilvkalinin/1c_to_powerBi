@@ -214,6 +214,7 @@ Jivo scope и трёх статусов закрытых месяцев 2026-01�
 | DV-V03 | После text-cast observation: 457 556 base rows, 456 639 current branch rows и keys; branch excess = 0, не выведено 917 | VALIDATED WITH ROW-LOSS RISK — current inner branch не меняется |
 | DV-V06 | Source-side cast observation текстового visit filter: 35 rows = 35 technical keys, 32 client-day-club, missing/mismatched club = 0 | BLOCKED as cohort evidence — результат не подтверждает Power Query classification |
 | DV-V06B | Поздний read-only срез 2026: legacy `service name LIKE '%Посещение%'` = 36 строк, operation ID «посещение» = 3 003 981; пересечение = 0 | VALIDATED rejected candidate — ID операции не эквивалентен текущей service-name когорте и не вводится как новый filter |
+| DV-V07 | `AccumRg7575` ≈ 33,6 млн строк / 29,1 ГБ; current 2026 count по legacy cohort выполнился за 25,7 мс, без disk/temp reads | OBSERVED hot-cache source baseline — использованы `_reference163_5` и `_accumrg7575_5`; это не end-to-end SLA |
 
 Старый DV-V03/DV-V06 SQL напрямую применял `ILIKE` к 1С-типу `mvarchar` и
 не выполняется в PostgreSQL (`operator does not exist: mvarchar !~~* unknown`).
@@ -235,7 +236,10 @@ DV-V06B проверил единственный подтверждённый �
 
 До готовности отчёта остаются: подтверждённый ключ классификации посещения
 вместо имени, независимые as-of controls на контрольных датах из Power BI и
-rerun/SLA. Никакая из этих границ не закрыта догадкой или новым фильтром.
+rerun/SLA. DV-V07 не выявил проблемы у узкого current count: на горячем кэше
+его execution time = 25,7 мс, shared reads/temp = 0. Однако cold-cache,
+извлечение, загрузка и обновление Power BI не измерялись, поэтому SLA остаётся
+незакрытым. Никакая из этих границ не закрыта догадкой или новым фильтром.
 
 ## SV-100 — «Карта администратора»: Gymmy bounded controls
 

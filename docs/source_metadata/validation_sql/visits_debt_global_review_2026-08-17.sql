@@ -117,7 +117,17 @@ SELECT (SELECT count(*) FROM legacy_service) AS legacy_service_rows,
         LEFT JOIN operation_visit o USING (_recordertref, _recorderrref, _lineno)
         WHERE o._recorderrref IS NULL) AS legacy_only_rows,
        (SELECT count(*) FROM operation_visit o
-        LEFT JOIN legacy_service l USING (_recordertref, _recorderrref, _lineno)
+       LEFT JOIN legacy_service l USING (_recordertref, _recorderrref, _lineno)
         WHERE l._recorderrref IS NULL) AS operation_only_rows;
+
+-- DV-V07, executed 2026-08-18. Performance baseline for the current legacy
+-- cohort only; it does not claim end-to-end refresh SLA or endorse the text
+-- predicate as a future classification rule.
+EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON)
+SELECT count(*)
+FROM public._accumrg7575 a
+JOIN public._reference163 s ON s._idrref = a._fld7579rref
+WHERE a._period >= DATE '2026-01-01' AND a._period < DATE '2027-01-01'
+  AND s._description::text LIKE '%Посещение%';
 
 ROLLBACK;
