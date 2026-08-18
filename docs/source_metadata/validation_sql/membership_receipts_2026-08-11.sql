@@ -438,6 +438,90 @@ FROM (
 GROUP BY branch
 ORDER BY branch;
 
+-- MR-V10A: exact PBIT contract-level coverage for payment, product age and
+-- source stage. Check before price joins so their known multiplicity cannot
+-- inflate classification counts.
+WITH current_pbit_contracts AS (
+  SELECT c._idrref AS contract_id, c._fld699rref AS payment_type_id,
+         c._fld696rref AS contract_type_id, c._fld694rref AS source_stage_id,
+         p._fld1741rref AS product_age_id, p._description::text AS product_name
+  FROM public._reference59 c
+  LEFT JOIN public._reference163 p ON p._idrref = c._fld685rref
+  WHERE c._fld670 >= TIMESTAMP '2025-01-01'
+    AND c._fld670 < TIMESTAMP '2027-01-01'
+    AND c._fld681rref <> decode('00000000000000000000000000000000', 'hex')
+    AND c._fld696rref <> decode('9b656ee141a764e44de79e83cd30c1b2', 'hex')
+    AND c._fld699rref <> decode('96976725cebf51f7461429d74d3f6cbe', 'hex')
+    AND c._description::text NOT LIKE '%ИП%'
+    AND c._description::text NOT LIKE '%клип%'
+    AND c._description::text NOT LIKE '%Клип%'
+), classified AS (
+  SELECT c.*,
+         CASE
+           WHEN payment_type_id = decode('9bd3ea4748457ee94b2011de6d9687d7', 'hex') THEN 'Рекарринг'
+           WHEN payment_type_id = decode('96976725cebf51f7461429d74d3f6cbe', 'hex') THEN 'Бесплатный'
+           ELSE 'Предоплата'
+         END AS payment_type_current,
+         CASE
+           WHEN contract_type_id = decode('b3810658562bb24d4270435597b56bd7', 'hex') THEN 'Детские секции'
+           WHEN product_name LIKE '%детские секции%' OR product_name LIKE '%Детские секции%'
+             OR product_name LIKE '%ДЕТСКИЕ СЕКЦИИ%' THEN 'Детские секции'
+           WHEN product_age_id = decode('80d300505681013811e4d84b6c6561d9', 'hex') THEN 'Взрослые'
+           WHEN product_age_id = decode('80d300505681013811e4d85d67cfb97d', 'hex') THEN 'Дети'
+           WHEN product_age_id = decode('80d300505681013811e4d85d6e92a534', 'hex') THEN 'Юниоры'
+           ELSE 'Взрослые'
+         END AS product_age_current,
+         e._enumorder AS source_stage_order
+  FROM current_pbit_contracts c
+  LEFT JOIN public._enum402 e ON e._idrref = c.source_stage_id
+)
+SELECT 'payment_type'::text AS classification, payment_type_current AS current_value,
+       count(*) AS contracts
+FROM classified
+GROUP BY 1, 2
+UNION ALL
+SELECT 'product_age', product_age_current, count(*)
+FROM classified
+GROUP BY 1, 2
+UNION ALL
+SELECT 'source_stage_order',
+       CASE WHEN source_stage_order = 0 THEN 'New'
+            WHEN source_stage_order = 1 THEN 'Renew'
+            WHEN source_stage_order IS NULL THEN 'unmapped_or_null'
+            ELSE 'Ex' END,
+       count(*)
+FROM classified
+GROUP BY 1, 2
+ORDER BY classification, current_value;
+
+-- MR-V10B: split the source-stage values that do not join the exact PBIT
+-- Enum402 mapping. No fallback category is introduced by this control.
+WITH current_pbit_contracts AS (
+  SELECT c._fld694rref AS source_stage_id
+  FROM public._reference59 c
+  WHERE c._fld670 >= TIMESTAMP '2025-01-01'
+    AND c._fld670 < TIMESTAMP '2027-01-01'
+    AND c._fld681rref <> decode('00000000000000000000000000000000', 'hex')
+    AND c._fld696rref <> decode('9b656ee141a764e44de79e83cd30c1b2', 'hex')
+    AND c._fld699rref <> decode('96976725cebf51f7461429d74d3f6cbe', 'hex')
+    AND c._description::text NOT LIKE '%ИП%'
+    AND c._description::text NOT LIKE '%клип%'
+    AND c._description::text NOT LIKE '%Клип%'
+)
+SELECT CASE
+         WHEN source_stage_id = decode('00000000000000000000000000000000', 'hex') THEN 'zero_reference'
+         WHEN source_stage_id IS NULL THEN 'null_reference'
+         WHEN e._idrref IS NULL THEN 'not_in_enum402'
+         WHEN e._enumorder = 0 THEN 'New'
+         WHEN e._enumorder = 1 THEN 'Renew'
+         ELSE 'Ex'
+       END AS current_mapping_path,
+       count(*) AS contracts
+FROM current_pbit_contracts c
+LEFT JOIN public._enum402 e ON e._idrref = c.source_stage_id
+GROUP BY 1
+ORDER BY 1;
+
 -- MR-V09B: reproduce the Table.Distinct columns of the two PBIT freeze
 -- queries.  Compare only within the source query scope, without new filters.
 WITH movement AS (
