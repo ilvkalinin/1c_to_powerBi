@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Fail closed for every user-visible conclusion, question, or final response.
+# Fail closed only for a completed-work summary or final response. Intermediate
+# commentary uses the lighter end-with-next-action rule from communication.md.
 set -euo pipefail
 
 if [[ $# -gt 1 ]]; then
