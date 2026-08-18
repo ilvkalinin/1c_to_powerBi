@@ -137,6 +137,92 @@ FROM (
 GROUP BY 1, 2
 ORDER BY 1, 2;
 
+-- MR-V10D: measure the exact PBIT InfoRg8595 Table.Distinct(product) risk.
+-- The control never picks a row: it only counts conflicting access-time values.
+WITH pbit_index_rows AS (
+  SELECT DISTINCT i._fld8603rref AS product_id,
+         payment._description::text AS payment_type,
+         access_time._description::text AS access_time,
+         age._description::text AS product_age,
+         duration._description::text AS duration_type,
+         quantity_limit._description::text AS quantity_limit_type,
+         coupon._description::text AS coupon_type,
+         product._description::text AS product_name
+  FROM public._inforg8595 i
+  LEFT JOIN public._reference109 payment ON payment._idrref = i._fld8597rref
+  LEFT JOIN public._reference109 age ON age._idrref = i._fld8598rref
+  LEFT JOIN public._reference109 access_time ON access_time._idrref = i._fld8599rref
+  LEFT JOIN public._reference109 duration ON duration._idrref = i._fld8600rref
+  LEFT JOIN public._reference109 quantity_limit ON quantity_limit._idrref = i._fld8601rref
+  LEFT JOIN public._reference109 coupon ON coupon._idrref = i._fld8602rref
+  LEFT JOIN public._reference163 product ON product._idrref = i._fld8603rref
+  WHERE payment._description IS NOT NULL
+), current_contract_products AS (
+  SELECT DISTINCT c._fld685rref AS product_id
+  FROM public._reference59 c
+  WHERE c._fld670 >= TIMESTAMP '2025-01-01'
+    AND c._fld670 < TIMESTAMP '2027-01-01'
+    AND c._fld681rref <> decode('00000000000000000000000000000000', 'hex')
+    AND c._fld696rref <> decode('9b656ee141a764e44de79e83cd30c1b2', 'hex')
+    AND c._fld699rref <> decode('96976725cebf51f7461429d74d3f6cbe', 'hex')
+    AND c._description::text NOT LIKE '%ИП%'
+    AND c._description::text NOT LIKE '%клип%'
+    AND c._description::text NOT LIKE '%Клип%'
+), per_product AS (
+  SELECT product_id, count(*) AS pbit_rows,
+         count(DISTINCT access_time) AS access_time_values
+  FROM pbit_index_rows
+  GROUP BY 1
+)
+SELECT scope,
+       count(*) AS products,
+       count(*) FILTER (WHERE pbit_rows > 1) AS products_with_multiple_pbit_rows,
+       coalesce(sum(pbit_rows - 1) FILTER (WHERE pbit_rows > 1), 0) AS pbit_row_excess,
+       count(*) FILTER (WHERE access_time_values > 1) AS products_with_conflicting_access_time
+FROM (
+  SELECT 'all_current_pbit_index'::text AS scope, p.* FROM per_product p
+  UNION ALL
+  SELECT 'current_contract_products'::text, p.*
+  FROM per_product p JOIN current_contract_products c ON c.product_id = p.product_id
+) scoped
+GROUP BY scope
+ORDER BY scope;
+
+-- MR-V10E: exact DAX coverage for access-time output after the confirmed
+-- unique InfoRg8595 product lookup. Text "дневн" keeps current priority.
+WITH pbit_index AS (
+  SELECT DISTINCT i._fld8603rref AS product_id,
+         access_time._description::text AS access_time
+  FROM public._inforg8595 i
+  LEFT JOIN public._reference109 payment ON payment._idrref = i._fld8597rref
+  LEFT JOIN public._reference109 access_time ON access_time._idrref = i._fld8599rref
+  WHERE payment._description IS NOT NULL
+), current_pbit_contracts AS (
+  SELECT c._idrref AS contract_id, c._fld685rref AS product_id,
+         p._description::text AS product_name
+  FROM public._reference59 c
+  LEFT JOIN public._reference163 p ON p._idrref = c._fld685rref
+  WHERE c._fld670 >= TIMESTAMP '2025-01-01'
+    AND c._fld670 < TIMESTAMP '2027-01-01'
+    AND c._fld681rref <> decode('00000000000000000000000000000000', 'hex')
+    AND c._fld696rref <> decode('9b656ee141a764e44de79e83cd30c1b2', 'hex')
+    AND c._fld699rref <> decode('96976725cebf51f7461429d74d3f6cbe', 'hex')
+    AND c._description::text NOT LIKE '%ИП%'
+    AND c._description::text NOT LIKE '%клип%'
+    AND c._description::text NOT LIKE '%Клип%'
+)
+SELECT CASE
+         WHEN c.product_name ILIKE '%дневн%' THEN 'Дневной Физкульт'
+         WHEN i.access_time IS NOT NULL AND i.access_time <> '' THEN i.access_time
+         ELSE 'Безлимитный'
+       END AS access_time_current,
+       count(*) AS contracts,
+       count(*) FILTER (WHERE i.product_id IS NULL) AS contracts_without_index_row
+FROM current_pbit_contracts c
+LEFT JOIN pbit_index i ON i.product_id = c.product_id
+GROUP BY 1
+ORDER BY 1;
+
 -- MR-V02 expected: each bounded advance movement has one physical key and at
 -- most one contract join. Active and RecordKind are observations; current M
 -- determines sign through its document-recorder CASE and must be preserved.
