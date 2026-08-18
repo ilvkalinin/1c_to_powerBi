@@ -67,4 +67,24 @@ SELECT count(*) AS qualified_bridge_rows,
        count(*) FILTER (WHERE duration_days >= 365) AS duration_365_plus
 FROM eligible_bridge;
 
+-- MF-V07B, executed 2026-08-18. This observes payment-type field coverage
+-- in the report bridge. It does not infer which physical value is recurring.
+WITH eligible_bridge AS MATERIALIZED (
+  SELECT c._fld699rref AS payment_type_id
+  FROM public._inforg6798 r
+  JOIN public._reference59 c ON c._idrref = r._fld6800_rrref
+  JOIN public._reference106 t ON t._idrref = r._fld6799rref
+  JOIN public._reference89 f ON f._idrref = t._fld1191rref
+  WHERE r._fld6802
+    AND f._description::text = 'Продажа клубной карты'
+    AND c._fld696rref <> decode('9b656ee141a764e44de79e83cd30c1b2', 'hex')
+    AND c._fld699rref <> decode('96976725cebf51f7461429d74d3f6cbe', 'hex')
+    AND c._fld670::date >= DATE '2024-01-01'
+    AND c._fld670::date >= t._fld1193::date
+)
+SELECT count(*) AS qualified_bridge_rows,
+       count(DISTINCT payment_type_id) AS nonnull_payment_type_values,
+       count(*) FILTER (WHERE payment_type_id IS NULL) AS null_payment_type_rows
+FROM eligible_bridge;
+
 ROLLBACK;

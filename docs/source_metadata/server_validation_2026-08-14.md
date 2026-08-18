@@ -284,3 +284,8 @@ contract` связей. `NULL` длительности = 0; неположит�
 21 864, `181–364` = 21 249, `365+` = 148 805. Неположительную строку не
 исключать и не переносить в категорию без отдельного правила; это
 `VALIDATED WITH ANOMALY` для duration source field.
+
+MF-V07B: в следующем live-снимке 200 861 qualified `task × contract` связей
+имеют четыре непустых физических значения `Reference59.Fld699`; `NULL` = 0.
+Это `VALIDATED` для physical coverage payment type, но не определяет, какое
+значение означает рекарринг: label mapping остаётся `VALIDATION_PENDING`.
