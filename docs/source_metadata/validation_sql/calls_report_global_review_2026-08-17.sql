@@ -136,4 +136,25 @@ FROM public._reference89
 WHERE _description::text ILIKE '%клип%'
 ORDER BY 1;
 
+-- CR-V05C, executed 2026-08-18. A bounded July impact observation for the
+-- CR-V05B candidate only. It does not adopt the candidate into the report
+-- filter and does not generalise the one-month count to other periods.
+WITH requested_topics(topic_name) AS (
+  VALUES ('Благодарность'), ('Замечание'), ('Консультация'),
+         ('Предложение'), ('Пропажа'), ('Травма')
+), feedback AS MATERIALIZED (
+  SELECT i._idrref, i._owneridrref
+  FROM public._reference67 i
+  WHERE i._fld831rref = decode('9db9fdbf6bd80f2044eb2835157b3bc8', 'hex')
+    AND i._fld823 >= DATE '2026-07-01' AND i._fld823 < DATE '2026-08-01'
+)
+SELECT count(*) AS scoped_feedback_rows,
+       count(DISTINCT f._idrref) AS scoped_feedback_ids
+FROM feedback f
+JOIN public._reference106 task ON task._idrref = f._owneridrref
+JOIN public._reference8628 topic ON topic._idrref = task._fld8643rref
+JOIN public._reference89 funnel ON funnel._idrref = task._fld1191rref
+JOIN requested_topics rt ON rt.topic_name = topic._description::text
+WHERE funnel._description::text = 'Продажа клип карты Рецепция';
+
 ROLLBACK;
