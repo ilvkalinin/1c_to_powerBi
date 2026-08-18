@@ -20,13 +20,12 @@ visit event grain, Power BI reconciliation или refresh/re-run.
 [`server validation`](../source_metadata/server_validation_2026-08-14.md#sv-098--отчёт-по-обращениям-crm-core-and-comment-controls);
 исправленный null-safe control, bounded first-followup path и CR-V05A — в
 [`calls_report_global_review_2026-08-17.sql`](../source_metadata/validation_sql/calls_report_global_review_2026-08-17.sql).
-CR-V05A подтверждает шесть тем и четыре из пяти документированных воронок;
-точное имя `Продажа клип-карт Рецепция` в `Reference89` отсутствует. Похожее
-имя не подставляется, поэтому базовый funnel scope `BLOCKED` до
-подтверждённого current SQL/M/DAX-правила. CR-V05B наблюдает возможный
-кандидат `Продажа клип карты Рецепция`, но это только `ASSUMPTION`: исходный
-current SQL/M/DAX среди материалов проекта отсутствует. Статус реализации не
-меняется.
+CR-V05A подтверждает шесть тем и четыре из пяти документированных воронок.
+Пользователь подтвердил, что source-наименование `Продажа клип карты
+Рецепция` является нужной воронкой; CR-V05D зафиксировал её единственный
+`Reference89._idrref = 99d7928e75e3805f11f0310981642c71`. По BR-023 source
+filter использует этот ID, а не текст. Старое написание остаётся критичным
+артефактом; статус реализации не меняется.
 
 ## Reuse review
 
@@ -72,7 +71,7 @@ current SQL/M/DAX среди материалов проекта отсутст�
 | `feedback_topic_name` | `Reference8628.Description` | `text` | да | interaction | CONFIRMED current SQL | V-05 six-topic scope |
 | `club_id` | `Reference106.Fld1195` | `UNKNOWN` | да | interaction | CONFIRMED current SQL | V-04 FK |
 | `club_name` | `Reference132.Description` | `text` | да | interaction | CONFIRMED need | V-04 |
-| `funnel_id` / `funnel_name` | `Reference106.Fld1191 → Reference89.Description` | `UNKNOWN` / `text` | да | interaction | CONFIRMED current SQL | V-05 five funnels |
+| `funnel_id` / `funnel_name` | `Reference106.Fld1191 → Reference89.Description`; для «Продажа клип-карт Рецепция» filter ID = `99d7928e75e3805f11f0310981642c71` | `UNKNOWN` / `text` | да | interaction | CONFIRMED — BR-023 / CR-V05D | V-05 remaining scopes |
 | `department_id` / `department_name` | `Reference106.Fld8642 → Reference178.Description` | `UNKNOWN` / `text` | да | interaction | CONFIRMED current SQL | V-04 |
 | `status_id` / `status_name` | `Reference67.Fld830`; current GUID mapping: выполнено / не выполнено / отменено | `UNKNOWN` / `text` | да | interaction | CONFIRMED current SQL | V-05 all values |
 | `state_id` / `state_name` | `Reference67.Fld829 → Reference224.Description` | `UNKNOWN` / `text` | да | interaction | CONFIRMED current SQL | V-04 |
@@ -121,10 +120,10 @@ current SQL/M/DAX среди материалов проекта отсутст�
 3. `VALIDATION_PENDING`: техническая кардинальность связей Power BI и
    контрольные значения. Проектные связи зафиксированы в data contract;
    данные доступны не позднее 08:30 по Москве (`CONFIRMED`, BR-014).
-4. `BLOCKED`: CR-V05A нашёл точные physical matches для шести тем и четырёх
-   воронок, но не для документированного фильтра `Продажа клип-карт Рецепция`.
-   Неизвестную замену не выбирать: до подтверждённого current SQL/M/DAX
-   правила нельзя воспроизвести базовый funnel scope.
+4. `CONFIRMED`: BR-023 связывает документированную воронку
+   «Продажа клип-карт Рецепция» с единственным physical ID
+   `99d7928e75e3805f11f0310981642c71`. Текст не используется как filter;
+   остающиеся V-05 scope controls проверяются отдельно.
 
 ## Refresh
 

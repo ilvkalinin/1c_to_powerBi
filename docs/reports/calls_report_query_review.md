@@ -9,14 +9,12 @@
 
 SV-098 добавил narrow read-only evidence для feedback core, HTML,
 PK-side dimensions, first-followup ordering, comments и source states.
-CR-V05A подтвердил шесть тем и четыре из пяти документированных воронок, но
-точное имя `Продажа клип-карт Рецепция` в `Reference89` отсутствует; базовый
-funnel scope поэтому `BLOCKED`, без подстановки похожего имени. Непройденные
+CR-V05A подтвердил шесть тем и четыре из пяти документированных воронок.
+Пользователь подтвердил, что source-название `Продажа клип карты Рецепция`
+соответствует документированной воронке; BR-023 фиксирует её единственный
+`Reference89._idrref`, поэтому filter не зависит от написания. Непройденные
 controls сохраняют свой статус и не считаются пройденными по косвенным
 результатам.
-CR-V05B наблюдает `Продажа клип карты Рецепция` как возможный вариант
-написания, но не заменяет filter: исходный current SQL/M/DAX среди материалов
-проекта отсутствует.
 
 ## Stage 2 checkpoint — SV-088 (2026-08-12)
 
@@ -127,7 +125,7 @@ HTML из `Reference137` очищается регулярными выраже�
 | V-02 | уникальность `Reference67.ID`, `Reference106.ID` и кодов | ID без дублей; код не используется как ключ, если не уникален |
 | V-03 | кардинальность phone и HTML по interaction | правило агрегации даёт ровно одну строку на interaction |
 | V-04 | candidate fact после всех dimension joins | `COUNT(*) = COUNT(DISTINCT interaction_id)` до intentional bridges |
-| V-05 | точный набор type/status/theme/funnel/campaign GUID и Jivo-исключений отдельно для набора шести тем и набора скорости/качества | CR-V05A: шесть тем и четыре воронки имеют ровно один physical match; `Продажа клип-карт Рецепция` отсутствует, поэтому базовый funnel scope `BLOCKED` до current SQL/M/DAX-правила |
+| V-05 | точный набор type/status/theme/funnel/campaign GUID и Jivo-исключений отдельно для набора шести тем и набора скорости/качества | CR-V05A: шесть тем и четыре воронки имеют ровно один physical match; BR-023 фиксирует пятую воронку через единственный `Reference89._idrref`. Speed/quality, Jivo и state scopes остаются pending. |
 | V-06 | первый event после feedback | event имеет подтверждённый type «Исходящий звонок», либо правило уточнено |
 | V-07 | HTML update и follow-up call | даты не предшествуют creation, ties имеют deterministic tie-break |
 | V-08 | посещения | один и тот же business visit не дублируется join контрактов; дневная сумма сверяется |

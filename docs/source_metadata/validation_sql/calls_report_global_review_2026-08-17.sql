@@ -157,4 +157,14 @@ JOIN public._reference89 funnel ON funnel._idrref = task._fld1191rref
 JOIN requested_topics rt ON rt.topic_name = topic._description::text
 WHERE funnel._description::text = 'Продажа клип карты Рецепция';
 
+-- CR-V05D. Confirmed by BR-023 on 2026-08-18: the report label resolves to
+-- this one physical funnel ID. Future source filters use the ID rather than a
+-- text comparison; no other similarly named funnel is implied.
+SELECT count(*) AS resolved_funnel_rows,
+       count(*) FILTER (
+         WHERE _description::text = 'Продажа клип карты Рецепция'
+       ) AS expected_source_name_rows
+FROM public._reference89
+WHERE _idrref = decode('99d7928e75e3805f11f0310981642c71', 'hex');
+
 ROLLBACK;
