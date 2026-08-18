@@ -40,3 +40,31 @@ SELECT count(*) AS movement_rows,
        count(*) FILTER(WHERE m._recordkind=0) AS recordkind_0_rows,
        count(*) FILTER(WHERE m._recordkind=1) AS recordkind_1_rows
 FROM movements m LEFT JOIN public._reference59 c ON c._idrref=m._fld7741rref;
+
+-- MR-V03A / MB-V-source-states, executed for the board-reused domain.
+-- Expected: observe the complete 2026 combinations of Active and RecordKind
+-- separately for contract advances and membership services. It establishes no
+-- new state or sign filter: document-recorder sign logic remains current M.
+SELECT source_kind, active, record_kind, movement_rows, amount_total
+FROM (
+  SELECT 'contract_advance'::text AS source_kind,
+         _active AS active,
+         _recordkind AS record_kind,
+         count(*) AS movement_rows,
+         sum(_fld7377) AS amount_total
+  FROM public._accumrg7370
+  WHERE _period >= DATE '2026-01-01' AND _period < DATE '2027-01-01'
+  GROUP BY 1, 2, 3
+
+  UNION ALL
+
+  SELECT 'membership_service'::text AS source_kind,
+         _active AS active,
+         _recordkind AS record_kind,
+         count(*) AS movement_rows,
+         sum(_fld7749) AS amount_total
+  FROM public._accumrg7739
+  WHERE _period >= DATE '2026-01-01' AND _period < DATE '2027-01-01'
+  GROUP BY 1, 2, 3
+) states
+ORDER BY source_kind, active, record_kind;

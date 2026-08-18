@@ -104,7 +104,7 @@ GROUP BY 1 ORDER BY 1;
 
 -- NV-V05. User-approved PBIT 2026-08-18 supplies the exact ACCUNIQ list and
 -- sign rule. Expected: all 12 codes match Reference163; the result records
--- source-state coverage and the PBIT groups with signed total 1 or 2. It
+-- `_active` coverage and the PBIT groups with signed total 1 or 2. It
 -- observes rather than introduces additional source filters.
 WITH accuniq_codes(service_code) AS (
   VALUES ('00000017896'), ('00000018151'), ('00000017882'),
@@ -122,8 +122,7 @@ WITH accuniq_codes(service_code) AS (
          a._fld7576rref AS client_id,
          s._code::text AS service_code,
          CASE WHEN a._fld7585 = -1 THEN -1 ELSE 1 END AS pbit_signed_quantity,
-         a._active,
-         a._recordkind
+         a._active
   FROM public._accumrg7575 a
   JOIN public._reference163 s ON s._idrref = a._fld7579rref
   JOIN accuniq_codes c ON c.service_code = s._code::text
@@ -141,11 +140,67 @@ SELECT (SELECT count(*) FROM service_matches WHERE physical_matches = 1)
            AS codes_without_one_physical_match,
        (SELECT count(*) FROM movements) AS scoped_movement_rows,
        (SELECT count(*) FROM movements WHERE NOT _active) AS inactive_movement_rows,
-       (SELECT count(DISTINCT _recordkind) FROM movements) AS observed_recordkind_values,
        (SELECT count(*) FROM pbit_groups WHERE signed_total IN (1, 2))
            AS current_pbit_qualified_groups,
        (SELECT count(*) FROM pbit_groups WHERE signed_total NOT IN (1, 2))
            AS excluded_by_current_pbit_quantity,
        (SELECT max(movement_rows) FROM pbit_groups) AS max_rows_per_pbit_group;
+
+-- NV-V09. Expected: reproduce the current PBIT `ЗаписиНаАккуники` path:
+-- select MAX(Period) per prebooking document (not per client), retain every
+-- tie at that timestamp, then exclude enum orders 2 and 3. The control only
+-- measures whether this legacy ordering can lose a client/date match; it does
+-- not replace the prebooking key with a client key or introduce a tie-break.
+WITH accuniq_codes(code) AS (
+  VALUES ('00000017896'), ('00000018151'), ('00000017882'), ('00000017883'),
+         ('00000018152'), ('00000017897'), ('00000016715'), ('00000016162'),
+         ('00000016194'), ('00000016161'), ('00000017672'), ('00000016160')
+),
+base AS MATERIALIZED (
+  SELECT r._period AS state_period,
+         r._fld7007_rrref AS prebooking_id,
+         r._fld7008rref AS client_id,
+         e._enumorder AS state_order,
+         d._fld4306::date AS scheduled_date
+  FROM public._inforg7006 r
+  JOIN public._document329 d ON d._idrref = r._fld7007_rrref
+  JOIN public._reference141x1 client ON client._idrref = r._fld7008rref
+  JOIN public._enum448 e ON e._idrref = r._fld7013rref
+  JOIN public._reference163 service ON service._idrref = r._fld7010rref
+  JOIN accuniq_codes c ON c.code = service._code::text
+  WHERE r._period >= TIMESTAMP '2025-01-01'
+),
+latest_period AS MATERIALIZED (
+  SELECT prebooking_id, max(state_period) AS state_period
+  FROM base
+  GROUP BY prebooking_id
+),
+latest_rows AS MATERIALIZED (
+  SELECT b.*
+  FROM base b
+  JOIN latest_period lp
+    ON lp.prebooking_id = b.prebooking_id
+   AND lp.state_period = b.state_period
+),
+current_pbit_rows AS (
+  SELECT * FROM latest_rows
+  WHERE state_order NOT IN (2, 3)
+),
+client_date AS (
+  SELECT client_id, scheduled_date, count(*) AS pbit_rows
+  FROM current_pbit_rows
+  GROUP BY 1, 2
+)
+SELECT (SELECT count(*) FROM base) AS source_rows,
+       (SELECT count(DISTINCT prebooking_id) FROM base) AS prebookings,
+       (SELECT count(*) FROM latest_rows) AS latest_rows,
+       (SELECT count(*) FROM latest_rows) -
+         (SELECT count(DISTINCT prebooking_id) FROM latest_rows) AS latest_tie_excess,
+       (SELECT count(*) FILTER (WHERE state_order IN (2, 3)) FROM latest_rows)
+         AS latest_rows_excluded_by_state,
+       (SELECT count(*) FROM current_pbit_rows) AS current_pbit_rows,
+       (SELECT count(*) FROM client_date) AS current_client_date_keys,
+       (SELECT count(*) FROM current_pbit_rows) -
+         (SELECT count(*) FROM client_date) AS client_date_duplicate_excess;
 
 ROLLBACK;

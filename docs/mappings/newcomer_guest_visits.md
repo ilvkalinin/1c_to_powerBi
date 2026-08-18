@@ -95,7 +95,7 @@ outcomes данного отчёта локальны.
 | `interaction_state`, `interaction_status` | `Reference224` + GUID status `Reference67.Fld830` | `text` | да | CONFIRMED current rule / V-08 |
 | `tour_kind` | completed: Закрыто/Выполнено; planned: Запланировано/Не выполнено | `text` | нет | CONFIRMED current rule / V-08 |
 | `performer_id` | `Reference67.Fld824 → Reference225.ID` | UNKNOWN | да | CONFIRMED source / V-08 |
-| `accuniq_booking_flag` | current `InfoRg7006`/`Document329` match client × `tour_date`, latest state excluding 2/3 | `boolean` | нет | CONFIRMED current rule / V-09 |
+| `accuniq_booking_flag` | current `InfoRg7006`/`Document329` match client × `tour_date`, latest state excluding 2/3 | `boolean` | нет | CONFIRMED current rule / NV-V09 physical path; 8 latest ties and 128 client-date duplicate excess preserved |
 | `purchase_contract_id`, `purchase_activation_date`, `purchase_lag_days` | первый подходящий контракт в окне `[tour_date, tour_date + 44]` | UNKNOWN, `date`, `integer` | да | CONFIRMED current rule / V-06 |
 | `sex`, `birth_date`, `age_at_tour`, `age_group` | из клиента; возраст и категория на дату тура, так как на событии нет абонемента | `text`, `date`, `integer`, `text` | да | CONFIRMED — решение пользователя 2026-07-30 |
 

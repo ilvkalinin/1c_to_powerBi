@@ -109,4 +109,85 @@ SELECT count(*) AS qualified_bridge_rows,
        count(*) FILTER (WHERE payment_type_id IS NULL) AS null_payment_type_rows
 FROM eligible_bridge;
 
+-- MF-V08, control month 2025-07-01. Expected: the three components reproduce
+-- the exact current DAX measure `ФактЗаявкиНакопленныйТрафик` on the current
+-- PBIT scope: tasks from `UNION(Задания 2024, Задания 2025)`, minus distinct
+-- cancelled tasks and the SUM of distinct contract clients per task. The final
+-- value must equal `all_tasks - cancelled_tasks - activated_contract_clients`;
+-- DAX returns that same final value for both traffic directions. No claim of
+-- equality with a Power BI numeric control is made because no such values were
+-- supplied.
+WITH params AS (
+  SELECT DATE '2025-07-01' AS month_start
+),
+report_tasks AS MATERIALIZED (
+  SELECT t._idrref AS task_id,
+         t._code::text AS task_code,
+         t._fld1193 AS created_at,
+         t._fld1192 AS closed_at,
+         t._fld1205rref AS stage_id
+  FROM public._reference106 t
+  JOIN public._reference89 f ON f._idrref = t._fld1191rref
+  LEFT JOIN public._reference132 club ON club._idrref = t._fld1195rref
+  LEFT JOIN public._reference201 reason ON reason._idrref = t._fld1201rref
+  WHERE f._description::text = 'Продажа клубной карты'
+    AND (club._description IS NULL
+         OR club._description::text <> 'Детский развивающий центр')
+    AND t._fld1193 > TIMESTAMP '2024-04-01'
+    AND t._fld1193 < TIMESTAMP '2026-01-01'
+    AND NOT t._marked
+    AND COALESCE(reason._description::text, '') NOT IN (
+      '(Не использовать) Найдено аналогичное задание',
+      'Найдено аналогичное задание'
+    )
+),
+window_tasks AS MATERIALIZED (
+  SELECT rt.*
+  FROM report_tasks rt
+  CROSS JOIN params p
+  WHERE rt.created_at::date >= (p.month_start - INTERVAL '2 months')::date
+    AND rt.created_at::date < p.month_start
+),
+cancelled AS MATERIALIZED (
+  SELECT DISTINCT wt.task_code
+  FROM window_tasks wt
+  JOIN public._reference264 stage ON stage._idrref = wt.stage_id
+  CROSS JOIN params p
+  WHERE stage._description::text IN ('Отказ', 'Отмена')
+    AND wt.closed_at::date < p.month_start
+),
+activated_contract_clients_by_task AS MATERIALIZED (
+  SELECT wt.task_code,
+         count(DISTINCT client._code) AS distinct_clients
+  FROM window_tasks wt
+  JOIN public._inforg6798 r ON r._fld6799rref = wt.task_id
+  JOIN public._reference59 c ON c._idrref = r._fld6800_rrref
+  LEFT JOIN public._reference141x1 client ON client._idrref = c._fld681rref
+  CROSS JOIN params p
+  WHERE r._fld6802
+    AND c._fld696rref <> decode('9b656ee141a764e44de79e83cd30c1b2', 'hex')
+    AND c._fld699rref <> decode('96976725cebf51f7461429d74d3f6cbe', 'hex')
+    AND c._fld670 IS NOT NULL
+    AND c._fld670::date < p.month_start
+  GROUP BY wt.task_code
+),
+components AS (
+  SELECT
+    (SELECT count(DISTINCT task_code) FROM window_tasks) AS all_tasks,
+    (SELECT count(*) FROM cancelled) AS cancelled_tasks,
+    (SELECT COALESCE(sum(distinct_clients), 0)
+     FROM activated_contract_clients_by_task) AS activated_contract_clients
+)
+SELECT all_tasks,
+       cancelled_tasks,
+       activated_contract_clients,
+       all_tasks - cancelled_tasks - activated_contract_clients
+         AS current_dax_final_value,
+       (all_tasks - cancelled_tasks - activated_contract_clients)
+         = (all_tasks - cancelled_tasks - activated_contract_clients)
+         AS same_for_inbound_and_outbound,
+       (SELECT count(*) FROM activated_contract_clients_by_task)
+         AS tasks_with_pre_month_contract_clients
+FROM components;
+
 ROLLBACK;

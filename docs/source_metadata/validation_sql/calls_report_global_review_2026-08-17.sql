@@ -217,4 +217,51 @@ WHERE _fld831rref = decode('9db9fdbf6bd80f2044eb2835157b3bc8', 'hex')
   AND _fld823 >= DATE '2026-01-01'
   AND _fld823 < DATE '2026-08-01';
 
+-- CR-V08, control month 2026-07. Expected: reproduce the current PBIT
+-- `Посещения` denominator exactly: COUNT(non-null contract reference),
+-- grouped by day, client code, access club and actual visit club. This is not
+-- a distinct-client metric. The query observes whether access club creates
+-- several output rows for one day × client × visit-club; it must not introduce
+-- a new deduplication rule. No Power BI numeric control has been supplied.
+WITH source_rows AS MATERIALIZED (
+  SELECT a._period::date AS visit_date,
+         client._code::text AS client_code,
+         main_club._description::text AS access_club,
+         visit_club._description::text AS visit_club,
+         a._fld7578_rrref AS contract_id
+  FROM public._accumrg7575 a
+  JOIN public._document325 doc ON doc._idrref = a._recorderrref
+  JOIN public._reference141x1 client ON client._idrref = doc._fld4171rref
+  LEFT JOIN public._reference59 contract ON contract._idrref = a._fld7578_rrref
+  LEFT JOIN public._reference132 main_club ON main_club._idrref = contract._fld687rref
+  LEFT JOIN public._reference132 visit_club ON visit_club._idrref = doc._fld4167rref
+  WHERE doc._fld4164rref = decode('9a5a4c90d2b1aede4b91dcd1abe84c43', 'hex')
+    AND a._period >= TIMESTAMP '2026-07-01'
+    AND a._period < TIMESTAMP '2026-08-01'
+    AND client._fld1532rref = decode('9e8eaa7b2e77c19f4a1c22a8d9c3efa1', 'hex')
+    AND client._code IS NOT NULL
+),
+pbit_groups AS MATERIALIZED (
+  SELECT visit_date, client_code, access_club, visit_club,
+         count(contract_id) AS visit_count
+  FROM source_rows
+  GROUP BY 1, 2, 3, 4
+),
+business_visit_keys AS (
+  SELECT DISTINCT visit_date, client_code, visit_club
+  FROM pbit_groups
+)
+SELECT (SELECT count(*) FROM source_rows) AS source_rows,
+       (SELECT count(*) FILTER (WHERE contract_id IS NULL) FROM source_rows)
+         AS source_rows_without_contract,
+       (SELECT count(*) FROM pbit_groups) AS pbit_output_rows,
+       (SELECT COALESCE(sum(visit_count), 0) FROM pbit_groups)
+         AS pbit_visit_denominator,
+       (SELECT count(*) FILTER (WHERE visit_count = 0) FROM pbit_groups)
+         AS zero_count_output_rows,
+       (SELECT count(*) FROM business_visit_keys) AS day_client_visit_club_keys,
+       (SELECT count(*) FROM pbit_groups) -
+         (SELECT count(*) FROM business_visit_keys) AS access_club_split_excess
+;
+
 ROLLBACK;
