@@ -1,6 +1,6 @@
 # Точный checklist до полного review global gate — 2026-08-18
 
-Статус: `DOCUMENTARY_CHECKLIST / NO_SOURCE_QUERIES_RUN`.
+Статус: `DOCUMENTARY_CHECKLIST / SOURCE CONTROLS PARTIALLY EXECUTED 2026-08-18`.
 
 ## Назначение и граница
 
@@ -19,15 +19,15 @@ SQL/M/DAX. Контроль считается закрытым только п�
 
 | Отчёт | Оставшиеся control IDs | Что именно должно быть доказано без изменения правила |
 |---|---|---|
-| Отчёт по поступлениям | MR-V03, MR-V04—V10, MR-V11, MR-V12, MR-V14—V15 | states/sign, взаимное исключение 14 recorder-веток, сохранение count/sum после join, predecessor ties, freeze/classification, пять KPI с уже подтверждённой единицей `contract × payment_period`, роли дат, воспроизводимый rerun и SLA. `SV-096` уже закрыл только спор о «дубликатах ежемесячного платежа». |
+| Отчёт по поступлениям | MR-V03, MR-V05—V10, MR-V11, MR-V12, MR-V14—V15 | MR-V04 подтвердил техническую взаимоисключаемость 14 current document-types: 112 973 движения распознаны ровно одним типом, 0 — несколькими; 870 347 не распознаны и остаются исключёнными current M. Остаются states/sign, сохранение count/sum после join, predecessor ties, freeze/classification, пять KPI с уже подтверждённой единицей `contract × payment_period`, роли дат, воспроизводимый rerun и SLA. |
 | Продажа детских пакетов | CP-V03—V06 из SV-085/095 | technical признак и знак возврата, states чека и регистра, допустимость current receipt filter и контрольные значения. Правило для 38 строк (`'0'`, `'0'`, `0`) повторно не проверяется как выбор метода. |
-| Новички и гостевые визиты | NV-V02, NV-V05, NV-V06, NV-V09 | отсутствие размножения `AccumRg7575 → Document325/Reference59`; 12 утверждённых ACCUNIQ-кодов в `Reference163`, states и `Fld7585`; границы outcome 0/44/45; latest state `InfoRg7006` для booking attribution. |
-| Отчёт по обращениям | CR-V08, CR-V11 | business visit grain без размножения contract join; changes/deletions, rerun и SLA. `SV-098` и CR-V05D—G уже закрыли feedback core, Jivo, статусы и funnel ID. |
+| Новички и гостевые визиты | NV-V02, NV-V06 | NV-V05 подтвердил 12 ACCUNIQ-кодов, `Fld7585`, 18 602 движений и current groups; NV-V09 подтвердил latest/state path, но сохранил 8 ties и 128 client-date duplicate excess. Остаются отсутствие размножения `AccumRg7575 → Document325/Reference59` и границы outcome 0/44/45; полный source predicate подходящего абонемента отсутствует. |
+| Отчёт по обращениям | CR-V11 | CR-V08 подтвердил exact PBIT-знаменатель посещений: `COUNT(contract_ref) = 307 911` за июль 2026; три access-club split-строки сохраняются без дедупликации. Остаются changes/deletions, rerun и SLA. |
 | Посещаемость клиентов с долгами | DV-V05, DV-V06, DV-V07 | as-of сверка минимум на двух датах/клубах, физически подтверждённая классификация current visit/service scope без подстановки нового фильтра, end-to-end refresh SLA. `SV-099` уже закрыл physical movement key и document branches. |
 | Работа с посещаемостью | WA-V06, historical часть WA-V08 | дневное покрытие/численность `client_base_daily` и измеренный годовой refresh SLA. Внешние Excel-наборы шкафчиков и мощности в этот checklist не входят. |
 | Карта администратора | нет незакрытого source control | `SV-100`/AC-V05 закрыли event key, success и card→club. Сверка с фактическими цифрами Power BI невозможна: таких цифр в переданных материалах нет. |
-| Маркетинговая воронка | MF-V08, MF-V10 | exact DAX накопленного трафика на согласованном месяце; rerun, changes и SLA. `SV-101` и MF-V04/V06/V07/V07C не повторяются. |
-| Членство для правления | наследуемые MR source controls | source states/keys из общего домена поступлений и физическая воспроизводимость ролей дат/non-additive расчётов. `MB-V01—V08` — будущая проверка результата, когда появится объект и контрольные значения, а не доступный сейчас source control. |
+| Маркетинговая воронка | MF-V10 | MF-V08 воспроизвёл exact DAX накопленного трафика на 2025-07-01: `66 404 − 27 319 − 15 221 = 23 864`; остаются rerun, changes и SLA. |
+| Членство для правления | наследуемые MR source controls | SV-105 измерил states общих движений, SV-107 — техническую взаимоисключаемость current document-types. Остаются документно-зависимые sign/state rules, source roles дат и non-additive inputs. `MB-V01—V08` — будущая проверка результата, когда появится объект и контрольные значения, а не доступный сейчас source control. |
 
 «Карта администратора» исключается из оставшегося source-side перечня:
 `SV-100`/AC-V05 уже закрыли её единственный технический вопрос.
@@ -45,6 +45,9 @@ SQL/M/DAX. Контроль считается закрытым только п�
   funnel `Продажа клип карты Рецепция` уже определены текущими материалами.
 - Маркетинговая воронка: PBIT-алгоритм, task-code scope, bridge cardinality,
   payment type и наблюдаемые source states уже доказаны/сохранены.
+- Текущий read-only пакет 2026-08-18 дополнительно закрыл NV-V05/NV-V09,
+  CR-V08 и MF-V08; MR-V04, как и SV-105 по states, дали evidence текущей
+  границы без изменения current M.
 
 ## Граница фактических данных Power BI
 
