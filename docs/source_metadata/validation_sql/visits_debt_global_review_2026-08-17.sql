@@ -120,6 +120,66 @@ SELECT (SELECT count(*) FROM legacy_service) AS legacy_service_rows,
        LEFT JOIN legacy_service l USING (_recordertref, _recorderrref, _lineno)
         WHERE l._recorderrref IS NULL) AS operation_only_rows;
 
+-- DV-V05A, control date 2026-07-15. Expected: reproduce the current DAX
+-- as-of algebra independently of the visitor cohort: beginning of day uses
+-- movements before D, end of day uses movements through D, and an open debt
+-- has a positive sum of the four documented RecordKind × quantity classes.
+-- This cannot validate the final report KPI until DV-V06 has a stable visit
+-- cohort; it only validates the source-side as-of component without changing
+-- its current calculation.
+WITH params AS (SELECT DATE '2026-07-15' AS control_date),
+movements AS MATERIALIZED (
+  SELECT _period::date AS movement_date,
+         _fld7511rref AS client_id,
+         _fld7512_rrref AS prebooking_id,
+         _recordkind AS record_kind,
+         _fld7516 AS quantity_delta,
+         _fld7517 AS amount_delta
+  FROM public._accumrg7509
+  WHERE _period >= DATE '2026-01-01' AND _period < DATE '2026-07-16'
+),
+as_of AS (
+  SELECT m.client_id, m.prebooking_id,
+         sum(m.amount_delta) FILTER (WHERE m.movement_date < p.control_date)
+           AS start_amount,
+         sum(m.amount_delta) FILTER (WHERE m.movement_date <= p.control_date)
+           AS end_amount,
+         sum(CASE WHEN (m.record_kind = 0 AND m.quantity_delta = 1)
+                       OR (m.record_kind = 1 AND m.quantity_delta = 1)
+                       OR (m.record_kind = 1 AND m.quantity_delta = -1)
+                       OR (m.record_kind = 0 AND m.quantity_delta = -1)
+                  THEN m.quantity_delta ELSE 0 END)
+           FILTER (WHERE m.movement_date < p.control_date) AS start_unconfirmed,
+         sum(CASE WHEN (m.record_kind = 0 AND m.quantity_delta = 1)
+                       OR (m.record_kind = 1 AND m.quantity_delta = 1)
+                       OR (m.record_kind = 1 AND m.quantity_delta = -1)
+                       OR (m.record_kind = 0 AND m.quantity_delta = -1)
+                  THEN m.quantity_delta ELSE 0 END)
+           FILTER (WHERE m.movement_date <= p.control_date) AS end_unconfirmed
+  FROM movements m CROSS JOIN params p
+  GROUP BY 1, 2
+)
+SELECT count(*) FILTER (WHERE start_unconfirmed > 0) AS open_pairs_start_day,
+       count(*) FILTER (WHERE end_unconfirmed > 0) AS open_pairs_end_day,
+       COALESCE(sum(start_amount) FILTER (WHERE start_unconfirmed > 0), 0)
+         AS debt_amount_start_day,
+       COALESCE(sum(end_amount) FILTER (WHERE end_unconfirmed > 0), 0)
+         AS debt_amount_end_day,
+       count(*) FILTER (WHERE start_unconfirmed > 0 AND end_unconfirmed <= 0)
+         AS closed_on_control_day,
+       count(*) FILTER (WHERE start_unconfirmed <= 0 AND end_unconfirmed > 0)
+         AS opened_on_control_day
+FROM as_of;
+
+-- DV-V07A. Expected: measure the narrow source-side as-of component on the
+-- same control date. This is a query-plan baseline only; it does not claim
+-- full mart or Power BI refresh SLA and does not resolve the blocked visit
+-- cohort classification.
+EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON)
+SELECT count(*)
+FROM public._accumrg7509
+WHERE _period >= DATE '2026-01-01' AND _period < DATE '2026-07-16';
+
 -- DV-V07, executed 2026-08-18. Performance baseline for the current legacy
 -- cohort only; it does not claim end-to-end refresh SLA or endorse the text
 -- predicate as a future classification rule.
