@@ -184,21 +184,22 @@ CR-V05E подтвердил current Jivo-exclusion на bounded июле 2026: 
 rows, из них 919 с `Jivo` в имени; `NULL` имён = 0. Поэтому существующее
 исключение материально и сохраняется по BR-018. Полный годовой text scan был
 отменён по `statement_timeout`, поэтому число 919 не обобщается на историю;
-speed/quality и status GUID scopes остаются `VALIDATION_PENDING`.
+speed/quality scope остаётся `VALIDATION_PENDING`.
 
 CR-V05F: в том же bounded июле у 6 326 feedback rows три непустых физических
-значения `Fld830`, `NULL` = 0. Это согласуется со структурой трёх current
-категорий статуса, но не связывает их ID с именами «Выполнено», «Не выполнено»
-и «Отменено»; label mapping остаётся `VALIDATION_PENDING`.
+значения `Fld830`, `NULL` = 0. Сохранённый current SQL задаёт их exact mapping:
+`b78f16cfde0c1e1f4f7c0ae8d942393d` = «Выполнено»,
+`83b62b0bd3908a65448b72ca1ec17e94` = «Не выполнено» и
+`aef6c17befe0705047f834208813539a` = «Отменено».
 
 CR-V05G выполнил тот же control как семь независимых месячных read-only
 запросов для полного закрытого периода 2026-01—07. Результаты: январь
 11 892 / 2 184 Jivo, февраль 9 600 / 1 752, март 10 748 / 1 669, апрель
 5 916 / 852, май 5 276 / 761, июнь 5 875 / 767, июль 6 326 / 919. Итого
 55 633 feedback rows, 8 904 Jivo; в каждом месяце три непустых `Fld830` и
-`NULL` = 0. Это `VALIDATED` для physical Jivo scope и структуры статусов
-закрытых месяцев 2026-01—07; соответствие трёх ID пользовательским именам и
-speed/quality scope остаются `VALIDATION_PENDING`.
+`NULL` = 0. Вместе с exact mapping из current SQL это `VALIDATED` для physical
+Jivo scope и трёх статусов закрытых месяцев 2026-01—07; speed/quality scope
+остаётся `VALIDATION_PENDING`.
 
 ## SV-099 — «Посещаемость клиентов с долгами»: movement and branch controls
 

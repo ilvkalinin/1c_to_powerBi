@@ -92,7 +92,7 @@ blocker: после documentary audit глобальный gate остаётся
 | `mart.employee_presence_day` | `VALIDATION_REQUIRED` | Однозначная СКУД→сотрудник связь и отсутствие размножения часов. |
 | `mart.crm_interaction` | `VALIDATION_REQUIRED` | States, full population и идентичность interaction key. |
 | `mart.v_sales_interaction` | `VALIDATION_REQUIRED` | Phone-row semantics и кадровый отбор. |
-| `mart.v_feedback_interaction` | `VALIDATION_REQUIRED` | Bounded HTML/follow-up/cardinality и base funnel scope подтверждены BR-023; остаются speed/quality/Jivo/state scopes, visit denominator, reconciliation и SLA. |
+| `mart.v_feedback_interaction` | `VALIDATION_REQUIRED` | Bounded HTML/follow-up/cardinality и base funnel scope подтверждены BR-023; Jivo и три статуса `Fld830` подтверждены current SQL + CR-V05F/G. Остаются speed/quality scope, visit denominator, reconciliation и SLA. |
 | `mart.v_guest_tour` | `VALIDATION_REQUIRED` | Filter/state и 44-day outcome controls. |
 | `mart.new_first_visit` | `VALIDATION_REQUIRED` | First-rank tie-break и PII-detail grain. |
 | `mart.guest_visit_conversion` | `BLOCKED` | Точный PBI service/rank artifact отсутствует; статус/конверсия не выбираются эвристикой. |

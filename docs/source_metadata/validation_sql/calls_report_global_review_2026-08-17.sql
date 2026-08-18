@@ -200,4 +200,21 @@ WHERE _fld831rref = decode('9db9fdbf6bd80f2044eb2835157b3bc8', 'hex')
   AND _fld823 >= :start_date
   AND _fld823 < :end_date;
 
+-- CR-V05H. Exact report-status mapping is preserved from current SQL. This
+-- control is deliberately narrow and may be rerun only when a new snapshot is
+-- needed; it never derives names from the unavailable enum relation.
+SELECT count(*) AS feedback_rows,
+       count(*) FILTER (WHERE _fld830rref = decode('b78f16cfde0c1e1f4f7c0ae8d942393d', 'hex')) AS completed_rows,
+       count(*) FILTER (WHERE _fld830rref = decode('83b62b0bd3908a65448b72ca1ec17e94', 'hex')) AS not_completed_rows,
+       count(*) FILTER (WHERE _fld830rref = decode('aef6c17befe0705047f834208813539a', 'hex')) AS cancelled_rows,
+       count(*) FILTER (WHERE _fld830rref IS NULL OR _fld830rref NOT IN (
+         decode('b78f16cfde0c1e1f4f7c0ae8d942393d', 'hex'),
+         decode('83b62b0bd3908a65448b72ca1ec17e94', 'hex'),
+         decode('aef6c17befe0705047f834208813539a', 'hex')
+       )) AS unmapped_or_null_rows
+FROM public._reference67
+WHERE _fld831rref = decode('9db9fdbf6bd80f2044eb2835157b3bc8', 'hex')
+  AND _fld823 >= DATE '2026-01-01'
+  AND _fld823 < DATE '2026-08-01';
+
 ROLLBACK;

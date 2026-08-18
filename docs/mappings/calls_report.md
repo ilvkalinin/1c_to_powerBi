@@ -73,7 +73,7 @@ filter использует этот ID, а не текст. Старое нап
 | `club_name` | `Reference132.Description` | `text` | да | interaction | CONFIRMED need | V-04 |
 | `funnel_id` / `funnel_name` | `Reference106.Fld1191 → Reference89.Description`; для «Продажа клип-карт Рецепция» filter ID = `99d7928e75e3805f11f0310981642c71` | `UNKNOWN` / `text` | да | interaction | CONFIRMED — BR-023 / CR-V05D | V-05 remaining scopes |
 | `department_id` / `department_name` | `Reference106.Fld8642 → Reference178.Description` | `UNKNOWN` / `text` | да | interaction | CONFIRMED current SQL | V-04 |
-| `status_id` / `status_name` | `Reference67.Fld830`; current GUID mapping: выполнено / не выполнено / отменено | `UNKNOWN` / `text` | да | interaction | CONFIRMED current SQL | V-05 all values |
+| `status_id` / `status_name` | `Reference67.Fld830`: `b78f16cfde0c1e1f4f7c0ae8d942393d` → «Выполнено»; `83b62b0bd3908a65448b72ca1ec17e94` → «Не выполнено»; `aef6c17befe0705047f834208813539a` → «Отменено» | `UNKNOWN` / `text` | да | interaction | VALIDATED current SQL + CR-V05F/G structure | exact values |
 | `state_id` / `state_name` | `Reference67.Fld829 → Reference224.Description` | `UNKNOWN` / `text` | да | interaction | CONFIRMED current SQL | V-04 |
 | `executor_id` / `executor_name` | `Reference67.Fld824 → Reference225.Description` | `UNKNOWN` / `text` | да | interaction | CONFIRMED current SQL | V-04 |
 | `position_id` / `position_name` | `Reference106.Fld1199 → Reference101.Description` | `UNKNOWN` / `text` | да | interaction | CONFIRMED current SQL | V-04 |
