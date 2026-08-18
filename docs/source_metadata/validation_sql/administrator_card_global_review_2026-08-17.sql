@@ -48,4 +48,30 @@ SELECT (SELECT count(*) FROM selected_events) AS selected_events,
        (SELECT count(*) FROM card_clubs WHERE derived_clubs_per_card <> 1) AS cards_with_nonunique_derived_club,
        (SELECT coalesce(sum(usage_count), 0) FROM daily) AS successful_events_after_current_rule;
 
+-- AC-V05. Expected: each of the 12 current card codes resolves through the
+-- existing last-word label to exactly one physical club. This validates the
+-- current mapping to a canonical source ID; it does not change the card list
+-- or rewrite the current Power Query rule.
+WITH requested_cards(card_code) AS (
+  VALUES ('И00134834'), ('001365180'), ('001365168'), ('001365170'),
+         ('001365171'), ('001365172'), ('001365174'), ('001365175'),
+         ('001365177'), ('001365178'), ('001365167'), ('001365166')
+), card_labels AS (
+  SELECT q.card_code,
+         nullif(regexp_replace(trim(r._description::text), '^.*\\s+', ''), '')
+           AS derived_club_label
+  FROM requested_cards q
+  LEFT JOIN public._reference141x1 r ON r._code::text = q.card_code
+), label_matches AS (
+  SELECT l.card_code, count(c._idrref) AS exact_club_matches
+  FROM card_labels l
+  LEFT JOIN public._reference132 c ON c._description::text = l.derived_club_label
+  GROUP BY l.card_code
+)
+SELECT count(*) AS requested_cards,
+       count(*) FILTER (WHERE exact_club_matches = 1) AS cards_with_one_exact_club,
+       count(*) FILTER (WHERE exact_club_matches = 0) AS cards_without_exact_club,
+       count(*) FILTER (WHERE exact_club_matches > 1) AS cards_with_multiple_exact_clubs
+FROM label_matches;
+
 ROLLBACK;

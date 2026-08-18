@@ -58,7 +58,7 @@ blocker: после documentary audit глобальный gate остаётся
 | 22 | Посещаемость клиентов с долгами | `VALIDATION_REQUIRED` | Ключ движения, client × prebooking и current DAX treatment quantity `other` подтверждены; остаются стабильная классификация посещения вместо имени, as-of controls и SLA. | `mart.unconfirmed_service_debt_movement`, `mart.visit_client_day`; SV-089/099; ADR-0021 |
 | 23 | Посещения Пушкинский | `VALIDATION_REQUIRED` | Snapshot, категории и исключение ДРЦ должны быть подтверждены на полном scope. | `mart.visit_client_day`, `mart.club_day_metrics`; SV-071; ADR-0003 |
 | 24 | Работа с посещаемостью | `VALIDATION_REQUIRED` | Не сформирован daily client-base denominator; годовой source query превысил timeout, SLA не измерен; шкафчики остаются вне PostgreSQL. | `mart.club_attendance_hourly`, `mart.client_base_daily`; SV-065/067; ADR-0022 |
-| 25 | Карта администратора | `VALIDATION_REQUIRED` | Gymmy key/success и bounded cards/directions подтверждены; остаются канонический card→club mapping и независимая дневная сверка. Внешний журнал не анализируется. | `mart.administrator_card_gymmy_daily`; SV-002/100; ADR-0023 |
+| 25 | Карта администратора | `VALIDATION_REQUIRED` | Gymmy key/success, cards/directions и канонический card→club mapping подтверждены; остаётся независимая дневная сверка. Внешний журнал не анализируется. | `mart.administrator_card_gymmy_daily`; SV-002/100; ADR-0023 |
 | 26 | Титульный лист | `OPEN` | Внутренние source controls пройдены, но свод требует готовых shared dependencies; внешние Excel-ветви остаются в Power BI. | `mart.revenue_group_summary_daily`, `mart.client_base_daily`, `mart.club_attendance_hourly`; SV-062—064; ADR-0024 |
 | 27 | Маркетинговая воронка | `VALIDATION_REQUIRED` | Code уникален в report funnel; CRM joins не размножают task, states наблюдены. Остаются накопленный трафик, Power BI reconciliation и rerun/SLA; BR-020 сохраняет каждую qualified связь. | `mart.fitness_leads_funnel_task`; SV-080/101; ADR-0011 |
 | 28 | Клиентская база | `DECISION_REQUIRED` | Package/visit/state controls, control values и физическое представление `NULL/Не определено`; retention имеет отдельный grain. | `mart.client_base_snapshot`, `mart.client_base_retention`, `mart.client_base_daily`; SV-069; ADR-0002 |
@@ -105,7 +105,7 @@ blocker: после documentary audit глобальный gate остаётся
 | `mart.unconfirmed_service_debt_movement` | `VALIDATION_REQUIRED` | Key, client × prebooking и quantity `other` воспроизводят current DAX; остаются visit classification, as-of reconciliation и SLA. |
 | `mart.group_lesson` | `IMPLEMENTED` | Собственный admission закрыт; не заменяет правила полного расписания. |
 | `mart.lesson_room_slot_5m` | `IMPLEMENTED` | Собственный admission закрыт; BR-021 и два nonpositive source controls зафиксированы. |
-| `mart.administrator_card_gymmy_daily` | `VALIDATION_REQUIRED` | Gymmy key/success validated bounded; canonical card→club mapping и independent daily count остаются. |
+| `mart.administrator_card_gymmy_daily` | `VALIDATION_REQUIRED` | Gymmy key/success и canonical card→club mapping validated bounded; independent daily count остаётся. |
 | `mart.v_administrator_bookings_daily` | `VALIDATION_REQUIRED` | Booking→movement cardinality/sum и кадровая атрибуция. |
 | `mart.v_reception_revenue_daily` | `VALIDATION_REQUIRED` | Seller attribution и report-view grain. |
 | `mart.revenue_group_summary_daily` | `VALIDATION_REQUIRED` | Daily article key и validated internal branches. |

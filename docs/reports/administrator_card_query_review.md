@@ -57,8 +57,10 @@ SV-002 дополнительно подтвердил наличие `public._i
 
 SV-100 выполнил bounded control Gymmy за июль 2026: 9 082 события по
 подтверждённым 12 картам и двум направлениям, без `false`/`NULL` успеха.
-Unique source index подтверждает physical event key. Внешний журнал не
-открывался; last-word club остаётся text observation, а не canonical club key.
+Unique source index подтверждает physical event key. AC-V05 дополнительно
+подтвердил: у всех 12 карт current last-word label имеет ровно один exact match
+в `Reference132`, поэтому source mapping в канонический клуб однозначен.
+Внешний журнал не открывался.
 
 ## Критические наблюдения
 
