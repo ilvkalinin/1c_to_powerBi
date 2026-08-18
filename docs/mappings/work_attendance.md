@@ -1,6 +1,6 @@
 # Source-to-target mapping: «Работа с посещаемостью»
 
-Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0022 / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-065, SV-067 / IMPLEMENTATION DEFERRED`.
+Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0022 / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-065, SV-067, SV-111 / IMPLEMENTATION DEFERRED`.
 
 Целевой проектный объект: `mart.club_attendance_hourly`. Тип — компактная
 физическая таблица по ADR-0022; реализация отложена. Production SQL не создаётся.
@@ -80,7 +80,7 @@ SV-065/SV-067. Sentinel-дата рождения `0001-01-01 00:00:00` тепе
 
 | Статус | Элемент | Риск / причина | Проверка / следующее действие |
 |---|---|---|---|
-| VALIDATION_PENDING | `mart.client_base_daily` | подтвердить ежедневное покрытие, выбор `club/network`, совместимость календаря и измерений с метрикой посещений | WA-V06 |
+| PARTIALLY VALIDATED | `mart.client_base_daily` | SV-111 подтвердил source-side cohort на 28 последовательных датах в scope `club` и `network`, а также входы возраста/пола на 2026-07-01; ещё не подтверждены полный период и физический контракт | WA-V06 / SV-111 |
 | CONFIRMED | возрастной срез `% посещений от КБ` | sentinel `0001-01-01 00:00:00` преобразуется в `NULL`; возрастная группа остаётся пустой, а не `85+` | BR-019, решение пользователя 2026-08-11; WA-V04 / SV-065 |
 | NOT_APPLICABLE | `Шкафчики` и мощности | Excel-наборы остаются в Power BI | WA-V06 не выполняется для PostgreSQL |
 | CONFIRMED | состояния документов/регистра | на текущей M-когорте 2026-01—07 нет неактивных, непроведённых или помеченных строк | SV-065; не добавлять новый source-filter |
