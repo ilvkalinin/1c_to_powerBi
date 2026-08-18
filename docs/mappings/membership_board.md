@@ -1,7 +1,7 @@
 # Source-to-target mapping: «Отчёт членство для правления»
 
 Статус:
-`BUSINESS MAPPING COMPLETE / REUSE CONFIRMED / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-083 / IMPLEMENTATION DEFERRED`.
+`BUSINESS MAPPING COMPLETE / REUSE CONFIRMED / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-083, SV-105, SV-107, SV-112 / IMPLEMENTATION DEFERRED`.
 
 ## Гранулярность и ключи
 
@@ -28,6 +28,11 @@ SV-107 подтвердил техническую однозначность 14
 112 973 движений авансов 2026; 870 347 остальных движений не распознаны этим
 списком и остаются исключённой частью current scope. Новые document-types и
 sign rules из этого не выводятся.
+
+SV-112 воспроизвёл current-M state/sign CASE на 98 127 включаемых
+распознанных движениях 2026 без новых фильтров. ПКО с `RecordKind=1` не
+встретился в истории 2025–2026; его нулевое правило сохранено как current
+artifact, а не выдано за физически наблюдённый факт.
 
 ## Повторно используемые целевые поля
 

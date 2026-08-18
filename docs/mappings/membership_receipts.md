@@ -1,7 +1,7 @@
 # Source-to-target mapping: поступления по членству
 
 Статус:
-`BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0017 / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-083; Stage 3 deferred`.
+`BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0017 / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-083, SV-105, SV-107, SV-112; Stage 3 deferred`.
 
 Этот mapping фиксирует текущую логику отчёта и не утверждает физический объект
 или SQL. На `STAGE_1_LOCAL_ANALYSIS` DDL/DML и серверные проверки запрещены.
@@ -45,7 +45,7 @@ SV-094 корректно зафиксировал множественност�
 | `movement_kind` | приход/расход регистра | registers | `RecordKind` | текущий код; значение проверяется | `smallint` candidate | нет | движение | CONFIRMED source / semantics pending | M | MR-V03 |
 | `recorder_type` | передача/перевод/возврат/карта/чек/безнал/ПКО/РКО и т. п. | 14 document joins | наличие документа | текущий приоритет M | `text` | да | движение | CONFIRMED current M / exclusivity pending | M | MR-V04 |
 | `amount_raw` | исходная сумма | `AccumRg7370/7739` | `Fld7377/Fld7749` | без знакового CASE | `numeric` | нет | движение | CONFIRMED source | M | MR-V03 |
-| `amount_signed` | сумма после правила документа | `AccumRg7370` | `RecordKind`, recorder type, `Fld7377` | текущий sign CASE; ПКО → 0 | `numeric` | нет | движение | CONFIRMED current M / states pending | M | MR-V03/MR-V04 |
+| `amount_signed` | сумма после правила документа | `AccumRg7370` | `RecordKind`, recorder type, `Fld7377` | текущий sign CASE; ПКО → 0 | `numeric` | нет | движение | CONFIRMED current M / partial physical state-sign validation; ПКО `RecordKind=1` не встречен | M, SV-112 | MR-V03/MR-V04 |
 | `co_access_amount` | сумма со-доступа, вычитаемая из аванса | `AccumRg7739` | `Fld7749` | текстовая классификация со-доступа, aggregate contract+date | `numeric` | да (`0`) | contract × date | CONFIRMED current DAX / cardinality pending | M/DAX | MR-V07 |
 | `receipt_amount_net` | контрактное поступление без со-доступа | вычисление | `amount_signed`, `co_access_amount` | `amount_signed - co_access_amount` | `numeric` | нет | движение | CONFIRMED current DAX | `_Сумма итог2` | branch reconciliation |
 | `service_group` | membership-категория услуги | `Reference163` | `Description` | только со-доступ, полотенца, гостевой визит, заморозка, переоформление, адаптация ДРЦ, вход для детей | `text` | да | движение услуги | CONFIRMED target scope | M + user decision 2026-07-31 | MR-V10/MR-V11 |

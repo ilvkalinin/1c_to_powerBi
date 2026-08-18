@@ -1,7 +1,7 @@
 # Query review: «Отчёт членство для правления»
 
 Статус:
-`LOCAL QUERY/MODEL REVIEW COMPLETE / SHARED SOURCE TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-083 / STAGE 3 BOARD RECONCILIATION DEFERRED`.
+`LOCAL QUERY/MODEL REVIEW COMPLETE / SHARED SOURCE TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-083, SV-105, SV-107, SV-112 / STAGE 3 BOARD RECONCILIATION DEFERRED`.
 
 Разобраны DOCX (16 отрендеренных страниц) и PBIT: 81 таблица, 88 связей,
 22 M-expression, 263 меры, 310 calculated columns и 29 видимых страниц.
@@ -33,6 +33,12 @@ SV-105 выполнил full-year source observation shared domain: в 2026 ес
 46 416 неактивных движений контрактных авансов, а у membership-услуг
 неактивных строк в этом срезе нет. Это не даёт права менять state/sign filter:
 его допустимость по-прежнему определяется current M через документ-регистратор.
+
+SV-112 подтвердил для board-reused contract-advance branch current-M знак на
+98 127 включаемых распознанных движениях 2026: все они проведены и не
+помечены на удаление; правило не расширено новым state/filter. Физическая
+ветка `ПКО × RecordKind=1` не встретилась в 2025–2026 и остаётся preserved,
+но не наблюдённой.
 
 ## Board-специфичные объекты
 

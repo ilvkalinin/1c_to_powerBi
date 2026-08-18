@@ -1,13 +1,14 @@
 # Query review: «Отчёт по поступлениям»
 
 Статус:
-`LOCAL QUERY/MODEL REVIEW COMPLETE / TECHNICAL VALIDATION DEFERRED / NO DATABASE EXECUTION`.
+`LOCAL QUERY/MODEL REVIEW COMPLETE / SHARED SOURCE TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-105, SV-107, SV-112 / STAGE 3 DEFERRED`.
 
 Проверены два пользовательских DOCX: бизнес-описание, 17 встроенных
 изображений, 1725 абзацев Power Query/SQL/DAX и шесть экранов Power BI
 relationships. Дополнительно разобран PBIT: полный `DataModelSchema`,
-report layout, 108 таблиц, 121 связь, M/DAX и 30 страниц. Подключения, SQL и
-`EXPLAIN` не выполнялись.
+report layout, 108 таблиц, 121 связь, M/DAX и 30 страниц. Локальный разбор не
+выполнял подключения, SQL или `EXPLAIN`; последующие read-only source controls
+зафиксированы в SV-105, SV-107 и SV-112.
 
 ## Инвентаризация Power Query / SQL
 
@@ -57,15 +58,21 @@ PBIT содержит полные определения таблиц 2023–20
   `payment_period` (`Текст после разделителя`);
 - после широкой агрегации применяется `Table.Distinct`.
 
-`VALIDATION_PENDING`: реальное значение `RecordKind`, `_Active`, статусы всех
-документов, уникальность `(Recorder, LineNo)`, непересечение 14 joins и
-сохранение суммы после каждого join.
+`VALIDATION_PENDING`: уникальность `(Recorder, LineNo)`, сохранение суммы
+после каждого join и ветви, не представленные в текущем historical scope.
 
 SV-107 на 2026 подтвердил, что 112 973 движения авансов распознаются ровно
 одним из 14 document-types current M, пересечений типов нет. Ещё 870 347
 движений этим списком не распознаны и текущий M их исключает до расчёта. Это
 граница текущего scope, не основание подбирать дополнительные документы или
 назначать им знак.
+
+SV-112 воспроизвёл current-M CASE для 98 127 включаемых распознанных движений
+2026: 12 типов, без непроведённых и помеченных на удаление строк. Сырая сумма
+1 566 213 645,10 после текущего правила знака даёт 1 302 893 331,02; новых
+state/sign filters не добавлено. ПКО в 2025–2026 имеет 14 721 строку только с
+`RecordKind=0`, поэтому его ветка «`RecordKind=1` → 0» сохранена, но остаётся
+не наблюдённой на физической строке.
 
 ## DAX пяти KPI
 
