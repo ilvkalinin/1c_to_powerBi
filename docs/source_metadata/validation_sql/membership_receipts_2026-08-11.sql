@@ -9,6 +9,134 @@ FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
 WHERE n.nspname='public' AND c.relname=ANY(ARRAY['_accumrg7370','_accumrg7739','_reference59','_reference134'])
 ORDER BY 1;
 
+-- MR-V10C: current-PBIT channel, access-zone and access-type coverage on the
+-- contract-advance branch. This retains the recorder precedence and text
+-- conditions; it only counts current DAX output categories.
+WITH movements AS (
+  SELECT a._recorderrref AS recorder_id, a._lineno AS line_no,
+         a._fld7371rref AS contract_id, a._fld7372rref AS movement_club_id,
+         a._fld7376rref AS analytics_id
+  FROM public._accumrg7370 a
+  WHERE a._period >= TIMESTAMP '2025-01-01'
+    AND a._period < TIMESTAMP '2027-01-01'
+), classified AS (
+  SELECT m.recorder_id, m.line_no, c._description::text AS contract_name,
+         p._description::text AS product_name, club._description::text AS movement_club_name,
+         c._fld697rref AS club_access_type_id, analytics._description::text AS analytics_name,
+         CASE
+           WHEN d317._idrref IS NOT NULL THEN 'transfer'
+           WHEN d316._idrref IS NOT NULL THEN 'transfer_contract'
+           WHEN d332._idrref IS NOT NULL THEN 'sale'
+           WHEN d285._idrref IS NOT NULL THEN 'return'
+           WHEN d304._idrref IS NOT NULL THEN 'card'
+           WHEN d346._idrref IS NOT NULL THEN 'cash_receipt'
+           WHEN d327._idrref IS NOT NULL THEN 'cashless'
+           WHEN d315._idrref IS NOT NULL THEN 'sales_report'
+           WHEN d331._idrref IS NOT NULL THEN 'pko'
+           WHEN d305._idrref IS NOT NULL THEN 'certificate'
+           WHEN d333._idrref IS NOT NULL THEN 'rko'
+           WHEN d339._idrref IS NOT NULL THEN 'advance_writeoff'
+           WHEN d340._idrref IS NOT NULL THEN 'cashless_writeoff'
+           WHEN d296._idrref IS NOT NULL THEN 'recurring_correction'
+         END AS recorder_type,
+         CASE
+           WHEN d327._fld4235rref IS NOT NULL
+            AND d327._fld4235rref <> decode('00000000000000000000000000000000', 'hex') THEN 'Рассрочка'
+           ELSE coalesce(
+             CASE d332._fld4433rref
+               WHEN decode('99a9ebb169a4e2a611eebfc77dadf23f', 'hex') THEN 'Клуб'
+               WHEN decode('99ad9b75dc73f34911eed62832d12269', 'hex') THEN 'Website'
+               WHEN decode('99a9ebb169a4e2a611eebfc77dadf23d', 'hex') THEN 'App'
+               WHEN decode('99a9ebb169a4e2a611eebfc77dadf23e', 'hex') THEN 'App сотрудника'
+               WHEN decode('99aff84c6229c6ae11eef6b58cf54f81', 'hex') THEN 'Web customer'
+             END,
+             CASE d304._fld3680rref
+               WHEN decode('99a9ebb169a4e2a611eebfc77dadf23f', 'hex') THEN 'Клуб'
+               WHEN decode('99ad9b75dc73f34911eed62832d12269', 'hex') THEN 'Website'
+               WHEN decode('99a9ebb169a4e2a611eebfc77dadf23d', 'hex') THEN 'App'
+               WHEN decode('99a9ebb169a4e2a611eebfc77dadf23e', 'hex') THEN 'App сотрудника'
+               WHEN decode('99aff84c6229c6ae11eef6b58cf54f81', 'hex') THEN 'Web customer'
+             END,
+             CASE d346._fld4891rref
+               WHEN decode('99a9ebb169a4e2a611eebfc77dadf23f', 'hex') THEN 'Клуб'
+               WHEN decode('99ad9b75dc73f34911eed62832d12269', 'hex') THEN 'Website'
+               WHEN decode('99a9ebb169a4e2a611eebfc77dadf23d', 'hex') THEN 'App'
+               WHEN decode('99a9ebb169a4e2a611eebfc77dadf23e', 'hex') THEN 'App сотрудника'
+               WHEN decode('99aff84c6229c6ae11eef6b58cf54f81', 'hex') THEN 'Web customer'
+             END,
+             CASE d305._fld3712rref
+               WHEN decode('99a9ebb169a4e2a611eebfc77dadf23f', 'hex') THEN 'Клуб'
+               WHEN decode('99ad9b75dc73f34911eed62832d12269', 'hex') THEN 'Website'
+               WHEN decode('99a9ebb169a4e2a611eebfc77dadf23d', 'hex') THEN 'App'
+               WHEN decode('99a9ebb169a4e2a611eebfc77dadf23e', 'hex') THEN 'App сотрудника'
+               WHEN decode('99aff84c6229c6ae11eef6b58cf54f81', 'hex') THEN 'Web customer'
+             END,
+             CASE d339._fld4702rref
+               WHEN decode('99a9ebb169a4e2a611eebfc77dadf23f', 'hex') THEN 'Клуб'
+               WHEN decode('99ad9b75dc73f34911eed62832d12269', 'hex') THEN 'Website'
+               WHEN decode('99a9ebb169a4e2a611eebfc77dadf23d', 'hex') THEN 'App'
+               WHEN decode('99a9ebb169a4e2a611eebfc77dadf23e', 'hex') THEN 'App сотрудника'
+               WHEN decode('99aff84c6229c6ae11eef6b58cf54f81', 'hex') THEN 'Web customer'
+             END,
+             CASE d331._fld4395rref
+               WHEN decode('99a9ebb169a4e2a611eebfc77dadf23f', 'hex') THEN 'Клуб'
+               WHEN decode('99ad9b75dc73f34911eed62832d12269', 'hex') THEN 'Website'
+               WHEN decode('99a9ebb169a4e2a611eebfc77dadf23d', 'hex') THEN 'App'
+               WHEN decode('99a9ebb169a4e2a611eebfc77dadf23e', 'hex') THEN 'App сотрудника'
+               WHEN decode('99aff84c6229c6ae11eef6b58cf54f81', 'hex') THEN 'Web customer'
+             END
+           )
+         END AS source_channel
+  FROM movements m
+  LEFT JOIN public._reference59 c ON c._idrref = m.contract_id
+  LEFT JOIN public._reference163 p ON p._idrref = c._fld685rref
+  LEFT JOIN public._reference132 club ON club._idrref = m.movement_club_id
+  LEFT JOIN public._reference134 analytics ON analytics._idrref = m.analytics_id
+  LEFT JOIN public._enum495 contract_type ON contract_type._idrref = c._fld696rref
+  LEFT JOIN public._document317 d317 ON d317._idrref = m.recorder_id
+  LEFT JOIN public._document316 d316 ON d316._idrref = m.recorder_id
+  LEFT JOIN public._document332 d332 ON d332._idrref = m.recorder_id
+  LEFT JOIN public._document285 d285 ON d285._idrref = m.recorder_id
+  LEFT JOIN public._document304 d304 ON d304._idrref = m.recorder_id
+  LEFT JOIN public._document346 d346 ON d346._idrref = m.recorder_id
+  LEFT JOIN public._document327 d327 ON d327._idrref = m.recorder_id
+  LEFT JOIN public._document315 d315 ON d315._idrref = m.recorder_id
+  LEFT JOIN public._document331 d331 ON d331._idrref = m.recorder_id
+  LEFT JOIN public._document305 d305 ON d305._idrref = m.recorder_id
+  LEFT JOIN public._document333 d333 ON d333._idrref = m.recorder_id
+  LEFT JOIN public._document339 d339 ON d339._idrref = m.recorder_id
+  LEFT JOIN public._document340 d340 ON d340._idrref = m.recorder_id
+  LEFT JOIN public._document296 d296 ON d296._idrref = m.recorder_id
+  WHERE contract_type._enumorder <> 0
+    AND (c._description IS NULL OR c._description::text NOT LIKE '%ИП%')
+    AND (analytics._description IS NULL OR analytics._description::text NOT LIKE '%ДСУ%')
+), current_dax AS (
+  SELECT *,
+         CASE WHEN product_name ILIKE '%web%' THEN 'Web customer'
+              WHEN source_channel IS NOT NULL AND source_channel <> '' THEN source_channel
+              ELSE 'Клуб' END AS payment_source_current,
+         CASE WHEN movement_club_name = 'Пушкинский VIP' THEN
+              CASE WHEN product_name ILIKE '%кандидат%' THEN 'VIP кандидат'
+                   WHEN product_name ILIKE '%Exclusive 2%' OR product_name ILIKE '%Exclusive II%' THEN 'Exclusive II'
+                   WHEN product_name ILIKE '%Exclusive%' THEN 'Exclusive'
+                   ELSE 'VIP' END
+              ELSE 'Весь клуб' END AS access_zone_current,
+         CASE WHEN product_name ILIKE '%сеть%' THEN 'Сетевой'
+              WHEN club_access_type_id = decode('abf82ac2a7cb5ed04be0f28e6fe07689', 'hex') THEN 'Сетевой'
+              WHEN club_access_type_id = decode('ac64dcb94a278ff64f8f05b6aa470169', 'hex') THEN 'Локальный'
+              ELSE 'Отсутствует' END AS club_access_type_current
+  FROM classified
+  WHERE recorder_type IS NOT NULL AND recorder_type <> 'sale'
+)
+SELECT classification, current_value, count(*) AS movement_rows
+FROM (
+  SELECT 'payment_source'::text AS classification, payment_source_current AS current_value FROM current_dax
+  UNION ALL SELECT 'access_zone', access_zone_current FROM current_dax
+  UNION ALL SELECT 'club_access_type', club_access_type_current FROM current_dax
+) x
+GROUP BY 1, 2
+ORDER BY 1, 2;
+
 -- MR-V02 expected: each bounded advance movement has one physical key and at
 -- most one contract join. Active and RecordKind are observations; current M
 -- determines sign through its document-recorder CASE and must be preserved.
