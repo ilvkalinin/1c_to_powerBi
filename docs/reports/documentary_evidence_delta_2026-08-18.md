@@ -21,11 +21,11 @@ reconciliation, SLA и прямо названные physical controls сохр�
 | Отчёт по поступлениям | Исправление `SV-094` и `SV-096` подтвердили, что рекарринговая KPI-единица — `contract × payment_period`, а все движения группы суммируются. | Множественность движений не является дубликатом платежа; период не выводится из даты. Остаются states/sign, predecessor и независимая сверка текущего отчёта. |
 | Продажа детских пакетов | `SV-095` и решение пользователя: для 38 строк без `VT4924` использовать `product_id = '0'`, `product_name = '0'`, `package_amount = 0`. | Gap price/product закрыт решением; возвраты и source states остаются отдельными controls. |
 | Новички и гостевые визиты | `SV-097` подтвердил bounded document path; пользователь утвердил 12 ACCUNIQ-кодов и знаковое правило PBIT. | Для полного physical control теперь есть точный service scope; не выполнены статусы, ключи, full cardinality, outcome 0/44/45 и booking attribution. |
-| Отчёт по обращениям | `SV-098`, `CR-V05D—G` и утверждённый PBIT. | Подтверждены feedback core, Jivo, три статуса и базовый funnel ID; остаются visit denominator, Power BI reconciliation и SLA/rerun. |
+| Отчёт по обращениям | `SV-098`, `CR-V05D—G` и утверждённый PBIT. | Подтверждены feedback core, Jivo, три статуса и базовый funnel ID; остаются visit denominator и source rerun/SLA. Сверка с фактическими цифрами Power BI не входит в pre-creation gate по решению пользователя 2026-08-18. |
 | Посещаемость клиентов с долгами | `SV-099`. | Подтверждены movement key и document branches; остаются stable visit classification, as-of сверка и SLA. |
-| Карта администратора | `SV-100`, `AC-V05`. | Подтверждены event key, success и однозначный card→club; остаётся независимая дневная сверка с Power BI. |
-| Маркетинговая воронка | `SV-101`, `MF-V04/V06/V07/V07C` и утверждённый PBIT. | Подтверждены task code в scope, join без размножения, наблюдение states, duration/payment type; остаются `MF-V08`, Power BI reconciliation и SLA/rerun. |
-| Членство для правления | `SV-096` переиспользуется для единицы рекарринга. | Больше нет блокера «физический monthly payment key»; остаются states, board reconciliation, non-additivity и SLA. |
+| Карта администратора | `SV-100`, `AC-V05`. | Подтверждены event key, success и однозначный card→club; source-side технических gaps не осталось. |
+| Маркетинговая воронка | `SV-101`, `MF-V04/V06/V07/V07C` и утверждённый PBIT. | Подтверждены task code в scope, join без размножения, наблюдение states, duration/payment type; остаются `MF-V08` и source rerun/SLA. Сверка с фактическими цифрами Power BI не входит в pre-creation gate по решению пользователя 2026-08-18. |
+| Членство для правления | `SV-096` переиспользуется для единицы рекарринга. | Больше нет блокера «физический monthly payment key»; остаются states, non-additivity и SLA. Сверка итогов board-отчёта с Power BI возможна только при наличии фактических контрольных значений и не входит в pre-creation gate. |
 
 ## Актуальный остаток, который держит global gate
 
@@ -39,17 +39,16 @@ reconciliation, SLA и прямо названные physical controls сохр�
 | Отчёт по поступлениям | states/sign, predecessor `MIN(ID)` и независимая сверка текущего отчёта. |
 | Продажа детских пакетов | знак возврата и states источника. |
 | Новички и гостевые визиты | physical control утверждённых 12 услуг, states, key/cardinality, 0/44/45 outcome и booking attribution. |
-| Отчёт по обращениям | business grain знаменателя посещений, Power BI reconciliation, rerun/SLA. |
+| Отчёт по обращениям | business grain знаменателя посещений, source rerun/SLA. |
 | Посещаемость клиентов с долгами | stable visit classification, as-of control, SLA. |
 | Работа с посещаемостью | daily client-base denominator и historical refresh SLA. |
-| Карта администратора | независимая дневная сверка с Power BI. |
-| Маркетинговая воронка | `MF-V08` для полной меры накопленного трафика, Power BI reconciliation, rerun/SLA. |
-| Членство для правления | states, board reconciliation, non-additive KPI и SLA. |
+| Маркетинговая воронка | `MF-V08` для полной меры накопленного трафика, source rerun/SLA. |
+| Членство для правления | states, non-additive KPI и SLA. |
 
 ## Вывод
 
-«Загрузка ОП» исключена из перечня технических gaps. Для остальных девяти
-отчётов выше уточнён и сокращён остаток; закрытые части не должны запускаться
+«Загрузка ОП» и «Карта администратора» исключены из перечня технических gaps.
+Для остальных восьми отчётов выше уточнён и сокращён остаток; закрытые части не должны запускаться
 повторно. Глобальный gate остаётся закрытым до выполнения всего перечисленного
 и отдельной документарной проверки всех 31 договорных отчётов и 38 объектов.
 
