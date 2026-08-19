@@ -5,4 +5,4 @@
 # CLOSED_PENDING_NEXT_APPROVAL rejects all new selections until the user
 # explicitly confirms the next independent package.
 gate_id	state	allowed_stage	allowed_report_ids	reason
-global_stage_gate	CLOSED_PENDING_NEXT_APPROVAL	-	-	Revenue-group-summary DDL package closed 2026-08-19: one four-column internal fact created empty and its schema contract passed. Initial load was intentionally not requested. The next independent package requires explicit user confirmation.
+global_stage_gate	CLOSED_PENDING_NEXT_APPROVAL	-	-	Client-base Stage 3 product-admission review closed 2026-08-19: `mart.client_base_daily` has an approved SQL review, exact source controls and a seven-column contract. A separate user-approved DDL package is required before creation; initial load, refresh and Power BI reconciliation remain separate packages.

@@ -48,7 +48,7 @@ BR-014).
 | `AccumRg7370`, `AccumRg7575`, `AccumRg7646`, `AccumRg7739` | текущие ветви выручки | VALIDATED current query, keys and control sums | SV-063, SV-064 |
 | `Document325`, `Reference59`, `Reference70`, `Reference132`, `Reference141X1`, `Reference163` | текущая выручка/посещения и классификация | VALIDATED current join/cardinality on control period | SV-062, SV-063 |
 | `mart.revenue_group_summary_daily` | переиспользуемый пустой факт внутренней выручки 02–06 | Schema implemented / initial load not requested | data products catalog; ADR-0010 |
-| `mart.client_base_daily` | ежедневная КБ для произвольной даты | CONFIRMED dependency / validation pending | data products catalog; client base/work attendance mappings |
+| `mart.client_base_daily` | ежедневная КБ для произвольной даты | SQL review ready / DDL not yet authorized | ADR-0031; client base/work attendance mappings |
 | логический факт почасовой посещаемости | интервалы для максимальной ЧК | BUSINESS MAPPING COMPLETE / validation pending | work attendance mapping |
 | внешние файлы КБ/Renew/расходов/характеристик | недостающие показатели | EXTERNAL / остаются в Power BI | решение пользователя 2026-07-30 |
 

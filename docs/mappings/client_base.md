@@ -1,8 +1,9 @@
 # Source-to-target mapping: агрегированный снимок «Клиентская база»
 
-Статус: `DRAFT / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-069, SV-111`.
-Граница membership-снимка и необходимость раздельных scope подтверждены;
-реализация и остальные source-side проверки остаются отложенными.
+Статус: `SNAPSHOT/RETENTION DEFERRED / client_base_daily STAGE 3 SQL REVIEW READY`.
+Граница membership-снимка и необходимость раздельных scope подтверждены.
+Этот пакет касается только `mart.client_base_daily`; редкий snapshot, retention
+и их дополнительные разрезы остаются отдельными отложенными продуктами.
 
 Предлагаемый объект: `mart.client_base_snapshot`.
 
@@ -80,8 +81,7 @@ membership-строки, 79 710 уникальных `клиент × клуб` 
 
 ## Дневное расширение для «Работы с посещаемостью»
 
-Статус: `CONFIRMED dependency / ARCHITECTURE DESIGNED — ADR-0012/0022 /
-TECHNICAL VALIDATION DEFERRED`.
+Статус: `STAGE 3 SQL REVIEW READY — ADR-0031 / NO DDL OR DML AUTHORIZED`.
 
 Решение пользователя от 2026-07-29: показатель «% посещений от КБ» обязан
 брать знаменатель из витрины клиентской базы, а не из текущей таблицы Power BI
@@ -100,17 +100,20 @@ TECHNICAL VALIDATION DEFERRED`.
 
 | Целевая колонка | Бизнес-описание | Источник / преобразование | Тип | NULL | Статус | Проверка |
 |---|---|---|---|---|---|---|
-| `scope_level` | `club` или `network` | те же source-side branches, что и у snapshot | `text` | нет | CONFIRMED by reuse | CBD-V01 |
-| `report_date` | каждый календарный день целевой истории; снимок на 00:00 | календарь дней вместо понедельников/первых чисел | `date` | нет | CONFIRMED — решение пользователя | CBD-V01, CBD-V02 |
-| `club_id` | основной клуб доступа; `NULL` для network | `Reference59.Fld687 → Reference132.ID` после membership dedupe | UNKNOWN | только `network` | CONFIRMED by reuse | CBD-V03 |
-| `age_years` | возраст на отчётную дату | `Reference141.Fld1507` и `report_date` | `smallint` | по правилу КБ | CONFIRMED by reuse | CBD-V04 |
-| `age_group` | дети `<14`, юниоры `14–17`, взрослые `18+`, `Не указано` | `age_years` | `NULL age_years → «Не указано»` | `text` | нет | CONFIRMED by reuse / user decision 2026-07-30 | CBD-V04 |
-| `gender` | пол клиента на отчётную дату либо `Не указано` | `Reference141.Fld1527` → enum | `NULL → «Не указано»`; нераспознанный enum требует технической валидации | `text` | нет | CONFIRMED by reuse / user decision 2026-07-30 | CBD-V05 |
-| `client_count` | уникальные действующие клиенты в scope и разрезах | тот же membership interval и scope-specific dedupe, что у `mart.client_base_snapshot` | `integer`/`bigint` | нет | CONFIRMED dependency / technical state pending | CBD-V03, CBD-V06 |
+| `scope_level` | `club` или `network` | две явные source-side branches | `text` | нет | CONFIRMED | SV-111, S3-CBD-ADMISSION-001 |
+| `report_date` | каждый календарный день целевой истории; снимок на 00:00 | календарь дней вместо понедельников/первых чисел | `date` | нет | CONFIRMED — решение пользователя | BR-005, SV-111 |
+| `club_id` | основной клуб доступа; `NULL` только для network | `Reference59.Fld687 → Reference132.ID` после membership dedupe → canonical hex text | `text` | только `network` | CONFIRMED source key | SV-111, S3-CBD-ADMISSION-001 |
+| `age_years` | возраст на отчётную дату | `Reference141X1.Fld1507` и `report_date`; sentinel `0001-01-01` → `NULL` | `smallint` | да | CONFIRMED current client-base rule | SV-111 |
+| `age_group` | дети `<14`, юниоры `14–17`, взрослые `18+`, `Не указано` | `age_years` | `NULL age_years → «Не указано»` | `text` | нет | CONFIRMED user decision 2026-07-30 | SV-111 |
+| `gender` | пол клиента на отчётную дату либо `Не указано` | `Reference141X1.Fld1527` → two confirmed current codes; other/`NULL` → `Не указано` | `text` | нет | CONFIRMED current rule | SV-111 |
+| `client_count` | уникальные действующие клиенты в scope и разрезах | distinct client after BR-005 and scope-specific dedupe | `bigint` | нет | CONFIRMED source formation | SV-111, S3-CBD-ADMISSION-001 |
 
 Отдельные столбцы стажа и активности не включаются: у отчёта посещаемости нет
 таких фильтров, а их перенос увеличил бы grain без подтверждённого потребителя.
-Наборы `club` и `network` не суммируются. DAX метрики посещаемости выбирает
+Наборы `club` и `network` не суммируются. Физический ключ:
+`(scope_level, report_date, club_id, age_years, age_group, gender)` с
+`NULLS NOT DISTINCT`; он допускает ровно одну network-строку с пустым клубом
+и одну строку неизвестного возраста для комбинации разрезов. DAX метрики посещаемости выбирает
 `club` при фильтре клуба и `network` без фильтра клуба, затем считает среднее
 `client_count` по выбранным дням. Решение пользователя от 2026-07-29 задаёт
 общую семантику возрастного фильтра: `visit_count` использует возраст на дату
@@ -118,12 +121,12 @@ TECHNICAL VALIDATION DEFERRED`.
 
 | ID | Проверка | Ожидаемый результат | Статус |
 |---|---|---|---|
-| CBD-V01 | покрытие календаря | ровно один дневной набор для каждого дня целевой истории и обоих scope | PARTIALLY VALIDATED — SV-111: source-side cohort сформирована для всех 28 последовательных дней 2026-07-01—28 и обоих scope за 17,89 с; весь период и физический объект не проверялись |
-| CBD-V02 | boundary 00:00 | начало в D исключается, окончание D−1 включается согласно BR-005 | PARTIALLY VALIDATED — SV-069 подтверждает общее membership-правило на 2026-07-01; дневной набор не выполнялся |
-| CBD-V03 | ключи/дубли scope | `club` dedupe по `(date, club, client)`, `network` по `(date, client)`; итог не смешивает scope | PARTIALLY VALIDATED — SV-069 подтверждает общее membership-правило на 2026-07-01; дневной набор не выполнялся |
+| CBD-V01 | покрытие календаря | ровно один дневной набор для каждого дня целевой истории и обоих scope | VALIDATED source formation — SV-111: 730/730 дней BR-003 в обоих scope; interval-control 7,039 с |
+| CBD-V02 | boundary 00:00 | начало в D исключается, окончание D−1 включается согласно BR-005 | VALIDATED — SV-069 и 4 exact anchor checks SV-111 |
+| CBD-V03 | ключи/дубли scope | `club` dedupe по `(date, club, client)`, `network` по `(date, client)`; итог не смешивает scope | VALIDATED source formation — SV-111; S3-CBD-ADMISSION-001: 0 invalid scope/club combinations |
 | CBD-V04 | возраст | контролируются дни рождения и границы 13/14/17/18 | VALIDATED — SV-111 на 2026-07-01: возрастные границы представлены, sentinel `0001-01-01` даёт `NULL`, отрицательных возрастов нет |
 | CBD-V05 | пол | каждое значение enum однозначно отображается или разрешённо остаётся `NULL` | VALIDATED — SV-111 на 2026-07-01: вся cohort покрыта двумя текущими кодами «Женский»/«Мужской», неожиданных non-NULL кодов нет |
-| CBD-V06 | сверка знаменателя | среднее дневной КБ воспроизводит согласованный контрольный срез посещаемости | VALIDATION_PENDING — NOT_EXECUTED — ожидается подключение к корпоративной сети |
+| CBD-V06 | сверка знаменателя | среднее дневной КБ воспроизводит согласованный контрольный срез посещаемости | VALIDATED source formation — SV-111: 0 differences at 4 direct current-M anchor dates; end-to-end Power BI reconciliation remains post-load |
 
 ## Не переносить на VM-2
 

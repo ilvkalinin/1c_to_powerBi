@@ -1,12 +1,12 @@
 # Data contract: «Клиентская база»
 
-Статус: `DESIGNED / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-069 / IMPLEMENTATION DEFERRED`. Контракт Power BI определён. SV-069 подтвердил boundary и раздельные membership scope на 2026-07-01; production SQL и физические таблицы не создавались. Остаются неподтверждённые статусы записей 1С, физические типы источника и контрольные значения.
+Статус: `client_base_daily SQL REVIEW READY / snapshot and retention deferred`. Контракт Power BI определён. SV-111 подтвердил daily source formation на всём BR-003; DDL/DML не выполнялись. Snapshot и retention сохраняют свои отдельные отложенные вопросы.
 
 ## Общие параметры
 
 | Параметр | Значение | Статус / доказательство |
 |---|---|---|
-| Объекты PostgreSQL | `mart.client_base_snapshot`, `mart.client_base_retention` | CONFIRMED BY DESIGN — ADR-0002 |
+| Объекты PostgreSQL | `mart.client_base_daily` в текущем пакете; `mart.client_base_snapshot`, `mart.client_base_retention` — отдельно | ADR-0031 / ADR-0002 |
 | Назначение | компактная импортная модель клиентской базы без клиентской детализации | CONFIRMED |
 | Период хранения | январь–март: текущий и два предыдущих года; апрель–декабрь: текущий и предыдущий год | CONFIRMED |
 | Режим Power BI | `Import` | CONFIRMED BY DESIGN |
@@ -17,6 +17,33 @@
 | Power BI incremental refresh | не требуется для первой версии: объём агрегатов мал, перерасчёт выполняется в PostgreSQL | CONFIRMED BY DESIGN |
 | SLA | данные доступны не позднее 08:30 по Москве | CONFIRMED — BR-014, решение пользователя 2026-07-30 |
 | PII / идентификатор клиента | не передаются и не хранятся на VM-2 | CONFIRMED |
+
+## Факт `mart.client_base_daily`
+
+Таблица Power BI: `Клиентская база по дням`.
+
+Гранулярность:
+
+> уровень охвата × календарная дата × клуб только для club scope × возраст × возрастная группа × пол.
+
+Логический ключ:
+
+> `(scope_level, report_date, club_id, age_years, age_group, gender)` с `NULLS NOT DISTINCT`.
+
+| PostgreSQL | Power BI | PostgreSQL тип | Power BI тип | NULL | Роль | Аддитивность | Скрыть |
+|---|---|---|---|---|---|---|---|
+| `scope_level` | `Уровень охвата` | `text` | Text | нет | `club/network` | не мера | да |
+| `report_date` | `Дата` | `date` | Date | нет | FK календаря | не мера | нет |
+| `club_id` | `Код клуба` | `text` | Text | только `network` | FK клуба | не мера | да |
+| `age_years` | `Возраст` | `smallint` | Whole number | да | срез | не мера | нет |
+| `age_group` | `Возрастная группа` | `text` | Text | нет | срез | не мера | нет |
+| `gender` | `Пол` | `text` | Text | нет | срез | не мера | нет |
+| `client_count` | `Количество клиентов` | `bigint` | Whole number | нет | показатель | только внутри одного дня и scope | нет |
+
+`scope_level = club` требует клуб; `network` требует пустой клуб. Пол и
+возрастная группа не бывают пустыми: неизвестное значение — `Не указано`.
+Календарь и клубы фильтруют факт `1:*`, однонаправленно; связи fact-to-fact и
+many-to-many запрещены. DAX выбирает scope и считает среднее по выбранным дням.
 
 ## Факт `mart.client_base_snapshot`
 
@@ -94,10 +121,10 @@
 
 | От | К | Кардинальность | Фильтрация | Статус |
 |---|---|---|---|---|
-| `Отчетные даты[Отчетная дата]` | оба факта и план по `Отчетная дата` | `1:*` | однонаправленная | CONFIRMED BY DESIGN |
-| `Клубы[Код клуба]` | snapshot `Код клуба`, retention `Код базового клуба`, план `Код клуба` | `1:*` | однонаправленная | CONFIRMED BY DESIGN |
-| `Возраст[Возраст]` | оба факта по текущему/снимочному возрасту | `1:*` | однонаправленная | CONFIRMED BY DESIGN |
-| `Пол[Пол]` | оба факта | `1:*` | однонаправленная | CONFIRMED BY DESIGN |
+| `Отчетные даты[Отчетная дата]` | daily, snapshot, retention и план по их отчётной дате | `1:*` | однонаправленная | CONFIRMED BY DESIGN |
+| `Клубы[Код клуба]` | daily/snapshot `Код клуба`, retention `Код базового клуба`, план `Код клуба` | `1:*` | однонаправленная | CONFIRMED BY DESIGN |
+| `Возраст[Возраст]` | daily, snapshot и retention по возрасту соответствующей строки | `1:*` | однонаправленная | CONFIRMED BY DESIGN |
+| `Пол[Пол]` | daily, snapshot и retention | `1:*` | однонаправленная | CONFIRMED BY DESIGN |
 | `Стаж[Стаж]` | оба факта | `1:*` | однонаправленная | CONFIRMED BY DESIGN |
 | `Активность[Категория активности]` | snapshot | `1:*` | однонаправленная | CONFIRMED BY DESIGN |
 

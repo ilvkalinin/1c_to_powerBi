@@ -80,7 +80,7 @@ SV-065/SV-067. Sentinel-дата рождения `0001-01-01 00:00:00` тепе
 
 | Статус | Элемент | Риск / причина | Проверка / следующее действие |
 |---|---|---|---|
-| CONFIRMED source / target acceptance pending | `mart.client_base_daily` | SV-111 подтвердил source-side cohort на всех 730 датах BR-003 в scope `club` и `network`; на четырёх датах interval-control точно совпал с direct current-M `COUNT(DISTINCT)`. Физический контракт и end-to-end SLA возможны только после разрешённого создания объекта. | WA-V06C / SV-111 |
+| CONFIRMED source / SQL review ready | `mart.client_base_daily` | SV-111 подтвердил source-side cohort на всех 730 датах BR-003 в scope `club` и `network`; на четырёх датах interval-control точно совпал с direct current-M `COUNT(DISTINCT)`. S3-CBD-ADMISSION-001 подтвердил агрегатный grain без нарушений. Физическая таблица и end-to-end SLA ожидают отдельного разрешения на DDL и initial-load. | WA-V06C / SV-111 / S3-CBD-ADMISSION-001 |
 | CONFIRMED | возрастной срез `% посещений от КБ` | sentinel `0001-01-01 00:00:00` преобразуется в `NULL`; возрастная группа остаётся пустой, а не `85+` | BR-019, решение пользователя 2026-08-11; WA-V04 / SV-065 |
 | NOT_APPLICABLE | `Шкафчики` и мощности | Excel-наборы остаются в Power BI | WA-V06 не выполняется для PostgreSQL |
 | CONFIRMED | состояния документов/регистра | на текущей M-когорте 2026-01—07 нет неактивных, непроведённых или помеченных строк | SV-065; не добавлять новый source-filter |
