@@ -1,6 +1,6 @@
 # Stage 3 PRODUCT ADMISSION: `mart.client_base_daily`
 
-Статус: `SCHEMA IMPLEMENTED / INITIAL LOAD, REFRESH AND POWER BI RECONCILIATION NOT AUTHORIZED`.
+Статус: `SCHEMA IMPLEMENTED / INITIAL-LOAD DML REVIEW READY / REFRESH AND POWER BI RECONCILIATION NOT AUTHORIZED`.
 
 ## Один продукт и его потребители
 
@@ -32,8 +32,12 @@
 [Проверка схемы](../../sql/tests/client_base_daily_schema_contract.sql) прошла
 после DDL: 7 колонок, 5 ограничений (уникальный ключ и 4 проверки), 5
 обязательных колонок и 0 строк. Перед отдельным initial-load пакетом
-необходимы source extract, source/target controls, rerun и измерение SLA;
-данный пакет создал только пустую схему.
+были подготовлены exact source extract, source/target controls и read-only
+measurement для отдельного initial-load пакета. Целевая DML всё ещё требует
+отдельного подтверждения reviewed SQL; refresh и Power BI остаются вне scope.
 
 Точный read-only admission control сохранён как
 [client_base_daily_admission_2026-08-19.sql](../source_metadata/validation_sql/client_base_daily_admission_2026-08-19.sql).
+Результаты подготовки DML и reviewed transaction —
+[client_base_daily_initial_load_readiness.md](client_base_daily_initial_load_readiness.md)
+и [client_base_daily_initial_load_review.sql](client_base_daily_initial_load_review.sql).
