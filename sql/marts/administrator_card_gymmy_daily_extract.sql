@@ -15,7 +15,7 @@ WITH requested_cards(card_code) AS (
     JOIN public._reference141x1 r ON r._code::text = q.card_code
     JOIN public._reference132 c
       ON c._description::text = nullif(
-          regexp_replace(trim(r._description::text), '^.*\\s+', ''), ''
+          regexp_replace(trim(r._description::text), '^.*\s+', ''), ''
       )
 ), selected_events AS (
     SELECT g._period::date AS event_date,

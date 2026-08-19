@@ -118,6 +118,7 @@ def main() -> None:
     with connect_with_retry("SOURCE_") as source, connect_with_retry("MART_") as target:
         with source.cursor() as source_cursor, target.cursor() as target_cursor:
             source_cursor.execute("BEGIN ISOLATION LEVEL REPEATABLE READ, READ ONLY")
+            source_cursor.execute("SET LOCAL enable_seqscan = off")
             target_cursor.execute("BEGIN")
             target_cursor.execute(
                 "SELECT pg_advisory_xact_lock(hashtext(%s))",

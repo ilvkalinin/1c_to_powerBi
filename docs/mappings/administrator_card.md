@@ -1,10 +1,11 @@
 # Source-to-target mapping: карта администратора
 
-Статус: `BUSINESS MAPPING CONFIRMED / ARCHITECTURE DESIGNED — ADR-0023 / STAGE_2 GYMMY SOURCE CONTROLS CLOSED — SV-002, SV-100, AC-V05 / IMPLEMENTATION DEFERRED`.
+Статус: `IMPLEMENTED / INITIAL BR-003 LOAD VALIDATED — AC-REC-001—002 / ARCHITECTURE — ADR-0023 / STAGE_2 GYMMY SOURCE CONTROLS CLOSED — SV-002, SV-100, AC-V05`.
 
 Mapping описывает одну семантическую таблицу Power BI из
 `mart.administrator_card_gymmy_daily` и внешнего журнала администраторов.
-PostgreSQL SQL не создаётся.
+PostgreSQL реализует только Gymmy-часть этой таблицы; внешний журнал остаётся
+за границей PostgreSQL.
 
 SV-002 подтвердил наличие `public._inforg5836`; SV-100 — его physical event
 key, boolean success и bounded наличие карт/направлений. AC-V05 подтвердил,
@@ -86,6 +87,6 @@ key, boolean success и bounded наличие карт/направлений. 
 ## Отложенные технические подтверждения
 
 1. Схема внешнего Excel и правила нормализации причин.
-2. Контрольные значения.
+2. Сверка с внешним журналом в Power BI, когда он будет доступен владельцу.
 
 Обновление: один раз в день.

@@ -1,6 +1,6 @@
 # Data contract: «Карта администратора»
 
-Статус: `DESIGNED / IMPLEMENTATION DEFERRED / STAGE_2 GYMMY SOURCE CONTROLS CLOSED — SV-002, SV-100, AC-V05 / STAGE 3 CONTROLS PENDING`.
+Статус: `IMPLEMENTED / INITIAL BR-003 LOAD VALIDATED — AC-REC-001—002 / STAGE_2 GYMMY SOURCE CONTROLS CLOSED — SV-002, SV-100, AC-V05`.
 
 ## PostgreSQL-объект Gymmy
 
@@ -27,6 +27,9 @@ Power Query добавляет к Gymmy малый внешний журнал �
 
 SV-002 подтвердил существование `public._inforg5836`; SV-100/AC-V05 уже
 закрыли source-side успешность Gymmy, 12 кодов карт, card→club и суммы
-до/после дневной агрегации. Приёмка Stage 3 проверит созданный объект и его
-refresh. Внешние Excel-файлы и их Power Query остаются вне анализа; сырые
-карты, терминалы и события не входят.
+до/после дневной агрегации. Начальная Stage 3-приёмка 2026-08-19 подтвердила
+суммы `Вход = 107583`, `Выход = 86694`, отсутствие дубликатов ключа,
+нарушений контракта и строк вне BR-003; evidence —
+`sql/tests/administrator_card_gymmy_daily_reconciliation.sql`. Внешние
+Excel-файлы и их Power Query остаются вне анализа; сырые карты, терминалы и
+события не входят.

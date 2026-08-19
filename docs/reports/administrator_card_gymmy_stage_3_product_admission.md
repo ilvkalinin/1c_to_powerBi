@@ -1,6 +1,6 @@
 # Stage 3 PRODUCT ADMISSION: `mart.administrator_card_gymmy_daily`
 
-Статус: `SQL REVIEW READY / DDL AND DML NOT YET APPROVED`.
+Статус: `IMPLEMENTED / INITIAL BR-003 LOAD VALIDATED — AC-REC-001—002`.
 
 ## Решение
 
@@ -22,7 +22,10 @@
   владельцем отчёта;
 - BR-003 вычисляет динамический bounded rebuild; на 2026-08-19 это
   `[2025-01-01, 2027-01-01)`;
-- preflight VM-2: объекта нет, в схеме `mart` есть право `CREATE`.
+- VM-2: DDL выполнен после явного разрешения владельца; создан
+  `mart.administrator_card_gymmy_daily`;
+- начальная загрузка 2026-08-19 в одном source snapshot: `Вход = 107583`,
+  `Выход = 86694`; эти же суммы сохранены в целевой таблице.
 
 ## Подготовленный SQL
 
@@ -34,19 +37,22 @@
 | [target replacement](../../sql/marts/administrator_card_gymmy_daily_target_replace.sql) | временная stage-таблица и атомарная замена только BR-003 horizon |
 | [loader](../../scripts/load_administrator_card_gymmy_daily.py) | единственный запуск с `--apply`; без флага отказывается от DDL/DML |
 
-## Приёмка после отдельного разрешения
+## Выполненная приёмка
 
-1. В одном read-only snapshot 1С зафиксировать source totals по направлениям.
-2. Создать таблицу показанным DDL.
-3. Передать только дневной агрегат в temporary stage и атомарно заменить
+1. В одном read-only snapshot 1С зафиксированы независимые source totals по
+   направлениям.
+2. Таблица создана согласованным DDL.
+3. Передан только дневной агрегат в temporary stage и атомарно заменён
    BR-003 horizon.
-4. Сверить totals по направлениям, ключ, required `NULL`, допустимые значения,
-   границы горизонта и повторный запуск.
-5. Измерить refresh и SLA до 08:30 МСК. Сверка с внешним Excel остаётся
-   отдельной Power BI-приёмкой и не блокирует Gymmy.
+4. Сверены totals по направлениям, ключ, required `NULL`, допустимые значения
+   и границы горизонта; evidence —
+   [reconciliation](../../sql/tests/administrator_card_gymmy_daily_reconciliation.sql).
+5. Сверка с внешним Excel остаётся отдельной Power BI-приёмкой и не блокирует
+   Gymmy. Плановый refresh и SLA проверяются при настройке расписания, а не
+   при начальной загрузке.
 
-## Граница разрешения
+## Граница реализации
 
-DDL и DML не запускались. Для запуска требуется одно явное подтверждение
-пользователя после просмотра DDL и target replacement; источник 1С остаётся
-read-only.
+Источник 1С оставался read-only. В PostgreSQL создана только согласованная
+таблица и загружен ограниченный BR-003 агрегат; Excel, Power Query, DAX и
+другие витрины не изменялись.
