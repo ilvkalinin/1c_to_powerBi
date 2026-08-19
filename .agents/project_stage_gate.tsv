@@ -5,4 +5,4 @@
 # CLOSED_PENDING_NEXT_APPROVAL rejects all new selections until the user
 # explicitly confirms the next independent package.
 gate_id	state	allowed_stage	allowed_report_ids	reason
-global_stage_gate	CLOSED_PENDING_NEXT_APPROVAL	-	-	Revenue-group-summary admission audit and SQL review closed 2026-08-19. One four-column internal fact is ready for separate DDL review; no DDL/DML was run. The next independent package requires explicit user confirmation.
+global_stage_gate	CLOSED_PENDING_NEXT_APPROVAL	-	-	Revenue-group-summary DDL package closed 2026-08-19: one four-column internal fact created empty and its schema contract passed. Initial load was intentionally not requested. The next independent package requires explicit user confirmation.

@@ -1,6 +1,6 @@
 # Свод выручка ГК
 
-Статус: `STAGE 3 PRODUCT ADMISSION IN PROGRESS / SQL REVIEW READY / NO DDL OR DML AUTHORIZED`.
+Статус: `SHARED SCHEMA IMPLEMENTED 2026-08-19 / INITIAL LOAD NOT REQUESTED`.
 
 Первичные доказательства: пользовательские документы
 `/Users/ilia/Downloads/Telegram Desktop/Свод выручка ГК.docx` (полные M/SQL,

@@ -1,6 +1,6 @@
 # Stage 3 PRODUCT ADMISSION: `mart.revenue_group_summary_daily`
 
-Статус: `SQL REVIEW READY / DDL AND DML NOT AUTHORIZED`.
+Статус: `SHARED SCHEMA IMPLEMENTED 2026-08-19 / INITIAL LOAD NOT REQUESTED`.
 
 ## Результат audit
 
@@ -42,9 +42,10 @@
 - [контракт](../data_contracts/revenue_group_summary.md)
 - [ADR-0010](../adr/0010-revenue-group-summary-daily.md)
 
-## Что ещё не выполнялось
+## Выполнение DDL и что ещё не выполнялось
 
-DDL, DML, загрузка данных, изменение Power Query/DAX и внешних Excel не
-выполнялись. Перед отдельным разрешением на DDL нужно только просмотреть
-этот точный SQL; перед будущим initial load отдельно подтвердить extract,
-branch controls, rerun и SLA.
+После отдельного подтверждения пользователя точный DDL выполнен одной
+транзакцией. Post-check подтвердил: 4 колонки, один primary key, одно правило
+допустимых статей, 4 обязательных поля и 0 строк. DML, загрузка данных,
+изменение Power Query/DAX и внешних Excel не выполнялись. Перед будущим
+initial load отдельно подтверждаются extract, branch controls, rerun и SLA.

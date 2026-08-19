@@ -1,6 +1,6 @@
 # Data contract: «Свод выручка ГК»
 
-Статус: `STAGE 3 PRODUCT ADMISSION IN PROGRESS / NO DDL OR DML AUTHORIZED / INTERNAL POSTGRESQL BRANCHES VALIDATED — SV-035—SV-050, SV-066`.
+Статус: `SCHEMA IMPLEMENTED 2026-08-19 / INITIAL LOAD NOT REQUESTED / INTERNAL POSTGRESQL BRANCHES VALIDATED — SV-035—SV-050, SV-066`.
 Контракт покрывает только PostgreSQL-факт фактической выручки. Планы и бюджеты
 по подтверждённому решению остаются отдельными Excel-фактами Power BI.
 
@@ -8,7 +8,7 @@
 
 | Параметр | Значение | Статус / доказательство |
 |---|---|---|
-| Объект PostgreSQL | `mart.revenue_group_summary_daily` | ACCEPTED — ADR-0010 |
+| Объект PostgreSQL | `mart.revenue_group_summary_daily` | IMPLEMENTED empty schema — S3-RGS-DDL-001 |
 | Таблица Power BI | `Свод выручка ГК` | CONFIRMED naming rule |
 | Назначение | внутренний факт статей `02`–`06` по дню и клубу; текущий Power BI добавляет свои внешние статьи `07`–`13` | CONFIRMED PBIT boundary 2026-08-19 |
 | Гранулярность | дата факта × клуб × статья | CONFIRMED — ADR-0010/mapping |

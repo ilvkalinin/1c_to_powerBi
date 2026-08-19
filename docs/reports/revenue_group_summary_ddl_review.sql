@@ -1,4 +1,4 @@
--- REVIEW ONLY — do not execute without a separate user approval for DDL.
+-- REVIEWED AND APPLIED 2026-08-19 after separate user approval for DDL.
 -- Product: mart.revenue_group_summary_daily.
 -- Scope: internal current-report articles 02–06 only. Articles 07–13 remain
 -- in the existing external Power BI facts and are not copied to PostgreSQL.

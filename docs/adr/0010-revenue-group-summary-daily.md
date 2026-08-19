@@ -1,6 +1,6 @@
 # ADR-0010: дневной факт «Свод выручка ГК»
 
-- Статус: `ACCEPTED / STAGE 3 PRODUCT ADMISSION IN PROGRESS / NO DDL OR DML AUTHORIZED`
+- Статус: `ACCEPTED / SHARED SCHEMA IMPLEMENTED 2026-08-19 / INITIAL LOAD NOT REQUESTED`
 - Дата: 2026-07-28
 - Отчёт: №31 «Свод выручка ГК»
 

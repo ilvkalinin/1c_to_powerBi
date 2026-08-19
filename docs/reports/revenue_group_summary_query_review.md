@@ -1,6 +1,6 @@
 # Query review: «Свод выручка ГК»
 
-Статус: `COMPLETE / STAGE 3 SQL REVIEW READY / NO DDL OR DML AUTHORIZED`.
+Статус: `COMPLETE / SHARED SCHEMA IMPLEMENTED 2026-08-19 / INITIAL LOAD NOT REQUESTED`.
 
 ## Пакетный audit 2026-08-11
 

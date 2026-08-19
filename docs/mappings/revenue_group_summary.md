@@ -1,6 +1,6 @@
 # Source-to-target mapping: Свод выручка ГК
 
-Статус: `STAGE 3 PRODUCT ADMISSION IN PROGRESS / INTERNAL POSTGRESQL BRANCHES VALIDATED — SV-035—SV-050, SV-066 / NO DDL OR DML AUTHORIZED`.
+Статус: `SCHEMA IMPLEMENTED 2026-08-19 / INITIAL LOAD NOT REQUESTED / INTERNAL POSTGRESQL BRANCHES VALIDATED — SV-035—SV-050, SV-066`.
 
 Этот mapping фиксирует текущий отчётный результат, а не разрешает создание
 физической витрины. Никакого SQL/DDL для VM-1 или VM-2 не создано.
