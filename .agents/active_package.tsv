@@ -11,7 +11,7 @@ membership_receipts	COMPLETE	SELF
 children_package_sales	COMPLETE	SELF
 newcomer_guest_visits	COMPLETE	SELF
 calls_report	BLOCKED	-
-visits_debt	BLOCKED	-
+visits_debt	COMPLETE	SELF
 work_attendance	BLOCKED	-
 administrator_card	COMPLETE	SELF
 marketing_funnel	COMPLETE	SELF

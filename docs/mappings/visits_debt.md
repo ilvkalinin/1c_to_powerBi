@@ -16,7 +16,7 @@ cohort, а `AccumRg7509` — отдельным movement fact. SV-099 подтв
 уникальность ключа, отсутствие пустых ключевых ссылок и отсутствие branch
 multiplication. `prebooking_id` не уникален по клиенту, поэтому as-of key
 остаётся `client × prebooking`. Единая классификация посещения подтверждена
-правилом BR-025; as-of controls остаются открытыми. `quantity other`
+правилом BR-025; as-of компонент проверен DV-V05B. `quantity other`
 воспроизводится current DAX: не участвует в `unconfirmed`, но остаётся в сумме
 непогашенной группы.
 
@@ -59,9 +59,9 @@ multiplication. `prebooking_id` не уникален по клиенту, по�
 
 | Целевая колонка | Бизнес-описание | Источник / преобразование | PostgreSQL тип | NULL | Статус | Тест |
 |---|---|---|---|---|---|---|
-| `visit_date` | день включения клиента в когорту | `AccumRg7575.Period` / `Document325`; в cohort входят только `Document325.Fld4164RRef = 9a5a4c90d2b1aede4b91dcd1abe84c43` по BR-025 | `date` | нет | CONFIRMED user rule / technical precedence pending | BR-025, DV-V02 |
-| `visit_club_id` | фактический клуб посещения | `AccumRg7575.Fld7577` и/или `Document325.Fld4167` | `UNKNOWN` | нет | CONFIRMED rule — BR-006 | DV-V06 |
-| `client_key` | клиент для пересечения с движениями долга | общий защищённый ключ | `UNKNOWN` | нет | CONFIRMED need | DV-V04 |
+| `visit_date` | день включения клиента в когорту | `AccumRg7575.Period` / `Document325`; в cohort входят только `Document325.Fld4164RRef = 9a5a4c90d2b1aede4b91dcd1abe84c43` по BR-025 | `date` | нет | CONFIRMED user rule / source sample validated | BR-025, DV-V05B |
+| `visit_club_id` | фактический клуб посещения | `Document325.Fld4167` после BR-025 | `bytea` | нет | CONFIRMED rule — BR-006/BR-025 | DV-V05B |
+| `client_key` | клиент для пересечения с движениями долга | `Document325.Fld4171`; в DV-V05B совпал с `AccumRg7575.Fld7576` на двух датах × двух клубах | `bytea` | нет | CONFIRMED source sample | DV-V05B |
 | `visit_client_count` | вклад уникального клиента в график посещений | `1` после client-day схлопывания | `smallint` | нет | CONFIRMED — решение пользователя 2026-07-31 | DV-V05 |
 
 ## Производные показатели Power BI
@@ -103,9 +103,9 @@ multiplication. `prebooking_id` не уникален по клиенту, по�
 |---|---|---|---|
 | CONFIRMED | Семантика графика «Количество посещений» | единица — уникальный клиент с посещением, а не число входов. | client-day grain и `DISTINCTCOUNT(client_key)`; решение пользователя 2026-07-31. |
 | CONFIRMED | Доставка PII | код и ФИО клиента допускаются в report-specific detail для всех, у кого уже есть доступ к данному Power BI-отчёту. | решение пользователя 2026-07-31; физический механизм ограничения выбирается на реализации. |
-| CONFIRMED | Частота обновления | ежедневная; Power BI доступен до 08:30 МСК, витрина завершается раньше. | BR-014 и решение пользователя 2026-07-31; производительность проверить DV-V07. |
-| VALIDATED WITH OBSERVATION | ключ и state `AccumRg7509` | 482 347 movements имеют уникальный physical key; inactive/null ключи = 0. DAX sign и quantity `other` воспроизводятся по TXT; новый state-filter не вводится. | SV-099; дальнейшая as-of сверка — DV-V05. |
+| CONFIRMED | Частота обновления | ежедневная; Power BI доступен до 08:30 МСК, витрина завершается раньше. | BR-014 и решение пользователя 2026-07-31; end-to-end производительность — приёмка созданной витрины. |
+| VALIDATED WITH OBSERVATION | ключ и state `AccumRg7509` | 482 347 movements имеют уникальный physical key; inactive/null ключи = 0. DAX sign и quantity `other` воспроизводятся по TXT; новый state-filter не вводится. | SV-099; as-of компонент дополнительно проверен DV-V05B. |
 | VALIDATED WITH ROW-LOSS RISK | документные ветки | current branches не размножают движения, но 917 из 457 556 base rows не выводятся через ветвление/inner employee join. | SV-099; current branch не меняется без отдельного решения. |
-| VALIDATION_PENDING | as-of остаток | не доказано контрольными датами, что формула закрывает каждую ПЗ. | DV-V04–DV-V05; independent control отсутствует. |
+| VALIDATED SOURCE-SIDE | as-of остаток | На двух датах и двух фактических клубах BR-025 нет null/mismatch client-key и excess технического ключа; current DAX-алгебра дала сохранённые контрольные суммы. | DV-V05B; это не выдаётся за отсутствующую сверку с фактическим Power BI. |
 | CONFIRMED | классификация посещения | BR-025 устанавливает общий физический ключ `Document325.Fld4164RRef = 9a5a4c90d2b1aede4b91dcd1abe84c43`. Он намеренно заменяет legacy `LIKE '%Посещение%'`; наблюдаемое расхождение 36 против 3 003 981 строк сохраняется как критичный артефакт. | user decision 2026-08-19; SV-099 DV-V06B; повторная замена правила без нового решения запрещена. |
 | DEFERRED TO ACCEPTANCE | объём и SLA | Узкий current count измерен: `AccumRg7575` ≈ 33,6 млн строк / 29,1 ГБ, execution = 25,7 мс на горячем кэше и без disk/temp reads. End-to-end SLA проверяется при приёмке созданной витрины и её расписания. | DV-V07; global user decision 2026-08-19. |

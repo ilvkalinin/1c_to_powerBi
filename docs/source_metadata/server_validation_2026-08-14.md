@@ -210,6 +210,7 @@ Jivo scope и трёх статусов закрытых месяцев 2026-01�
 |---|---|---|
 | DV-V01 | 482 347 movements за 2026 = столько же technical keys; inactive, null client/prebooking и null quantity/amount = 0 | VALIDATED physical movement key |
 | DV-V04 | 236 274 client × prebooking pairs; 24 208 prebookings относятся к >1 клиенту, максимум 56; 233 733 пары имеют несколько движений | VALIDATED — `prebooking_id` не является ключом клиента; as-of key остаётся парой |
+| DV-V05B | BR-025 на 2026-07-15 и 2026-08-15: две непустые фактические площадки на дату; 1 681/1 628 и 875/869 client-day, 1 732/1 662 и 888/880 raw events; null/mismatch клиента и excess технического ключа = 0; 380/309 и 198/212 посетителей с открытым долгом | VALIDATED source key/cardinality and as-of component; контрольные суммы долга сохранены ниже |
 | DV-V02 | Current DAX classes `RecordKind 0/1 × quantity ±1` есть; вне этих четырёх классов 1 970 movements | VALIDATED — эти строки не меняют DAX-признак `unconfirmed`, но их `СуммаИтог` остаётся в сумме группы, если она признана непогашенной |
 | DV-V03 | После text-cast observation: 457 556 base rows, 456 639 current branch rows и keys; branch excess = 0, не выведено 917 | VALIDATED WITH ROW-LOSS RISK — current inner branch не меняется |
 | DV-V06 | Source-side cast observation текстового visit filter: 35 rows = 35 technical keys, 32 client-day-club, missing/mismatched club = 0 | OBSERVED legacy cohort only — по BR-025 не определяет новую cohort посещений |
@@ -236,11 +237,37 @@ DV-V06B проверил единственный подтверждённый �
 единым правилом BR-025 через этот ID операции; legacy `LIKE '%Посещение%'`
 не переносится как определение посещения.
 
-До готовности отчёта остаются независимые as-of controls на контрольных датах
-из Power BI. DV-V07 не выявил проблемы у узкого current count: на горячем
-кэше его execution time = 25,7 мс, shared reads/temp = 0. End-to-end rerun и
-SLA относятся к приёмке созданной витрины по глобальному решению пользователя
-2026-08-19. Никакая из этих границ не закрыта догадкой.
+После SV-099 оставались independent as-of controls на контрольных датах и
+end-to-end rerun/SLA. DV-V05B ниже закрывает source-side as-of control;
+end-to-end rerun и SLA относятся к приёмке созданной витрины по глобальному
+решению пользователя 2026-08-19. Никакая из этих границ не закрыта догадкой.
+
+### DV-V05B — «Посещаемость клиентов с долгами»: две даты × два клуба по BR-025
+
+Статус: `VALIDATED SOURCE-SIDE KEY / AS-OF COMPONENT`. Выполнен 2026-08-19
+на live `gymdb` в одном `REPEATABLE READ, READ ONLY` снимке под
+`gymdb_readonly`, `statement_timeout = 25s`. Точный SQL сохранён как
+[visits_debt_as_of_br025_2026-08-19.sql](validation_sql/visits_debt_as_of_br025_2026-08-19.sql).
+
+До запуска были зафиксированы три ожидаемых технических результата: на каждой
+дате есть не меньше двух фактических клубов BR-025; `дата × клуб × клиент`
+схлопывается без excess технического ключа; клиент документа `Document325`
+не пуст и совпадает с клиентом движения `AccumRg7575`. Все три результата
+получены: null/mismatch клиента и excess ключа равны нулю.
+
+| Дата | Клуб по убыванию числа клиентов | Client-day | Raw events | Посетители с открытым долгом | Долг на конец дня |
+|---|---:|---:|---:|---:|---:|
+| 2026-07-15 | 1 | 1 681 | 1 732 | 380 | 11 947 467,00 |
+| 2026-07-15 | 2 | 1 628 | 1 662 | 309 | 7 525 726,00 |
+| 2026-08-15 | 1 | 875 | 888 | 198 | 3 592 075,00 |
+| 2026-08-15 | 2 | 869 | 880 | 212 | 4 699 714,00 |
+
+Это самостоятельная source-side проверка ключа и текущей DAX-алгебры as-of,
+а не сверка с не переданными фактическими итогами Power BI. По решению
+пользователя 2026-08-18 отсутствие такого среза не является pre-creation
+blocker. Поэтому DV-V05B закрывает оставшийся source-side контроль отчёта;
+старый текстовый фильтр и его расхождение с BR-025 остаются сохранёнными
+артефактами.
 
 ## SV-100 — «Карта администратора»: Gymmy bounded controls
 
