@@ -1,6 +1,6 @@
 # Требования отчёта: «Отчет по посещаемости клиентов с долгами»
 
-Статус: `BUSINESS ANALYSIS COMPLETE / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-089 / IMPLEMENTATION DEFERRED`.
+Статус: `BUSINESS ANALYSIS COMPLETE / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED / BLOCKED SOURCE COHORT — SV-089, SV-099, SV-110 / IMPLEMENTATION DEFERRED`.
 
 Договорный отчёт №22, блок «Гостеприимство». Анализ выполнен локально по
 бизнес-описанию, current M/DAX и снимкам модели. Новые SQL-контроли не
@@ -19,9 +19,10 @@
 [`SV-099 SQL`](../source_metadata/validation_sql/visits_debt_global_review_2026-08-17.sql)
 выполнен read-only: подтверждены physical key, client × prebooking и
 document-branch multiplicity. Current DAX treatment quantity `other` также
-подтверждён исходным TXT. Стабильная visit classification, as-of control и
-SLA остаются открытыми. DDL/DML, Stage 3 и изменения текущего M/DAX не
-выполнялись.
+подтверждён исходным TXT. Стабильная visit classification остаётся `BLOCKED`:
+legacy service-name filter и физический ID операции дают непересекающиеся
+наборы. As-of component проверен SV-110, но без подтверждённой когорты не
+становится итогом KPI. DDL/DML, Stage 3 и изменения current M/DAX не выполнялись.
 
 ## Учёт class-C критичности — 2026-08-13
 
