@@ -31,6 +31,8 @@
 | [source extract](../../sql/marts/administrator_card_gymmy_daily_extract.sql) | ограниченный source-side агрегат без персональных данных |
 | [source controls](../../sql/marts/administrator_card_gymmy_daily_source_controls.sql) | независимые totals по направлениям до card→club mapping |
 | [DDL review](administrator_card_gymmy_daily_ddl_review.sql) | одна таблица, PK и два check constraint; транзакция и rollback указаны в файле |
+| [target replacement](../../sql/marts/administrator_card_gymmy_daily_target_replace.sql) | временная stage-таблица и атомарная замена только BR-003 horizon |
+| [loader](../../scripts/load_administrator_card_gymmy_daily.py) | единственный запуск с `--apply`; без флага отказывается от DDL/DML |
 
 ## Приёмка после отдельного разрешения
 
@@ -46,4 +48,5 @@
 ## Граница разрешения
 
 DDL и DML не запускались. Для запуска требуется одно явное подтверждение
-пользователя после просмотра точного DDL; источник 1С остаётся read-only.
+пользователя после просмотра DDL и target replacement; источник 1С остаётся
+read-only.
