@@ -32,7 +32,7 @@ SV-094 корректно зафиксировал множественност�
 
 | Целевая колонка | Бизнес-описание | Исходная таблица | Исходная колонка | Преобразование | PostgreSQL тип | NULL | Гранулярность | Статус | Источник подтверждения | Тест |
 |---|---|---|---|---|---|---|---|---|---|---|
-| `source_kind` | ветка денежного источника | вычисление | — | `contract_advance`, `membership_service` | `text` | нет | движение | CONFIRMED target scope | M + user decision 2026-07-31 | MR-V11 branch reconciliation |
+| `source_kind` | ветка денежного источника | вычисление | — | `contract_advance`, `membership_service` | `text` | нет | движение | VALIDATED branch scope — SV-123/124 | M + user decision 2026-07-31 | MR-V11 branch reconciliation |
 | `recorder_id` | документ-регистратор | `AccumRg7370/7739` | `RecorderRRef` | канонический ID | `text` candidate | нет | движение | CONFIRMED source / type pending | M | MR-V02 |
 | `recorder_line_no` | номер строки движения | те же регистры | `LineNo` | без изменения | `integer` candidate | нет | движение | VALIDATION_PENDING | source metadata required | MR-V02 |
 | `receipt_date` | дата поступления | `AccumRg7370/7739` | `Period` | `::date` | `date` | нет | движение | CONFIRMED current DAX | M/DAX | MR-V12 |
