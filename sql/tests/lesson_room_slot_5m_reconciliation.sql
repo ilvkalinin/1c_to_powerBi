@@ -39,18 +39,24 @@ SELECT count(*) FILTER (WHERE lesson_start_at < $1::date
 FROM mart.lesson_room_slot_5m;
 
 -- LS-REC-003 — every retained lesson has the exact BR-021 rounded slot count.
+-- The boundary columns are NOT NULL by the target contract; min/max equality
+-- is therefore equivalent to count(DISTINCT ...) = 1 and keeps the check
+-- streamable in primary-key order.
 WITH per_lesson AS (
     SELECT source_kind, source_lesson_id,
-           min(lesson_start_at) AS lesson_start_at,
-           max(lesson_end_at) AS lesson_end_at,
+           min(lesson_start_at) AS min_lesson_start_at,
+           max(lesson_start_at) AS max_lesson_start_at,
+           min(lesson_end_at) AS min_lesson_end_at,
+           max(lesson_end_at) AS max_lesson_end_at,
            count(*)::bigint AS actual_slots,
-           count(DISTINCT lesson_start_at) AS start_values,
-           count(DISTINCT lesson_end_at) AS end_values
+           max(lesson_end_at) AS lesson_end_at
     FROM mart.lesson_room_slot_5m
     GROUP BY source_kind, source_lesson_id
 )
-SELECT count(*) FILTER (WHERE start_values <> 1 OR end_values <> 1) AS inconsistent_lesson_boundaries,
-       count(*) FILTER (WHERE lesson_end_at <= lesson_start_at) AS nonpositive_retained_lessons,
-       count(*) FILTER (WHERE actual_slots <> ceil(extract(epoch FROM lesson_end_at - lesson_start_at) / 300.0)::bigint)
+SELECT count(*) FILTER (WHERE min_lesson_start_at <> max_lesson_start_at
+                         OR min_lesson_end_at <> max_lesson_end_at)
+           AS inconsistent_lesson_boundaries,
+       count(*) FILTER (WHERE lesson_end_at <= min_lesson_start_at) AS nonpositive_retained_lessons,
+       count(*) FILTER (WHERE actual_slots <> ceil(extract(epoch FROM lesson_end_at - min_lesson_start_at) / 300.0)::bigint)
            AS br021_slot_count_mismatches
 FROM per_lesson;
