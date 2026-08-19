@@ -15,9 +15,10 @@ SV-002/SV-006 подтверждают физические relations current M;
 cohort, а `AccumRg7509` — отдельным movement fact. SV-099 подтвердил
 уникальность ключа, отсутствие пустых ключевых ссылок и отсутствие branch
 multiplication. `prebooking_id` не уникален по клиенту, поэтому as-of key
-остаётся `client × prebooking`. Стабильная visit classification, as-of
-controls и SLA остаются открытыми. `quantity other` воспроизводится current
-DAX: не участвует в `unconfirmed`, но остаётся в сумме непогашенной группы.
+остаётся `client × prebooking`. Единая классификация посещения подтверждена
+правилом BR-025; as-of controls остаются открытыми. `quantity other`
+воспроизводится current DAX: не участвует в `unconfirmed`, но остаётся в сумме
+непогашенной группы.
 
 [`SV-099 SQL`](../source_metadata/validation_sql/visits_debt_global_review_2026-08-17.sql)
 выполнен read-only. Его полный результат и критичный артефакт `mvarchar` — в
@@ -58,7 +59,7 @@ DAX: не участвует в `unconfirmed`, но остаётся в сумм
 
 | Целевая колонка | Бизнес-описание | Источник / преобразование | PostgreSQL тип | NULL | Статус | Тест |
 |---|---|---|---|---|---|---|
-| `visit_date` | день включения клиента в когорту | `AccumRg7575.Period` / `Document325`; precedence и состояния подтвердить | `date` | нет | CONFIRMED current / technical pending | DV-V02, DV-V06 |
+| `visit_date` | день включения клиента в когорту | `AccumRg7575.Period` / `Document325`; в cohort входят только `Document325.Fld4164RRef = 9a5a4c90d2b1aede4b91dcd1abe84c43` по BR-025 | `date` | нет | CONFIRMED user rule / technical precedence pending | BR-025, DV-V02 |
 | `visit_club_id` | фактический клуб посещения | `AccumRg7575.Fld7577` и/или `Document325.Fld4167` | `UNKNOWN` | нет | CONFIRMED rule — BR-006 | DV-V06 |
 | `client_key` | клиент для пересечения с движениями долга | общий защищённый ключ | `UNKNOWN` | нет | CONFIRMED need | DV-V04 |
 | `visit_client_count` | вклад уникального клиента в график посещений | `1` после client-day схлопывания | `smallint` | нет | CONFIRMED — решение пользователя 2026-07-31 | DV-V05 |
@@ -88,7 +89,7 @@ DAX: не участвует в `unconfirmed`, но остаётся в сумм
 |---|---|---|
 | Проверенные источники | `AccumRg7575`, `Document325`, `Document329`, `Document279`, `Document313`, клиент, клуб, услуга и сотрудник каталогизированы; `AccumRg7509` добавлен настоящим mapping. | CONFIRMED catalog, metadata, M |
 | Проверенные продукты | `mart.visit_client_day`, `mart.club_day_metrics`, факты ИП, ДПФУ и контроля предзаписи рассмотрены. | CONFIRMED catalog |
-| Проверенные правила | BR-001, BR-002, BR-003, BR-006, BR-007, BR-013 и BR-014 применимы. | CONFIRMED catalog |
+| Проверенные правила | BR-001, BR-002, BR-003, BR-006, BR-007, BR-013, BR-014 и BR-025 применимы. | CONFIRMED catalog |
 | Сравнение гранулярности | `visit_client_day` — client-day; движение долга — event/ПЗ; `club_day_metrics` — только club-day. | CONFIRMED current M/DAX |
 | Сравнение ключей | общий visit факт не хранит `prebooking_id`, движение долга не является событием посещения. | CONFIRMED |
 | Сравнение семантики | ДПФУ/ИП — оказанные услуги, а данный факт — остаток неподтверждённой услуги as-of; контроль предзаписи не подтверждает денежный остаток. | CONFIRMED |
@@ -106,5 +107,5 @@ DAX: не участвует в `unconfirmed`, но остаётся в сумм
 | VALIDATED WITH OBSERVATION | ключ и state `AccumRg7509` | 482 347 movements имеют уникальный physical key; inactive/null ключи = 0. DAX sign и quantity `other` воспроизводятся по TXT; новый state-filter не вводится. | SV-099; дальнейшая as-of сверка — DV-V05. |
 | VALIDATED WITH ROW-LOSS RISK | документные ветки | current branches не размножают движения, но 917 из 457 556 base rows не выводятся через ветвление/inner employee join. | SV-099; current branch не меняется без отдельного решения. |
 | VALIDATION_PENDING | as-of остаток | не доказано контрольными датами, что формула закрывает каждую ПЗ. | DV-V04–DV-V05; independent control отсутствует. |
-| VALIDATION_PENDING | классификация и состояние посещения | `LIKE` и отсутствие status-фильтров не дают стабильную cohort; source `mvarchar` не поддерживает исходный `ILIKE` напрямую. Проверенный кандидат `Document325.Fld4164` дал 3 003 981 строку против 36 legacy-строк и нулевое пересечение. | SV-099 DV-V06/V06B; нужен подтверждённый стабильный ключ, новый фильтр не выводится. |
-| VALIDATION_PENDING | объём и SLA | Узкий current count измерен: `AccumRg7575` ≈ 33,6 млн строк / 29,1 ГБ, execution = 25,7 мс на горячем кэше и без disk/temp reads. Это не доказывает полный refresh SLA. | DV-V07; измерить cold-cache, extract/load и Power BI refresh до вывода о ежедневной готовности. |
+| CONFIRMED | классификация посещения | BR-025 устанавливает общий физический ключ `Document325.Fld4164RRef = 9a5a4c90d2b1aede4b91dcd1abe84c43`. Он намеренно заменяет legacy `LIKE '%Посещение%'`; наблюдаемое расхождение 36 против 3 003 981 строк сохраняется как критичный артефакт. | user decision 2026-08-19; SV-099 DV-V06B; повторная замена правила без нового решения запрещена. |
+| DEFERRED TO ACCEPTANCE | объём и SLA | Узкий current count измерен: `AccumRg7575` ≈ 33,6 млн строк / 29,1 ГБ, execution = 25,7 мс на горячем кэше и без disk/temp reads. End-to-end SLA проверяется при приёмке созданной витрины и её расписания. | DV-V07; global user decision 2026-08-19. |
