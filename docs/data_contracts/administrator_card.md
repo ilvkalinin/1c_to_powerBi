@@ -1,6 +1,6 @@
 # Data contract: «Карта администратора»
 
-Статус: `DESIGNED / IMPLEMENTATION DEFERRED / PHYSICAL SOURCE AVAILABILITY VALIDATED — SV-002 / STAGE 3 CONTROLS PENDING`.
+Статус: `DESIGNED / IMPLEMENTATION DEFERRED / STAGE_2 GYMMY SOURCE CONTROLS CLOSED — SV-002, SV-100, AC-V05 / STAGE 3 CONTROLS PENDING`.
 
 ## PostgreSQL-объект Gymmy
 
@@ -25,7 +25,8 @@ Power Query добавляет к Gymmy малый внешний журнал �
 `Направление`, `Источник`, `Причина`, `Количество использований`. Связи даты и
 клуба — `1:*`, single direction. DAX считает входы/выходы и разницы источников.
 
-SV-002 подтвердил существование `public._inforg5836`. Приёмка Stage 3:
-успешность Gymmy, 12 кодов клуба, суммы до/после агрегации и повторный
+SV-002 подтвердил существование `public._inforg5836`; SV-100/AC-V05 уже
+закрыли source-side успешность Gymmy, 12 кодов карт, card→club и суммы
+до/после дневной агрегации. Приёмка Stage 3 проверит созданный объект и его
 refresh. Внешние Excel-файлы и их Power Query остаются вне анализа; сырые
 карты, терминалы и события не входят.

@@ -1,6 +1,6 @@
 # Разбор текущего запроса: «Карта администратора»
 
-Статус: `EVIDENCE REVIEWED / BUSINESS LOGIC COMPLETE / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-002, SV-100`.
+Статус: `EVIDENCE REVIEWED / BUSINESS LOGIC COMPLETE / STAGE_2 GYMMY SOURCE CONTROLS CLOSED — SV-002, SV-100, AC-V05`.
 
 Источники:
 
@@ -60,7 +60,8 @@ SV-100 выполнил bounded control Gymmy за июль 2026: 9 082 собы
 Unique source index подтверждает physical event key. AC-V05 дополнительно
 подтвердил: у всех 12 карт current last-word label имеет ровно один exact match
 в `Reference132`, поэтому source mapping в канонический клуб однозначен.
-Внешний журнал не открывался.
+Тот же source control проверил дневной `COUNT(*)` до сжатия. Внешний журнал не
+открывался.
 
 ## Критические наблюдения
 
@@ -96,4 +97,6 @@ Unique source index подтверждает physical event key. AC-V05 допо
    фиксируется как контроль.
 3. Полнота списка карт и однозначное соответствие карте клуба.
 4. Сверка дневного `COUNT(*)` до и после агрегации.
-5. Сверка контрольного периода с карточками Power BI.
+5. Сверка контрольного периода с карточками Power BI — будущая post-load
+   приёмка при появлении фактических контрольных значений; не source-side
+   blocker по решению global gate 2026-08-18.

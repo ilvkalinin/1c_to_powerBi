@@ -1,6 +1,6 @@
 # Source-to-target mapping: карта администратора
 
-Статус: `BUSINESS MAPPING CONFIRMED / ARCHITECTURE DESIGNED — ADR-0023 / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-002, SV-100 / IMPLEMENTATION DEFERRED`.
+Статус: `BUSINESS MAPPING CONFIRMED / ARCHITECTURE DESIGNED — ADR-0023 / STAGE_2 GYMMY SOURCE CONTROLS CLOSED — SV-002, SV-100, AC-V05 / IMPLEMENTATION DEFERRED`.
 
 Mapping описывает одну семантическую таблицу Power BI из
 `mart.administrator_card_gymmy_daily` и внешнего журнала администраторов.
@@ -9,7 +9,9 @@ PostgreSQL SQL не создаётся.
 SV-002 подтвердил наличие `public._inforg5836`; SV-100 — его physical event
 key, boolean success и bounded наличие карт/направлений. AC-V05 подтвердил,
 что все 12 согласованных карт однозначно сопоставляются каноническому клубу
-через текущую текстовую метку. Независимый дневной control остаётся открытым.
+через текущую текстовую метку. SV-100 также подтвердил source-side дневной
+`COUNT(*)`; сверка с фактическими цифрами Power BI откладывается до post-load
+приёмки и не является source-side blocker.
 
 ## Гранулярность
 
