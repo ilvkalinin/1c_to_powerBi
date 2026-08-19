@@ -381,6 +381,57 @@ SELECT payment_type,count(*) output_groups,sum(amount) amount_total,
        (SELECT overlap_rows FROM overlap) overlap_with_ordinary_advance_rows
 FROM towel_groups GROUP BY 1 ORDER BY 1;
 
+-- MR-V12A: current-DAX date roles on every membership receipt branch.
+-- The source period is always the BR-003 load boundary.  Metric date is the
+-- source period for recurring/services and activation date otherwise.
+WITH ordinary AS (
+  SELECT 'ordinary_advance'::text AS branch,
+         CASE WHEN c._fld699rref=decode('9bd3ea4748457ee94b2011de6d9687d7','hex') THEN 'recurring'
+              WHEN c._fld699rref=decode('96976725cebf51f7461429d74d3f6cbe','hex') THEN 'free'
+              WHEN c._fld699rref=decode('9a96b207e6e963c44a4421511fef04e5','hex') THEN 'credit' ELSE 'prepayment' END AS payment_type,
+         a._period::date AS receipt_date,c._fld670::date AS activation_date,c._fld671::date AS start_date,c._fld672::date AS end_date
+  FROM public._accumrg7370 a JOIN public._reference59 c ON c._idrref=a._fld7371rref
+  JOIN public._reference163 p ON p._idrref=c._fld685rref JOIN public._reference134 x ON x._idrref=a._fld7376rref
+  JOIN public._enum495 e ON e._idrref=c._fld696rref
+  WHERE a._period>=DATE '2025-01-01' AND a._period<DATE '2027-01-01'
+    AND a._recordertref=ANY(ARRAY[decode('0000013d','hex'),decode('0000013c','hex'),decode('0000011d','hex'),decode('00000130','hex'),decode('0000015a','hex'),decode('00000147','hex'),decode('0000013b','hex'),decode('0000014b','hex'),decode('00000131','hex'),decode('0000014d','hex'),decode('00000153','hex'),decode('00000154','hex'),decode('00000128','hex')])
+    AND c._fld699rref IS NOT NULL AND e._enumorder<>0
+    AND (c._description IS NULL OR c._description::text NOT LIKE '%ИП%') AND x._description::text NOT LIKE '%ДСУ%'
+), towel AS (
+  SELECT 'towel_advance'::text AS branch,'service'::text AS payment_type,
+         a._period::date AS receipt_date,c._fld670::date AS activation_date,c._fld671::date AS start_date,c._fld672::date AS end_date
+  FROM public._accumrg7370 a JOIN public._reference59 c ON c._idrref=a._fld7371rref JOIN public._reference163 p ON p._idrref=c._fld685rref
+  WHERE a._period>=DATE '2025-01-01' AND a._period<DATE '2027-01-01'
+    AND p._fld1733rref=decode('80d100505681013811e4d16f28bf1aab','hex')
+    AND a._recordertref=ANY(ARRAY[decode('0000013d','hex'),decode('0000013c','hex'),decode('0000011d','hex'),decode('00000130','hex'),decode('0000015a','hex'),decode('00000147','hex'),decode('0000013b','hex'),decode('0000014b','hex'),decode('00000131','hex'),decode('0000014d','hex'),decode('00000153','hex'),decode('00000154','hex'),decode('00000128','hex')])
+), services AS (
+  SELECT 'membership_service'::text AS branch,'service'::text AS payment_type,
+         a._period::date AS receipt_date,c._fld670::date AS activation_date,c._fld671::date AS start_date,c._fld672::date AS end_date,
+         CASE WHEN p._description::text='Полотенце' OR p._description::text='Аренда полотенца (разовая)' THEN NULL
+              WHEN strpos(p._description::text,'Со-д')>0 OR strpos(p._description::text,'со-д')>0 OR strpos(p._description::text,'Полоте')>0 OR strpos(p._description::text,'полоте')>0
+                OR strpos(p._description::text,'Госте')>0 OR strpos(p._description::text,'гостев')>0 OR strpos(p._description::text,'Заморо')>0 OR strpos(p._description::text,'заморо')>0
+                OR strpos(p._description::text,'день здоровья')>0 OR strpos(p._description::text,'Переоформление')>0 OR strpos(p._description::text,'Адаптац')>0 OR strpos(p._description::text,'Вход для детей')>0 THEN 'in_scope' END AS service_scope,
+         CASE WHEN (strpos(p._description::text,'Со-д')>0 OR strpos(p._description::text,'со-д')>0) THEN c._fld687rref ELSE a._fld7746rref END AS reporting_club_id
+  FROM public._accumrg7739 a JOIN public._reference163 p ON p._idrref=a._fld7743rref JOIN public._reference59 c ON c._idrref=a._fld7741rref
+  WHERE a._period>=DATE '2025-01-01' AND a._period<DATE '2027-01-01'
+    AND a._fld7743rref<>decode('00000000000000000000000000000000','hex') AND a._recordkind=1
+), all_branches AS (
+  SELECT branch,payment_type,receipt_date,activation_date,start_date,end_date,
+         CASE WHEN payment_type IN ('recurring','service') THEN receipt_date ELSE activation_date END AS metric_date
+  FROM ordinary
+  UNION ALL SELECT branch,payment_type,receipt_date,activation_date,start_date,end_date,receipt_date FROM towel
+  UNION ALL SELECT branch,payment_type,receipt_date,activation_date,start_date,end_date,receipt_date FROM services
+            WHERE service_scope='in_scope' AND reporting_club_id IS NOT NULL AND reporting_club_id<>decode('00000000000000000000000000000000','hex')
+)
+SELECT branch,payment_type,
+       count(*) source_rows,
+       count(*) FILTER(WHERE receipt_date<DATE '2025-01-01' OR receipt_date>=DATE '2027-01-01') receipt_outside_br003,
+       count(*) FILTER(WHERE metric_date IS NULL) metric_date_null,
+       count(*) FILTER(WHERE metric_date<DATE '2025-01-01' OR metric_date>=DATE '2027-01-01') metric_date_outside_br003,
+       count(*) FILTER(WHERE end_date IS NULL) end_date_null,
+       count(*) FILTER(WHERE start_date IS NOT NULL AND end_date IS NOT NULL AND end_date<start_date) invalid_contract_dates
+FROM all_branches GROUP BY 1,2 ORDER BY 1,2;
+
 -- MR-V10C: current-PBIT channel, access-zone and access-type coverage on the
 -- contract-advance branch. This retains the recorder precedence and text
 -- conditions; it only counts current DAX output categories.
