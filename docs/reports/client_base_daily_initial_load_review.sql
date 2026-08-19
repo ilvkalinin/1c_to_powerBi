@@ -13,8 +13,10 @@
 -- VM-1:
 BEGIN ISOLATION LEVEL REPEATABLE READ, READ ONLY;
 SET LOCAL statement_timeout = '60000';
--- Capture independent source controls, then stream only the seven aggregate
--- fields through binary COPY. No source-side write is possible.
+-- Capture independent source controls, then write only the seven aggregate
+-- fields to an ephemeral local binary transfer file. No source-side write is
+-- possible; the file contains no client or membership IDs and is deleted in a
+-- finally block before the runner exits.
 ROLLBACK;
 
 -- VM-2:
@@ -33,9 +35,10 @@ CREATE TEMP TABLE _client_base_daily_expected (
     PRIMARY KEY (report_date, scope_level)
 ) ON COMMIT DROP;
 
--- Binary COPY streams the already aggregated seven fields from VM-1 into the
--- stage. Before any delete, the runner verifies the stage key, every schema
--- invariant, horizon and exact equality with independent source totals.
+-- Binary COPY reads the already aggregated seven fields from the ephemeral
+-- local transfer file into the stage. Before any delete, the runner verifies
+-- the stage key, every schema invariant, horizon and exact equality with
+-- independent source totals.
 COPY _client_base_daily_stage (
     scope_level, report_date, club_id, age_years, age_group, gender, client_count
 ) FROM STDIN WITH (FORMAT BINARY);

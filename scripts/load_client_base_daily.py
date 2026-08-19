@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import tempfile
 import time
 from datetime import date, datetime
 from pathlib import Path
@@ -129,73 +130,86 @@ def main() -> None:
         raise RuntimeError("Unexpected target replacement statement count")
 
     started_at = time.monotonic()
-    with psycopg.connect(**config("SOURCE_")) as source, psycopg.connect(**config("MART_")) as target:
-        with source.cursor() as source_cursor, target.cursor() as target_cursor:
-            source_cursor.execute("BEGIN ISOLATION LEVEL REPEATABLE READ, READ ONLY")
-            source_cursor.execute("SET LOCAL statement_timeout = '60000'")
-            expected = source_totals(source_cursor, source_controls_sql, start, end)
+    transfer_path: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            prefix="client_base_daily_", suffix=".copy", delete=False
+        ) as transfer_file:
+            transfer_path = Path(transfer_file.name)
+            with psycopg.connect(**config("SOURCE_")) as source:
+                with source.cursor() as source_cursor:
+                    source_cursor.execute("BEGIN ISOLATION LEVEL REPEATABLE READ, READ ONLY")
+                    source_cursor.execute("SET LOCAL statement_timeout = '60000'")
+                    expected = source_totals(source_cursor, source_controls_sql, start, end)
+                    print(
+                        f"SOURCE_SNAPSHOT horizon={start}..{end} daily_scope_totals={len(expected)}",
+                        flush=True,
+                    )
+                    with source_cursor.copy(
+                        f"COPY ({extract_sql}) TO STDOUT WITH (FORMAT BINARY)"
+                    ) as source_copy:
+                        for block in source_copy:
+                            transfer_file.write(block)
+                    transfer_file.flush()
+                    source.rollback()
             print(
-                f"SOURCE_SNAPSHOT horizon={start}..{end} daily_scope_totals={len(expected)}",
+                f"SOURCE_COPY_READY bytes={transfer_path.stat().st_size}",
                 flush=True,
             )
 
-            target_cursor.execute("BEGIN")
-            target_cursor.execute(
-                "SELECT pg_advisory_xact_lock(hashtext(%s))",
-                ("mart.client_base_daily:refresh",),
-            )
-            target_cursor.execute(
-                "CREATE TEMP TABLE _client_base_daily_stage (LIKE mart.client_base_daily INCLUDING DEFAULTS) ON COMMIT DROP"
-            )
-            target_cursor.execute(
-                """
-                CREATE TEMP TABLE _client_base_daily_expected (
-                    report_date date NOT NULL,
-                    scope_level text NOT NULL,
-                    client_count bigint NOT NULL,
-                    PRIMARY KEY (report_date, scope_level)
-                ) ON COMMIT DROP
-                """
-            )
-            target_cursor.executemany(
-                "INSERT INTO _client_base_daily_expected VALUES (%s, %s, %s)",
-                [(report_date, scope, count) for (report_date, scope), count in expected.items()],
-            )
-            with target_cursor.copy(
-                f"COPY _client_base_daily_stage ({COLUMNS}) FROM STDIN WITH (FORMAT BINARY)"
-            ) as target_copy, source_cursor.copy(
-                f"COPY ({extract_sql}) TO STDOUT WITH (FORMAT BINARY)"
-            ) as source_copy:
-                transfer_buffer = bytearray()
-                for block in source_copy:
-                    transfer_buffer.extend(block)
-                    if len(transfer_buffer) >= 1_048_576:
-                        target_copy.write(bytes(transfer_buffer))
-                        transfer_buffer.clear()
-                if transfer_buffer:
-                    target_copy.write(bytes(transfer_buffer))
+        with psycopg.connect(**config("MART_")) as target:
+            with target.cursor() as target_cursor:
+                target_cursor.execute("BEGIN")
+                target_cursor.execute(
+                    "SELECT pg_advisory_xact_lock(hashtext(%s))",
+                    ("mart.client_base_daily:refresh",),
+                )
+                target_cursor.execute(
+                    "CREATE TEMP TABLE _client_base_daily_stage (LIKE mart.client_base_daily INCLUDING DEFAULTS) ON COMMIT DROP"
+                )
+                target_cursor.execute(
+                    """
+                    CREATE TEMP TABLE _client_base_daily_expected (
+                        report_date date NOT NULL,
+                        scope_level text NOT NULL,
+                        client_count bigint NOT NULL,
+                        PRIMARY KEY (report_date, scope_level)
+                    ) ON COMMIT DROP
+                    """
+                )
+                target_cursor.executemany(
+                    "INSERT INTO _client_base_daily_expected VALUES (%s, %s, %s)",
+                    [(report_date, scope, count) for (report_date, scope), count in expected.items()],
+                )
+                with target_cursor.copy(
+                    f"COPY _client_base_daily_stage ({COLUMNS}) FROM STDIN WITH (FORMAT BINARY)"
+                ) as target_copy, transfer_path.open("rb") as transfer_input:
+                    while block := transfer_input.read(1_048_576):
+                        target_copy.write(block)
 
-            require_stage_integrity(target_cursor, start, end)
-            staged = totals(target_cursor, "_client_base_daily_stage", start, end)
-            if staged != expected:
-                raise RuntimeError("Staging daily totals differ from independent source control")
-            print(
-                f"STAGE_PASS daily_scope_totals={len(staged)} binary_transfer=buffered_1MiB",
-                flush=True,
-            )
+                require_stage_integrity(target_cursor, start, end)
+                staged = totals(target_cursor, "_client_base_daily_stage", start, end)
+                if staged != expected:
+                    raise RuntimeError("Staging daily totals differ from independent source control")
+                print(
+                    f"STAGE_PASS daily_scope_totals={len(staged)} binary_transfer=local_aggregate_file",
+                    flush=True,
+                )
 
-            for statement in target_statements:
-                target_cursor.execute(statement)
-            persisted = totals(target_cursor, "mart.client_base_daily", start, end)
-            if persisted != expected:
-                raise RuntimeError("Persistent daily totals differ from source snapshot")
-            target.commit()
-            source.rollback()
-            elapsed = time.monotonic() - started_at
-            print(
-                f"DML_COMMITTED horizon={start}..{end} daily_scope_totals={len(persisted)} elapsed_seconds={elapsed:.3f}",
-                flush=True,
-            )
+                for statement in target_statements:
+                    target_cursor.execute(statement)
+                persisted = totals(target_cursor, "mart.client_base_daily", start, end)
+                if persisted != expected:
+                    raise RuntimeError("Persistent daily totals differ from source snapshot")
+                target.commit()
+                elapsed = time.monotonic() - started_at
+                print(
+                    f"DML_COMMITTED horizon={start}..{end} daily_scope_totals={len(persisted)} elapsed_seconds={elapsed:.3f}",
+                    flush=True,
+                )
+    finally:
+        if transfer_path is not None:
+            transfer_path.unlink(missing_ok=True)
 
 
 if __name__ == "__main__":
