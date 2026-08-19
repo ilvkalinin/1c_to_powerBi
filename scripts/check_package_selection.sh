@@ -25,7 +25,8 @@ allowed_report_ids=$(awk -F '\t' '$1 !~ /^#/ && $1 == "global_stage_gate" { prin
 project_reason=$(awk -F '\t' '$1 !~ /^#/ && $1 == "global_stage_gate" { print $5; exit }' "$project_gate")
 if [ "$project_state" = "OPEN" ]; then
   :
-elif [ "$project_state" = "READONLY_REVIEW_AUTHORIZED" ] && [ "$stage" = "$allowed_stage" ]; then
+elif { [ "$project_state" = "READONLY_REVIEW_AUTHORIZED" ] || [ "$project_state" = "STAGE3_PRODUCT_ADMISSION_AUTHORIZED" ]; } \
+  && [ "$stage" = "$allowed_stage" ]; then
   :
 elif [ "$project_state" = "STAGE3_PLANNING_AUTHORIZED" ]; then
   echo "PACKAGE SELECTION REJECTED: Stage 3 planning is authorized, but runnable package selection, DDL and DML remain blocked" >&2
@@ -42,11 +43,11 @@ fi
 
 failed=0
 for report_id in "$@"; do
-  if [ "$project_state" = "READONLY_REVIEW_AUTHORIZED" ]; then
+  if [ "$project_state" = "READONLY_REVIEW_AUTHORIZED" ] || [ "$project_state" = "STAGE3_PRODUCT_ADMISSION_AUTHORIZED" ]; then
     case ",$allowed_report_ids," in
       *,"$report_id",*) ;;
       *)
-        echo "PACKAGE SELECTION REJECTED: $report_id is outside the authorized global read-only review" >&2
+        echo "PACKAGE SELECTION REJECTED: $report_id is outside the authorized global scope" >&2
         failed=1
         continue
         ;;

@@ -2,5 +2,7 @@
 # READONLY_REVIEW_AUTHORIZED permits only its exact Stage 2 report list.
 # STAGE3_PLANNING_AUTHORIZED permits documentation/planning only; selection,
 # DDL and DML remain blocked by scripts/check_package_selection.sh.
+# STAGE3_PRODUCT_ADMISSION_AUTHORIZED permits only the exact listed Stage 3
+# product-admission report; DDL/DML still require separate SQL review.
 gate_id	state	allowed_stage	allowed_report_ids	reason
-global_stage_gate	STAGE3_PLANNING_AUTHORIZED	PLANNING_ONLY	-	User confirmed 2026-08-19 after the full global review: choose and prepare the first Stage-3 wave only. Runnable package selection, DDL, DML and mart creation remain prohibited until a separately confirmed product-admission package.
+global_stage_gate	STAGE3_PLANNING_AUTHORIZED	PLANNING_ONLY	-	User confirmed 2026-08-19: begin creating the remaining marts sequentially. The first planned admission, «Выручка рецепции», is returned to planning after S3-RR-ADMISSION-001 proved that its required scope is absent from mart.ancillary_revenue_movement. No runnable product is authorized until the required architecture decision is recorded.
