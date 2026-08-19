@@ -23,8 +23,12 @@ SELECT
            OR age_group IS NULL
            OR gender NOT IN ('Женский', 'Мужской', 'Не указано')
            OR client_count IS NULL OR client_count <= 0
-           OR (age_years IS NULL AND age_group <> 'Не указано')
-           OR (age_years IS NOT NULL AND age_years < 0)
+           OR NOT (
+               (age_years IS NULL AND age_group = 'Не указано')
+               OR (age_years < 14 AND age_group = 'Дети')
+               OR (age_years BETWEEN 14 AND 17 AND age_group = 'Юниоры')
+               OR (age_years >= 18 AND age_group = 'Взрослые')
+           )
     ) AS contract_violations,
     count(*) FILTER (
         WHERE report_date < $1::date OR report_date >= $2::date

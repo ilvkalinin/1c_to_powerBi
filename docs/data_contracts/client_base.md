@@ -1,6 +1,6 @@
 # Data contract: «Клиентская база»
 
-Статус: `client_base_daily SCHEMA IMPLEMENTED / initial load not requested / snapshot and retention deferred`. Контракт Power BI определён. SV-111 подтвердил daily source formation на всём BR-003; пустая схема прошла S3-CBD-DDL-001. Snapshot и retention сохраняют свои отдельные отложенные вопросы.
+Статус: `client_base_daily INITIAL LOAD COMPLETED / snapshot and retention deferred`. Контракт Power BI определён. SV-111 подтвердил daily source formation на всём BR-003; начальная загрузка 2026-08-19 прошла точную source-to-target сверку. Snapshot и retention сохраняют свои отдельные отложенные вопросы.
 
 ## Общие параметры
 
@@ -42,6 +42,9 @@
 
 `scope_level = club` требует клуб; `network` требует пустой клуб. Пол и
 возрастная группа не бывают пустыми: неизвестное значение — `Не указано`.
+Для `mart.client_base_daily` рассчитанный возраст меньше 14 лет, включая
+отрицательный возраст при будущей дате рождения, сохраняется в группе `Дети`:
+это подтверждённое воспроизведение текущего Power Query отчёта.
 Календарь и клубы фильтруют факт `1:*`, однонаправленно; связи fact-to-fact и
 many-to-many запрещены. DAX выбирает scope и считает среднее по выбранным дням.
 

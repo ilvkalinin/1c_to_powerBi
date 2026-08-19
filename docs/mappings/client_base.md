@@ -1,6 +1,6 @@
 # Source-to-target mapping: агрегированный снимок «Клиентская база»
 
-Статус: `SNAPSHOT/RETENTION DEFERRED / client_base_daily SCHEMA IMPLEMENTED, INITIAL LOAD NOT REQUESTED`.
+Статус: `SNAPSHOT/RETENTION DEFERRED / client_base_daily INITIAL LOAD COMPLETED 2026-08-19`.
 Граница membership-снимка и необходимость раздельных scope подтверждены.
 Этот пакет касается только `mart.client_base_daily`; редкий snapshot, retention
 и их дополнительные разрезы остаются отдельными отложенными продуктами.
@@ -81,7 +81,7 @@ membership-строки, 79 710 уникальных `клиент × клуб` 
 
 ## Дневное расширение для «Работы с посещаемостью»
 
-Статус: `SCHEMA IMPLEMENTED — ADR-0031 / initial load not requested`.
+Статус: `INITIAL LOAD COMPLETED — ADR-0031 / 2026-08-19`.
 
 Решение пользователя от 2026-07-29: показатель «% посещений от КБ» обязан
 брать знаменатель из витрины клиентской базы, а не из текущей таблицы Power BI
@@ -104,7 +104,7 @@ membership-строки, 79 710 уникальных `клиент × клуб` 
 | `report_date` | каждый календарный день целевой истории; снимок на 00:00 | календарь дней вместо понедельников/первых чисел | `date` | нет | CONFIRMED — решение пользователя | BR-005, SV-111 |
 | `club_id` | основной клуб доступа; `NULL` только для network | `Reference59.Fld687 → Reference132.ID` после membership dedupe → canonical hex text | `text` | только `network` | CONFIRMED source key | SV-111, S3-CBD-ADMISSION-001 |
 | `age_years` | возраст на отчётную дату | `Reference141X1.Fld1507` и `report_date`; sentinel `0001-01-01` → `NULL` | `smallint` | да | CONFIRMED current client-base rule | SV-111 |
-| `age_group` | дети `<14`, юниоры `14–17`, взрослые `18+`, `Не указано` | `age_years` | `NULL age_years → «Не указано»` | `text` | нет | CONFIRMED user decision 2026-07-30 | SV-111 |
+| `age_group` | дети `<14`, юниоры `14–17`, взрослые `18+`, `Не указано` | `age_years` | `NULL age_years → «Не указано»`; рассчитанный возраст `<14`, включая отрицательный при будущей дате рождения, → «Дети» | `text` | нет | CONFIRMED user decision 2026-07-30, clarified 2026-08-19 | full-horizon CBD load |
 | `gender` | пол клиента на отчётную дату либо `Не указано` | `Reference141X1.Fld1527` → two confirmed current codes; other/`NULL` → `Не указано` | `text` | нет | CONFIRMED current rule | SV-111 |
 | `client_count` | уникальные действующие клиенты в scope и разрезах | distinct client after BR-005 and scope-specific dedupe | `bigint` | нет | CONFIRMED source formation | SV-111, S3-CBD-ADMISSION-001 |
 
@@ -124,7 +124,7 @@ membership-строки, 79 710 уникальных `клиент × клуб` 
 | CBD-V01 | покрытие календаря | ровно один дневной набор для каждого дня целевой истории и обоих scope | VALIDATED source formation — SV-111: 730/730 дней BR-003 в обоих scope; interval-control 7,039 с |
 | CBD-V02 | boundary 00:00 | начало в D исключается, окончание D−1 включается согласно BR-005 | VALIDATED — SV-069 и 4 exact anchor checks SV-111 |
 | CBD-V03 | ключи/дубли scope | `club` dedupe по `(date, club, client)`, `network` по `(date, client)`; итог не смешивает scope | VALIDATED source formation — SV-111; S3-CBD-ADMISSION-001: 0 invalid scope/club combinations |
-| CBD-V04 | возраст | контролируются дни рождения и границы 13/14/17/18 | VALIDATED — SV-111 на 2026-07-01: возрастные границы представлены, sentinel `0001-01-01` даёт `NULL`, отрицательных возрастов нет |
+| CBD-V04 | возраст | контролируются дни рождения и границы 13/14/17/18; рассчитанный возраст `<14` всегда относится к «Детям» | VALIDATED — SV-111 на 2026-07-01: возрастные границы представлены, sentinel `0001-01-01` даёт `NULL`, отрицательных возрастов нет. Full-horizon load выявил 174 агрегированных строк с отрицательным возрастом; пользователь 2026-08-19 подтвердил их сохранение в «Дети». |
 | CBD-V05 | пол | каждое значение enum однозначно отображается или разрешённо остаётся `NULL` | VALIDATED — SV-111 на 2026-07-01: вся cohort покрыта двумя текущими кодами «Женский»/«Мужской», неожиданных non-NULL кодов нет |
 | CBD-V06 | сверка знаменателя | среднее дневной КБ воспроизводит согласованный контрольный срез посещаемости | VALIDATED source formation — SV-111: 0 differences at 4 direct current-M anchor dates; end-to-end Power BI reconciliation remains post-load |
 
