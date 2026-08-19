@@ -60,7 +60,7 @@ state и interval anomalies сохраняются как артефакты п�
 | 21 | Отчёт по обращениям | `TECHNICAL_GAP` | SV-088: HTML/follow-up, topic/filter, denominator, SLA controls not executed/pending. |
 | 22 | Посещаемость клиентов с долгами | `TECHNICAL_GAP` | SV-089: document/prebooking/text/as-of controls not executed; SLA pending. |
 | 23 | Посещения Пушкинский | `RULE_PRESERVED` | SV-071: categories and observed coupon multiplicity preserved. |
-| 24 | Работа с посещаемостью | `TECHNICAL_GAP` | SV-067: full-year exact query timed out; daily client-base and historical SLA unresolved. |
+| 24 | Работа с посещаемостью | `SOURCE_CONTROL_CLOSED` | WA-V06C: полный двухлетний source-side расчёт дневной КБ эквивалентен current-M на четырёх direct anchors; SLA остаётся приёмкой после создания витрины. |
 | 25 | Карта администратора | `TECHNICAL_GAP` | SV-002 только подтверждает source availability; Gymmy key/success/card→club не доказаны. |
 | 26 | Титульный лист | `EVIDENCE_REUSED` | SV-062—064; Excel branches remain external. |
 | 27 | Маркетинговая воронка | `TECHNICAL_GAP` | SV-080/BR-020 фиксируют правило, но physical task-code/join/state controls остаются. |

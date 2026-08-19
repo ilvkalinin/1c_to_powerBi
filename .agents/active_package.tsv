@@ -12,7 +12,7 @@ children_package_sales	COMPLETE	SELF
 newcomer_guest_visits	COMPLETE	SELF
 calls_report	COMPLETE	SELF
 visits_debt	COMPLETE	SELF
-work_attendance	BLOCKED	-
+work_attendance	COMPLETE	SELF
 administrator_card	COMPLETE	SELF
 marketing_funnel	COMPLETE	SELF
 membership_board	BLOCKED	-

@@ -583,7 +583,8 @@ DV-V07A: шестимесячный source-only as-of count за 2026-01-01—07
 
 ## SV-111 — «Работа с посещаемостью»: source-side дневная клиентская база
 
-Статус: `PARTIALLY VALIDATED`. Выполнен 2026-08-18 на live `gymdb` в
+Статус: `VALIDATED SOURCE FORMATION / POST-CREATION ACCEPTANCE PENDING`. Выполнен
+2026-08-18 и дополнен 2026-08-19 на live `gymdb` в
 `BEGIN READ ONLY` под `gymdb_readonly`, `statement_timeout = 30s`. Точный SQL
 сохранён как CBD-V01A в
 [client_base_2026-08-11.sql](validation_sql/client_base_2026-08-11.sql).
@@ -611,8 +612,36 @@ CBD-V01C повторил контроль с exact overlap-предикатам
 только договоры, неспособные пересечь июль 2026, и выполнился за 17,89 с при
 лимите 30 с. План двухлетнего горизонта BR-003 использует `_reference59_8`
 как `Bitmap Index Scan`, но его оценка 112 253 строк и стоимость 211 142,80
-не являются фактическим временем. Полный двухлетний подсчёт поэтому намеренно
-не запускается как тяжёлый Stage-2 control; срок и SLA остаются незакрытыми.
+не являются фактическим временем. Прямая полная реализация WA-V06B
+([work_attendance_client_base_history_2026-08-19.sql](validation_sql/work_attendance_client_base_history_2026-08-19.sql))
+затем была безопасно остановлена по лимиту 30 с (`QueryCanceled`, 30,167 с):
+это измерение не меняет правило и не является доказательством невозможности
+source-side контроля.
+
+WA-V06C от 2026-08-19 проверил тот же двухлетний горизонт BR-003
+2025-01-01—2026-12-31 без декартова сопоставления каждого договора с каждым
+днём. Для каждого `client × club` и каждого `client` он объединил
+пересекающиеся интервалы действия договоров, где current-M условие остаётся
+точно прежним: `active_from < report_date AND active_to >= report_date - 1`.
+До выполнения план имел стоимость 200 512,60; read-only выполнение с
+`statement_timeout = 30s` заняло 7,039 с. SQL и ожидаемые условия сохранены в
+[work_attendance_client_base_interval_control_2026-08-19.sql](validation_sql/work_attendance_client_base_interval_control_2026-08-19.sql).
+
+| Контроль WA-V06C | Фактический результат | Статус |
+|---|---:|---|
+| Календарные даты BR-003 | 730 из 730 | VALIDATED source formation |
+| Даты с непустой `club` cohort | 730 из 730 | VALIDATED |
+| Даты с непустой `network` cohort | 730 из 730 | VALIDATED |
+| `club` clients по дням | 50 936—92 918 | OBSERVED |
+| `network` clients по дням | 50 921—92 826 | OBSERVED |
+| Расхождения с прямым current-M `COUNT(DISTINCT)` на 2025-01-01, 2025-07-15, 2026-01-01, 2026-07-15 | 0 из 4 | VALIDATED equivalence |
+
+Следствие: источник и exact current-M правило достаточны для полного
+исторического формирования дневной КБ; отдельный источник или новое
+бизнес-правило не требуется. Физический контракт `mart.client_base_daily`,
+end-to-end rerun и измеренный SLA проверяются после разрешённого создания
+витрины: они не могут быть выполнены до появления объекта и не являются
+source-side блокером global gate.
 
 CBD-V04/V05 на 2026-07-01 дополнительно проверили входы возраста и пола в
 network cohort из 79 648 клиентов. Один sentinel даты рождения
