@@ -3,6 +3,7 @@
 -- prebooking_state_event_source_controls.sql in the loader's REPEATABLE READ
 -- source snapshot on 2026-08-14 before target COPY:
 -- rows=2389981, booking_delta=1686747, PZ=575206, GZ=1814775, arrived=133284.
+-- The runner binds $1 = BR-003 horizon_start and $2 = horizon_end.
 
 -- PB-REC-001 — source snapshot controls versus persisted mart controls.
 WITH expected AS (
@@ -37,8 +38,8 @@ SELECT count(*) FILTER (WHERE booking_kind = 'PZ')::bigint AS pz_physical_rows,
 FROM mart.prebooking_state_event;
 
 -- PB-REC-003 — BR-003 horizon, required values, and state-to-delta contract.
-SELECT count(*) FILTER (WHERE lesson_start_at < DATE '2025-01-01'
-                              OR lesson_start_at >= DATE '2027-01-01') AS out_of_horizon_rows,
+SELECT count(*) FILTER (WHERE lesson_start_at < $1::date
+                              OR lesson_start_at >= $2::date) AS out_of_horizon_rows,
        count(*) FILTER (WHERE state_event_at IS NULL OR booking_kind IS NULL
           OR recorder_tref IS NULL OR recorder_id IS NULL OR source_line_no IS NULL
           OR booking_document_id IS NULL OR lesson_start_at IS NULL OR lesson_end_at IS NULL

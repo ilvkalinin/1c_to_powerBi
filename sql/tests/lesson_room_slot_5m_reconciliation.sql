@@ -2,6 +2,7 @@
 -- Initial source snapshot before target DML on 2026-08-14:
 -- rows=5424234, group_slots=1968061, prebooking_slots=3456173,
 -- group_lessons=187435, prebooking_lessons=384089.
+-- The runner binds $1 = BR-003 horizon_start and $2 = horizon_end.
 
 -- LS-REC-001 — snapshot controls versus the persisted target.
 WITH expected AS (
@@ -23,8 +24,8 @@ SELECT e.*, a.*, (e.rows = a.rows AND e.group_slots = a.group_slots
 FROM expected AS e CROSS JOIN actual AS a;
 
 -- LS-REC-002 — target contract and BR-003 horizon.
-SELECT count(*) FILTER (WHERE lesson_start_at < DATE '2025-01-01'
-                              OR lesson_start_at >= DATE '2027-01-01') AS out_of_horizon_rows,
+SELECT count(*) FILTER (WHERE lesson_start_at < $1::date
+                              OR lesson_start_at >= $2::date) AS out_of_horizon_rows,
        count(*) FILTER (WHERE source_kind IS NULL OR source_lesson_id IS NULL
           OR created_at IS NULL OR lesson_start_at IS NULL OR lesson_end_at IS NULL
           OR slot_start_at IS NULL OR club_id IS NULL OR payment_class_current IS NULL

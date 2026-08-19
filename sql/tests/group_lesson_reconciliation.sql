@@ -1,6 +1,7 @@
 -- Read-only reconciliation: mart.group_lesson.
 -- Initial source snapshot before target DML on 2026-08-14:
 -- rows=301237, capacity_sum=5951952, free_arrived_sum=1351360.
+-- The runner binds $1 = BR-003 horizon_start and $2 = horizon_end.
 
 -- GL-REC-001 — source base controls versus persisted mart base controls.
 WITH expected AS (
@@ -19,8 +20,8 @@ FROM expected e CROSS JOIN actual a;
 SELECT (SELECT count(*) FROM (
             SELECT 1 FROM mart.group_lesson GROUP BY group_lesson_id HAVING count(*) > 1
         ) duplicates) AS duplicate_key_groups,
-       count(*) FILTER (WHERE lesson_start_at < DATE '2025-01-01'
-                              OR lesson_start_at >= DATE '2027-01-01') AS out_of_horizon_rows,
+       count(*) FILTER (WHERE lesson_start_at < $1::date
+                              OR lesson_start_at >= $2::date) AS out_of_horizon_rows,
        count(*) FILTER (WHERE group_lesson_id IS NULL OR lesson_created_at IS NULL
           OR lesson_start_at IS NULL OR lesson_end_at IS NULL OR club_id IS NULL
           OR employee_id IS NULL OR service_id IS NULL OR is_free_program IS NULL

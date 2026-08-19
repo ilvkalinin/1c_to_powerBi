@@ -71,7 +71,7 @@ DISTINCT`, поэтому ключ не распадается на нескол
 
 | ID | Важность | Состояние | Что нужно сделать |
 |---|---|---|---|
-| Q-001 | medium | OPEN | В `sql/tests/prebooking_state_event_reconciliation.sql`, `sql/tests/group_lesson_reconciliation.sql` и `sql/tests/lesson_room_slot_5m_reconciliation.sql` границы BR-003 зашиты как 2025–2027. Загрузчики уже используют динамическое правило, но эти три теста после смены горизонта начнут давать ложные ошибки. Заменить даты на параметры горизонта, не меняя бизнес-логику. |
+| Q-001 | medium | RESOLVED (2026-08-19) | В `sql/tests/prebooking_state_event_reconciliation.sql`, `sql/tests/group_lesson_reconciliation.sql` и `sql/tests/lesson_room_slot_5m_reconciliation.sql` статические границы заменены на параметры `$1` и `$2`, как в остальных reconciliation checks. При выполнении `PB-REC-003`, `GL-REC-002` и `LS-REC-002` с независимым горизонтом `[2025-01-01, 2027-01-01)` каждая вернула 0 строк вне горизонта; поиск больше не находит статических границ в этих трёх файлах. Загрузчики и бизнес-логика не менялись. |
 | Q-002 | low | NOT RUN | Повторить полный per-lesson контроль BR-021 вне интерактивного лимита либо потоково по ключу `(source_kind, source_lesson_id, slot_start_at)`; результат записать отдельно. |
 | Q-003 | medium | BLOCKED BY STAGE GATE | Аудит подтвердил целевую целостность и совпадение с первоначальным source snapshot, но не свежесть относительно 1С на 2026-08-19. Новый source-to-target снимок не запускался: действующий глобальный gate разрешает только Stage 3 planning, а не новую Stage 2-проверку. |
 
