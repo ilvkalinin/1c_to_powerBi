@@ -1,6 +1,6 @@
 # Source-to-target mapping: выручка рецепции
 
-Статус: `BUSINESS MAPPING COMPLETE / STAGE 2 VALIDATED / EXTEND ARCHITECTURE CONFIRMED`.
+Статус: `BUSINESS MAPPING COMPLETE / STAGE 2 VALIDATED / EXTEND DDL REVIEW READY`.
 
 SQL и физические объекты не создаются в рамках текущего этапа.
 

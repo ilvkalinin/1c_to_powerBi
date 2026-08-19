@@ -1,6 +1,6 @@
 # ADR-0005: общий факт дополнительных услуг и товаров
 
-- Статус: `IMPLEMENTED FOR DPFU SCOPE / RECEPTION EXTEND CONFIRMED / DDL AND DML PENDING`
+- Статус: `IMPLEMENTED FOR DPFU SCOPE / RECEPTION EXTEND DDL REVIEW READY / DDL AND DML PENDING`
 - Дата: 2026-07-27
 - Отчёт: № 18 «Выручка рецепции»
 
@@ -31,6 +31,10 @@ DDL-review должен определить scope-зависимую обяза
 добавить `reception_category_key`; до его отдельного одобрения физическая
 таблица не меняется. Подробное доказательство —
 `reception_revenue_product_admission_assessment_2026-08-19.md`.
+Точный reviewed migration и её post-DDL проверка хранятся в
+`docs/reports/reception_revenue_shared_fact_extension_ddl_review.sql` и
+`sql/tests/reception_revenue_shared_fact_schema_contract.sql`; они не
+выполнялись.
 
 ## Рассмотренные варианты
 
@@ -48,13 +52,14 @@ DDL-review должен определить scope-зависимую обяза
 Поток данных:
 
 > source-side фильтрация на VM-1 → временный объект атомарной загрузки →
-> общий физический факт на VM-2 → обычный локальный view рецепции →
+> общий физический факт на VM-2 → обычные локальные views ДПФУ и рецепции →
 > Power BI Import.
 
 Предлагаемые объекты до уточнения scope:
 
 - общий факт — `mart.ancillary_revenue_movement`;
-- view отчёта — `mart.v_reception_revenue` (сейчас не создаётся).
+- views отчётов — `mart.v_dpfu_ancillary_revenue` и
+  `mart.v_reception_revenue` (сейчас не создаются).
 
 Общий факт содержит не сырые регистры, а только квалифицированные движения
 дополнительных услуг и товаров за рабочий горизонт и только необходимые

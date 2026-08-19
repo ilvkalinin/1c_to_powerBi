@@ -1,6 +1,6 @@
 # S3-RR-ADMISSION-001: оценка допуска «Выручки рецепции»
 
-Дата: 2026-08-19. Статус: `ARCHITECTURE CONFIRMED — EXTEND / DDL AND DML NOT AUTHORIZED`.
+Дата: 2026-08-19. Статус: `EXTEND DDL REVIEW READY / DDL AND DML NOT AUTHORIZED`.
 Проверка ограничена проектными материалами и целевой VM-2 в режиме чтения.
 DDL, DML и 1С не изменялись.
 
@@ -72,6 +72,12 @@ SV-050—052 уже подтверждают, что рецепционный к
 регистров, полностью распределяется по восьми категориям и не требует новой
 методики. До отдельного DDL/DML-разрешения `mart.v_reception_revenue` не
 создаётся и текущая реализованная таблица не изменяется.
+
+Проверенный текст будущей миграции создаёт две лёгкие views — рецепции и
+ДПФУ — и не создаёт ни новой таблицы, ни индекса. Он сохранён в
+[`reception_revenue_shared_fact_extension_ddl_review.sql`](reception_revenue_shared_fact_extension_ddl_review.sql);
+его post-DDL контракт — в
+[`reception_revenue_shared_fact_schema_contract.sql`](../../sql/tests/reception_revenue_shared_fact_schema_contract.sql).
 
 ## Evidence
 

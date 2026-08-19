@@ -1,6 +1,6 @@
 # Data contract: «Выручка рецепции»
 
-Статус: `EXTEND ARCHITECTURE CONFIRMED / current ancillary scope does not yet contain reception / STAGE 2 VALIDATED`.
+Статус: `EXTEND DDL REVIEW READY / current ancillary scope does not yet contain reception / STAGE 2 VALIDATED`.
 Контракт фиксирует текущую логическую модель. Будущая миграция расширит общий
 факт scope `reception` и добавит `reception_category_key`; SQL и DDL пока не
 создавались, поэтому `mart.v_reception_revenue` нельзя создать над текущей

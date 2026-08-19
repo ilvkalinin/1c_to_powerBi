@@ -1,9 +1,15 @@
 # Data contract: «Выручка ДПФУ»
 
-Статус: `DESIGNED COMPOSITE MODEL / mart.ancillary_revenue_movement IMPLEMENTED / remaining products deferred`.
+Статус: `DESIGNED COMPOSITE MODEL / mart.ancillary_revenue_movement IMPLEMENTED / shared-scope DDL REVIEW READY`.
 
 Модель REUSE `mart.ancillary_revenue_movement`, `mart.ip_training_daily`,
 `mart.ip_revenue_daily` и `mart.dpfu_plan_assignment` по ADR-0005/0012.
+
+После отдельной одобренной миграции рецепции ДПФУ-потребители подключаются к
+`mart.v_dpfu_ancillary_revenue`, а не к неотфильтрованному общему факту. View
+возвращает те же строки и поля ДПФУ, поэтому не меняет текущие M/DAX-правила;
+он нужен только для изоляции будущего рецепционного scope. До миграции view не
+существует и текущая модель не изменяется.
 
 Основной факт содержит дату, source kind, club/client/employee/service/activity/
 format IDs, отображаемые имена, calculation/age categories,
