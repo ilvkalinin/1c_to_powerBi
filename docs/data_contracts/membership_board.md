@@ -1,6 +1,6 @@
 # Data contract: «Членство для правления»
 
-Статус: `DESIGNED REUSE / IMPLEMENTATION DEFERRED / SHARED SOURCE TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-083`.
+Статус: `DESIGNED REUSE / IMPLEMENTATION DEFERRED / SHARED SOURCE VALIDATION COMPLETE — SV-083, SV-096, SV-112—SV-130`.
 
 Отдельного board-факта нет. Отчёт REUSE
 `mart.membership_receipt_movement` и `mart.membership_contract_kpi_unit` из
@@ -20,10 +20,10 @@ MTD/YTD и факторные компоненты.
 
 SV-083 подтвердил в bounded срезах существование двух регистров и контрактных
 справочников, уникальность physical technical keys и отсутствие orphan-contract.
-Приёмка наследует незавершённые MR-V01…MR-V12 и дополнительно требует
-равенство пяти KPI оперативному отчёту, factor reconciliation, отсутствие
-влияния performance aggregate `___Итого по сети`, корректные plan grains и
-SLA. Эти проверки выполняются только после отдельного разрешения Stage 3.
+После создания объектов приёмка повторит end-to-end равенство пяти KPI
+оперативному отчёту, factor reconciliation, отсутствие влияния performance
+aggregate `___Итого по сети`, корректные plan grains и SLA. Это не новые
+source controls и выполняется только после отдельного разрешения Stage 3.
 
 Для реализации `receipt_date` и `metric_date` остаются разными role-playing
 датами; `kpi_unit_key` рекарринга представляет ежемесячный платёж. Только

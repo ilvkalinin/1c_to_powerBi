@@ -1,7 +1,7 @@
 # Source-to-target mapping: «Отчёт членство для правления»
 
 Статус:
-`BUSINESS MAPPING COMPLETE / REUSE CONFIRMED / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-083, SV-096, SV-105, SV-107, SV-112—SV-130 / IMPLEMENTATION DEFERRED`.
+`BUSINESS MAPPING COMPLETE / REUSE CONFIRMED / STAGE_2 SOURCE VALIDATION COMPLETE — SV-083, SV-096, SV-105, SV-107, SV-112—SV-130 / IMPLEMENTATION DEFERRED`.
 
 ## Гранулярность и ключи
 
@@ -31,8 +31,8 @@ sign rules из этого не выводятся.
 
 SV-112 воспроизвёл current-M state/sign CASE на 98 127 включаемых
 распознанных движениях 2026 без новых фильтров. ПКО с `RecordKind=1` не
-встретился в истории 2025–2026; его нулевое правило сохранено как current
-artifact, а не выдано за физически наблюдённый факт.
+встретился в истории 2025–2026; его нулевое правило сохраняется по BR-018
+как критичный current artifact, а не выдаётся за физически наблюдённый факт.
 
 SV-113 подтвердил отсутствие размножения строк и сумм 14 document-recorder
 joins в общей contract-advance ветви. Это не закрывает другие joins и не
@@ -121,8 +121,8 @@ KPI-единицы. `kpi_unit_key` рекарринга остаётся клю�
 а не контракта; `metric_date` не заменяет `receipt_date`. Неаддитивные меры
 вычисляются из детального домена и не берутся из агрегата `___Итого по сети`.
 Технический ключ, current state/sign и общий source domain подтверждены
-SV-096 и SV-112—SV-130. До product admission остаётся только физически
-ненаблюдаемая ПКО-ветка `RecordKind=1`; MB-V01 не создаёт отдельного
+SV-096 и SV-112—SV-130. Физически ненаблюдаемая ПКО-ветка `RecordKind=1`
+сохранена по BR-018 как критичный артефакт; MB-V01 не создаёт отдельного
 source control, потому что board обязан переиспользовать эталонные KPI.
 Приёмка созданной Power BI-модели отдельно проверит factor/performance
 workarounds с внешними планами. Ничто из этого не меняет BR-015, BR-016 или

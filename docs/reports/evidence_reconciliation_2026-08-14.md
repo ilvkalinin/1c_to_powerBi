@@ -66,7 +66,7 @@ state и interval anomalies сохраняются как артефакты п�
 | 27 | Маркетинговая воронка | `TECHNICAL_GAP` | SV-080/BR-020 фиксируют правило, но physical task-code/join/state controls остаются. |
 | 28 | Клиентская база | `RULE_PRESERVED` | SV-069: 00:00 boundary и раздельный club/network dedupe подтверждены. |
 | 29 | Выручка ДПФУ | `EVIDENCE_REUSED` | SV-054—057 и four shared facts validated. |
-| 30 | Членство для правления | `TECHNICAL_GAP` | SV-083: ключ, states и board/non-additive reconciliation ещё не доказаны. |
+| 30 | Членство для правления | `SOURCE_CONTROL_CLOSED` | Эталонный домен поступлений подтверждён SV-096 и SV-112—SV-130; ненаблюдаемое ПКО `RecordKind=1` сохранено по BR-018, а board/non-additive reconciliation выполняется после создания модели. |
 | 31 | Свод выручка ГК | `EVIDENCE_REUSED` | SV-035—050/066; external Excel remains outside PostgreSQL. |
 
 Итог: 21 отчёт не требует нового source control (`EVIDENCE_REUSED` или

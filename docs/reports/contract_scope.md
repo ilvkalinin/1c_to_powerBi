@@ -47,7 +47,7 @@ data contract оформлены по 31 из 31 отчёта. Реализов�
 | 27 | Маркетинг | Воронка | COMPLETE — `marketing_funnel` | COMPLETE — `marketing_funnel` | DESIGNED — REUSE ADR-0011 | COMPLETE — `marketing_funnel` | DEFERRED | PARTIALLY VALIDATED — SV-080; Stage 3 deferred |
 | 28 | Маркетинг | Клиентская база | COMPLETE | COMPLETE — `client_base`, `client_base_retention` | COMPLETE — ADR-0002 | COMPLETE — `client_base` | DEFERRED | PARTIALLY VALIDATED — SV-069; Stage 3 deferred |
 | 29 | Для правления | Выручка ДПФУ | COMPLETE | COMPLETE — `dpfu_revenue` | DESIGNED — ADR-0005/0012/0025 | COMPLETE — `dpfu_revenue` | PARTIALLY IMPLEMENTED — `mart.ancillary_revenue_movement` initial BR-003 load validated; IP and plan products remain deferred | COMPLETE — SV-054—SV-057; S3-LOAD-001—005 |
-| 30 | Для правления | Отчет членство для правления | COMPLETE — `membership_board` | COMPLETE — `membership_board` | DESIGNED — REUSE ADR-0017 | COMPLETE — `membership_board` | DEFERRED | PARTIALLY VALIDATED — SV-083; Stage 3 deferred |
+| 30 | Для правления | Отчет членство для правления | COMPLETE — `membership_board` | COMPLETE — `membership_board` | DESIGNED — REUSE ADR-0017 | COMPLETE — `membership_board` | DEFERRED | VALIDATED source reuse — SV-083, SV-096, SV-112—SV-130; Stage 3 deferred |
 | 31 | Для правления | Свод выручка ГК | COMPLETE — `revenue_group_summary` | COMPLETE — `revenue_group_summary` | DESIGNED — ADR-0010 | COMPLETE — `revenue_group_summary` | DEFERRED | PARTIALLY VALIDATED — SV-035—SV-050, SV-066; Stage 3 deferred |
 
 Локальные бизнес-анализ, mapping, архитектура и Power BI-контракт завершены по

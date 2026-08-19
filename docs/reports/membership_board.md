@@ -1,7 +1,7 @@
 # Отчёт членство для правления
 
 Статус:
-`BUSINESS ANALYSIS COMPLETE / MODEL REVIEW COMPLETE / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-083, SV-096, SV-112—SV-130 / STAGE 3 DEFERRED`.
+`BUSINESS ANALYSIS COMPLETE / MODEL REVIEW COMPLETE / STAGE_2 SOURCE VALIDATION COMPLETE — SV-083, SV-096, SV-112—SV-130 / STAGE 3 DEFERRED`.
 
 Первичные доказательства:
 
@@ -168,6 +168,7 @@ PBIT содержит 29 видимых страниц.
 Бизнес-блокеров локального анализа нет. Recurring KPI определён текущим PBI
 как `contract × payment_period` с суммой движений (SV-096), current-M ключ
 движения и полный исходный денежный контур — SV-127—SV-130. Единственный
-непредставленный физический sign-case — ПКО с `RecordKind=1`; неоднозначности
-цены и predecessor-сортировки сохранены как legacy-риски по BR-018. Это не
-разрешает Stage 3: действует общий project gate.
+непредставленный физический sign-case — ПКО с `RecordKind=1`; он, как и
+неоднозначности цены и predecessor-сортировки, сохранён как legacy-артефакт
+по BR-018 и не создаёт новую трактовку. Это не разрешает Stage 3: действует
+общий project gate.
