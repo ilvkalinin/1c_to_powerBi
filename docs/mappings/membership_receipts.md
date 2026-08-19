@@ -1,7 +1,7 @@
 # Source-to-target mapping: поступления по членству
 
 Статус:
-`BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0017 / STAGE 3 PRODUCT ADMISSION IN PROGRESS; DDL-DML NOT APPROVED`.
+`BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0017 / SHARED SCHEMA IMPLEMENTED 2026-08-19; INITIAL LOAD NOT REQUESTED`.
 
 Этот mapping фиксирует текущую логику отчёта и полный контракт двух общих
 фактов. Подготовка review-SQL разрешена; DDL/DML и создание объектов остаются

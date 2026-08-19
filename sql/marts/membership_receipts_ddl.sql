@@ -1,8 +1,8 @@
--- REVIEWED AND APPLIED 2026-08-19 after separate user approval.
+-- APPLIED only after explicit user approval on 2026-08-19.
 -- Implements the two shared products for «Отчёт по поступлениям» and
 -- «Членство для правления». No board-only fact or `___Итого по сети` cache.
--- Initial load was intentionally not requested.
--- Do not rerun. Post-commit rollback is a separate approved change.
+-- Rollback before COMMIT: ROLLBACK.
+-- Post-commit rollback is a separate approved change and is deliberately not automated.
 
 BEGIN;
 

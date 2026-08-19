@@ -1,6 +1,6 @@
 # Stage 3 PRODUCT ADMISSION: «Членство для правления»
 
-Статус: `ADMISSION IN PROGRESS / DDL AND DML NOT APPROVED`.
+Статус: `SHARED SCHEMA IMPLEMENTED 2026-08-19 / INITIAL LOAD NOT REQUESTED`.
 
 ## Граница пакета
 
@@ -42,6 +42,7 @@ IDs атрибутов договора/продукта и исходным `so
 | S3-MB-ADMISSION-004 | тот же control | по полному current-M ключу 193 116 групп; дублей 0 | CONFIRMED |
 | S3-MB-ADMISSION-005 | VM-2 read-only catalog | PostgreSQL 18.0.3; есть `CREATE` в `mart`, поэтому точный `UNIQUE NULLS NOT DISTINCT` доступен для nullable group drivers | CONFIRMED |
 | S3-MB-ADMISSION-006 | local DDL/mapping review | ровно две общие `CREATE TABLE`; report-specific table/view/cache отсутствуют; все confirmed contract fields присутствуют в review DDL | CONFIRMED / BR-026 |
+| S3-MB-DDL-001 | VM-2, approved DDL | созданы `mart.membership_receipt_movement` (43 колонки, 15 constraints) и `mart.membership_contract_kpi_unit` (30 колонок, 13 constraints); в обеих таблицах 0 строк | VALIDATED |
 
 ## Следствие для реализации
 
@@ -51,6 +52,8 @@ DDL review должен использовать полный natural key M-гр
 recorder/line остаются частью key; для агрегированных веток авансов они
 пусты. Это сохраняет exact M результат и не передаёт на VM-2 лишние raw rows.
 
-До отдельного просмотра DDL и target replacement запрещены любые DDL/DML.
+Пользователь отдельно подтвердил DDL 2026-08-19. Объекты созданы одной
+транзакцией, без DML и без загрузки данных. Initial load и настройка
+обновления не входят в этот пакет и требуют нового явного решения.
 
-Подготовленный для просмотра DDL: [membership receipts DDL](membership_receipts_ddl_review.sql).
+Исполненный DDL: [membership receipts DDL](/Users/ilia/Desktop/Cursor/База%20sql%20НФГ/sql/marts/membership_receipts_ddl.sql).

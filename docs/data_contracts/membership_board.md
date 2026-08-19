@@ -1,6 +1,6 @@
 # Data contract: «Членство для правления»
 
-Статус: `STAGE 3 PRODUCT ADMISSION IN PROGRESS / DDL-DML NOT APPROVED / SHARED SOURCE VALIDATION COMPLETE — SV-083, SV-096, SV-112—SV-130`.
+Статус: `SHARED SCHEMA IMPLEMENTED 2026-08-19 / INITIAL LOAD NOT REQUESTED / SHARED SOURCE VALIDATION COMPLETE — SV-083, SV-096, SV-112—SV-130`.
 
 Отдельного board-факта нет. Отчёт REUSE
 `mart.membership_receipt_movement` и `mart.membership_contract_kpi_unit` из

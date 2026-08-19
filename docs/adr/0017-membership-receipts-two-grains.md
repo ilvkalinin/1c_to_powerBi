@@ -1,6 +1,6 @@
 # ADR-0017: поступления по членству — движение и контрактная KPI-единица
 
-- Статус: `STAGE 3 PRODUCT ADMISSION IN PROGRESS / DDL-DML NOT APPROVED`
+- Статус: `SHARED SCHEMA IMPLEMENTED 2026-08-19 / INITIAL LOAD NOT REQUESTED`
 - Дата: 2026-08-03
 - Отчёты: №13 «Отчёт по поступлениям», №30 «Членство для правления»
 
