@@ -1,6 +1,6 @@
 # Stage 3 PRODUCT ADMISSION: `mart.client_base_daily`
 
-Статус: `SQL REVIEW READY / DDL AND DML NOT AUTHORIZED`.
+Статус: `SCHEMA IMPLEMENTED / INITIAL LOAD, REFRESH AND POWER BI RECONCILIATION NOT AUTHORIZED`.
 
 ## Один продукт и его потребители
 
@@ -22,17 +22,18 @@
 | BR-005 | начало в D исключается, окончание D−1 включается | CONFIRMED |
 | возраст и пол | sentinel-дата рождения → `Не указано`; два текущих пола → `Женский`/`Мужской`, иное/пустое → `Не указано` | CONFIRMED current rule |
 
-## SQL к просмотру
+## Созданная схема
 
-[DDL](client_base_daily_ddl_review.sql) создаёт одну таблицу из семи полей.
+[DDL](client_base_daily_ddl_review.sql) создал одну таблицу из семи полей.
 `UNIQUE NULLS NOT DISTINCT` сохраняет единственность network-строк с пустым
 клубом и строк неизвестного возраста. В схему не включаются client ID, ФИО,
 контракты, посещения, стаж или категории активности.
 
-[Проверка схемы](../../sql/tests/client_base_daily_schema_contract.sql) после
-будущего DDL требует 7 колонок, 5 бизнес-ограничений и пустой факт. Перед
-отдельным initial-load пакетом необходимы source extract, source/target
-controls, rerun и измерение SLA; текущий пакет ничего не создаёт и не грузит.
+[Проверка схемы](../../sql/tests/client_base_daily_schema_contract.sql) прошла
+после DDL: 7 колонок, 5 ограничений (уникальный ключ и 4 проверки), 5
+обязательных колонок и 0 строк. Перед отдельным initial-load пакетом
+необходимы source extract, source/target controls, rerun и измерение SLA;
+данный пакет создал только пустую схему.
 
 Точный read-only admission control сохранён как
 [client_base_daily_admission_2026-08-19.sql](../source_metadata/validation_sql/client_base_daily_admission_2026-08-19.sql).

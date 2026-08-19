@@ -1,6 +1,6 @@
 # Source-to-target mapping: агрегированный снимок «Клиентская база»
 
-Статус: `SNAPSHOT/RETENTION DEFERRED / client_base_daily STAGE 3 SQL REVIEW READY`.
+Статус: `SNAPSHOT/RETENTION DEFERRED / client_base_daily SCHEMA IMPLEMENTED, INITIAL LOAD NOT REQUESTED`.
 Граница membership-снимка и необходимость раздельных scope подтверждены.
 Этот пакет касается только `mart.client_base_daily`; редкий snapshot, retention
 и их дополнительные разрезы остаются отдельными отложенными продуктами.
@@ -81,7 +81,7 @@ membership-строки, 79 710 уникальных `клиент × клуб` 
 
 ## Дневное расширение для «Работы с посещаемостью»
 
-Статус: `STAGE 3 SQL REVIEW READY — ADR-0031 / NO DDL OR DML AUTHORIZED`.
+Статус: `SCHEMA IMPLEMENTED — ADR-0031 / initial load not requested`.
 
 Решение пользователя от 2026-07-29: показатель «% посещений от КБ» обязан
 брать знаменатель из витрины клиентской базы, а не из текущей таблицы Power BI

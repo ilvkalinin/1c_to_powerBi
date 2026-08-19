@@ -1,4 +1,4 @@
--- REVIEW ONLY — do not execute without separate user approval for DDL.
+-- REVIEWED AND APPLIED 2026-08-19 after separate user approval for DDL.
 -- Product: mart.client_base_daily.
 -- No client IDs, PII, raw memberships or retention rows are stored here.
 
@@ -41,6 +41,6 @@ COMMENT ON TABLE mart.client_base_daily IS
 
 COMMIT;
 
--- Before COMMIT: ROLLBACK.
--- Post-commit rollback is a separate approved change. Do not delete the
--- fact automatically.
+-- This reviewed definition is retained as the physical-schema record.
+-- Post-commit rollback is a separate approved change. Do not delete the fact
+-- automatically.

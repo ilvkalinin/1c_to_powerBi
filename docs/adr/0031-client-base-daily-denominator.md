@@ -1,6 +1,6 @@
 # ADR-0031: ежедневный знаменатель клиентской базы
 
-- Статус: `ACCEPTED / STAGE 3 SQL REVIEW READY / NO DDL OR DML AUTHORIZED`
+- Статус: `ACCEPTED / SCHEMA IMPLEMENTED / INITIAL LOAD NOT REQUESTED`
 - Дата: 2026-08-19
 - Потребители: «Работа с посещаемостью», KPI Фитнеса, «Титульный лист»
 

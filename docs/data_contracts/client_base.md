@@ -1,6 +1,6 @@
 # Data contract: «Клиентская база»
 
-Статус: `client_base_daily SQL REVIEW READY / snapshot and retention deferred`. Контракт Power BI определён. SV-111 подтвердил daily source formation на всём BR-003; DDL/DML не выполнялись. Snapshot и retention сохраняют свои отдельные отложенные вопросы.
+Статус: `client_base_daily SCHEMA IMPLEMENTED / initial load not requested / snapshot and retention deferred`. Контракт Power BI определён. SV-111 подтвердил daily source formation на всём BR-003; пустая схема прошла S3-CBD-DDL-001. Snapshot и retention сохраняют свои отдельные отложенные вопросы.
 
 ## Общие параметры
 
