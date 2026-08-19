@@ -132,7 +132,7 @@ def main() -> None:
     with psycopg.connect(**config("SOURCE_")) as source, psycopg.connect(**config("MART_")) as target:
         with source.cursor() as source_cursor, target.cursor() as target_cursor:
             source_cursor.execute("BEGIN ISOLATION LEVEL REPEATABLE READ, READ ONLY")
-            source_cursor.execute("SET LOCAL statement_timeout = '30000'")
+            source_cursor.execute("SET LOCAL statement_timeout = '60000'")
             expected = source_totals(source_cursor, source_controls_sql, start, end)
             print(
                 f"SOURCE_SNAPSHOT horizon={start}..{end} daily_scope_totals={len(expected)}",

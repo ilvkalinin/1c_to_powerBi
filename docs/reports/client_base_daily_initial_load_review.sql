@@ -6,7 +6,18 @@
 -- Full source aggregate: sql/marts/client_base_daily_extract.sql.
 -- Independent source totals: sql/marts/client_base_daily_source_controls.sql.
 -- Runner: scripts/load_client_base_daily.py (refuses to write without --apply).
+-- VM-1 runs READ ONLY with a hard 60-second statement cap: the independently
+-- measured query completes in less time, but binary transfer of 1.66m rows
+-- needs more than the former 30-second cap.
 
+-- VM-1:
+BEGIN ISOLATION LEVEL REPEATABLE READ, READ ONLY;
+SET LOCAL statement_timeout = '60000';
+-- Capture independent source controls, then stream only the seven aggregate
+-- fields through binary COPY. No source-side write is possible.
+ROLLBACK;
+
+-- VM-2:
 BEGIN;
 
 SELECT pg_advisory_xact_lock(hashtext('mart.client_base_daily:refresh'));
