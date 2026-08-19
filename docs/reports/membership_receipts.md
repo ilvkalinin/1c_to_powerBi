@@ -1,7 +1,7 @@
 # Отчёт по поступлениям
 
 Статус:
-`BUSINESS ANALYSIS COMPLETE / MODEL REVIEW COMPLETE / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-083; Stage 3 deferred`.
+`BUSINESS ANALYSIS COMPLETE / MODEL REVIEW COMPLETE / STAGE 3 PRODUCT ADMISSION IN PROGRESS; DDL/DML NOT APPROVED`.
 
 Первичные доказательства:
 
@@ -17,8 +17,10 @@
   составу поступлений, возрастному срезу, оплате, каналу, стажу, границе
   планов и полный M `ПродажаЗаморозкиСАбонементом`.
 
-Подключения к PostgreSQL/1С, SQL и `EXPLAIN` не выполнялись. Все физические
-проверки имеют статус `VALIDATION_PENDING`.
+Проверенные source controls и их результаты зафиксированы в
+`docs/source_metadata/server_validation_2026-08-14.md` и в admission-пакете.
+DDL, DML и загрузка целевых объектов не выполнялись и остаются запрещёнными
+до отдельного просмотра SQL.
 
 ## Stage 2: SV-083 (2026-08-11)
 
@@ -257,7 +259,8 @@ BR-008 к этому продуктовому срезу не применяет
 - текущий и среднесрочный планы являются неизменяемыми Excel-файлами,
   остаются отдельными фактами Power BI и в PostgreSQL-витрины не переносятся.
 
-Физическая витрина, ADR, data contract и production SQL не утверждены.
+Подготовлен только review-вариант DDL двух общих фактов. Production SQL и
+создание объектов не утверждены.
 Бизнес-блокеров текущего локального анализа не осталось. Физические ключи,
 состояния источника, кардинальности и производительность остаются
 `VALIDATION_PENDING`.

@@ -1,11 +1,13 @@
 # Data contract: «Членство для правления»
 
-Статус: `DESIGNED REUSE / IMPLEMENTATION DEFERRED / SHARED SOURCE VALIDATION COMPLETE — SV-083, SV-096, SV-112—SV-130`.
+Статус: `STAGE 3 PRODUCT ADMISSION IN PROGRESS / DDL-DML NOT APPROVED / SHARED SOURCE VALIDATION COMPLETE — SV-083, SV-096, SV-112—SV-130`.
 
 Отдельного board-факта нет. Отчёт REUSE
 `mart.membership_receipt_movement` и `mart.membership_contract_kpi_unit` из
 контракта `membership_receipts`/ADR-0017. Схема, ключи, роли дат и NULL
-полностью наследуются.
+полностью наследуются. Рассчитанные таблицы Board-PBIT не являются третьим
+фактом: это технический кэш, появившийся из-за ограничения Power BI на
+аудитных визуалах с множеством срезов.
 
 Пользовательские поля: даты поступления/KPI/окончания, reporting/access/sales
 club roles, manager, super stage, product age, payment type/source, product,
@@ -28,4 +30,6 @@ source controls и выполняется только после отдельн
 Для реализации `receipt_date` и `metric_date` остаются разными role-playing
 датами; `kpi_unit_key` рекарринга представляет ежемесячный платёж. Только
 денежные поступления аддитивны; средние, доли и factor helpers считаются из
-детального домена, а не агрегируются из `___Итого по сети`.
+детального домена, а не агрегируются из `___Итого по сети`. Потенциальный
+физический cache допустим лишь после измерения и сверки с этими двумя фактами
+по всем общим срезам (BR-026).

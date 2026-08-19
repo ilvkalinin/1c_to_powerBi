@@ -1,18 +1,21 @@
 # Source-to-target mapping: поступления по членству
 
 Статус:
-`BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0017 / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-083, SV-105, SV-107, SV-112—SV-130; Stage 3 deferred`.
+`BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0017 / STAGE 3 PRODUCT ADMISSION IN PROGRESS; DDL-DML NOT APPROVED`.
 
-Этот mapping фиксирует текущую логику отчёта и не утверждает физический объект
-или SQL. На `STAGE_1_LOCAL_ANALYSIS` DDL/DML и серверные проверки запрещены.
+Этот mapping фиксирует текущую логику отчёта и полный контракт двух общих
+фактов. Подготовка review-SQL разрешена; DDL/DML и создание объектов остаются
+запрещёнными до отдельного просмотра SQL.
 
 ## Гранулярность
 
 Подтверждены два разных уровня:
 
-1. движение поступления — квалифицированная строка источника
-   `source_kind × recorder_id × line_no`; текущий Power Query теряет `line_no`
-   и агрегирует широкий набор полей;
+1. движение поступления — одна текущая M-группа квалифицированных source rows.
+   Raw key `source_kind × recorder_id × line_no` остаётся source-side control
+   SV-130, но не является ключом целевой строки: current M группирует строки
+   до вычета со-доступа. S3-MB-ADMISSION-002—004 подтвердили 193 116 точных
+   M-групп без дублей и запретили раскладывать group-level вычет по raw rows;
 2. единица контрактных KPI:
    - предоплата — один квалифицированный `contract_id`;
    - рекарринг — один квалифицированный ежемесячный платёж контракта;
@@ -25,18 +28,20 @@
 SV-094 корректно зафиксировал множественность движений, но ошибочно назвал её
 ошибкой ключа; исправление интерпретации — SV-096.
 
-Технический ключ движения current-M domain:
-`(source_kind, recorder_id, line_no)` — `VALIDATED` в SV-130. Тип документа
-физического регистра не требуется в этом ключе: внутри каждой из двух веток
-сочетание `recorder_id + line_no` не повторяется между типами документа.
+Технический ключ raw current-M domain `(source_kind, recorder_id, line_no)`
+остается `VALIDATED` в SV-130. Тип документа физического регистра не требуется
+в нём: внутри каждой из двух веток сочетание `recorder_id + line_no` не
+повторяется между типами документа. Целевой unique key — полный natural key
+M-группы; он фиксируется в Stage 3 DDL review с `NULLS NOT DISTINCT`.
 
 ## Целевые колонки движения и контрактных атрибутов
 
 | Целевая колонка | Бизнес-описание | Исходная таблица | Исходная колонка | Преобразование | PostgreSQL тип | NULL | Гранулярность | Статус | Источник подтверждения | Тест |
 |---|---|---|---|---|---|---|---|---|---|---|
 | `source_kind` | ветка денежного источника | вычисление | — | `ordinary_advance`, `towel_advance`, `membership_service` | `text` | нет | движение | VALIDATED branch scope — SV-123/124/130 | M + user decision 2026-07-31 | MR-V11 branch reconciliation |
-| `recorder_id` | документ-регистратор | `AccumRg7370/7739` | `RecorderRRef` | канонический ID | `text` | нет | движение | VALIDATED CURRENT-M KEY — SV-130 | source physical key + MR-V02B | MR-V02 |
-| `recorder_line_no` | номер строки движения | те же регистры | `LineNo` | без изменения | `integer` | нет | движение | VALIDATED CURRENT-M KEY — SV-130 | source physical key + MR-V02B | MR-V02 |
+| `source_object` | исходный канал current-M-группы | recorder documents + product | несколько | точный current-M `source_object` до presentation fallback; `instalment`, `club`, `website`, `app`, `employee_app`, `web_customer` или NULL | `text` | да | движение | VALIDATED current-M group driver — S3-MB-ADMISSION-004 | MR-V11E/I | exact M-group uniqueness |
+| `source_group_recorder_id` | physical key неагрегированной service-ветки | `AccumRg7739` | `RecorderRRef` | канонический ID; для current-M групп авансов NULL, raw ID остальных веток — только source control | `text` | да | движение | VALIDATED current-M service branch — SV-123/130 | source physical key + MR-V02B | raw-to-group reconciliation |
+| `source_group_line_no` | номер physical source строки service-ветки | `AccumRg7739` | `LineNo` | без изменения; для current-M групп авансов NULL | `integer` | да | движение | VALIDATED current-M service branch — SV-123/130 | source physical key + MR-V02B | raw-to-group reconciliation |
 | `receipt_date` | дата поступления | `AccumRg7370/7739` | `Period` | `::date` | `date` | нет | движение | VALIDATED current-DAX input — SV-126 | M/DAX | MR-V12 |
 | `metric_date` | дата количества/цен/длительности | movement + `Reference59` | `Period`, `Fld670` | рекарринг и услуга → дата движения; предоплата, бесплатно и кредит → дата активации | `date` | да при отсутствующей активации | контрактная единица | VALIDATED current-DAX input — SV-126 | DAX + user decision 2026-07-31 | MR-V12 |
 | `contract_id` | устойчивый ID контракта | registers → `Reference59` | `Fld7371/Fld7741/Fld7655` → `ID` | канонический ID | `text` candidate | да у услуг | движение / контракт | CONFIRMED current source | SQL/M | orphan test |
@@ -50,6 +55,7 @@ SV-094 корректно зафиксировал множественност�
 | `amount_signed` | сумма после правила документа | `AccumRg7370` | `RecordKind`, recorder type, `Fld7377` | текущий sign CASE; ПКО → 0 | `numeric` | нет | движение | CONFIRMED current M / partial physical state-sign validation; ПКО `RecordKind=1` не встречен | M, SV-112 | MR-V03/MR-V04 |
 | `co_access_amount` | сумма со-доступа, вычитаемая из аванса | `AccumRg7739` | `Fld7749` | текстовая классификация со-доступа, aggregate contract+date | `numeric` | да (`0`) | contract × date | VALIDATED current PBIT cardinality — SV-114/122 | M/DAX | MR-V07 |
 | `receipt_amount_net` | контрактное поступление без со-доступа | вычисление | `amount_signed`, `co_access_amount` | `amount_signed - co_access_amount` | `numeric` | нет | движение | VALIDATED current DAX input — SV-122 | `_Сумма итог2` | MR-V11 |
+| `source_movement_count` | число source rows в target M-группе | `AccumRg7370/7739` | — | `COUNT(*)` после точной current-M группировки; service-ветка = 1 | `bigint` | нет | движение | VALIDATED exact M-group — S3-MB-ADMISSION-004 | MR-V11E/I | raw-to-group reconciliation |
 | `service_group` | membership-категория услуги | `Reference163` | `Description` | только со-доступ, полотенца, гостевой визит, заморозка, переоформление, адаптация ДРЦ, вход для детей | `text` | да | движение услуги | VALIDATED current-PBIT service branch — SV-123 | M + user decision 2026-07-31 | MR-V11 |
 | `movement_club_id` | клуб движения услуги | `AccumRg7739` | `Fld7746` | канонический club ID | `text` | да | движение | CONFIRMED current source | SQL | orphan |
 | `access_club_id` | основной клуб доступа контракта | `Reference59` | `Fld687` | канонический club ID | `text` | да | контракт | CONFIRMED current source | SQL | orphan |
@@ -63,17 +69,22 @@ SV-094 корректно зафиксировал множественност�
 | `free_freeze_before_activation_days` | бесплатная заморозка до активации | `AccumRg7478`, paid freeze branches, `AccumRg7646` | `Fld7481`, `Fld7655`, `Fld7659`, `Reference163.Fld1756` | total freeze minus paid freeze, including sold freeze aggregated per contract; floor at 0 | `numeric` | нет (`0`) | контракт | VALIDATED CURRENT-PBIT DEDUP — SV-117: ОРП joins кратны до существенного `Table.Distinct`, порядок сохранён | DOCX + user M 2026-07-31 | MR-V09 |
 | `effective_duration_days` | длительность для KPI | вычисление | payment type, term, freeze | service blank; recurring 30.42; prepayment term + free freeze | `numeric` | да | контрактная единица | CONFIRMED current DAX | `_ДлитКонтрСуперНовая` | MR-V11 |
 | `source_stage` | исходный NEW/RENEW/EX | `Reference59` | `Fld694` | current `Enum402` mapping; нулевая ссылка остаётся пустой | `text` | да | контракт | VALIDATED CURRENT-PBIT COVERAGE — SV-118: 458 нулевых ссылок без fallback | `стаж_контракта` | MR-V10 |
+| `source_stage_id` | технический ID исходного стажа | `Reference59` | `Fld694RRef` | канонический ID без label fallback; участвует в exact current-M key | `text` | да | движение | VALIDATED current-M group driver — S3-MB-ADMISSION-004 | MR-V11E/I | exact M-group uniqueness |
 | `super_stage` | динамический ресурс KPI | predecessor contract + analytics | несколько | `NEW`, `RENEW`, `RENEW(БП)`, `EX`, `Продажа`, `Списание`, `Клип-карты` | `text` | нет | контрактная единица | CONFIRMED target rule | PBIT DAX + user decision 2026-07-31 | scenario matrix |
 | `payment_type` | тип оплаты | `Reference59` + current M | `Fld699`, contract type | `9bd3ea4748457ee94b2011de6d9687d7` → `Рекарринг`; другой non-NULL → `Предоплата`; `NULL` → `Услуга`; `Кредит`/`Бесплатный` отображаются в `Предоплате`, когда не исключены scope | `text` | нет | движение | VALIDATED CURRENT-PBIT COVERAGE — SV-118 | current M + BR-024 | MR-V10 |
 | `payment_source` | канал продажи | recorder documents + product name | несколько | current COALESCE/override; сохранять `Клуб`, `Website`, `App`, `App сотрудника`, `Web customer`, `Рассрочка` | `text` | да | движение | VALIDATED CURRENT-PBIT COVERAGE — SV-119; Website/App сотрудника не наблюдались | M/DAX + user decision 2026-07-31 | MR-V10 |
 | `product_id` | номенклатура контракта/услуги | `Reference59`, `AccumRg7739`, `Reference163` | `Fld685/Fld7743`, `ID` | stable product ID | `text` | да | движение | CONFIRMED current source | SQL/M | orphan |
 | `product_age_category` | продуктовая возрастная категория | `Reference163` | `Fld1741` + name/type | `Взрослые`/`Дети`/`Юниоры`; current `Детские секции` → `Дети` | `text` | да | контракт | VALIDATED CURRENT-PBIT COVERAGE — SV-118 | PBIT M/DAX + user correction 2026-07-31 | MR-V10 |
 | `purchase_type` | передача/продажа | `Reference59` | `Fld668` | current GUID mapping | `text` | да | контракт | CONFIRMED current DAX | DAX | GUID coverage |
+| `purchase_type_id` | технический ID типа приобретения | `Reference59` | `Fld668RRef` | канонический ID; участвует в exact current-M key | `text` | да | движение | VALIDATED current-M group driver — S3-MB-ADMISSION-004 | MR-V11E/I | exact M-group uniqueness |
 | `membership_kind` | стандартный/подарок/совместный/эксклюзивный | `Reference59` | `Fld667` + product name | current GUID/text mapping | `text` | да | контракт | CONFIRMED current DAX | DAX | coverage |
+| `membership_kind_id` | технический ID вида абонемента | `Reference59` | `Fld667RRef` | канонический ID; участвует в exact current-M key | `text` | да | движение | VALIDATED current-M group driver — S3-MB-ADMISSION-004 | MR-V11E/I | exact M-group uniqueness |
 | `club_access_type` | сетевой/локальный | `Reference59`, `InfoRg8595` | `Fld697`, `Fld8603/8597...` | product override then contract GUID | `text` | да | контракт | VALIDATED CURRENT-PBIT COVERAGE — SV-119/120 | DAX | MR-V10 |
+| `club_access_type_id` | технический ID типа клубного доступа | `Reference59` | `Fld697RRef` | канонический ID; участвует в exact current-M key | `text` | да | движение | VALIDATED current-M group driver — S3-MB-ADMISSION-004 | MR-V11E/I | exact M-group uniqueness |
 | `access_time_type` | дневной/безлимитный/ограничение | `InfoRg8595`, product name | `Fld8599`, description | current text override then index | `text` | да | контракт | VALIDATED CURRENT-PBIT LOOKUP AND FALLBACK — SV-120 | DAX | MR-V10 |
 | `access_zone` | VIP/Exclusive/кандидат/весь клуб | product name + club | `Description` | current ordered text search | `text` | нет | контракт | VALIDATED CURRENT-PBIT COVERAGE — SV-119 | DAX | MR-V10 |
 | `list_contract_price` | полная цена для режима П | `AccumRg7646/7739` → `_Спр Абонементы.price` | `Fld7659/Fld7749` | текущая contract aggregation; tie-break pending | `numeric` | да | контрактная единица | VALIDATED RISK — SV-115: multiple price pairs, current `Table.Distinct` preserved | SQL/M/DAX | MR-V06 |
+| `calculation_price` | сумма для средней цены контракта | M-group + `list_contract_price` | несколько | recurring `Продажа/Списание` и режим `Ф` → net receipt; режим `П` → current `MINX(list_contract_price)`; режим `УК` → NULL | `numeric` | да | контрактная единица | CONFIRMED current DAX | `__СуммаДляРасчетов` | MR-V11 |
 | `calculation_mode` | правило цены по клубу | club mapping | club name | Пушкинский=`П`, УК/ДРЦ=`УК`, прочие=`Ф` | `text` | нет | контракт | CONFIRMED current DAX / hard-code risk | DAX | all clubs covered |
 
 ## Производные меры Power BI
@@ -163,6 +174,7 @@ PBIT подтверждает общую звезду и одновременн�
 | REJECTED | reuse `mart.contract_usage` | different fact: visits over one contract, no receipt movements | source rule/dimensions only |
 | REJECTED | plans in PostgreSQL mart | user confirmed stable Excel files remain in Power BI | keep separate external plan facts |
 | REJECTED | direct plan-to-movement join | incompatible grain and sum multiplication | separate plan facts with shared dimensions |
+| REJECTED | physical copies of `___Итого по сети` / «Таблица активных контрактов» | report-specific calculated tables are not business facts | BR-026: only the two shared grains are physical products |
 | REJECTED | PII in target by default | no confirmed consumer on shown pages | protected key only |
 
 ## Stage 2 evidence — SV-083

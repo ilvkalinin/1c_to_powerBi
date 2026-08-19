@@ -1,12 +1,12 @@
 # Data contract: «Поступления по членству»
 
-Статус: `DESIGNED / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-083, SV-096, SV-112—SV-130`.
+Статус: `STAGE 3 PRODUCT ADMISSION IN PROGRESS / DDL-DML NOT APPROVED / SHARED SOURCE VALIDATION COMPLETE — SV-083, SV-096, SV-112—SV-130`.
 
 ## Объекты
 
 | Объект | Таблица Power BI | Grain / ключ |
 |---|---|---|
-| `mart.membership_receipt_movement` | `Поступления` | движение / `(source_kind, recorder_id, recorder_line_no)` — validated current-M key, SV-130 |
+| `mart.membership_receipt_movement` | `Поступления` | current-M receipt group / полный natural key с `UNIQUE NULLS NOT DISTINCT`; raw key SV-130 остаётся source control |
 | `mart.membership_contract_kpi_unit` | `Контрактные KPI` | контракт предоплаты или ежемесячный recurring payment / `kpi_unit_key` |
 
 Оба объекта — Import, ежедневный bounded rebuild BR-003 до 08:30. Надёжного
@@ -19,7 +19,8 @@ watermark нет. Планы остаются внешними Power BI-факт
 
 | Поля | Целевые типы | Роль / видимость |
 |---|---|---|
-| `source_kind`, `recorder_id`, `recorder_line_no` | text, text, integer | ключ; recorder скрыт |
+| `source_kind`, `source_object`, `source_group_recorder_id`, `source_group_line_no` | text, text, text, integer | branch и technical drivers current-M key; physical raw key нужен только неагрегированной service-ветке; скрыть |
+| `source_stage_id`, `purchase_type_id`, `membership_kind_id`, `club_access_type_id` | text | technical IDs exact M-group; скрыть |
 | `receipt_date` | date | активный FK календаря |
 | `contract_id`, `client_key` | text | technical, скрыть |
 | `movement_kind`, `recorder_type` | smallint, text | source classification, скрыть/срез |
@@ -44,9 +45,20 @@ watermark нет. Планы остаются внешними Power BI-факт
 | `list_contract_price` | numeric | KPI amount; не суммировать без unit filter |
 | `calculation_mode` | text | classification, скрыть |
 
-Все колонки mapping, относящиеся только к одному grain, размещаются только в
+Технические drivers exact M-группы (`accounting_analytics_text`,
+`source_product_name`, `source_product_freeze_days`, `source_object`,
+`source_stage_id`, `purchase_type_id`, `membership_kind_id`,
+`club_access_type_id`) скрыты, участвуют только в unique key и не являются
+пользовательскими срезами. Их отображаемые классификации не заменяют IDs в
+ключе. Все колонки mapping,
+относящиеся только к одному grain, размещаются только в
 соответствующем объекте; смешанная строка запрещена. `metric_date` у services
 не создаётся, услуги отсутствуют в KPI-unit.
+
+Объекты контракта не повторяют calculated tables Power BI. «Таблица активных
+контрактов» — потребительский фильтр старой модели; `___Итого по сети` — её
+performance workaround. Оба заменяются использованием этих двух общих фактов
+и не получают физических аналогов.
 
 ## Связи и меры
 

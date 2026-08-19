@@ -1,14 +1,15 @@
 # Source-to-target mapping: «Отчёт членство для правления»
 
 Статус:
-`BUSINESS MAPPING COMPLETE / REUSE CONFIRMED / STAGE_2 SOURCE VALIDATION COMPLETE — SV-083, SV-096, SV-105, SV-107, SV-112—SV-130 / IMPLEMENTATION DEFERRED`.
+`BUSINESS MAPPING COMPLETE / REUSE CONFIRMED / STAGE 3 PRODUCT ADMISSION IN PROGRESS; DDL-DML NOT APPROVED`.
 
 ## Гранулярность и ключи
 
 Отдельного board-факта нет.
 
-- денежное движение: полностью повторяет grain
-  `membership_receipts` — `source_kind × recorder_id × line_no`;
+- денежное движение: полностью повторяет current-M grain
+  `membership_receipts` — полный natural key M-группы; raw
+  `source_kind × recorder_id × line_no` остаётся только source control;
 - контрактная KPI-единица: контракт предоплаты или квалифицированный
   ежемесячный платёж рекарринга;
 - планы: отдельные факты Power BI на собственном grain;
@@ -47,7 +48,7 @@ joins в общей contract-advance ветви. Это не закрывает 
 | Целевая колонка | Бизнес-описание | Исходная таблица / колонка | Преобразование | PostgreSQL тип | NULL | Grain | Статус | Доказательство | Тест |
 |---|---|---|---|---|---|---|---|---|---|
 | `source_kind` | ветка поступления | mapping `membership_receipts` | без изменения | `text` | нет | движение | CONFIRMED REUSE | MR mapping + PBIT | MR-V11 |
-| `source_movement_key` | технический ключ движения | `AccumRg7370/7739` | `source_kind + recorder_id + line_no` | `text` | нет | движение | VALIDATED CURRENT-M KEY — SV-130 | MR mapping | MR-V02B |
+| `source_movement_count` | число raw source rows в current-M-группе | `AccumRg7370/7739` | число строк после точной M-группировки | `bigint` | нет | движение | VALIDATED current-M grain — S3-MB-ADMISSION-004 | MR mapping | exact M-group uniqueness |
 | `receipt_date` | дата денежного движения | `Period` | `::date` | `date` | нет | движение | CONFIRMED REUSE | BR-015 | MB-V07 |
 | `metric_date` | дата контрактного KPI | movement / activation | recurring → movement; prepayment → activation | `date` | да у услуг | KPI unit | CONFIRMED REUSE | BR-015 | MB-V07 |
 | `kpi_unit_key` | единица количества | contract / `payment_period` | предоплата → contract; рекарринг → `contract × payment_period` | `text` candidate | да у услуг | KPI unit | CONFIRMED REUSE | BR-016 + MR mapping | SV-096/MB-V01 |
@@ -92,9 +93,9 @@ joins в общей contract-advance ветви. Это не закрывает 
 |---|---|---|
 | Источники из `source_objects` | новых источников 1С нет; набор совпадает с `membership_receipts` | CONFIRMED |
 | Продукты из `data_products` | detailed membership domain полностью покрывает board KPI; group summary слишком грубый | CONFIRMED |
-| Правила из `business_rules` | BR-001/002/003/013/014/015/016; BR-008 не применяется | CONFIRMED |
+| Правила из `business_rules` | BR-001/002/003/013/014/015/016/026; BR-008 не применяется | CONFIRMED |
 | Сравнение гранулярности | пять KPI, роли дат и срезы совпадают с отчётом по поступлениям | CONFIRMED user decision + PBIT |
-| Сравнение ключей | movement key и KPI-grain повторяют `membership_receipts`; рекарринг агрегирует движения по `contract × payment_period` | CONFIRMED REUSE / SV-096 |
+| Сравнение ключей | full current-M movement key и KPI-grain повторяют `membership_receipts`; рекарринг агрегирует движения по `contract × payment_period` | CONFIRMED REUSE / SV-096 / S3-MB-ADMISSION-004 |
 | Сравнение семантики | общие KPI обязаны совпадать; board добавляет только presentation logic | CONFIRMED user decision |
 | Решение | `REUSE` detailed membership domain and common dimensions; `NOT_APPLICABLE` для нового board-факта | CONFIRMED |
 | Причина | отдельный факт дублировал бы расчёты и создал второй источник истины | CONFIRMED |
@@ -106,7 +107,7 @@ joins в общей contract-advance ветви. Это не закрывает 
 |---|---|---|---|
 | PARTIALLY VALIDATED | состояния и знак | full current-M movement key validated by SV-130; current sign CASE validated by SV-112, но ПКО с `RecordKind=1` не встретился физически | MR-V03 |
 | CONFIRMED REUSE | равенство KPI | board-PBIT содержит 26 legacy-вариантов общих мер, но решение пользователя устанавливает эталон «Отчёт по поступлениям»; отдельный board source rule не создаётся | BR-015/016, user decision 2026-07-31 |
-| VALIDATION_PENDING (Power BI acceptance) | performance aggregate | `___Итого по сети` может менять filter context и неаддитивные KPI; это legacy performance workaround, не источник для PostgreSQL | MB-V02/MB-V08, проверка созданной модели |
+| VALIDATION_PENDING (Power BI acceptance) | performance aggregate | `___Итого по сети` — legacy workaround ограничений Power BI на аудитных визуалах; он не является источником PostgreSQL. Любой будущий cache строится только из эталонных витрин и сверяется по пяти KPI | BR-026, MB-V01/MB-V02/MB-V08 |
 | NOT_APPLICABLE (source Stage 2) | внешние планы | планы — отдельные Power BI-факты; их grain не включается в PostgreSQL domain и не соединяется с фактом движений | BR-018/022 |
 | VALIDATION_PENDING (Power BI acceptance) | факторная сходимость | компоненты должны сходиться с общим отклонением на созданной модели с внешними планами; новых source columns не требуется | MB-V05 |
 | REJECTED | отдельный PostgreSQL board-факт | дублирует домен поступлений | решение REUSE |

@@ -1,7 +1,7 @@
 # Query review: «Отчёт по поступлениям»
 
 Статус:
-`LOCAL QUERY/MODEL REVIEW COMPLETE / SHARED SOURCE TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-105, SV-107, SV-112—SV-130 / STAGE 3 DEFERRED`.
+`LOCAL QUERY/MODEL REVIEW COMPLETE / SHARED SOURCE TECHNICAL VALIDATION COMPLETE — SV-105, SV-107, SV-112—SV-130 / STAGE 3 PRODUCT ADMISSION IN PROGRESS; DDL-DML NOT APPROVED`.
 
 Проверены два пользовательских DOCX: бизнес-описание, 17 встроенных
 изображений, 1725 абзацев Power Query/SQL/DAX и шесть экранов Power BI
@@ -235,7 +235,7 @@ PBIT подтверждает:
 | ID | Проверка | Подготовленное действие | Ожидаемый результат |
 |---|---|---|---|
 | MR-V01 | metadata | найти все relations/колонки через `pg_catalog` | ровно один relation каждого имени; типы и nullable записаны |
-| MR-V02 | ключ движений | физический ключ и current-M key | VALIDATED SV-094/130: в current-M scope `source_kind + recorder_id + line_no` уникален; type документа в target key не нужен |
+| MR-V02 | raw ключ движений | физический source key | VALIDATED SV-094/130: в raw current-M scope `source_kind + recorder_id + line_no` уникален; это source control, а не ключ целевой M-группы |
 | MR-V03 | состояния и знак | разрез `_Active`, `RecordKind`, `Posted`, `Marked`, тип recorder и знак суммы | PARTIALLY VALIDATED SV-112: current CASE воспроизведён; ПКО с `RecordKind=1` физически не встретился |
 | MR-V04 | полиморфные recorder joins | число совпавших документов каждого типа на движение `7370` | VALIDATED SV-107: у квалифицированного движения ровно один current type |
 | MR-V05 | join preservation | count/sum до и после каждого join | VALIDATED COMPONENTS: SV-113 document joins, SV-122 co-access, SV-123 service, SV-124 towel; price multiplicity сохранена как risk SV-115 |

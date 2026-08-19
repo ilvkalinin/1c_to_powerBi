@@ -1,6 +1,6 @@
 # ADR-0017: поступления по членству — движение и контрактная KPI-единица
 
-- Статус: `DESIGNED / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-083 / IMPLEMENTATION DEFERRED`
+- Статус: `STAGE 3 PRODUCT ADMISSION IN PROGRESS / DDL-DML NOT APPROVED`
 - Дата: 2026-08-03
 - Отчёты: №13 «Отчёт по поступлениям», №30 «Членство для правления»
 
@@ -14,8 +14,9 @@ grain контракта предоплаты либо ежемесячного 
 
 Создать две физические таблицы:
 
-- `mart.membership_receipt_movement` — квалифицированное денежное движение,
-  ключ-кандидат `(source_kind, recorder_id, recorder_line_no)`;
+- `mart.membership_receipt_movement` — квалифицированная current-M-группа
+  денежных движений; raw `(source_kind, recorder_id, line_no)` сохраняется
+  только как source control, а target использует полный natural group key;
 - `mart.membership_contract_kpi_unit` — одна KPI-единица: контракт
   предоплаты либо ежемесячный платёж рекарринга, ключ `kpi_unit_key`.
 
@@ -25,9 +26,12 @@ grain контракта предоплаты либо ежемесячного 
 source-rule и reconciliation, но не эти детальные таблицы. Отчёт для
 правления REUSE обе таблицы без отдельной копии.
 
-Физические таблицы выбраны из-за раздельных VM, полиморфных документов и
-повторных сложных as-of/price вычислений. Удалённый view и materialized view
-не выбираются без измерений.
+Это два общих факта с несовместимыми устойчивыми grain, а не перенос
+промежуточных DAX-таблиц. Никакие report-specific таблицы, view или
+materialized view — в частности `___Итого по сети` и «Таблица активных
+контрактов» — не создаются. Физические таблицы выбраны из-за раздельных VM,
+полиморфных документов и повторных сложных as-of/price вычислений. Удалённый
+view и materialized view не выбираются без измерений.
 
 ## Обновление и Power BI
 
@@ -40,6 +44,12 @@ watermark. Движение связано с активным календар�
 PostgreSQL рассчитывает sign, source kind, payment type, super stage,
 duration, price helpers и ключ KPI. DAX считает пять KPI, средние и временные
 сравнения. Excel-планы остаются отдельными Power BI-фактами.
+
+S3-MB-ADMISSION-002—004 подтвердили, что current M группирует движения до
+вычета со-доступа: 14 444 date×contract имеют несколько групп, и в 37 случаях
+raw allocation изменил бы итог. Поэтому raw таблица не создаётся: компактный
+group fact является точным переносом текущего результата, а не новой
+методикой.
 
 ## Риски
 
