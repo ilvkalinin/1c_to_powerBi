@@ -5,4 +5,4 @@
 # CLOSED_PENDING_NEXT_APPROVAL rejects all new selections until the user
 # explicitly confirms the next independent package.
 gate_id	state	allowed_stage	allowed_report_ids	reason
-global_stage_gate	STAGE3_PRODUCT_ADMISSION_AUTHORIZED	STAGE_3_PRODUCT_ADMISSION	client_base	User approved 2026-08-19 the initial-load preparation for empty mart.client_base_daily. Exact source extract, independent controls and reviewed atomic replacement may be prepared and read-only measured; target DML requires separate approval of the exact SQL. No Power BI change, snapshot/retention product, schedule or source write is authorized.
+global_stage_gate	CLOSED_PENDING_NEXT_APPROVAL	-	-	The approved client_base initial-load package completed 2026-08-19: age-contract DDL and atomic DML were separately approved and reconciled. A next independent package requires explicit user confirmation and a new allowed scope.
