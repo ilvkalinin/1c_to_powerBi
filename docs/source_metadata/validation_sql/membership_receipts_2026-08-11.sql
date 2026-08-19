@@ -386,16 +386,17 @@ FROM towel_groups GROUP BY 1 ORDER BY 1;
 -- source period for recurring/services and activation date otherwise.
 WITH ordinary AS (
   SELECT 'ordinary_advance'::text AS branch,
-         CASE WHEN c._fld699rref=decode('9bd3ea4748457ee94b2011de6d9687d7','hex') THEN 'recurring'
+         CASE WHEN c._fld699rref IS NULL THEN 'service'
+              WHEN c._fld699rref=decode('9bd3ea4748457ee94b2011de6d9687d7','hex') THEN 'recurring'
               WHEN c._fld699rref=decode('96976725cebf51f7461429d74d3f6cbe','hex') THEN 'free'
               WHEN c._fld699rref=decode('9a96b207e6e963c44a4421511fef04e5','hex') THEN 'credit' ELSE 'prepayment' END AS payment_type,
          a._period::date AS receipt_date,c._fld670::date AS activation_date,c._fld671::date AS start_date,c._fld672::date AS end_date
   FROM public._accumrg7370 a JOIN public._reference59 c ON c._idrref=a._fld7371rref
-  JOIN public._reference163 p ON p._idrref=c._fld685rref JOIN public._reference134 x ON x._idrref=a._fld7376rref
+  JOIN public._reference134 x ON x._idrref=a._fld7376rref
   JOIN public._enum495 e ON e._idrref=c._fld696rref
   WHERE a._period>=DATE '2025-01-01' AND a._period<DATE '2027-01-01'
     AND a._recordertref=ANY(ARRAY[decode('0000013d','hex'),decode('0000013c','hex'),decode('0000011d','hex'),decode('00000130','hex'),decode('0000015a','hex'),decode('00000147','hex'),decode('0000013b','hex'),decode('0000014b','hex'),decode('00000131','hex'),decode('0000014d','hex'),decode('00000153','hex'),decode('00000154','hex'),decode('00000128','hex')])
-    AND c._fld699rref IS NOT NULL AND e._enumorder<>0
+    AND e._enumorder<>0
     AND (c._description IS NULL OR c._description::text NOT LIKE '%ИП%') AND x._description::text NOT LIKE '%ДСУ%'
 ), towel AS (
   SELECT 'towel_advance'::text AS branch,'service'::text AS payment_type,
@@ -438,7 +439,8 @@ FROM all_branches GROUP BY 1,2 ORDER BY 1,2;
 -- Power BI total, which is unavailable in the supplied PBIT template.
 WITH advance_raw AS (
   SELECT a._period::date event_date,a._fld7371rref contract_id,x._description::text analytics_text,
-         CASE WHEN c._fld699rref=decode('9bd3ea4748457ee94b2011de6d9687d7','hex') THEN 'recurring'
+         CASE WHEN c._fld699rref IS NULL THEN 'service'
+              WHEN c._fld699rref=decode('9bd3ea4748457ee94b2011de6d9687d7','hex') THEN 'recurring'
               WHEN c._fld699rref=decode('96976725cebf51f7461429d74d3f6cbe','hex') THEN 'free'
               WHEN c._fld699rref=decode('9a96b207e6e963c44a4421511fef04e5','hex') THEN 'credit' ELSE 'prepayment' END payment_type,
          c._fld681rref client_id,c._fld687rref access_club_id,c._fld701rref sales_point_club_id,c._fld670::date activation_date,c._fld671::date start_date,c._fld672::date end_date,c._fld694rref source_stage_id,
@@ -450,9 +452,9 @@ WITH advance_raw AS (
                 WHEN decode('99aff84c6229c6ae11eef6b58cf54f81','hex') THEN 'web_customer' END END source_object,
          CASE WHEN a._recordkind=1 AND a._recordertref=ANY(ARRAY[decode('0000013c','hex'),decode('0000014d','hex'),decode('00000154','hex'),decode('0000013b','hex'),decode('00000130','hex')]) THEN -a._fld7377
               WHEN a._recordkind=1 AND a._recordertref=decode('0000014b','hex') THEN 0 ELSE a._fld7377 END signed_amount
-  FROM public._accumrg7370 a JOIN public._reference59 c ON c._idrref=a._fld7371rref JOIN public._reference163 p ON p._idrref=c._fld685rref JOIN public._reference134 x ON x._idrref=a._fld7376rref JOIN public._enum495 e ON e._idrref=c._fld696rref
+  FROM public._accumrg7370 a JOIN public._reference59 c ON c._idrref=a._fld7371rref LEFT JOIN public._reference163 p ON p._idrref=c._fld685rref JOIN public._reference134 x ON x._idrref=a._fld7376rref JOIN public._enum495 e ON e._idrref=c._fld696rref
   LEFT JOIN public._document304 d304 ON d304._idrref=a._recorderrref LEFT JOIN public._document346 d346 ON d346._idrref=a._recorderrref LEFT JOIN public._document327 d327 ON d327._idrref=a._recorderrref LEFT JOIN public._document305 d305 ON d305._idrref=a._recorderrref LEFT JOIN public._document339 d339 ON d339._idrref=a._recorderrref LEFT JOIN public._document331 d331 ON d331._idrref=a._recorderrref
-  WHERE a._period>=DATE '2025-01-01' AND a._period<DATE '2027-01-01' AND a._recordertref=ANY(ARRAY[decode('0000013d','hex'),decode('0000013c','hex'),decode('0000011d','hex'),decode('00000130','hex'),decode('0000015a','hex'),decode('00000147','hex'),decode('0000013b','hex'),decode('0000014b','hex'),decode('00000131','hex'),decode('0000014d','hex'),decode('00000153','hex'),decode('00000154','hex'),decode('00000128','hex')]) AND c._fld699rref IS NOT NULL AND e._enumorder<>0 AND (c._description IS NULL OR c._description::text NOT LIKE '%ИП%') AND x._description::text NOT LIKE '%ДСУ%'
+  WHERE a._period>=DATE '2025-01-01' AND a._period<DATE '2027-01-01' AND a._recordertref=ANY(ARRAY[decode('0000013d','hex'),decode('0000013c','hex'),decode('0000011d','hex'),decode('00000130','hex'),decode('0000015a','hex'),decode('00000147','hex'),decode('0000013b','hex'),decode('0000014b','hex'),decode('00000131','hex'),decode('0000014d','hex'),decode('00000153','hex'),decode('00000154','hex'),decode('00000128','hex')]) AND e._enumorder<>0 AND (c._description IS NULL OR c._description::text NOT LIKE '%ИП%') AND x._description::text NOT LIKE '%ДСУ%'
 ), towel_raw AS (
   SELECT a._period::date event_date,a._fld7371rref contract_id,x._description::text analytics_text,'service'::text payment_type,
          c._fld681rref client_id,c._fld687rref access_club_id,c._fld701rref sales_point_club_id,c._fld670::date activation_date,c._fld671::date start_date,c._fld672::date end_date,c._fld694rref source_stage_id,
@@ -482,6 +484,26 @@ WITH advance_raw AS (
   UNION ALL SELECT 'membership_service',sum(amount) FROM service_rows
 )
 SELECT component,amount FROM (SELECT branch component,amount FROM components UNION ALL SELECT 'pbi_post_fact_total',sum(amount) FROM components) x ORDER BY component;
+
+-- MR-V11J: completeness of the full current-M ordinary-advance selection.
+-- It proves whether the KPI-oriented simplification would hide a service or
+-- missing-product row from the current `Пост Факт` branch.
+WITH current_m_ordinary AS (
+  SELECT c._fld699rref AS payment_type_id,p._idrref AS product_id
+  FROM public._accumrg7370 a
+  JOIN public._reference59 c ON c._idrref=a._fld7371rref
+  LEFT JOIN public._reference163 p ON p._idrref=c._fld685rref
+  JOIN public._reference134 x ON x._idrref=a._fld7376rref
+  JOIN public._enum495 e ON e._idrref=c._fld696rref
+  WHERE a._period>=DATE '2025-01-01' AND a._period<DATE '2027-01-01'
+    AND a._recordertref=ANY(ARRAY[decode('0000013d','hex'),decode('0000013c','hex'),decode('0000011d','hex'),decode('00000130','hex'),decode('0000015a','hex'),decode('00000147','hex'),decode('0000013b','hex'),decode('0000014b','hex'),decode('00000131','hex'),decode('0000014d','hex'),decode('00000153','hex'),decode('00000154','hex'),decode('00000128','hex')])
+    AND e._enumorder<>0 AND (c._description IS NULL OR c._description::text NOT LIKE '%ИП%')
+    AND x._description::text NOT LIKE '%ДСУ%'
+)
+SELECT count(*) current_m_rows,
+       count(*) FILTER(WHERE payment_type_id IS NULL) payment_type_null_rows,
+       count(*) FILTER(WHERE product_id IS NULL) product_missing_rows
+FROM current_m_ordinary;
 
 -- MR-V10C: current-PBIT channel, access-zone and access-type coverage on the
 -- contract-advance branch. This retains the recorder precedence and text
