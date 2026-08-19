@@ -152,7 +152,7 @@ PBIT подтверждает общую звезду и одновременн�
 | CONFIRMED | рекарринговая KPI-единица | текущий PBI суммирует все движения `contract_id × payment_period`; множественность строк в группе ожидаема | SV-096 / BR-016 |
 | PARTIALLY VALIDATED | source keys/states/signs | SV-112/113 подтвердили current state/sign и отсутствие размножения 14 document joins; другие joins и непредставленная ветка ПКО остаются открыты | MR-V01–MR-V05 |
 | VALIDATED RISK | predecessor contract | SV-116: 508 пар `клиент × дата активации` имеют несколько договоров; PBIT сортирует только по дате и не имеет business tie-break | сохранять current order по BR-018; решение о tie-break — отдельная доработка |
-| VALIDATION_PENDING | `InfoRg8595` | arbitrary row after `Table.Distinct(product_id)` | uniqueness/priority query |
+| VALIDATED | `InfoRg8595` | SV-120: 144 current-PBIT номенклатуры имеют 144 строки; среди 93 используемых конфликтов времени нет | current `Table.Distinct(product_id)` сохраняется без нового порядка |
 | CONFIRMED MODEL RISK | manager and sales-club propagation | current calculated KPI table lacks the corresponding shared-dimension relationships | require both keys/relationships in future KPI fact |
 | CONFIRMED MODEL RISK | field visibility | 205 columns across five main facts/plans are all visible in PBIT | expose only Russian business fields; hide technical keys and nonadditive helpers |
 | CONFIRMED MODEL RISK | automatic date tables | PBIT contains 55 `LocalDateTable_*` objects | use one explicit calendar with documented role-playing dates |
