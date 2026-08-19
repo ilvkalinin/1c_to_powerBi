@@ -48,7 +48,7 @@ SV-094 корректно зафиксировал множественност�
 | `amount_signed` | сумма после правила документа | `AccumRg7370` | `RecordKind`, recorder type, `Fld7377` | текущий sign CASE; ПКО → 0 | `numeric` | нет | движение | CONFIRMED current M / partial physical state-sign validation; ПКО `RecordKind=1` не встречен | M, SV-112 | MR-V03/MR-V04 |
 | `co_access_amount` | сумма со-доступа, вычитаемая из аванса | `AccumRg7739` | `Fld7749` | текстовая классификация со-доступа, aggregate contract+date | `numeric` | да (`0`) | contract × date | VALIDATED current PBIT cardinality — SV-114/122 | M/DAX | MR-V07 |
 | `receipt_amount_net` | контрактное поступление без со-доступа | вычисление | `amount_signed`, `co_access_amount` | `amount_signed - co_access_amount` | `numeric` | нет | движение | VALIDATED current DAX input — SV-122 | `_Сумма итог2` | MR-V11 |
-| `service_group` | membership-категория услуги | `Reference163` | `Description` | только со-доступ, полотенца, гостевой визит, заморозка, переоформление, адаптация ДРЦ, вход для детей | `text` | да | движение услуги | CONFIRMED target scope | M + user decision 2026-07-31 | MR-V10/MR-V11 |
+| `service_group` | membership-категория услуги | `Reference163` | `Description` | только со-доступ, полотенца, гостевой визит, заморозка, переоформление, адаптация ДРЦ, вход для детей | `text` | да | движение услуги | VALIDATED current-PBIT service branch — SV-123 | M + user decision 2026-07-31 | MR-V11 |
 | `movement_club_id` | клуб движения услуги | `AccumRg7739` | `Fld7746` | канонический club ID | `text` | да | движение | CONFIRMED current source | SQL | orphan |
 | `access_club_id` | основной клуб доступа контракта | `Reference59` | `Fld687` | канонический club ID | `text` | да | контракт | CONFIRMED current source | SQL | orphan |
 | `sales_point_club_id` | точка продажи | `Reference59` | `Fld701` | role-playing club dimension | `text` | да | контракт | CONFIRMED current source | SQL/model | orphan |
@@ -93,7 +93,7 @@ SV-094 корректно зафиксировал множественност�
 | Объект | Назначение | Статус | Доказательство |
 |---|---|---|---|
 | `AccumRg7370` | движения авансов/оплат по контрактам | CONFIRMED current source / key, states and sign pending | supplied M |
-| `AccumRg7739` | membership-услуги, со-доступ и цена | CONFIRMED current source / service scope and states pending | supplied M |
+| `AccumRg7739` | membership-услуги, со-доступ и цена | PARTIALLY VALIDATED — current service branch and its joins SV-123; other roles and price scope pending | supplied M |
 | `AccumRg7478` | движения заморозки | CONFIRMED current source / interval and states pending | supplied M |
 | `AccumRg7646` | цена продажи и продажа заморозки | CONFIRMED current source / cardinality pending | supplied M |
 | `Reference59` | контракт, клиент, даты, клубы, стаж и типы | CONFIRMED current source | supplied SQL/M |

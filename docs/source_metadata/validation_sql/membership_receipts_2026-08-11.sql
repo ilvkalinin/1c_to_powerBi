@@ -271,6 +271,60 @@ SELECT (SELECT count(*) FROM current_m_groups) current_m_grouped_rows,
        sum(amount) co_access_amount
 FROM per_key;
 
+-- MR-V11G: exact current-PBIT membership-service branch (2025–2026).
+-- Expected: seven fixed M text groups only; source and left-join row counts
+-- match, so the branch has no silent join multiplication.
+WITH source_rows AS (
+  SELECT a._recordertref,a._recorderrref,a._lineno,a._period::date AS event_date,
+         a._recordkind,a._fld7741rref AS contract_id,a._fld7742_rrref AS sale_document_id,
+         a._fld7743rref AS product_id,a._fld7746rref AS movement_club_id,a._fld7749 AS amount
+  FROM public._accumrg7739 a
+  WHERE a._period>=DATE '2025-01-01' AND a._period<DATE '2027-01-01'
+    AND a._fld7743rref<>decode('00000000000000000000000000000000','hex')
+), m_joined AS (
+  SELECT s.*,p._description::text AS product_name,c._fld687rref AS access_club_id,
+         d._fld4909rref AS employee_id
+  FROM source_rows s
+  LEFT JOIN public._reference163 p ON p._idrref=s.product_id
+  LEFT JOIN public._reference59 c ON c._idrref=s.contract_id
+  LEFT JOIN public._document346 d ON d._idrref=s.sale_document_id
+  LEFT JOIN public._reference225 e ON e._idrref=d._fld4909rref
+), classified AS (
+  SELECT m.*,
+    CASE WHEN product_name IS NULL THEN NULL
+         WHEN product_name='Полотенце' THEN NULL
+         WHEN product_name='Аренда полотенца (разовая)' THEN NULL
+         WHEN strpos(product_name,'Со-д')>0 THEN 'Со-доступ'
+         WHEN strpos(product_name,'со-д')>0 THEN 'Со-доступ'
+         WHEN strpos(product_name,'Полоте')>0 THEN 'Полотенца'
+         WHEN strpos(product_name,'полоте')>0 THEN 'Полотенца'
+         WHEN strpos(product_name,'Госте')>0 THEN 'Гостевой визит'
+         WHEN strpos(product_name,'гостев')>0 THEN 'Гостевой визит'
+         WHEN strpos(product_name,'Заморо')>0 THEN 'Заморозка'
+         WHEN strpos(product_name,'заморо')>0 THEN 'Заморозка'
+         WHEN strpos(product_name,'день здоровья')>0 THEN 'Гостевой визит'
+         WHEN strpos(product_name,'Переоформление')>0 THEN 'Переоформление'
+         WHEN strpos(product_name,'Адаптац')>0 THEN 'Адаптация ДРЦ'
+         WHEN strpos(product_name,'Вход для детей')>0 THEN 'Вход для детей'
+    END AS service_group
+  FROM m_joined m
+), selected AS (
+  SELECT *,CASE WHEN service_group='Со-доступ' THEN access_club_id ELSE movement_club_id END AS reporting_club_id
+  FROM classified
+  WHERE service_group IS NOT NULL AND _recordkind=1
+)
+SELECT service_group,count(*) output_rows,
+       count(DISTINCT (_recordertref,_recorderrref,_lineno)) technical_keys,
+       count(*)-count(DISTINCT (_recordertref,_recorderrref,_lineno)) technical_key_excess,
+       sum(amount) amount_total,
+       (SELECT count(*) FROM source_rows) source_rows,
+       (SELECT count(*) FROM m_joined) joined_rows,
+       (SELECT count(*) FROM m_joined)-(SELECT count(*) FROM source_rows) join_row_excess
+FROM selected
+WHERE reporting_club_id IS NOT NULL
+  AND reporting_club_id<>decode('00000000000000000000000000000000','hex')
+GROUP BY 1 ORDER BY 1;
+
 -- MR-V10C: current-PBIT channel, access-zone and access-type coverage on the
 -- contract-advance branch. This retains the recorder precedence and text
 -- conditions; it only counts current DAX output categories.
