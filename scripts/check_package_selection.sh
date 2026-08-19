@@ -1,5 +1,7 @@
 #!/bin/sh
 # Reject package targets whose latest checkpoint is already closed.
+# STAGE3_PLANNING_AUTHORIZED permits local planning only; it never permits a
+# runnable Stage 3 package, DDL or DML.
 set -eu
 
 if [ "$#" -lt 2 ]; then
@@ -25,6 +27,9 @@ if [ "$project_state" = "OPEN" ]; then
   :
 elif [ "$project_state" = "READONLY_REVIEW_AUTHORIZED" ] && [ "$stage" = "$allowed_stage" ]; then
   :
+elif [ "$project_state" = "STAGE3_PLANNING_AUTHORIZED" ]; then
+  echo "PACKAGE SELECTION REJECTED: Stage 3 planning is authorized, but runnable package selection, DDL and DML remain blocked" >&2
+  exit 1
 else
   echo "PACKAGE SELECTION REJECTED: global stage gate is ${project_state:-MISSING}; ${project_reason:-no documented release}" >&2
   exit 1

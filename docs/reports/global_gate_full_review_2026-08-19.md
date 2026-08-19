@@ -1,12 +1,14 @@
 # Полный review global gate — 2026-08-19
 
-Статус: `DECISION_READY / GATE NOT CHANGED`.
+Статус: `STAGE3_PLANNING_AUTHORIZED / IMPLEMENTATION STILL BLOCKED`.
 
 ## Граница review
 
 Review выполнен только по договорному scope и документированным целевым
 продуктам. Он не выполняет SQL на источнике, не меняет согласованные
-SQL/M/DAX-правила, не создаёт витрины и не меняет `.agents/project_stage_gate.tsv`.
+SQL/M/DAX-правила и не создаёт витрины. После явного подтверждения пользователя
+2026-08-19 gate переведён только в режим планирования первой Stage-3 волны;
+выбор runnable package, DDL и DML остаются заблокированными.
 
 Проверены три реестра:
 
@@ -76,7 +78,7 @@ contract.
 | Категория текущего состояния | Объекты | Вывод review |
 |---|---|---|
 | Собственная физическая приёмка пройдена (7) | `mart.ip_training_daily`, `mart.ancillary_revenue_movement`, `mart.dpfu_plan_assignment`, `mart.prebooking_state_event`, `mart.group_lesson`, `mart.lesson_room_slot_5m`, `mart.ip_revenue_daily` | Их admission закрыт; повторная загрузка возможна только при новом триггере. |
-| Не созданы; source review закрыт или правило сохранено (31) | `mart.client_base_snapshot`, `mart.client_base_daily`, `mart.client_base_retention`, `mart.visit_client_day`, `mart.club_day_metrics`, `mart.club_attendance_hourly`, `mart.employee_activity_interval`, `mart.employee_presence_day`, `mart.crm_interaction`, `mart.v_sales_interaction`, `mart.v_feedback_interaction`, `mart.v_guest_tour`, `mart.new_first_visit`, `mart.guest_visit_conversion`, `mart.fitness_leads_funnel_task`, `mart.children_package_sale`, `mart.promo_application`, `mart.unconfirmed_service_debt_movement`, `mart.administrator_card_gymmy_daily`, `mart.v_administrator_bookings_daily`, `mart.v_reception_revenue_daily`, `mart.revenue_group_summary_daily`, `mart.membership_receipt_movement`, `mart.membership_contract_kpi_unit`, `mart.preparation_renewal_checkpoint`, `mart.contract_usage`, `mart.fitness_funnel_client_start`, `mart.fitness_funnel_client_outcome`, `mart.renewal_management_contract`, `mart.newcomer_engagement_milestone`, `mart.newcomer_engagement_second_month` | Их создание всё ещё запрещено текущим gate. После отдельного разрешения каждый получает собственный product-admission: DDL, точная загрузка, ключи, reconciliation, rerun и SLA. |
+| Не созданы; source review закрыт или правило сохранено (31) | `mart.client_base_snapshot`, `mart.client_base_daily`, `mart.client_base_retention`, `mart.visit_client_day`, `mart.club_day_metrics`, `mart.club_attendance_hourly`, `mart.employee_activity_interval`, `mart.employee_presence_day`, `mart.crm_interaction`, `mart.v_sales_interaction`, `mart.v_feedback_interaction`, `mart.v_guest_tour`, `mart.new_first_visit`, `mart.guest_visit_conversion`, `mart.fitness_leads_funnel_task`, `mart.children_package_sale`, `mart.promo_application`, `mart.unconfirmed_service_debt_movement`, `mart.administrator_card_gymmy_daily`, `mart.v_administrator_bookings_daily`, `mart.v_reception_revenue`, `mart.revenue_group_summary_daily`, `mart.membership_receipt_movement`, `mart.membership_contract_kpi_unit`, `mart.preparation_renewal_checkpoint`, `mart.contract_usage`, `mart.fitness_funnel_client_start`, `mart.fitness_funnel_client_outcome`, `mart.renewal_management_contract`, `mart.newcomer_engagement_milestone`, `mart.newcomer_engagement_second_month` | Их создание всё ещё запрещено текущим gate. После отдельного разрешения каждый получает собственный product-admission: DDL, точная загрузка, ключи, reconciliation, rerun и SLA. |
 
 Ни один из 38 объектов не нуждается в новом отдельном правиле только потому,
 что он ещё не создан. Для всех найденных legacy-аномалий действуют либо
@@ -91,6 +93,6 @@ contract.
 создания объекта и согласованные BR-018 артефакты, которые не меняют первый
 релиз.
 
-Поэтому единственное остающееся полномочие — явное пользовательское решение:
-оставить global gate закрытым либо открыть его для заранее названного
-Stage-3 product-admission пакета. Этот review сам gate не открывает.
+Следующее отдельное полномочие — пользовательское подтверждение одного
+заранее названного Stage-3 product-admission пакета. Режим планирования не
+открывает runnable package selection и не разрешает DDL/DML.
