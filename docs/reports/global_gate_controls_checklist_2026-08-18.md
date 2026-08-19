@@ -1,6 +1,6 @@
 # Точный checklist до полного review global gate — 2026-08-18
 
-Статус: `DOCUMENTARY_CHECKLIST / SOURCE CONTROLS PARTIALLY EXECUTED 2026-08-18`.
+Статус: `CURRENT GLOBAL-GATE CHECKLIST / SOURCE CONTROLS UPDATED 2026-08-19`.
 
 ## Назначение и граница
 

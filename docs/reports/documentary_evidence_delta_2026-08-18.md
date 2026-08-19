@@ -2,6 +2,11 @@
 
 Статус: `DOCUMENTARY_AUDIT_COMPLETE / NO_SOURCE_QUERIES_RUN`.
 
+> Актуальность. Это снимок документарной сверки на 2026-08-18. Контроли,
+> выполненные 2026-08-19, не внесены в таблицы ниже; текущий остаток global
+> gate задают `project_stage_gate.tsv`, `report_checkpoint_ledger.tsv` и
+> [global checklist](global_gate_controls_checklist_2026-08-18.md).
+
 ## Цель и граница
 
 Сверка сопоставляет реестр от 2026-08-14 с доказательствами и решениями,

@@ -10,9 +10,9 @@ sales_interactions	COMPLETE	SELF
 membership_receipts	COMPLETE	SELF
 children_package_sales	COMPLETE	SELF
 newcomer_guest_visits	COMPLETE	SELF
-calls_report	PENDING	-
-visits_debt	PENDING	-
-work_attendance	PENDING	-
+calls_report	BLOCKED	-
+visits_debt	BLOCKED	-
+work_attendance	BLOCKED	-
 administrator_card	COMPLETE	SELF
 marketing_funnel	COMPLETE	SELF
 membership_board	COMPLETE	SELF
