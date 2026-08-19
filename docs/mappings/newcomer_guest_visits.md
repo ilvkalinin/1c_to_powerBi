@@ -1,16 +1,15 @@
 # Source-to-target mapping: «Новички и гостевые визиты»
 
-Статус: `BUSINESS MAPPING COMPLETE / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-087 / IMPLEMENTATION DEFERRED`.
+Статус: `BUSINESS MAPPING COMPLETE / TECHNICAL VALIDATION VALIDATED WITH PRESERVED RISKS — SV-087, SV-097, SV-102, SV-106, SV-108, SV-109 / IMPLEMENTATION DEFERRED`.
 
 Ниже описаны наборы, для которых ADR-0020 проектирует
 `mart.new_first_visit`, `mart.guest_visit_conversion` и REUSE
-`mart.v_guest_tour`. Это не разрешение на SQL/DDL. Все проверки имеют статус
-`VALIDATION_PENDING`, кроме выполненных NV-V01/NV-V03/NV-V04/NV-V07/NV-V08
-на read-only snapshot 2026-08-11. Источники существуют, physical key гостевого
-регистра и history ties подтверждены, но candidate guest key имеет статус
-`VALIDATION_FAILED`; семантика четырёх guest statuses и 0/44/45 outcomes
-остаётся pending. Пользователь 2026-08-18 утвердил PBIT-правило ACCUNIQ как
-базу первого релиза; физическая проверка движений всё ещё pending.
+`mart.v_guest_tour`. Это не разрешение на SQL/DDL. NV-V01—V09 выполнены
+read-only controls: источники, ACCUNIQ scope, current latest-state path,
+первый визит и границы 0/44/45 подтверждены. Technical key гостевого регистра
+уникален, но candidate business key имеет дубликаты; ties и final current
+`Distinct` сохраняются по BR-018. Пользователь 2026-08-18 утвердил
+PBIT-правило ACCUNIQ как базу первого релиза.
 SV-006 подтвердил наличие `InfoRg7064`; реестр отсутствующих объектов не
 изменяется.
 SV-097 дополнительно подтвердил bounded путь документ посещения → движение →
@@ -58,10 +57,10 @@ production-правилом без этой проверки.
 
 ## Набор 2: гостевой визит и конверсия
 
-Гранулярность: гость × дата гостевого визита; candidate key
-`(guest_registration_id, client_id, guest_visit_date)`, `VALIDATION_FAILED`
-по SV-087 (111 578 duplicate groups). Правило выбора строки не принимается
-без отдельного решения.
+Гранулярность current output: гость × дата гостевого визита; candidate key
+`(guest_registration_id, client_id, guest_visit_date)` имеет 111 578 групп
+дубликатов по SV-087. Current M завершает ветку `Distinct(client code, visit
+date)`; этот результат сохраняется по BR-018, новый порядок строк не вводится.
 
 | Целевое поле | Описание / преобразование | PostgreSQL тип | NULL | Статус и проверка |
 |---|---|---|---|---|
@@ -121,17 +120,16 @@ outcomes данного отчёта локальны.
 - Сырые `AccumRg7575`, `InfoRg7064`, `InfoRg7006` и CRM-регистры не
   реплицируются; требуемые пересечения/агрегации выполняются source-side.
 
-## Валидация перед SQL
+## Результат Stage 2
 
-`VALIDATION_PENDING`:
+- NV-V01/V03/V04/V07/V08 (SV-087): источники, technical keys, guest candidate
+  duplicates, history и CRM-tour path.
+- NV-V05 (SV-102): точные 12 ACCUNIQ-кодов, current sign и группы 1/2.
+- NV-V06 (SV-108): окно конверсии `[0,44]`, без включения дня 45.
+- NV-V09 (SV-106): current latest-state selection с сохранёнными ties и
+  дубликатами `клиент × дата`.
+- NV-V02 (SV-109): current первый визит на июле 2026 с 35 ties раннего
+  timestamp; второй порядок не добавлен.
 
-1. V-01 — физические типы, `NULL`, ID/Code и признаки удаления источников.
-2. V-02 — связность и cardinality посещение → документ/контракт/клиент.
-3. V-03/V-04 — семантика статусов и ключ гостевого регистра, включая повторы.
-4. V-05 — справочник 12 ACCUNIQ-услуг, знак/количество/сторно движения.
-5. V-06 — контрольные примеры интервалов 0, 44, 45 дней и нескольких покупок.
-6. V-07 — historical as-of стажа, границы и ties.
-7. V-08 — interaction → телефония, статусы/воронка/тип встречи, проведение.
-8. V-09 — latest состояние предварительной записи на client-level и исключения 2/3.
-9. По каждому набору: row count, uniqueness ключа, `NULL`, orphan, отсутствие
-   размножения join и сверка с контрольным периодом текущего отчёта.
+Ключи, ties, дубликаты и source multiplicity сохранены как current behavior;
+новая методика, DDL/DML и Stage 3 этим mapping не разрешаются.

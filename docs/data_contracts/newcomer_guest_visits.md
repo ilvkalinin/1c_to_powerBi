@@ -1,12 +1,13 @@
 # Data contract: «Новички и гостевые визиты»
 
-Статус: `DESIGNED COMPOSITE MODEL / IMPLEMENTATION DEFERRED / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-087`.
+Статус: `DESIGNED COMPOSITE MODEL / IMPLEMENTATION DEFERRED / STAGE_2 SOURCE VALIDATION VALIDATED WITH PRESERVED RISKS — SV-087, SV-097, SV-102, SV-106, SV-108, SV-109`.
 
-NV-V01/NV-V03/NV-V04/NV-V07/NV-V08 выполнены с зафиксированными ожиданиями.
-Physical guest key и CRM-tour grain подтверждены, но candidate guest key
-материально неуникален; статусы, ACCUNIQ и 0/44/45 outcomes не приняты.
-Реализация остаётся отложенной: для материально неуникального candidate guest
-key требуется отдельное решение до Stage 3.
+NV-V01—V09 выполнены с зафиксированными ожиданиями. Physical guest key и
+CRM-tour grain подтверждены; candidate guest key материально неуникален, но
+current `Distinct(client code, visit date)` сохраняется по BR-018. ACCUNIQ,
+latest-state path и outcomes 0/44/45 подтверждены source-side. Реализация
+остаётся отложенной общим project gate; отдельное новое правило для дубликатов
+или ties не требуется.
 
 ## Наборы
 

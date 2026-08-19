@@ -1,6 +1,6 @@
 # Разбор текущих запросов: «Новички и гостевые визиты»
 
-Статус: `BUSINESS REVIEW COMPLETE / STAGE 2 PARTIALLY VALIDATED — SV-087`.
+Статус: `BUSINESS REVIEW COMPLETE / STAGE 2 VALIDATED WITH PRESERVED RISKS — SV-087, SV-097, SV-102, SV-106, SV-108, SV-109`.
 
 Источники:
 
@@ -8,7 +8,9 @@
 - `НОвички и гостевые визиты (2).docx`, SHA-1 `29e83535b03a65f190b227122b1d33f63c4dc60e` — текущие Power Query, SQL и DAX.
 - `Pbit_old/Новички и гостевые визиты.pbit`, SHA-256 `3d54a392bec0d3feed21f998c91bf4607886ca101eac7b0adc94d6bbce180796` — согласованная пользователем 2026-08-18 базовая M-логика первого релиза для ACCUNIQ.
 
-NV-V01/NV-V03/NV-V04/NV-V07/NV-V08 выполнены 2026-08-11 в `BEGIN READ ONLY`.
+NV-V01/NV-V03/NV-V04/NV-V07/NV-V08 выполнены 2026-08-11 в `BEGIN READ ONLY`;
+NV-V02/V05/V06/V09 — последующими bounded read-only controls SV-102, SV-106,
+SV-108 и SV-109.
 Первичная запись о таймауте исправлена: клиент ошибочно включал SSL, который
 сервер не поддерживает. Это не является доказательством отсутствия источника.
 
@@ -95,9 +97,10 @@ guest_visit_date + 44 days]`. Финальный `Distinct` оставляет �
 
 ## Подготовленные проверки STAGE_2
 
-NV-V01/NV-V03/NV-V04/NV-V07/NV-V08 выполнены и описаны в SV-087. PBIT
-зафиксировал согласованные ACCUNIQ-константы и правило выбора; V-02/V-05/V-06/V-09
-остаются `VALIDATION_PENDING` как физические проверки.
+Все NV-V01—V09 имеют source-side evidence. PBIT зафиксировал ACCUNIQ-константы
+и правило выбора; SV-102/106/108/109 подтвердили физические ветки, границы
+окна и current latest-state selection. Обнаруженные ties и candidate duplicates
+сохраняются по BR-018, без нового `DISTINCT`, tie-break или фильтра.
 
 | ID | Проверка и ожидаемый результат |
 |---|---|
@@ -137,10 +140,10 @@ HAVING COUNT(*) > 1;
 
 ## Подготовленный read-only набор
 
-NV-V01/NV-V03/NV-V04/NV-V07/NV-V08 зафиксированы до запуска в
+NV-V01/NV-V03/NV-V04/NV-V07/NV-V08 сохранены в
 [`newcomer_guest_visits_2026-08-11.sql`](../source_metadata/validation_sql/newcomer_guest_visits_2026-08-11.sql).
-NV-V03/V04 подтвердили unique technical key, но material candidate duplicates;
-NV-V07 — отсутствие history ties; NV-V08 — отсутствие phone-row multiplication
-в текущем tour-контуре. PBIT закрыл отсутствие ACCUNIQ-констант; V-02/V-05/V-06/V-09
-остаются `VALIDATION_PENDING` до физической проверки кардинальностей, знака,
-окон и состояний.
+NV-V02 (SV-109) подтвердил current first-visit на контрольном месяце и 35
+ties ранней отметки времени; NV-V05 (SV-102) — 12 ACCUNIQ-кодов и current
+знак; NV-V06 (SV-108) — включение дней 0/44 и исключение 45; NV-V09 (SV-106)
+— latest-state path с 8 ties и 128 повторными `клиент × дата` строками. Эти
+особенности сохраняются, а не исправляются в source Stage 2.
