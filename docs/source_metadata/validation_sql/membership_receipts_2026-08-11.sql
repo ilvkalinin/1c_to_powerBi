@@ -235,7 +235,7 @@ WITH raw_advances AS (
   FROM raw_advances GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19
 ), co_access AS (
   SELECT a._period::date AS event_date,a._fld7741rref AS contract_id,sum(a._fld7749) amount
-  FROM public._accumrg7739 a JOIN public._reference163 p ON p._idrref=a._fld7743rref JOIN public._reference59 c ON c._idrref=a._fld7741rref
+  FROM public._accumrg7739 a JOIN public._reference163 p ON p._idrref=a._fld7743rref LEFT JOIN public._reference59 c ON c._idrref=a._fld7741rref
   WHERE a._period>=DATE '2025-01-01' AND a._period<DATE '2027-01-01' AND a._fld7743rref<>decode('00000000000000000000000000000000','hex') AND a._recordkind=1 AND (p._description::text LIKE '%Со-д%' OR p._description::text LIKE '%со-д%') AND c._fld687rref IS NOT NULL GROUP BY 1,2
 ), contract_period AS (
   SELECT m.contract_id,regexp_replace(m.analytics_text,'^.*; ','') payment_period,m.payment_type,sum(m.gross_amount-coalesce(c.amount,0)) net_amount
@@ -412,7 +412,7 @@ WITH ordinary AS (
                 OR strpos(p._description::text,'Госте')>0 OR strpos(p._description::text,'гостев')>0 OR strpos(p._description::text,'Заморо')>0 OR strpos(p._description::text,'заморо')>0
                 OR strpos(p._description::text,'день здоровья')>0 OR strpos(p._description::text,'Переоформление')>0 OR strpos(p._description::text,'Адаптац')>0 OR strpos(p._description::text,'Вход для детей')>0 THEN 'in_scope' END AS service_scope,
          CASE WHEN (strpos(p._description::text,'Со-д')>0 OR strpos(p._description::text,'со-д')>0) THEN c._fld687rref ELSE a._fld7746rref END AS reporting_club_id
-  FROM public._accumrg7739 a JOIN public._reference163 p ON p._idrref=a._fld7743rref JOIN public._reference59 c ON c._idrref=a._fld7741rref
+  FROM public._accumrg7739 a JOIN public._reference163 p ON p._idrref=a._fld7743rref LEFT JOIN public._reference59 c ON c._idrref=a._fld7741rref
   WHERE a._period>=DATE '2025-01-01' AND a._period<DATE '2027-01-01'
     AND a._fld7743rref<>decode('00000000000000000000000000000000','hex') AND a._recordkind=1
 ), all_branches AS (
@@ -431,6 +431,57 @@ SELECT branch,payment_type,
        count(*) FILTER(WHERE end_date IS NULL) end_date_null,
        count(*) FILTER(WHERE start_date IS NOT NULL AND end_date IS NOT NULL AND end_date<start_date) invalid_contract_dates
 FROM all_branches GROUP BY 1,2 ORDER BY 1,2;
+
+-- MR-V11I: source-side reconstruction of the current `Пост Факт` UNION.
+-- It preserves M groups, the RELATED co-access subtraction on every contract
+-- group and the ungrouped counterparty-service branch.  It is not a loaded
+-- Power BI total, which is unavailable in the supplied PBIT template.
+WITH advance_raw AS (
+  SELECT a._period::date event_date,a._fld7371rref contract_id,x._description::text analytics_text,
+         CASE WHEN c._fld699rref=decode('9bd3ea4748457ee94b2011de6d9687d7','hex') THEN 'recurring'
+              WHEN c._fld699rref=decode('96976725cebf51f7461429d74d3f6cbe','hex') THEN 'free'
+              WHEN c._fld699rref=decode('9a96b207e6e963c44a4421511fef04e5','hex') THEN 'credit' ELSE 'prepayment' END payment_type,
+         c._fld681rref client_id,c._fld687rref access_club_id,c._fld701rref sales_point_club_id,c._fld670::date activation_date,c._fld671::date start_date,c._fld672::date end_date,c._fld694rref source_stage_id,
+         p._description::text product_name,p._fld1756 freeze_days,p._idrref product_id,c._fld693 term_days,c._fld668rref purchase_type_id,c._fld667rref membership_kind_id,c._fld697rref club_access_type_id,
+         CASE WHEN d327._fld4235rref IS NOT NULL AND d327._fld4235rref<>decode('00000000000000000000000000000000','hex') THEN 'instalment'
+              ELSE CASE coalesce(d304._fld3680rref,d346._fld4891rref,d305._fld3712rref,d339._fld4702rref,d331._fld4395rref)
+                WHEN decode('99a9ebb169a4e2a611eebfc77dadf23f','hex') THEN 'club' WHEN decode('99ad9b75dc73f34911eed62832d12269','hex') THEN 'website'
+                WHEN decode('99a9ebb169a4e2a611eebfc77dadf23d','hex') THEN 'app' WHEN decode('99a9ebb169a4e2a611eebfc77dadf23e','hex') THEN 'employee_app'
+                WHEN decode('99aff84c6229c6ae11eef6b58cf54f81','hex') THEN 'web_customer' END END source_object,
+         CASE WHEN a._recordkind=1 AND a._recordertref=ANY(ARRAY[decode('0000013c','hex'),decode('0000014d','hex'),decode('00000154','hex'),decode('0000013b','hex'),decode('00000130','hex')]) THEN -a._fld7377
+              WHEN a._recordkind=1 AND a._recordertref=decode('0000014b','hex') THEN 0 ELSE a._fld7377 END signed_amount
+  FROM public._accumrg7370 a JOIN public._reference59 c ON c._idrref=a._fld7371rref JOIN public._reference163 p ON p._idrref=c._fld685rref JOIN public._reference134 x ON x._idrref=a._fld7376rref JOIN public._enum495 e ON e._idrref=c._fld696rref
+  LEFT JOIN public._document304 d304 ON d304._idrref=a._recorderrref LEFT JOIN public._document346 d346 ON d346._idrref=a._recorderrref LEFT JOIN public._document327 d327 ON d327._idrref=a._recorderrref LEFT JOIN public._document305 d305 ON d305._idrref=a._recorderrref LEFT JOIN public._document339 d339 ON d339._idrref=a._recorderrref LEFT JOIN public._document331 d331 ON d331._idrref=a._recorderrref
+  WHERE a._period>=DATE '2025-01-01' AND a._period<DATE '2027-01-01' AND a._recordertref=ANY(ARRAY[decode('0000013d','hex'),decode('0000013c','hex'),decode('0000011d','hex'),decode('00000130','hex'),decode('0000015a','hex'),decode('00000147','hex'),decode('0000013b','hex'),decode('0000014b','hex'),decode('00000131','hex'),decode('0000014d','hex'),decode('00000153','hex'),decode('00000154','hex'),decode('00000128','hex')]) AND c._fld699rref IS NOT NULL AND e._enumorder<>0 AND (c._description IS NULL OR c._description::text NOT LIKE '%ИП%') AND x._description::text NOT LIKE '%ДСУ%'
+), towel_raw AS (
+  SELECT a._period::date event_date,a._fld7371rref contract_id,x._description::text analytics_text,'service'::text payment_type,
+         c._fld681rref client_id,c._fld687rref access_club_id,c._fld701rref sales_point_club_id,c._fld670::date activation_date,c._fld671::date start_date,c._fld672::date end_date,c._fld694rref source_stage_id,
+         p._description::text product_name,p._fld1756 freeze_days,p._idrref product_id,c._fld693 term_days,c._fld668rref purchase_type_id,c._fld667rref membership_kind_id,c._fld697rref club_access_type_id,
+         CASE WHEN d327._fld4235rref IS NOT NULL AND d327._fld4235rref<>decode('00000000000000000000000000000000','hex') THEN 'instalment'
+              ELSE CASE coalesce(d304._fld3680rref,d346._fld4891rref,d305._fld3712rref,d339._fld4702rref,d331._fld4395rref)
+                WHEN decode('99a9ebb169a4e2a611eebfc77dadf23f','hex') THEN 'club' WHEN decode('99ad9b75dc73f34911eed62832d12269','hex') THEN 'website'
+                WHEN decode('99a9ebb169a4e2a611eebfc77dadf23d','hex') THEN 'app' WHEN decode('99a9ebb169a4e2a611eebfc77dadf23e','hex') THEN 'employee_app'
+                WHEN decode('99aff84c6229c6ae11eef6b58cf54f81','hex') THEN 'web_customer' END END source_object,
+         CASE WHEN a._recordkind=1 AND a._recordertref=ANY(ARRAY[decode('0000013c','hex'),decode('0000014d','hex'),decode('00000154','hex'),decode('0000013b','hex'),decode('00000130','hex')]) THEN -a._fld7377
+              WHEN a._recordkind=1 AND a._recordertref=decode('0000014b','hex') THEN 0 ELSE a._fld7377 END signed_amount
+  FROM public._accumrg7370 a JOIN public._reference59 c ON c._idrref=a._fld7371rref JOIN public._reference163 p ON p._idrref=c._fld685rref LEFT JOIN public._reference134 x ON x._idrref=a._fld7376rref
+  LEFT JOIN public._document304 d304 ON d304._idrref=a._recorderrref LEFT JOIN public._document346 d346 ON d346._idrref=a._recorderrref LEFT JOIN public._document327 d327 ON d327._idrref=a._recorderrref LEFT JOIN public._document305 d305 ON d305._idrref=a._recorderrref LEFT JOIN public._document339 d339 ON d339._idrref=a._recorderrref LEFT JOIN public._document331 d331 ON d331._idrref=a._recorderrref
+  WHERE a._period>=DATE '2025-01-01' AND a._period<DATE '2027-01-01' AND p._fld1733rref=decode('80d100505681013811e4d16f28bf1aab','hex') AND a._recordertref=ANY(ARRAY[decode('0000013d','hex'),decode('0000013c','hex'),decode('0000011d','hex'),decode('00000130','hex'),decode('0000015a','hex'),decode('00000147','hex'),decode('0000013b','hex'),decode('0000014b','hex'),decode('00000131','hex'),decode('0000014d','hex'),decode('00000153','hex'),decode('00000154','hex'),decode('00000128','hex')])
+), contract_groups AS (
+  SELECT 'ordinary_advance' branch,event_date,contract_id,analytics_text,payment_type,client_id,access_club_id,sales_point_club_id,activation_date,start_date,end_date,source_stage_id,product_name,freeze_days,product_id,term_days,purchase_type_id,membership_kind_id,club_access_type_id,source_object,sum(signed_amount) amount FROM advance_raw GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20
+  UNION ALL
+  SELECT 'towel_advance',event_date,contract_id,analytics_text,payment_type,client_id,access_club_id,sales_point_club_id,activation_date,start_date,end_date,source_stage_id,product_name,freeze_days,product_id,term_days,purchase_type_id,membership_kind_id,club_access_type_id,source_object,sum(signed_amount) FROM towel_raw GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20
+), co_access AS (
+  SELECT a._period::date event_date,a._fld7741rref contract_id,sum(a._fld7749) amount FROM public._accumrg7739 a JOIN public._reference163 p ON p._idrref=a._fld7743rref JOIN public._reference59 c ON c._idrref=a._fld7741rref
+  WHERE a._period>=DATE '2025-01-01' AND a._period<DATE '2027-01-01' AND a._fld7743rref<>decode('00000000000000000000000000000000','hex') AND a._recordkind=1 AND (p._description::text LIKE '%Со-д%' OR p._description::text LIKE '%со-д%') AND c._fld687rref IS NOT NULL GROUP BY 1,2
+), service_rows AS (
+  SELECT a._fld7749 amount FROM public._accumrg7739 a JOIN public._reference163 p ON p._idrref=a._fld7743rref LEFT JOIN public._reference59 c ON c._idrref=a._fld7741rref
+  WHERE a._period>=DATE '2025-01-01' AND a._period<DATE '2027-01-01' AND a._fld7743rref<>decode('00000000000000000000000000000000','hex') AND a._recordkind=1 AND (CASE WHEN p._description::text='Полотенце' OR p._description::text='Аренда полотенца (разовая)' THEN NULL WHEN strpos(p._description::text,'Со-д')>0 OR strpos(p._description::text,'со-д')>0 OR strpos(p._description::text,'Полоте')>0 OR strpos(p._description::text,'полоте')>0 OR strpos(p._description::text,'Госте')>0 OR strpos(p._description::text,'гостев')>0 OR strpos(p._description::text,'Заморо')>0 OR strpos(p._description::text,'заморо')>0 OR strpos(p._description::text,'день здоровья')>0 OR strpos(p._description::text,'Переоформление')>0 OR strpos(p._description::text,'Адаптац')>0 OR strpos(p._description::text,'Вход для детей')>0 THEN 'in_scope' END)='in_scope' AND (CASE WHEN strpos(p._description::text,'Со-д')>0 OR strpos(p._description::text,'со-д')>0 THEN c._fld687rref ELSE a._fld7746rref END) IS NOT NULL AND (CASE WHEN strpos(p._description::text,'Со-д')>0 OR strpos(p._description::text,'со-д')>0 THEN c._fld687rref ELSE a._fld7746rref END)<>decode('00000000000000000000000000000000','hex')
+), components AS (
+  SELECT branch,sum(g.amount-coalesce(c.amount,0)) amount FROM contract_groups g LEFT JOIN co_access c USING(event_date,contract_id) GROUP BY 1
+  UNION ALL SELECT 'membership_service',sum(amount) FROM service_rows
+)
+SELECT component,amount FROM (SELECT branch component,amount FROM components UNION ALL SELECT 'pbi_post_fact_total',sum(amount) FROM components) x ORDER BY component;
 
 -- MR-V10C: current-PBIT channel, access-zone and access-type coverage on the
 -- contract-advance branch. This retains the recorder precedence and text
