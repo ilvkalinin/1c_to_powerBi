@@ -9,6 +9,203 @@ FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
 WHERE n.nspname='public' AND c.relname=ANY(ARRAY['_accumrg7370','_accumrg7739','_reference59','_reference134'])
 ORDER BY 1;
 
+-- MR-V11A: archival broad form of the structural input to current DAX quantity.
+-- NOT EXECUTED: it did not return within the 30-second source-control limit.
+-- MR-V11B—D below preserve its scope in independently executable components.
+-- Recurring keeps every contract × payment_period; prepayment must not split
+-- into several periods.
+WITH current_advances AS (
+  SELECT a._fld7371rref AS contract_id,
+         regexp_replace(analytics._description::text, '^.*; ', '') AS payment_period,
+         CASE WHEN c._fld699rref IS NULL THEN 'Услуга'
+              WHEN c._fld699rref = decode('9bd3ea4748457ee94b2011de6d9687d7','hex') THEN 'Рекарринг'
+              ELSE 'Предоплата' END AS payment_type,
+         (c._fld672::date - c._fld671::date) AS duration_days
+  FROM public._accumrg7370 a
+  JOIN public._reference59 c ON c._idrref = a._fld7371rref
+  JOIN public._reference134 analytics ON analytics._idrref = a._fld7376rref
+  JOIN public._enum495 contract_type ON contract_type._idrref = c._fld696rref
+  LEFT JOIN public._document317 d317 ON d317._idrref = a._recorderrref
+  LEFT JOIN public._document316 d316 ON d316._idrref = a._recorderrref
+  LEFT JOIN public._document332 d332 ON d332._idrref = a._recorderrref
+  LEFT JOIN public._document285 d285 ON d285._idrref = a._recorderrref
+  LEFT JOIN public._document304 d304 ON d304._idrref = a._recorderrref
+  LEFT JOIN public._document346 d346 ON d346._idrref = a._recorderrref
+  LEFT JOIN public._document327 d327 ON d327._idrref = a._recorderrref
+  LEFT JOIN public._document315 d315 ON d315._idrref = a._recorderrref
+  LEFT JOIN public._document331 d331 ON d331._idrref = a._recorderrref
+  LEFT JOIN public._document305 d305 ON d305._idrref = a._recorderrref
+  LEFT JOIN public._document333 d333 ON d333._idrref = a._recorderrref
+  LEFT JOIN public._document339 d339 ON d339._idrref = a._recorderrref
+  LEFT JOIN public._document340 d340 ON d340._idrref = a._recorderrref
+  LEFT JOIN public._document296 d296 ON d296._idrref = a._recorderrref
+  WHERE a._period >= TIMESTAMP '2025-01-01' AND a._period < TIMESTAMP '2027-01-01'
+    AND contract_type._enumorder <> 0
+    AND c._description::text NOT LIKE '%ИП%'
+    AND analytics._description::text NOT LIKE '%ДСУ%'
+    AND d332._idrref IS NULL
+    AND (d317._idrref IS NOT NULL OR d316._idrref IS NOT NULL OR d285._idrref IS NOT NULL
+      OR d304._idrref IS NOT NULL OR d346._idrref IS NOT NULL OR d327._idrref IS NOT NULL
+      OR d315._idrref IS NOT NULL OR d331._idrref IS NOT NULL OR d305._idrref IS NOT NULL
+      OR d333._idrref IS NOT NULL OR d339._idrref IS NOT NULL OR d340._idrref IS NOT NULL
+      OR d296._idrref IS NOT NULL)
+), units AS (
+  SELECT contract_id, payment_period, payment_type, max(duration_days) AS duration_days,
+         count(*) AS movement_rows
+  FROM current_advances
+  GROUP BY 1, 2, 3
+), prepayment_contracts AS (
+  SELECT contract_id, count(*) AS payment_periods
+  FROM units WHERE payment_type = 'Предоплата'
+  GROUP BY 1
+)
+SELECT 'kpi_unit'::text AS metric, payment_type AS value,
+       count(*) FILTER (WHERE duration_days > 28) AS duration_eligible_units,
+       count(*) FILTER (WHERE duration_days <= 28 OR duration_days IS NULL) AS duration_ineligible_units
+FROM units
+GROUP BY 1, 2
+UNION ALL
+SELECT 'prepayment_contract',
+       CASE WHEN payment_periods = 1 THEN 'one_payment_period' ELSE 'multiple_payment_periods' END,
+       count(*), 0
+FROM prepayment_contracts
+GROUP BY 1, 2
+ORDER BY metric, value;
+
+-- MR-V11B: recurring-only, index-friendly component of MR-V11A.  Recorder
+-- exclusivity was already proven by MR-V04, so EXISTS preserves the current
+-- recognised/non-sale selection without the broad document joins.
+WITH recurring_units AS (
+  SELECT a._fld7371rref AS contract_id,
+         regexp_replace(analytics._description::text, '^.*; ', '') AS payment_period,
+         max(c._fld672::date - c._fld671::date) AS duration_days,
+         count(*) AS movement_rows
+  FROM public._accumrg7370 a
+  JOIN public._reference59 c ON c._idrref = a._fld7371rref
+  JOIN public._reference134 analytics ON analytics._idrref = a._fld7376rref
+  JOIN public._enum495 contract_type ON contract_type._idrref = c._fld696rref
+  WHERE a._period >= TIMESTAMP '2025-01-01' AND a._period < TIMESTAMP '2027-01-01'
+    AND c._fld699rref = decode('9bd3ea4748457ee94b2011de6d9687d7', 'hex')
+    AND contract_type._enumorder <> 0
+    AND c._description::text NOT LIKE '%ИП%'
+    AND analytics._description::text NOT LIKE '%ДСУ%'
+    AND NOT EXISTS (SELECT 1 FROM public._document332 d WHERE d._idrref = a._recorderrref)
+    AND (EXISTS (SELECT 1 FROM public._document317 d WHERE d._idrref = a._recorderrref)
+      OR EXISTS (SELECT 1 FROM public._document316 d WHERE d._idrref = a._recorderrref)
+      OR EXISTS (SELECT 1 FROM public._document285 d WHERE d._idrref = a._recorderrref)
+      OR EXISTS (SELECT 1 FROM public._document304 d WHERE d._idrref = a._recorderrref)
+      OR EXISTS (SELECT 1 FROM public._document346 d WHERE d._idrref = a._recorderrref)
+      OR EXISTS (SELECT 1 FROM public._document327 d WHERE d._idrref = a._recorderrref)
+      OR EXISTS (SELECT 1 FROM public._document315 d WHERE d._idrref = a._recorderrref)
+      OR EXISTS (SELECT 1 FROM public._document331 d WHERE d._idrref = a._recorderrref)
+      OR EXISTS (SELECT 1 FROM public._document305 d WHERE d._idrref = a._recorderrref)
+      OR EXISTS (SELECT 1 FROM public._document333 d WHERE d._idrref = a._recorderrref)
+      OR EXISTS (SELECT 1 FROM public._document339 d WHERE d._idrref = a._recorderrref)
+      OR EXISTS (SELECT 1 FROM public._document340 d WHERE d._idrref = a._recorderrref)
+      OR EXISTS (SELECT 1 FROM public._document296 d WHERE d._idrref = a._recorderrref))
+  GROUP BY 1, 2
+)
+SELECT count(*) AS recurring_kpi_units,
+       count(*) FILTER (WHERE duration_days > 28) AS duration_eligible_units,
+       count(*) FILTER (WHERE duration_days <= 28 OR duration_days IS NULL) AS duration_ineligible_units,
+       count(*) FILTER (WHERE movement_rows > 1) AS multi_movement_units,
+       coalesce(sum(movement_rows - 1) FILTER (WHERE movement_rows > 1), 0) AS movement_row_excess
+FROM recurring_units;
+
+-- MR-V11C: prepayment component. The DAX KPI counts one contract, never a
+-- payment-period row; measure whether source periods could split a contract.
+-- MR-V11D proves that these 13 accepted RecorderTRef values map completely
+-- to the same current-M document types (Document332/Sale is deliberately
+-- absent). This preserves the exact current-M recognised/non-sale condition
+-- while avoiding fourteen repeated document lookups for each movement.
+-- Expected before execution: one aggregate row. It observes source structure;
+-- no independent Power BI total exists for reconciliation in this control.
+WITH prepayment_rows AS (
+  SELECT a._fld7371rref AS contract_id,
+         regexp_replace(analytics._description::text, '^.*; ', '') AS payment_period,
+         c._fld672::date - c._fld671::date AS duration_days
+  FROM public._accumrg7370 a
+  JOIN public._reference59 c ON c._idrref = a._fld7371rref
+  JOIN public._reference134 analytics ON analytics._idrref = a._fld7376rref
+  JOIN public._enum495 contract_type ON contract_type._idrref = c._fld696rref
+  WHERE a._period >= TIMESTAMP '2025-01-01' AND a._period < TIMESTAMP '2027-01-01'
+    AND a._recordertref = ANY(ARRAY[
+      decode('0000013d','hex'), decode('0000013c','hex'), decode('0000011d','hex'),
+      decode('00000130','hex'), decode('0000015a','hex'), decode('00000147','hex'),
+      decode('0000013b','hex'), decode('0000014b','hex'), decode('00000131','hex'),
+      decode('0000014d','hex'), decode('00000153','hex'), decode('00000154','hex'),
+      decode('00000128','hex')])
+    AND c._fld699rref IS NOT NULL
+    AND c._fld699rref <> decode('9bd3ea4748457ee94b2011de6d9687d7', 'hex')
+    AND contract_type._enumorder <> 0
+    AND (c._description IS NULL OR c._description::text NOT LIKE '%ИП%')
+    AND analytics._description::text NOT LIKE '%ДСУ%'
+), per_contract AS (
+  SELECT contract_id, max(duration_days) AS duration_days,
+         count(DISTINCT payment_period) AS payment_periods,
+         count(*) AS movement_rows
+  FROM prepayment_rows
+  GROUP BY 1
+)
+SELECT count(*) AS prepayment_contracts,
+       count(*) FILTER (WHERE duration_days > 28) AS duration_eligible_contracts,
+       count(*) FILTER (WHERE duration_days <= 28 OR duration_days IS NULL) AS duration_ineligible_contracts,
+       count(*) FILTER (WHERE payment_periods > 1) AS contracts_with_multiple_payment_periods,
+       coalesce(sum(payment_periods - 1) FILTER (WHERE payment_periods > 1), 0) AS payment_period_excess,
+       count(*) FILTER (WHERE movement_rows > 1) AS multi_movement_contracts
+FROM per_contract;
+
+-- MR-V11D: physical proof for the RecorderTRef optimisation in MR-V11C.
+-- Expected before execution: every typed row maps to its current-M document;
+-- unmatched_rows = 0. Document285 may have no rows in the bounded period.
+WITH checks AS (
+  SELECT 'Document317'::text AS document_name, count(*) AS typed_rows, count(d._idrref) AS matched_rows
+  FROM public._accumrg7370 a LEFT JOIN public._document317 d ON d._idrref = a._recorderrref
+  WHERE a._period >= TIMESTAMP '2025-01-01' AND a._period < TIMESTAMP '2027-01-01' AND a._recordertref = decode('0000013d','hex')
+  UNION ALL SELECT 'Document316', count(*), count(d._idrref)
+  FROM public._accumrg7370 a LEFT JOIN public._document316 d ON d._idrref = a._recorderrref
+  WHERE a._period >= TIMESTAMP '2025-01-01' AND a._period < TIMESTAMP '2027-01-01' AND a._recordertref = decode('0000013c','hex')
+  UNION ALL SELECT 'Document332', count(*), count(d._idrref)
+  FROM public._accumrg7370 a LEFT JOIN public._document332 d ON d._idrref = a._recorderrref
+  WHERE a._period >= TIMESTAMP '2025-01-01' AND a._period < TIMESTAMP '2027-01-01' AND a._recordertref = decode('0000014c','hex')
+  UNION ALL SELECT 'Document285', count(*), count(d._idrref)
+  FROM public._accumrg7370 a LEFT JOIN public._document285 d ON d._idrref = a._recorderrref
+  WHERE a._period >= TIMESTAMP '2025-01-01' AND a._period < TIMESTAMP '2027-01-01' AND a._recordertref = decode('0000011d','hex')
+  UNION ALL SELECT 'Document304', count(*), count(d._idrref)
+  FROM public._accumrg7370 a LEFT JOIN public._document304 d ON d._idrref = a._recorderrref
+  WHERE a._period >= TIMESTAMP '2025-01-01' AND a._period < TIMESTAMP '2027-01-01' AND a._recordertref = decode('00000130','hex')
+  UNION ALL SELECT 'Document346', count(*), count(d._idrref)
+  FROM public._accumrg7370 a LEFT JOIN public._document346 d ON d._idrref = a._recorderrref
+  WHERE a._period >= TIMESTAMP '2025-01-01' AND a._period < TIMESTAMP '2027-01-01' AND a._recordertref = decode('0000015a','hex')
+  UNION ALL SELECT 'Document327', count(*), count(d._idrref)
+  FROM public._accumrg7370 a LEFT JOIN public._document327 d ON d._idrref = a._recorderrref
+  WHERE a._period >= TIMESTAMP '2025-01-01' AND a._period < TIMESTAMP '2027-01-01' AND a._recordertref = decode('00000147','hex')
+  UNION ALL SELECT 'Document315', count(*), count(d._idrref)
+  FROM public._accumrg7370 a LEFT JOIN public._document315 d ON d._idrref = a._recorderrref
+  WHERE a._period >= TIMESTAMP '2025-01-01' AND a._period < TIMESTAMP '2027-01-01' AND a._recordertref = decode('0000013b','hex')
+  UNION ALL SELECT 'Document331', count(*), count(d._idrref)
+  FROM public._accumrg7370 a LEFT JOIN public._document331 d ON d._idrref = a._recorderrref
+  WHERE a._period >= TIMESTAMP '2025-01-01' AND a._period < TIMESTAMP '2027-01-01' AND a._recordertref = decode('0000014b','hex')
+  UNION ALL SELECT 'Document305', count(*), count(d._idrref)
+  FROM public._accumrg7370 a LEFT JOIN public._document305 d ON d._idrref = a._recorderrref
+  WHERE a._period >= TIMESTAMP '2025-01-01' AND a._period < TIMESTAMP '2027-01-01' AND a._recordertref = decode('00000131','hex')
+  UNION ALL SELECT 'Document333', count(*), count(d._idrref)
+  FROM public._accumrg7370 a LEFT JOIN public._document333 d ON d._idrref = a._recorderrref
+  WHERE a._period >= TIMESTAMP '2025-01-01' AND a._period < TIMESTAMP '2027-01-01' AND a._recordertref = decode('0000014d','hex')
+  UNION ALL SELECT 'Document339', count(*), count(d._idrref)
+  FROM public._accumrg7370 a LEFT JOIN public._document339 d ON d._idrref = a._recorderrref
+  WHERE a._period >= TIMESTAMP '2025-01-01' AND a._period < TIMESTAMP '2027-01-01' AND a._recordertref = decode('00000153','hex')
+  UNION ALL SELECT 'Document340', count(*), count(d._idrref)
+  FROM public._accumrg7370 a LEFT JOIN public._document340 d ON d._idrref = a._recorderrref
+  WHERE a._period >= TIMESTAMP '2025-01-01' AND a._period < TIMESTAMP '2027-01-01' AND a._recordertref = decode('00000154','hex')
+  UNION ALL SELECT 'Document296', count(*), count(d._idrref)
+  FROM public._accumrg7370 a LEFT JOIN public._document296 d ON d._idrref = a._recorderrref
+  WHERE a._period >= TIMESTAMP '2025-01-01' AND a._period < TIMESTAMP '2027-01-01' AND a._recordertref = decode('00000128','hex')
+)
+SELECT document_name, typed_rows, matched_rows, typed_rows - matched_rows AS unmatched_rows
+FROM checks
+ORDER BY document_name;
+
 -- MR-V10C: current-PBIT channel, access-zone and access-type coverage on the
 -- contract-advance branch. This retains the recorder precedence and text
 -- conditions; it only counts current DAX output categories.

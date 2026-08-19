@@ -150,6 +150,7 @@ PBIT подтверждает общую звезду и одновременн�
 | Статус | Элемент | Риск / причина | Проверка / следующее действие |
 |---|---|---|---|
 | CONFIRMED | рекарринговая KPI-единица | текущий PBI суммирует все движения `contract_id × payment_period`; множественность строк в группе ожидаема | SV-096 / BR-016 |
+| CONFIRMED | KPI-единица предоплаты | в current-PBIT scope один договор предоплаты не имеет нескольких `payment_period`; несколько исходных движений сохраняются до current агрегации | SV-121 / BR-016 |
 | PARTIALLY VALIDATED | source keys/states/signs | SV-112/113 подтвердили current state/sign и отсутствие размножения 14 document joins; другие joins и непредставленная ветка ПКО остаются открыты | MR-V01–MR-V05 |
 | VALIDATED RISK | predecessor contract | SV-116: 508 пар `клиент × дата активации` имеют несколько договоров; PBIT сортирует только по дате и не имеет business tie-break | сохранять current order по BR-018; решение о tie-break — отдельная доработка |
 | VALIDATED | `InfoRg8595` | SV-120: 144 current-PBIT номенклатуры имеют 144 строки; среди 93 используемых конфликтов времени нет | current `Table.Distinct(product_id)` сохраняется без нового порядка |
