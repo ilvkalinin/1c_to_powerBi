@@ -1,13 +1,14 @@
 # Data contract: «Выручка рецепции»
 
-Статус: `DESIGNED / STAGE 2 VALIDATED / IMPLEMENTATION DEFERRED`.
-Контракт фиксирует текущую логическую модель. SQL и DDL не создавались.
+Статус: `BLOCKED — current ancillary scope does not contain reception / STAGE 2 VALIDATED`.
+Контракт фиксирует текущую логическую модель. SQL и DDL не создавались;
+`mart.v_reception_revenue` нельзя создать над текущим ancillary-фактом.
 
 ## Общие параметры
 
 | Параметр | Значение | Статус / доказательство |
 |---|---|---|
-| Объект PostgreSQL | `mart.v_reception_revenue` | PROPOSED — ADR-0005; детальный view, не дневной |
+| Объект PostgreSQL | `mart.v_reception_revenue` | BLOCKED — нужен расширенный общий факт либо отдельный узкий факт; детальный view, не дневной |
 | Таблица Power BI | `Выручка рецепции` | CONFIRMED naming rule |
 | Назначение | количество и выручка дополнительных услуг и товаров рецепции | CONFIRMED |
 | Гранулярность | дата × клуб × текущий сотрудник × номенклатура × вид деятельности × категория × источник | CONFIRMED current rule / SV-051, SV-052 |

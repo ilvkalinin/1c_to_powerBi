@@ -6,7 +6,7 @@
 
 | Таблица Power BI | PostgreSQL / источник | Grain | Роль |
 |---|---|---|---|
-| `Свод выручки` | `mart.revenue_group_summary_daily` | дата × клуб × статья | доходы |
+| `Свод выручки` | `mart.revenue_group_summary_daily` + текущие Excel-статьи Power BI | дата × клуб × статья | доходы: PostgreSQL 02–06, Excel 07–13 |
 | `Клиентская база по дням` | `mart.client_base_daily` | дата × клуб × срезы | КБ |
 | `Почасовая посещаемость` | `mart.club_attendance_hourly` | hourly demographic aggregate | максимальная ЧК |
 | `Renew` | текущий внешний источник | месяц × клуб candidate | Renew |

@@ -14,7 +14,7 @@ BR-014).
 
 | Набор | Гранулярность одной строки | Логический ключ | Решение |
 |---|---|---|---|
-| Доходная компонента | дата факта × клуб × статья | `(revenue_date, club_id, revenue_article_code)` | REUSE `mart.revenue_group_summary_daily`; ключ validation pending |
+| Доходная компонента | дата факта × клуб × статья | `(revenue_date, club_id, revenue_article_code)` | REUSE `mart.revenue_group_summary_daily` для 02–06; текущие Excel-статьи 07–13 остаются Power BI |
 | КБ на выбранную дату | дата × клуб × срезы КБ | grain `mart.client_base_daily` | REUSE / EXTEND consumer; объект ещё не реализован |
 | Часовой интервал посещения | дата × фактический клуб × час входа × час выхода × пол × возраст | candidate из `work_attendance` | REUSE / EXTEND consumer; ключ pending |
 | Внешние свойства/расходы | внешний файл Power BI | внешний файл Power BI | NOT_APPLICABLE: остаётся в Power BI по решению пользователя 2026-07-30 |
@@ -47,7 +47,7 @@ BR-014).
 |---|---|---|---|
 | `AccumRg7370`, `AccumRg7575`, `AccumRg7646`, `AccumRg7739` | текущие ветви выручки | VALIDATED current query, keys and control sums | SV-063, SV-064 |
 | `Document325`, `Reference59`, `Reference70`, `Reference132`, `Reference141X1`, `Reference163` | текущая выручка/посещения и классификация | VALIDATED current join/cardinality on control period | SV-062, SV-063 |
-| `mart.revenue_group_summary_daily` | будущий переиспользуемый дневной факт выручки | DESIGNED / validation pending | data products catalog; ADR-0010 |
+| `mart.revenue_group_summary_daily` | будущий переиспользуемый дневной факт внутренней выручки 02–06 | Stage 3 SQL review ready / no DDL-DML authorized | data products catalog; ADR-0010 |
 | `mart.client_base_daily` | ежедневная КБ для произвольной даты | CONFIRMED dependency / validation pending | data products catalog; client base/work attendance mappings |
 | логический факт почасовой посещаемости | интервалы для максимальной ЧК | BUSINESS MAPPING COMPLETE / validation pending | work attendance mapping |
 | внешние файлы КБ/Renew/расходов/характеристик | недостающие показатели | EXTERNAL / остаются в Power BI | решение пользователя 2026-07-30 |
