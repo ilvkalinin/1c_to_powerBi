@@ -206,6 +206,71 @@ SELECT document_name, typed_rows, matched_rows, typed_rows - matched_rows AS unm
 FROM checks
 ORDER BY document_name;
 
+-- MR-V11E: exact current-M grouping before the DAX net-amount condition.
+-- Expected: one result row per payment type; the previously validated
+-- contract+day co-access key must not multiply an advance group.
+WITH raw_advances AS (
+  SELECT a._period::date AS event_date, a._fld7371rref AS contract_id,
+         x._description::text AS analytics_text,
+         CASE WHEN c._fld699rref = decode('9bd3ea4748457ee94b2011de6d9687d7','hex') THEN 'recurring'
+              WHEN c._fld699rref = decode('96976725cebf51f7461429d74d3f6cbe','hex') THEN 'free'
+              WHEN c._fld699rref = decode('9a96b207e6e963c44a4421511fef04e5','hex') THEN 'credit' ELSE 'prepayment' END AS payment_type,
+         c._fld681rref AS client_id, c._fld687rref AS access_club_id, c._fld701rref AS sales_point_club_id,
+         c._fld670::date AS activation_date, c._fld671::date AS start_date, c._fld672::date AS end_date,
+         c._fld694rref AS source_stage_id, p._description::text AS product_name, p._fld1756 AS freeze_days,
+         p._idrref AS product_id, c._fld693 AS term_days, c._fld668rref AS purchase_type_id,
+         c._fld667rref AS membership_kind_id, c._fld697rref AS club_access_type_id,
+         CASE WHEN d327._fld4235rref IS NOT NULL AND d327._fld4235rref <> decode('00000000000000000000000000000000','hex') THEN 'instalment'
+              ELSE CASE coalesce(d304._fld3680rref,d346._fld4891rref,d305._fld3712rref,d339._fld4702rref,d331._fld4395rref)
+                WHEN decode('99a9ebb169a4e2a611eebfc77dadf23f','hex') THEN 'club' WHEN decode('99ad9b75dc73f34911eed62832d12269','hex') THEN 'website'
+                WHEN decode('99a9ebb169a4e2a611eebfc77dadf23d','hex') THEN 'app' WHEN decode('99a9ebb169a4e2a611eebfc77dadf23e','hex') THEN 'employee_app'
+                WHEN decode('99aff84c6229c6ae11eef6b58cf54f81','hex') THEN 'web_customer' END END AS source_object,
+         CASE WHEN a._recordkind=1 AND a._recordertref=ANY(ARRAY[decode('0000013c','hex'),decode('0000014d','hex'),decode('00000154','hex'),decode('0000013b','hex'),decode('00000130','hex')]) THEN -a._fld7377
+              WHEN a._recordkind=1 AND a._recordertref=decode('0000014b','hex') THEN 0 ELSE a._fld7377 END AS signed_amount
+  FROM public._accumrg7370 a JOIN public._reference59 c ON c._idrref=a._fld7371rref JOIN public._reference163 p ON p._idrref=c._fld685rref JOIN public._reference134 x ON x._idrref=a._fld7376rref JOIN public._enum495 e ON e._idrref=c._fld696rref
+  LEFT JOIN public._document304 d304 ON d304._idrref=a._recorderrref LEFT JOIN public._document346 d346 ON d346._idrref=a._recorderrref LEFT JOIN public._document327 d327 ON d327._idrref=a._recorderrref LEFT JOIN public._document305 d305 ON d305._idrref=a._recorderrref LEFT JOIN public._document339 d339 ON d339._idrref=a._recorderrref LEFT JOIN public._document331 d331 ON d331._idrref=a._recorderrref
+  WHERE a._period>=DATE '2025-01-01' AND a._period<DATE '2027-01-01' AND a._recordertref=ANY(ARRAY[decode('0000013d','hex'),decode('0000013c','hex'),decode('0000011d','hex'),decode('00000130','hex'),decode('0000015a','hex'),decode('00000147','hex'),decode('0000013b','hex'),decode('0000014b','hex'),decode('00000131','hex'),decode('0000014d','hex'),decode('00000153','hex'),decode('00000154','hex'),decode('00000128','hex')]) AND c._fld699rref IS NOT NULL AND e._enumorder<>0 AND (c._description IS NULL OR c._description::text NOT LIKE '%ИП%') AND x._description::text NOT LIKE '%ДСУ%'
+), m_groups AS (
+  SELECT event_date,contract_id,analytics_text,payment_type,client_id,access_club_id,sales_point_club_id,activation_date,start_date,end_date,source_stage_id,product_name,freeze_days,product_id,term_days,purchase_type_id,membership_kind_id,club_access_type_id,source_object,sum(signed_amount) gross_amount
+  FROM raw_advances GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19
+), co_access AS (
+  SELECT a._period::date AS event_date,a._fld7741rref AS contract_id,sum(a._fld7749) amount
+  FROM public._accumrg7739 a JOIN public._reference163 p ON p._idrref=a._fld7743rref JOIN public._reference59 c ON c._idrref=a._fld7741rref
+  WHERE a._period>=DATE '2025-01-01' AND a._period<DATE '2027-01-01' AND a._fld7743rref<>decode('00000000000000000000000000000000','hex') AND a._recordkind=1 AND (p._description::text LIKE '%Со-д%' OR p._description::text LIKE '%со-д%') AND c._fld687rref IS NOT NULL GROUP BY 1,2
+), contract_period AS (
+  SELECT m.contract_id,regexp_replace(m.analytics_text,'^.*; ','') payment_period,m.payment_type,sum(m.gross_amount-coalesce(c.amount,0)) net_amount
+  FROM m_groups m LEFT JOIN co_access c USING(event_date,contract_id) GROUP BY 1,2,3
+)
+SELECT payment_type,count(*) contract_periods,count(*) FILTER(WHERE net_amount=0) zero_net_contract_periods,count(*) FILTER(WHERE net_amount<>0) nonzero_net_contract_periods
+FROM contract_period GROUP BY 1 ORDER BY 1;
+
+-- MR-V11F: current-M co-access grouping must stay unique by contract + date.
+-- Expected on BR-003: current_m_grouped_rows = contract_day_keys and both
+-- multiplicity measures equal zero.  This is a cardinality control only.
+WITH current_m_groups AS (
+  SELECT a._period::date AS event_date,a._fld7741rref AS contract_id,
+         a._fld7744rref AS counterparty_id,c._fld687rref AS access_club_id,
+         p._description::text AS product_name,sum(a._fld7749) amount
+  FROM public._accumrg7739 a
+  JOIN public._reference163 p ON p._idrref=a._fld7743rref
+  JOIN public._reference59 c ON c._idrref=a._fld7741rref
+  WHERE a._period>=DATE '2025-01-01' AND a._period<DATE '2027-01-01'
+    AND a._fld7743rref<>decode('00000000000000000000000000000000','hex')
+    AND a._recordkind=1
+    AND (p._description::text LIKE '%Со-д%' OR p._description::text LIKE '%со-д%')
+    AND c._fld687rref IS NOT NULL
+  GROUP BY 1,2,3,4,5
+), per_key AS (
+  SELECT event_date,contract_id,count(*) grouped_rows,sum(amount) amount
+  FROM current_m_groups GROUP BY 1,2
+)
+SELECT (SELECT count(*) FROM current_m_groups) current_m_grouped_rows,
+       count(*) contract_day_keys,
+       count(*) FILTER (WHERE grouped_rows>1) keys_with_multiple_m_groups,
+       coalesce(sum(grouped_rows-1) FILTER (WHERE grouped_rows>1),0) excess_m_groups,
+       sum(amount) co_access_amount
+FROM per_key;
+
 -- MR-V10C: current-PBIT channel, access-zone and access-type coverage on the
 -- contract-advance branch. This retains the recorder precedence and text
 -- conditions; it only counts current DAX output categories.
