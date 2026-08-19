@@ -5,4 +5,4 @@
 # CLOSED_PENDING_NEXT_APPROVAL rejects all new selections until the user
 # explicitly confirms the next independent package.
 gate_id	state	allowed_stage	allowed_report_ids	reason
-global_stage_gate	CLOSED_PENDING_NEXT_APPROVAL	-	-	Client-base DDL package closed 2026-08-19: empty `mart.client_base_daily` schema was created and S3-CBD-DDL-001 passed. Initial load, refresh and Power BI reconciliation remain separate user-approved packages.
+global_stage_gate	CLOSED_PENDING_NEXT_APPROVAL	-	-	Reception-revenue architecture package closed 2026-08-19: `EXTEND` was selected for the shared ancillary movement fact; no DDL/DML, load, refresh or report-rule change ran. A separate DDL-review package is required before any physical migration.

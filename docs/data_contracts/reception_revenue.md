@@ -1,14 +1,16 @@
 # Data contract: «Выручка рецепции»
 
-Статус: `BLOCKED — current ancillary scope does not contain reception / STAGE 2 VALIDATED`.
-Контракт фиксирует текущую логическую модель. SQL и DDL не создавались;
-`mart.v_reception_revenue` нельзя создать над текущим ancillary-фактом.
+Статус: `EXTEND ARCHITECTURE CONFIRMED / current ancillary scope does not yet contain reception / STAGE 2 VALIDATED`.
+Контракт фиксирует текущую логическую модель. Будущая миграция расширит общий
+факт scope `reception` и добавит `reception_category_key`; SQL и DDL пока не
+создавались, поэтому `mart.v_reception_revenue` нельзя создать над текущей
+таблицей.
 
 ## Общие параметры
 
 | Параметр | Значение | Статус / доказательство |
 |---|---|---|
-| Объект PostgreSQL | `mart.v_reception_revenue` | BLOCKED — нужен расширенный общий факт либо отдельный узкий факт; детальный view, не дневной |
+| Объект PostgreSQL | `mart.v_reception_revenue` над расширенным `mart.ancillary_revenue_movement` | EXTEND CONFIRMED — отдельный узкий факт отклонён; детальный view, не дневной |
 | Таблица Power BI | `Выручка рецепции` | CONFIRMED naming rule |
 | Назначение | количество и выручка дополнительных услуг и товаров рецепции | CONFIRMED |
 | Гранулярность | дата × клуб × текущий сотрудник × номенклатура × вид деятельности × категория × источник | CONFIRMED current rule / SV-051, SV-052 |
@@ -29,6 +31,7 @@
 
 | PostgreSQL | Power BI | PostgreSQL тип | Power BI тип | NULL | Роль | Аддитивность | Скрыть |
 |---|---|---|---|---|---|---|---|
+| `revenue_scope` | не загружать в модель рецепции | `text` | — | нет | граница общего факта: `reception` | не мера | да |
 | `revenue_date` | `Дата` | `date` | Date | нет | FK календаря | не мера | нет |
 | `club_id` | `Код клуба` | UNKNOWN | Text | нет | FK клуба | не мера | да |
 | `employee_id` | `Код сотрудника` | `bytea` в источнике | Text | нет в текущем рецепционном scope | FK сотрудника | не мера | да |
