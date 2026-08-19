@@ -1,6 +1,6 @@
 # Data contract: маркетинговая «Воронка»
 
-Статус: `DESIGNED REUSE / IMPLEMENTATION DEFERRED / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-080`.
+Статус: `DESIGNED REUSE / IMPLEMENTATION DEFERRED / GLOBAL-GATE SOURCE CONTROLS CLOSED — SV-080, SV-101, SV-103, MF-V10A`.
 
 Отдельного PostgreSQL-факта нет. Модель REUSE использует
 `mart.fitness_leads_funnel_task` для task core и его логическую проекцию
@@ -27,5 +27,6 @@ BR-020 прямо задаёт единицу: каждая связь счит�
 `activation_date >= task_created_at` и history с 2024-01-01; global dedup
 абонемента запрещён. Физические объекты не создавались.
 
-Приёмка: уникальный task, доказанный task→contract bridge, distinct contract
-без размножения, plan grain, network/cluster, контрольные меры и SLA.
+Приёмка Stage 3: уникальный target task, task→contract bridge без
+размножения, контрольные меры, rerun и SLA созданной витрины. Внешние plans и
+network/cluster остаются в границе текущей модели Power BI.

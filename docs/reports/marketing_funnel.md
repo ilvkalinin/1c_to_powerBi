@@ -1,12 +1,14 @@
 # Требования отчёта: «Воронка»
 
-Статус: `BUSINESS LOGIC COMPLETE / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-080 / IMPLEMENTATION DEFERRED`.
+Статус: `BUSINESS LOGIC COMPLETE / GLOBAL-GATE SOURCE CONTROLS CLOSED — SV-080, SV-101, SV-103, MF-V10A / IMPLEMENTATION DEFERRED`.
 
 Договорный отчёт № 27, блок «Маркетинг». Он показывает созданные задания
 CRM-воронки «Продажа клубной карты», конверсию в активацию подходящих
 абонементов и выполнение плана. Источники истины: бизнес-описание, текущие
-SQL/M/DAX и Stage 2 source-side evidence. `SV-080` выполнен в gymdb только
-на чтение; прочие незапущенные проверки остаются `VALIDATION_PENDING`.
+SQL/M/DAX и Stage 2 source-side evidence. `SV-080`, `SV-101`, `SV-103` и
+`MF-V10A` выполнены в gymdb только на чтение. Текущий source-side scope global
+gate закрыт; приёмка созданной модели остаётся следующим этапом и не начинается
+автоматически.
 
 ## Бизнес-гранулярность и время
 

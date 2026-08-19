@@ -190,4 +190,19 @@ SELECT all_tasks,
          AS tasks_with_pre_month_contract_clients
 FROM components;
 
+-- MF-V10A. Expected: identify whether the two CRM source relations expose a
+-- physical modification timestamp for a safe incremental watermark. This is
+-- metadata-only and does not infer history from a current row version. If no
+-- such timestamp exists, a bounded full rebuild remains the current capture
+-- strategy; rerun and SLA are accepted only after a mart and schedule exist.
+SELECT table_name,
+       string_agg(column_name, ', ' ORDER BY ordinal_position)
+         FILTER (WHERE column_name ~ '(^_period$|version|marked|active|date|time|updated|modified)')
+         AS change_or_time_columns
+FROM information_schema.columns
+WHERE table_schema = 'public'
+  AND table_name IN ('_reference106', '_inforg6798')
+GROUP BY table_name
+ORDER BY table_name;
+
 ROLLBACK;

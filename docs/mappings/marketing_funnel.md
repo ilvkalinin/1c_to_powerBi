@@ -1,12 +1,13 @@
 # Source-to-target mapping: маркетинговая воронка
 
-Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE REUSE CONFIRMED / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-080, SV-101`.
+Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE REUSE CONFIRMED / GLOBAL-GATE SOURCE CONTROLS CLOSED — SV-080, SV-101, SV-103, MF-V10A`.
 
 CRM core имеет grain одно задание `Reference106.ID`. Для метрики
 «Абонементы факт» используется отдельная логическая проекция: одна
 квалифицированная связь `task_id × contract_id`. Её состав задаёт BR-020;
-physical bridge key остаётся `VALIDATION_PENDING`; task code подтверждён в
-отчётном scope по SV-101.
+task code подтверждён в отчётном scope по SV-101. Технический ключ target
+bridge проверяется при приёмке созданной проекции; это не открывает новый
+source-side control global gate.
 
 Целевой набор повторно использует `mart.fitness_leads_funnel_task`; ниже
 зафиксирована только проекция, нужная маркетинговому отчёту. Планы остаются
@@ -66,8 +67,8 @@ physical bridge key остаётся `VALIDATION_PENDING`; task code подтв�
 
 | Статус | Элемент | Риск / причина | Проверка / следующее действие |
 |---|---|---|---|
-| `VALIDATED business rule / VALIDATION_PENDING physical` | `task → contract` | SV-080: 100 строк bridge соответствуют 36 заданиям; у 21 задания более одного контракта. | BR-020 разрешает считать каждую qualifying `task × contract` связь. До Stage 3 подтвердить physical key/code join и сохранение строк; не добавлять global dedup. |
-| `VALIDATION_PENDING` | task code в bridge | current SQL соединяет отображаемые коды | MF-V02; перейти на ID только после доказательства physical field |
+| `VALIDATED business rule / Stage 3 target control` | `task → contract` | SV-080: 100 строк bridge соответствуют 36 заданиям; у 21 задания более одного контракта. | BR-020 разрешает считать каждую qualifying `task × contract` связь. При создании проекции проверить target key и сохранение строк; не добавлять global dedup. |
+| `VALIDATED in report scope` | task code в bridge | SV-101: current DAX-code уникален без `NULL` в report funnel; physical join остаётся по ID. | Не использовать code как physical bridge key; Stage 3 проверяет target ID-based key. |
 | `CONFIRMED user-approved PBIT / VALIDATION_PENDING physical` | когорты накопленного трафика | `UNION(Задания 2024, Задания 2025)`; два предыдущих календарных месяца; минус отмены до месяца и distinct clients по task с контрактом, активированным до месяца. Фильтры оплаты/длительности/возраста снимаются; обе traffic-категории получают один итог. | MF-V08, MF-V09 |
 | `VALIDATED WITH ANOMALY` | длительность контракта | В report funnel одна qualified связь имеет неположительную `Fld693`; `NULL` нет. | MF-V07; current boundaries сохраняются, строка не исключается без решения. |
 | `VALIDATED` | тип оплаты контракта | BR-024 задаёт единое для отчётов значение рекарринга; MF-V07C подтвердил его покрытие в report funnel. | 9 238 рекарринговых и 191 625 предоплатных `task × contract` связей; `NULL` = 0. |
