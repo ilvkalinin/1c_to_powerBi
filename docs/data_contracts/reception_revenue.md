@@ -1,10 +1,10 @@
 # Data contract: «Выручка рецепции»
 
-Статус: `EXTEND DDL REVIEW READY / current ancillary scope does not yet contain reception / STAGE 2 VALIDATED`.
-Контракт фиксирует текущую логическую модель. Будущая миграция расширит общий
-факт scope `reception` и добавит `reception_category_key`; SQL и DDL пока не
-создавались, поэтому `mart.v_reception_revenue` нельзя создать над текущей
-таблицей.
+Статус: `SHARED-SCOPE SCHEMA IMPLEMENTED / RECEPTION INITIAL LOAD NOT REQUESTED / STAGE 2 VALIDATED`.
+S3-RR-EXEC-001 расширил общий факт scope `reception`, добавил
+`reception_category_key` и создал `mart.v_reception_revenue`. View корректно
+пуст до отдельной согласованной загрузки рецепционных строк; текущий источник
+Power BI не менялся.
 
 ## Общие параметры
 

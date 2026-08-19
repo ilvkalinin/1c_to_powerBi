@@ -1,6 +1,6 @@
 # ADR-0005: общий факт дополнительных услуг и товаров
 
-- Статус: `IMPLEMENTED FOR DPFU SCOPE / RECEPTION EXTEND DDL REVIEW READY / DDL AND DML PENDING`
+- Статус: `SHARED-SCOPE SCHEMA IMPLEMENTED / RECEPTION INITIAL LOAD PENDING SEPARATE APPROVAL`
 - Дата: 2026-07-27
 - Отчёт: № 18 «Выручка рецепции»
 
@@ -21,20 +21,20 @@
 `mart.ancillary_revenue_movement` с current-M «Выручки рецепции». Факт содержит
 только шесть фитнес-направлений ДПФУ; рецепционный M-код исключает их и
 использует другой, непересекающийся scope с восемью категориями. Поэтому
-предусмотренный этим ADR `mart.v_reception_revenue` сейчас нельзя построить
-над реализованной таблицей: такой view был бы пустым или неполным.
+предусмотренный этим ADR `mart.v_reception_revenue` нельзя было построить над
+прежней реализацией: такой view был бы пустым или неполным.
 
 Это не отменяет общий факт ДПФУ и не разрешает создавать второй факт.
 Пакет S3-RR-ARCH-001 принял `EXTEND`: общий факт расширяется явно маркированным
-рецепционным scope, а отдельный узкий факт рецепции не создаётся. Будущий
-DDL-review должен определить scope-зависимую обязательность ДПФУ-атрибутов и
-добавить `reception_category_key`; до его отдельного одобрения физическая
-таблица не меняется. Подробное доказательство —
+рецепционным scope, а отдельный узкий факт рецепции не создаётся. S3-RR-EXEC-001
+применил reviewed DDL: добавлены `revenue_scope` и `reception_category_key`,
+scope-зависимая обязательность ДПФУ-атрибутов и два view. Подробное доказательство —
 `reception_revenue_product_admission_assessment_2026-08-19.md`.
 Точный reviewed migration и её post-DDL проверка хранятся в
 `docs/reports/reception_revenue_shared_fact_extension_ddl_review.sql` и
-`sql/tests/reception_revenue_shared_fact_schema_contract.sql`; они не
-выполнялись.
+`sql/tests/reception_revenue_shared_fact_schema_contract.sql`; они применены и
+прошли post-DDL контракт S3-RR-EXEC-001. Рецепционный initial load остаётся
+отдельным пакетом.
 
 ## Рассмотренные варианты
 
@@ -55,11 +55,11 @@ DDL-review должен определить scope-зависимую обяза
 > общий физический факт на VM-2 → обычные локальные views ДПФУ и рецепции →
 > Power BI Import.
 
-Предлагаемые объекты до уточнения scope:
+Реализованные объекты после S3-RR-EXEC-001:
 
 - общий факт — `mart.ancillary_revenue_movement`;
 - views отчётов — `mart.v_dpfu_ancillary_revenue` и
-  `mart.v_reception_revenue` (сейчас не создаются).
+  `mart.v_reception_revenue`.
 
 Общий факт содержит не сырые регистры, а только квалифицированные движения
 дополнительных услуг и товаров за рабочий горизонт и только необходимые

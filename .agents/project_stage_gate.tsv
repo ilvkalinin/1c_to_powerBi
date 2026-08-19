@@ -5,4 +5,4 @@
 # CLOSED_PENDING_NEXT_APPROVAL rejects all new selections until the user
 # explicitly confirms the next independent package.
 gate_id	state	allowed_stage	allowed_report_ids	reason
-global_stage_gate	CLOSED_PENDING_NEXT_APPROVAL	-	-	Reception shared-fact DDL-review package closed 2026-08-19: deterministic migration and two scope views reviewed, static safeguards passed, and no DDL/DML executed. A separate user-approved execution package is required before any physical migration.
+global_stage_gate	CLOSED_PENDING_NEXT_APPROVAL	-	-	Reception shared-fact execution package closed 2026-08-19: scope migration and both views created; S3-RR-EXEC-001 passed. Reception initial load, refresh, Power BI source switch and reconciliation remain separately approved packages.

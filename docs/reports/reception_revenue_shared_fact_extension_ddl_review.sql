@@ -1,5 +1,5 @@
--- REVIEW ONLY — do not execute without a separate user approval for this
--- migration. This file changes the shared fact contract and creates the view;
+-- REVIEWED AND APPLIED — 2026-08-19, package S3-RR-EXEC-001.
+-- This exact migration changes the shared-fact contract and creates the views;
 -- it does not load reception rows.
 --
 -- Product: mart.ancillary_revenue_movement + mart.v_reception_revenue.
@@ -112,7 +112,8 @@ WHERE revenue_scope = 'reception';
 
 COMMIT;
 
--- Before COMMIT: ROLLBACK.
--- After COMMIT, rollback is a separate approved migration; do not DROP the
--- shared fact or views automatically. Reception rows are loaded only in a
--- separately approved full-rebuild package.
+-- Applied result: 21 columns, 7 key/check constraints, 10 physical NOT NULL
+-- columns; all 504691 existing rows remain `dpfu`; both views exist; the
+-- reception view is empty pending a separately approved initial-load package.
+-- Any rollback is a separate approved migration; do not DROP the shared fact
+-- or views automatically.
