@@ -20,8 +20,10 @@ feedback, поэтому current `MIN` даты изменения нужен; �
 matches для шести тем и четырёх из пяти документированных воронок. Пользователь
 подтвердил, что source-вариант `Продажа клип карты Рецепция` — нужная воронка;
 единственный `Reference89._idrref` закреплён в BR-023 и используется как
-filter вместо текста. Visit denominator, Power BI reconciliation и
-refresh/re-run остаются `VALIDATION_PENDING`.
+filter вместо текста. Visit denominator подтверждён SV-104. Power BI
+reconciliation остаётся будущей приёмкой; CR-V11 (изменения, rerun и SLA)
+имеет статус `BLOCKED SOURCE-SIDE`: у interaction нет даты изменения, а
+безопасный source-side rerun не вернул control value до лимита 30 секунд.
 
 Выполненный [`SV-098 SQL`](../source_metadata/validation_sql/calls_report_global_review_2026-08-17.sql)
 содержит только агрегированные read-only проверки. Их числа и остающиеся
