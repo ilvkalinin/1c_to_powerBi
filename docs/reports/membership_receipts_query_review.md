@@ -1,7 +1,7 @@
 # Query review: «Отчёт по поступлениям»
 
 Статус:
-`LOCAL QUERY/MODEL REVIEW COMPLETE / SHARED SOURCE TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-105, SV-107, SV-112 / STAGE 3 DEFERRED`.
+`LOCAL QUERY/MODEL REVIEW COMPLETE / SHARED SOURCE TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-105, SV-107, SV-112—SV-130 / STAGE 3 DEFERRED`.
 
 Проверены два пользовательских DOCX: бизнес-описание, 17 встроенных
 изображений, 1725 абзацев Power Query/SQL/DAX и шесть экранов Power BI
@@ -58,8 +58,10 @@ PBIT содержит полные определения таблиц 2023–20
   `payment_period` (`Текст после разделителя`);
 - после широкой агрегации применяется `Table.Distinct`.
 
-`VALIDATION_PENDING`: уникальность `(Recorder, LineNo)`, сохранение суммы
-после каждого join и ветви, не представленные в текущем historical scope.
+Технический ключ current-M domain `(source_kind, Recorder, LineNo)` подтверждён
+SV-130; документные joins — SV-113, service/towel joins — SV-123/124. Не
+представлена только ветка ПКО с `RecordKind=1`; её нулевое правило сохраняется
+по BR-018 до появления физической строки.
 
 SV-107 на 2026 подтвердил, что 112 973 движения авансов распознаются ровно
 одним из 14 document-types current M, пересечений типов нет. Ещё 870 347
@@ -223,28 +225,30 @@ PBIT подтверждает:
 11. `Супер_стаж(НОВЫЙ)` не переносится; `Продажа` и `Списание` остаются
     отдельными категориями.
 
-## Непроведённый read-only пакет проверок
+## Реестр read-only проверок и фактический статус
 
-Все проверки: `VALIDATION_PENDING`.
-SQL: `NOT_EXECUTED — ожидается подключение к корпоративной сети`.
+Источник подключён; исходные идентификаторы MR-V01…MR-V15 сохранены для
+трассировки. В последнем столбце указан фактический результат, а не прежнее
+ожидание. В будущем pipeline остаются только приёмочные проверки созданных
+витрин и физически ненаблюдаемая ветка ПКО.
 
 | ID | Проверка | Подготовленное действие | Ожидаемый результат |
 |---|---|---|---|
 | MR-V01 | metadata | найти все relations/колонки через `pg_catalog` | ровно один relation каждого имени; типы и nullable записаны |
-| MR-V02 | ключ движений | дубли `(Recorder, LineNo)` отдельно для `7370/7478/7646/7739` | 0 дублей и 0 NULL либо новый доказанный ключ |
-| MR-V03 | состояния и знак | разрез `_Active`, `RecordKind`, `Posted`, `Marked`, тип recorder и знак суммы | каждая включённая комбинация имеет подтверждённое правило |
-| MR-V04 | полиморфные recorder joins | число совпавших документов каждого типа на движение `7370` | ровно один распознанный тип на квалифицированное движение |
-| MR-V05 | join preservation | count/sum до и после каждого join | разница 0, кроме документированного отбора |
-| MR-V06 | contract price | строки `AccumRg7646/7739` на `Reference59` | одна цена на contract + analytics_sequence либо явный tie-break |
-| MR-V07 | со-доступ | кардинальность `contract + period` и сумма до/после RELATED | максимум одна строка справа либо предварительная агрегация без размножения |
+| MR-V02 | ключ движений | физический ключ и current-M key | VALIDATED SV-094/130: в current-M scope `source_kind + recorder_id + line_no` уникален; type документа в target key не нужен |
+| MR-V03 | состояния и знак | разрез `_Active`, `RecordKind`, `Posted`, `Marked`, тип recorder и знак суммы | PARTIALLY VALIDATED SV-112: current CASE воспроизведён; ПКО с `RecordKind=1` физически не встретился |
+| MR-V04 | полиморфные recorder joins | число совпавших документов каждого типа на движение `7370` | VALIDATED SV-107: у квалифицированного движения ровно один current type |
+| MR-V05 | join preservation | count/sum до и после каждого join | VALIDATED COMPONENTS: SV-113 document joins, SV-122 co-access, SV-123 service, SV-124 towel; price multiplicity сохранена как risk SV-115 |
+| MR-V06 | contract price | строки `AccumRg7646/7739` на `Reference59` | VALIDATED RISK SV-115: 13 526 договоров имеют разные пары цен; current `Table.Distinct` сохраняется по BR-018 |
+| MR-V07 | со-доступ | кардинальность `contract + period` и сумма до/после RELATED | VALIDATED SV-114/122: current key уникален, current subtraction воспроизведён |
 | MR-V08 | предыдущий контракт | current PBIT сортирует договоры одного клиента по дате активации без второго порядка | SV-116: 508 ties; текущая неопределённость зафиксирована, новый tie-break не добавляется |
 | MR-V09 | freeze | платные/бесплатные движения и `ПродажаЗаморозкиСАбонементом` на границах acquisition/activation | SV-117: две ОРП-ветки кратны до `Table.Distinct`; exact current dedup проверен и сохраняется без нового агрегата |
 | MR-V10 | классификации | coverage GUID/text для оплаты, возраста, стажа, канала, зоны и доступа | SV-118—120 закрыли current-PBIT coverage; нулевая ссылка исходного стажа остаётся пустой, а `InfoRg8595` fallback — «Безлимитный» |
 | MR-V11 | пять KPI | `SV-121` подтвердил структурную единицу предоплаты; `SV-096` — рекарринг; `SV-122` — current нетто-сумму после со-доступа и ключ связи; `SV-123` — ветку `Расчеты с контрагентами`; `SV-124` — отдельную towel-ветку; `SV-125` — что цена и длительность используют разные current-DAX когорты; `SV-127/129` — базовый итог и полноту current M. | VALIDATED SOURCE-SIDE: базовый итог `Пост Факт` в независимых live snapshots 3 295 904 503,97 и 3 295 905 003,97; ordinary M содержит 205 140 строк без пустого типа оплаты/номенклатуры. Service-ветка и полотенца сохранены без join/union multiplication, price/duration difference остаётся по BR-018. Загруженного total Power BI и всех визуальных срезов в PBIT нет |
 | MR-V12 | даты | границы BR-003 и роли movement/activation/end | VALIDATED SV-126: все receipt rows в `[from,to)`; metric date для предоплаты/бесплатного типа может лежать вне загрузочной границы по current DAX, а 4 919 строк с `end < start` сохраняются и исключаются только current duration-filter |
-| MR-V13 | внешние планы Power BI | grain/ключ/coverage и связи среднесрочного и текущего Excel-планов | уникальный ключ plan fact; общие dimensions; нет загрузки в PostgreSQL и fact-to-fact join |
-| MR-V14 | rerun/изменения | два extract одного snapshot и проверка поздних правок/удалений | идентичный rerun; окно пересчёта покрывает изменения |
-| MR-V15 | performance | `EXPLAIN (ANALYZE, BUFFERS)` только после разрешения | refresh укладывается в доступность 08:30; индексы не предлагаются заранее |
+| MR-V13 | внешние планы Power BI | grain/ключ/coverage и связи среднесрочного и текущего Excel-планов | NOT_APPLICABLE: планы остаются отдельными внешними Power BI-фактами по решению пользователя |
+| MR-V14 | rerun/изменения | два extract одного snapshot и проверка поздних правок/удалений | VALIDATED SOURCE SNAPSHOT RERUN SV-128; обработка изменений будущей витрины проверяется при её приёмке |
+| MR-V15 | performance | `EXPLAIN (ANALYZE, BUFFERS)` только после разрешения | DEFERRED: SLA измеряется при приёмке созданных витрин и расписания, не до Stage 3 |
 
 ### MR-V02: ключи и состояния
 

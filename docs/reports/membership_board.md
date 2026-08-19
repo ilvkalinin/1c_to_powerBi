@@ -1,7 +1,7 @@
 # Отчёт членство для правления
 
 Статус:
-`BUSINESS ANALYSIS COMPLETE / MODEL REVIEW COMPLETE / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-083 / STAGE 3 DEFERRED`.
+`BUSINESS ANALYSIS COMPLETE / MODEL REVIEW COMPLETE / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-083, SV-096, SV-112—SV-130 / STAGE 3 DEFERRED`.
 
 Первичные доказательства:
 
@@ -16,9 +16,10 @@
   обязательном равенстве KPI в идентичных разрезах.
 
 Отдельный board-источник отсутствует: отчёт повторно использует домен
-`membership_receipts`. Его bounded read-only source-side контроль выполнен в
-SV-083; board-специфичные KPI reconciliation, внешние планы и performance
-остаются `VALIDATION_PENDING` до Stage 3.
+`membership_receipts`. Source-side контур пяти KPI, ключ движения, роли дат,
+ветки услуг и базовый итог проверены в SV-096 и SV-112—SV-130. Внешние планы
+остаются отдельными Power BI-фактами, а performance проверяется только при
+приёмке созданных витрин и расписания обновления.
 
 ## Назначение и пользователи
 
@@ -131,8 +132,9 @@ PBIT содержит 29 видимых страниц.
 - готовность Power BI — ежедневно к 08:30 МСК по BR-014;
 - текущий размер данных и время refresh `UNKNOWN`;
 - скриншоты 09–11.07.2026 — контрольные визуальные срезы
-  `VALIDATION_PENDING`, поскольку snapshot источника и полный контекст
-  фильтров не воспроизведены.
+  `VALIDATION_PENDING` только для приёмки созданной Power BI-модели: supplied
+  PBIT не содержит загруженный `DataModel`, поэтому source Stage 2 не может
+  честно сверить их с прежними визуальными цифрами.
 
 ## Граница PostgreSQL / Power BI
 
@@ -163,8 +165,9 @@ PBIT содержит 29 видимых страниц.
   остаются техническими controls перед product admission. Они не разрешают
   менять текущие state/sign cases или создавать отдельный board-факт.
 
-Бизнес-блокеров локального анализа нет. SV-083 подтвердил существование
-физических регистров/контрактных справочников и bounded технические ключи с
-join к контракту. Recurring KPI определён текущим PBI как
-`contract × payment_period` с суммой движений (SV-096); состояния, сверка KPI
-и производительность остаются `VALIDATION_PENDING` для Stage 3.
+Бизнес-блокеров локального анализа нет. Recurring KPI определён текущим PBI
+как `contract × payment_period` с суммой движений (SV-096), current-M ключ
+движения и полный исходный денежный контур — SV-127—SV-130. Единственный
+непредставленный физический sign-case — ПКО с `RecordKind=1`; неоднозначности
+цены и predecessor-сортировки сохранены как legacy-риски по BR-018. Это не
+разрешает Stage 3: действует общий project gate.

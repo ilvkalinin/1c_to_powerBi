@@ -505,6 +505,54 @@ SELECT count(*) current_m_rows,
        count(*) FILTER(WHERE product_id IS NULL) product_missing_rows
 FROM current_m_ordinary;
 
+-- MR-V02B: target movement key in the full current-M scope.  The physical
+-- source key contains RecorderTRef, but the planned fact separates the two
+-- registers with source_kind.  It proves that recorder reference + line
+-- number are not reused across document types inside each resulting branch.
+-- References may recur between branches/registers, which is why source_kind
+-- stays in the target key.
+WITH ordinary AS (
+  SELECT a._recordertref AS recorder_type_id,a._recorderrref AS recorder_id,a._lineno AS line_no
+  FROM public._accumrg7370 a
+  JOIN public._reference59 c ON c._idrref=a._fld7371rref
+  JOIN public._reference134 x ON x._idrref=a._fld7376rref
+  JOIN public._enum495 e ON e._idrref=c._fld696rref
+  WHERE a._period>=DATE '2025-01-01' AND a._period<DATE '2027-01-01'
+    AND a._recordertref=ANY(ARRAY[decode('0000013d','hex'),decode('0000013c','hex'),decode('0000011d','hex'),decode('00000130','hex'),decode('0000015a','hex'),decode('00000147','hex'),decode('0000013b','hex'),decode('0000014b','hex'),decode('00000131','hex'),decode('0000014d','hex'),decode('00000153','hex'),decode('00000154','hex'),decode('00000128','hex')])
+    AND e._enumorder<>0 AND (c._description IS NULL OR c._description::text NOT LIKE '%ИП%') AND x._description::text NOT LIKE '%ДСУ%'
+), services AS (
+  SELECT a._recordertref AS recorder_type_id,a._recorderrref AS recorder_id,a._lineno AS line_no
+  FROM public._accumrg7739 a
+  JOIN public._reference163 p ON p._idrref=a._fld7743rref
+  LEFT JOIN public._reference59 c ON c._idrref=a._fld7741rref
+  WHERE a._period>=DATE '2025-01-01' AND a._period<DATE '2027-01-01'
+    AND a._fld7743rref<>decode('00000000000000000000000000000000','hex') AND a._recordkind=1
+    AND (CASE WHEN p._description::text IN ('Полотенце','Аренда полотенца (разовая)') THEN NULL
+              WHEN strpos(p._description::text,'Со-д')>0 OR strpos(p._description::text,'со-д')>0 OR strpos(p._description::text,'Полоте')>0 OR strpos(p._description::text,'полоте')>0 OR strpos(p._description::text,'Госте')>0 OR strpos(p._description::text,'гостев')>0 OR strpos(p._description::text,'Заморо')>0 OR strpos(p._description::text,'заморо')>0 OR strpos(p._description::text,'день здоровья')>0 OR strpos(p._description::text,'Переоформление')>0 OR strpos(p._description::text,'Адаптац')>0 OR strpos(p._description::text,'Вход для детей')>0 THEN 'in_scope' END)='in_scope'
+    AND (CASE WHEN strpos(p._description::text,'Со-д')>0 OR strpos(p._description::text,'со-д')>0 THEN c._fld687rref ELSE a._fld7746rref END) IS NOT NULL
+    AND (CASE WHEN strpos(p._description::text,'Со-д')>0 OR strpos(p._description::text,'со-д')>0 THEN c._fld687rref ELSE a._fld7746rref END)<>decode('00000000000000000000000000000000','hex')
+), towels AS (
+  SELECT a._recordertref AS recorder_type_id,a._recorderrref AS recorder_id,a._lineno AS line_no
+  FROM public._accumrg7370 a
+  JOIN public._reference59 c ON c._idrref=a._fld7371rref
+  JOIN public._reference163 p ON p._idrref=c._fld685rref
+  WHERE a._period>=DATE '2025-01-01' AND a._period<DATE '2027-01-01'
+    AND p._fld1733rref=decode('80d100505681013811e4d16f28bf1aab','hex')
+    AND a._recordertref=ANY(ARRAY[decode('0000013d','hex'),decode('0000013c','hex'),decode('0000011d','hex'),decode('00000130','hex'),decode('0000015a','hex'),decode('00000147','hex'),decode('0000013b','hex'),decode('0000014b','hex'),decode('00000131','hex'),decode('0000014d','hex'),decode('00000153','hex'),decode('00000154','hex'),decode('00000128','hex')])
+), scoped AS (
+  SELECT 'ordinary_advance'::text AS source_kind,* FROM ordinary
+  UNION ALL SELECT 'membership_service'::text,* FROM services
+  UNION ALL SELECT 'towel_advance'::text,* FROM towels
+), by_key AS (
+  SELECT source_kind,recorder_id,line_no,count(*) row_count,count(DISTINCT recorder_type_id) recorder_type_count
+  FROM scoped GROUP BY 1,2,3
+)
+SELECT source_kind,sum(row_count) source_rows,count(*) keys_without_type,
+       sum(row_count)-count(*) duplicate_rows_without_type,
+       count(*) FILTER(WHERE recorder_type_count>1) keys_reused_across_document_types,
+       sum(row_count) FILTER(WHERE recorder_type_count>1) rows_on_reused_keys
+FROM by_key GROUP BY 1 ORDER BY 1;
+
 -- MR-V10C: current-PBIT channel, access-zone and access-type coverage on the
 -- contract-advance branch. This retains the recorder precedence and text
 -- conditions; it only counts current DAX output categories.

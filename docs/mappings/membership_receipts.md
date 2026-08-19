@@ -1,7 +1,7 @@
 # Source-to-target mapping: поступления по членству
 
 Статус:
-`BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0017 / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-083, SV-105, SV-107, SV-112; Stage 3 deferred`.
+`BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0017 / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-083, SV-105, SV-107, SV-112—SV-130; Stage 3 deferred`.
 
 Этот mapping фиксирует текущую логику отчёта и не утверждает физический объект
 или SQL. На `STAGE_1_LOCAL_ANALYSIS` DDL/DML и серверные проверки запрещены.
@@ -25,16 +25,18 @@
 SV-094 корректно зафиксировал множественность движений, но ошибочно назвал её
 ошибкой ключа; исправление интерпретации — SV-096.
 
-Кандидат технического ключа движения:
-`(source_kind, recorder_id, line_no)` — `VALIDATION_PENDING`.
+Технический ключ движения current-M domain:
+`(source_kind, recorder_id, line_no)` — `VALIDATED` в SV-130. Тип документа
+физического регистра не требуется в этом ключе: внутри каждой из двух веток
+сочетание `recorder_id + line_no` не повторяется между типами документа.
 
 ## Целевые колонки движения и контрактных атрибутов
 
 | Целевая колонка | Бизнес-описание | Исходная таблица | Исходная колонка | Преобразование | PostgreSQL тип | NULL | Гранулярность | Статус | Источник подтверждения | Тест |
 |---|---|---|---|---|---|---|---|---|---|---|
-| `source_kind` | ветка денежного источника | вычисление | — | `contract_advance`, `membership_service` | `text` | нет | движение | VALIDATED branch scope — SV-123/124 | M + user decision 2026-07-31 | MR-V11 branch reconciliation |
-| `recorder_id` | документ-регистратор | `AccumRg7370/7739` | `RecorderRRef` | канонический ID | `text` candidate | нет | движение | CONFIRMED source / type pending | M | MR-V02 |
-| `recorder_line_no` | номер строки движения | те же регистры | `LineNo` | без изменения | `integer` candidate | нет | движение | VALIDATION_PENDING | source metadata required | MR-V02 |
+| `source_kind` | ветка денежного источника | вычисление | — | `ordinary_advance`, `towel_advance`, `membership_service` | `text` | нет | движение | VALIDATED branch scope — SV-123/124/130 | M + user decision 2026-07-31 | MR-V11 branch reconciliation |
+| `recorder_id` | документ-регистратор | `AccumRg7370/7739` | `RecorderRRef` | канонический ID | `text` | нет | движение | VALIDATED CURRENT-M KEY — SV-130 | source physical key + MR-V02B | MR-V02 |
+| `recorder_line_no` | номер строки движения | те же регистры | `LineNo` | без изменения | `integer` | нет | движение | VALIDATED CURRENT-M KEY — SV-130 | source physical key + MR-V02B | MR-V02 |
 | `receipt_date` | дата поступления | `AccumRg7370/7739` | `Period` | `::date` | `date` | нет | движение | VALIDATED current-DAX input — SV-126 | M/DAX | MR-V12 |
 | `metric_date` | дата количества/цен/длительности | movement + `Reference59` | `Period`, `Fld670` | рекарринг и услуга → дата движения; предоплата, бесплатно и кредит → дата активации | `date` | да при отсутствующей активации | контрактная единица | VALIDATED current-DAX input — SV-126 | DAX + user decision 2026-07-31 | MR-V12 |
 | `contract_id` | устойчивый ID контракта | registers → `Reference59` | `Fld7371/Fld7741/Fld7655` → `ID` | канонический ID | `text` candidate | да у услуг | движение / контракт | CONFIRMED current source | SQL/M | orphan test |
@@ -92,10 +94,10 @@ SV-094 корректно зафиксировал множественност�
 
 | Объект | Назначение | Статус | Доказательство |
 |---|---|---|---|
-| `AccumRg7370` | движения авансов/оплат по контрактам | CONFIRMED current source / key, states and sign pending | supplied M |
-| `AccumRg7739` | membership-услуги, со-доступ и цена | PARTIALLY VALIDATED — current service branch and its joins SV-123; other roles and price scope pending | supplied M |
-| `AccumRg7478` | движения заморозки | CONFIRMED current source / interval and states pending | supplied M |
-| `AccumRg7646` | цена продажи и продажа заморозки | CONFIRMED current source / cardinality pending | supplied M |
+| `AccumRg7370` | движения авансов/оплат по контрактам | PARTIALLY VALIDATED — current-M key SV-130, sign/current scope SV-112; только ПКО `RecordKind=1` не наблюдался | supplied M + source controls |
+| `AccumRg7739` | membership-услуги, со-доступ и цена | VALIDATED CURRENT-M branches — services/co-access SV-122/123; price-choice ambiguity preserved SV-115 | supplied M + source controls |
+| `AccumRg7478` | движения заморозки | VALIDATED CURRENT-PBIT dedup/interval branch — SV-117 | supplied M + source controls |
+| `AccumRg7646` | цена продажи и продажа заморозки | VALIDATED RISK — price multiplicity SV-115; membership-freeze sale branch SV-117 | supplied M + source controls |
 | `Reference59` | контракт, клиент, даты, клубы, стаж и типы | CONFIRMED current source | supplied SQL/M |
 | `Reference134` | источник `АналитикаУчета`, из которого текущий M извлекает платёжный период | CONFIRMED current M/DAX | supplied PBIT |
 | `Reference141X1`, `Reference163`, `Reference132`, `Reference225` | клиент, продукт, клуб, сотрудник | CONFIRMED current source / states pending | supplied SQL/M |
@@ -151,7 +153,7 @@ PBIT подтверждает общую звезду и одновременн�
 |---|---|---|---|
 | CONFIRMED | рекарринговая KPI-единица | текущий PBI суммирует все движения `contract_id × payment_period`; множественность строк в группе ожидаема | SV-096 / BR-016 |
 | CONFIRMED | KPI-единица предоплаты | в current-PBIT scope один договор предоплаты не имеет нескольких `payment_period`; несколько исходных движений сохраняются до current агрегации | SV-121 / BR-016 |
-| PARTIALLY VALIDATED | source keys/states/signs | SV-112/113 подтвердили current state/sign и отсутствие размножения 14 document joins; другие joins и непредставленная ветка ПКО остаются открыты | MR-V01–MR-V05 |
+| PARTIALLY VALIDATED | source states/signs | технический ключ current-M domain подтверждён SV-130; SV-112/113 подтвердили current state/sign и отсутствие размножения 14 document joins. Ненаблюдаемая ветка ПКО `RecordKind=1` остаётся единственным физически не проверенным sign-case | MR-V03 |
 | VALIDATED RISK | predecessor contract | SV-116: 508 пар `клиент × дата активации` имеют несколько договоров; PBIT сортирует только по дате и не имеет business tie-break | сохранять current order по BR-018; решение о tie-break — отдельная доработка |
 | VALIDATED | `InfoRg8595` | SV-120: 144 current-PBIT номенклатуры имеют 144 строки; среди 93 используемых конфликтов времени нет | current `Table.Distinct(product_id)` сохраняется без нового порядка |
 | CONFIRMED MODEL RISK | manager and sales-club propagation | current calculated KPI table lacks the corresponding shared-dimension relationships | require both keys/relationships in future KPI fact |
@@ -168,5 +170,7 @@ PBIT подтверждает общую звезду и одновременн�
 `AccumRg7370`, `AccumRg7739`, `Reference59` и `Reference134` существуют. В
 bounded 2026 выборках по 100 строк оба регистра имеют 100 technical keys и 0
 orphan-contract. Наблюдаемые `RecordKind` не интерпретируются без current M
-sign CASE; recorder exclusivity, states, freeze and price joins
-остаются `VALIDATION_PENDING` перед реализацией.
+sign CASE. Этот ранний bounded control дополнен SV-096 и SV-112—SV-130:
+current-M ключ, recorder exclusivity, sign CASE, service/towel/freeze joins,
+даты и базовый итог уже проверены. Остаются только ненаблюдаемая ветка ПКО
+`RecordKind=1` и сохранённые по BR-018 риски цены/порядка предшественника.

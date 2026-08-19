@@ -1,7 +1,7 @@
 # Source-to-target mapping: «Отчёт членство для правления»
 
 Статус:
-`BUSINESS MAPPING COMPLETE / REUSE CONFIRMED / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-083, SV-105, SV-107, SV-112 / IMPLEMENTATION DEFERRED`.
+`BUSINESS MAPPING COMPLETE / REUSE CONFIRMED / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-083, SV-096, SV-105, SV-107, SV-112—SV-130 / IMPLEMENTATION DEFERRED`.
 
 ## Гранулярность и ключи
 
@@ -47,7 +47,7 @@ joins в общей contract-advance ветви. Это не закрывает 
 | Целевая колонка | Бизнес-описание | Исходная таблица / колонка | Преобразование | PostgreSQL тип | NULL | Grain | Статус | Доказательство | Тест |
 |---|---|---|---|---|---|---|---|---|---|
 | `source_kind` | ветка поступления | mapping `membership_receipts` | без изменения | `text` | нет | движение | CONFIRMED REUSE | MR mapping + PBIT | MR-V11 |
-| `source_movement_key` | технический ключ движения | `AccumRg7370/7739` | bounded physical composite key; полный domain pending | `text` candidate | нет | движение | PARTIALLY VALIDATED — SV-083 | MR mapping | MR-V02/MR-V03 |
+| `source_movement_key` | технический ключ движения | `AccumRg7370/7739` | `source_kind + recorder_id + line_no` | `text` | нет | движение | VALIDATED CURRENT-M KEY — SV-130 | MR mapping | MR-V02B |
 | `receipt_date` | дата денежного движения | `Period` | `::date` | `date` | нет | движение | CONFIRMED REUSE | BR-015 | MB-V07 |
 | `metric_date` | дата контрактного KPI | movement / activation | recurring → movement; prepayment → activation | `date` | да у услуг | KPI unit | CONFIRMED REUSE | BR-015 | MB-V07 |
 | `kpi_unit_key` | единица количества | contract / `payment_period` | предоплата → contract; рекарринг → `contract × payment_period` | `text` candidate | да у услуг | KPI unit | CONFIRMED REUSE | BR-016 + MR mapping | SV-096/MB-V01 |
@@ -81,7 +81,7 @@ joins в общей contract-advance ветви. Это не закрывает 
 
 | Объект | Назначение | Статус | Доказательство |
 |---|---|---|---|
-| все источники `membership_receipts` | факты и измерения членства | CONFIRMED REUSE / PARTIALLY VALIDATED — SV-083, SV-112—SV-116 | source catalogs + PBIT comparison + source controls |
+| все источники `membership_receipts` | факты и измерения членства | CONFIRMED REUSE / PARTIALLY VALIDATED — SV-083, SV-096, SV-112—SV-130 | source catalogs + PBIT comparison + source controls |
 | текущий и среднесрочный планы | плановые сравнения | CONFIRMED external Power BI facts | оба PBIT |
 | годовой план (`Бюджет24 в 1С`) | база `план годовой` | CONFIRMED external Power BI fact | board PBIT |
 | `___Итого по сети` | calculated performance aggregate | CONFIRMED implementation artifact, not source of truth | board PBIT + user decision |
@@ -104,11 +104,11 @@ joins в общей contract-advance ветви. Это не закрывает 
 
 | Статус | Элемент | Риск / причина | Проверка |
 |---|---|---|---|
-| VALIDATION_PENDING | физические ключи и состояния | bounded keys/contract joins validated by SV-083; full domain and states inherit MR pending | MR-V01–MR-V12 |
-| VALIDATION_PENDING | равенство KPI | board-PBIT содержит 26 отличающихся общих мер | MB-V01 |
-| VALIDATION_PENDING | performance aggregate | может менять filter context и неаддитивные KPI | MB-V02/MB-V08 |
-| VALIDATION_PENDING | внешние планы | несовместимый grain может размножить факт | MB-V03/MB-V04 |
-| VALIDATION_PENDING | факторная сходимость | компоненты должны сходиться с общим отклонением | MB-V05 |
+| PARTIALLY VALIDATED | состояния и знак | full current-M movement key validated by SV-130; current sign CASE validated by SV-112, но ПКО с `RecordKind=1` не встретился физически | MR-V03 |
+| CONFIRMED REUSE | равенство KPI | board-PBIT содержит 26 legacy-вариантов общих мер, но решение пользователя устанавливает эталон «Отчёт по поступлениям»; отдельный board source rule не создаётся | BR-015/016, user decision 2026-07-31 |
+| VALIDATION_PENDING (Power BI acceptance) | performance aggregate | `___Итого по сети` может менять filter context и неаддитивные KPI; это legacy performance workaround, не источник для PostgreSQL | MB-V02/MB-V08, проверка созданной модели |
+| NOT_APPLICABLE (source Stage 2) | внешние планы | планы — отдельные Power BI-факты; их grain не включается в PostgreSQL domain и не соединяется с фактом движений | BR-018/022 |
+| VALIDATION_PENDING (Power BI acceptance) | факторная сходимость | компоненты должны сходиться с общим отклонением на созданной модели с внешними планами; новых source columns не требуется | MB-V05 |
 | REJECTED | отдельный PostgreSQL board-факт | дублирует домен поступлений | решение REUSE |
 | REJECTED | перенос `___Итого по сети` как бизнес-источника | рассчитанный performance workaround | user decision 2026-07-31 |
 | REJECTED | board-версии пяти KPI | расходятся с оперативным эталоном | user precedence decision |
@@ -120,5 +120,10 @@ joins в общей contract-advance ветви. Это не закрывает 
 KPI-единицы. `kpi_unit_key` рекарринга остаётся ключом ежемесячного платежа,
 а не контракта; `metric_date` не заменяет `receipt_date`. Неаддитивные меры
 вычисляются из детального домена и не берутся из агрегата `___Итого по сети`.
-До product admission остаются физическая валидация ключей/состояний и MB-V01;
-они не являются основанием менять BR-015, BR-016 или current state/sign cases.
+Технический ключ, current state/sign и общий source domain подтверждены
+SV-096 и SV-112—SV-130. До product admission остаётся только физически
+ненаблюдаемая ПКО-ветка `RecordKind=1`; MB-V01 не создаёт отдельного
+source control, потому что board обязан переиспользовать эталонные KPI.
+Приёмка созданной Power BI-модели отдельно проверит factor/performance
+workarounds с внешними планами. Ничто из этого не меняет BR-015, BR-016 или
+current state/sign cases.

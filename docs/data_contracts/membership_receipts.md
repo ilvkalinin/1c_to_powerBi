@@ -1,12 +1,12 @@
 # Data contract: «Поступления по членству»
 
-Статус: `DESIGNED / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-083`.
+Статус: `DESIGNED / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-083, SV-096, SV-112—SV-130`.
 
 ## Объекты
 
 | Объект | Таблица Power BI | Grain / ключ |
 |---|---|---|
-| `mart.membership_receipt_movement` | `Поступления` | движение / `(source_kind, recorder_id, recorder_line_no)` candidate |
+| `mart.membership_receipt_movement` | `Поступления` | движение / `(source_kind, recorder_id, recorder_line_no)` — validated current-M key, SV-130 |
 | `mart.membership_contract_kpi_unit` | `Контрактные KPI` | контракт предоплаты или ежемесячный recurring payment / `kpi_unit_key` |
 
 Оба объекта — Import, ежедневный bounded rebuild BR-003 до 08:30. Надёжного
