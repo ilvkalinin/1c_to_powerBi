@@ -166,15 +166,21 @@ def main() -> None:
             ) as target_copy, source_cursor.copy(
                 f"COPY ({extract_sql}) TO STDOUT WITH (FORMAT BINARY)"
             ) as source_copy:
+                transfer_buffer = bytearray()
                 for block in source_copy:
-                    target_copy.write(block)
+                    transfer_buffer.extend(block)
+                    if len(transfer_buffer) >= 1_048_576:
+                        target_copy.write(bytes(transfer_buffer))
+                        transfer_buffer.clear()
+                if transfer_buffer:
+                    target_copy.write(bytes(transfer_buffer))
 
             require_stage_integrity(target_cursor, start, end)
             staged = totals(target_cursor, "_client_base_daily_stage", start, end)
             if staged != expected:
                 raise RuntimeError("Staging daily totals differ from independent source control")
             print(
-                f"STAGE_PASS daily_scope_totals={len(staged)}",
+                f"STAGE_PASS daily_scope_totals={len(staged)} binary_transfer=buffered_1MiB",
                 flush=True,
             )
 
