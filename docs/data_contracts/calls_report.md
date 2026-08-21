@@ -14,11 +14,13 @@ control values. Физические объекты не создавались.
 |---|---|
 | Объект | `mart.v_feedback_interaction` над `mart.crm_interaction` |
 | Таблица Power BI | `Обращения` |
-| Grain / ключ | одно feedback-взаимодействие / `feedback_interaction_id` |
+| Core grain / key | одно feedback-взаимодействие / `feedback_interaction_id` |
+| Report-view grain | final PBIT business-grouping без `interaction_id` |
 | Дата | `created_date` |
 | Обновление | ежедневно до 08:30; core может быть свежее |
 
-Поля: `feedback_interaction_id text`, `task_id text`, `created_at timestamp`,
+Core хранит `feedback_interaction_id text`; PBIT-compatible view не выводит
+его, если это меняет grouping. Поля view: `task_id text`, `created_at timestamp`,
 `created_date date`, `started_at/ended_at/planned_at timestamp`,
 `resolution_days integer`, `resolution_bucket text`, пары ID/name темы, клуба,
 воронки, подразделения, статуса, состояния, исполнителя и должности; client
@@ -38,6 +40,7 @@ REUSE `mart.club_day_metrics` с колонкой `visit_event_count bigint` н�
 DAX считает distinct `comment_text × client_code`, медиану ответа, доли и
 отношение к посещениям.
 
-Приёмка: уникальный interaction, нормализованные phone/comment rows,
-правильный earliest followup/comment, nonnegative resolution/response,
-reconciliation visit count, отсутствие M2M, rerun и SLA.
+Приёмка: уникальный interaction в core, PBIT-compatible final grouping в view,
+нормализованные phone/comment rows, правильный earliest followup/comment,
+nonnegative resolution/response, reconciliation visit count, отсутствие M2M,
+rerun и SLA.

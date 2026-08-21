@@ -13,7 +13,7 @@ controls остаются перед реализацией.
 | Report view | `mart.v_sales_interaction` | ADR-0016 |
 | Таблица Power BI | `Взаимодействия с клиентами` | CONFIRMED |
 | Core grain / key | одно `Reference67.ID` / `interaction_id` | CONFIRMED business |
-| Report-view grain / key | одна phone row `InfoRg7146`; без неё — одно interaction; `(interaction_id, phone technical key)` либо технический признак отсутствия phone row | CONFIRMED current / SV-026 |
+| Report-view grain / key | одна phone row `InfoRg7146`; без неё — одно interaction; `(interaction_id, phone technical key)` либо технический признак отсутствия phone row. PBIT `Table.Distinct` не схлопывает разные technical phone rows. | CONFIRMED current / SV-026 / user decision 2026-08-05 |
 | Даты | активная `interaction_date`; неактивная `planned_date` | DESIGNED |
 | Обновление | `08,10,12,14,16,18,20,22` | CONFIRMED |
 | Power BI | Import | DESIGNED |
@@ -51,5 +51,6 @@ manager-day, нормативные минуты, загрузку и backlog. P
 отчёта по BR-017.
 
 Приёмка: уникальный `interaction_id` в core, сохранение всех phone rows в
-report-view, отсутствие размножения кадровыми интервалами, корректные
-статусы/воронки, обе роли даты, контрольные значения и каждый из восьми refresh.
+report-view, отсутствие размножения кадровыми интервалами, три роли ОП
+включая «Ведущий менеджер», корректные статусы/воронки, обе роли даты,
+контрольные значения и каждый из восьми refresh.

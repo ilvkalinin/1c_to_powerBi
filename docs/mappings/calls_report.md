@@ -43,10 +43,10 @@ interactions `Reference67` type «Обратная связь», созданн�
 
 Повторная read-only сверка этого же PBIT 2026-08-21 подтвердила, что финальная
 группировка query `ОС со звонками` не содержит `Reference67.ID`, а first
-follow-up ищется по `client code × task code` после creation timestamp. Это
-не опровергает core grain, но создаёт `DECISION_REQUIRED` для exact
-report-view compatibility: сохранить финальную PBIT grouping или выдавать
-одну core interaction. См. [CRM core mapping](crm_interaction.md).
+follow-up ищется по `client code × task code` после creation timestamp.
+`COMPATIBILITY RESOLVED`: по BR-018 и пользовательскому утверждению этого
+PBIT 2026-08-18 view первого релиза сохраняет final PBIT business-grouping;
+`interaction_id` остаётся обязательным ключом core, но не ключом output view.
 
 ## Reuse review
 
@@ -63,13 +63,16 @@ report-view compatibility: сохранить финальную PBIT grouping �
 
 ## Гранулярность
 
-Кандидат факта обратной связи:
+Core обратной связи:
 
 > одна строка на `Reference67.ID`, где interaction type = «Обратная связь».
 
-Ключ `feedback_interaction_id = interaction_id`. HTML, телефония и связанные
-звонки имеют неизвестную кардинальность и должны быть предварительно
-нормализованы до одной строки/детерминированного агрегата.
+Ключ core `feedback_interaction_id = interaction_id`. Compatibility view
+`v_feedback_interaction` воспроизводит final PBIT grouping по его business
+attributes без `interaction_id`; HTML, телефония и связанные звонки сначала
+нормализуются/агрегируются именно по этому current rule. Следовательно,
+`interaction_id` не выводится даже как скрытый ключ, если это меняет число
+строк view.
 
 Кандидат знаменателя посещений:
 
@@ -79,7 +82,7 @@ report-view compatibility: сохранить финальную PBIT grouping �
 
 | Целевая колонка | Описание / источник и преобразование | Тип | NULL | Grain | Статус и доказательство | Проверка |
 |---|---|---|---|---|---|---|
-| `feedback_interaction_id` | `Reference67.ID`; не выводить GUID в Power BI | `UNKNOWN` | нет | interaction | CONFIRMED source | V-02 |
+| `feedback_interaction_id` | `Reference67.ID`; ключ core, не колонка PBIT-compatible view | `UNKNOWN` | нет | interaction | CONFIRMED source | V-02 / view-group reconciliation |
 | `task_id` | `Reference67.OwnerID = Reference106.ID` | `UNKNOWN` | нет | interaction | CONFIRMED current SQL | V-02 orphan tasks |
 | `created_at` | `Reference67.Fld823` | `timestamp` `UNKNOWN` | нет | interaction | CONFIRMED current SQL | V-01 type/timezone |
 | `created_date` | `created_at::date` для календаря | `date` | нет | interaction | CONFIRMED need | V-01 |

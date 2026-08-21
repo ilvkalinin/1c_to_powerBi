@@ -18,6 +18,6 @@ row-grain.
 
 Before an implementation package, the exact public columns, PostgreSQL types,
 grants and source-to-core encoding must be reviewed together with the three
-view contracts. PBIT reconciliation has open `DECISION_REQUIRED` items for
-sales `Distinct`/third role, feedback grouping without interaction ID and
-guest-tour phone/date semantics. None is resolved by this draft.
+view contracts. PBIT reconciliation has resolved the sales `Distinct`/third
+role, feedback grouping without interaction ID and guest-tour phone/date
+semantics; physical types, hidden keys and grants remain validation work.

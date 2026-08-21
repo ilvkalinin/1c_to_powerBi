@@ -25,9 +25,9 @@ Read-only PBIT reconciliation 2026-08-21 подтвердил, что query `Т�
 делает direct `InfoRg7146` join, отбирает встречу в воронке «Продажа клубной
 карты», а `ДатаДляОтчета` выбирает `Fld820`, либо `Fld822` при sentinel start.
 Финальный `Туры` оставляет пары Закрыто/Выполнено и
-Запланировано/Не выполнено. Это `DECISION_REQUIRED` для точной
-report-view multiplicity/date semantics и не меняет core grain
-`Reference67.ID`; см. [CRM core mapping](crm_interaction.md).
+Запланировано/Не выполнено. `COMPATIBILITY RESOLVED`: по BR-018 и
+пользовательскому утверждению PBIT 2026-08-18 view сохраняет его phone-row
+multiplicity и `report_date`; core grain `Reference67.ID` от этого не меняется.
 
 ## Подтверждённые источники
 
@@ -89,22 +89,27 @@ date)`; этот результат сохраняется по BR-018, новы
 
 ## Набор 3: тур и конверсия
 
-Гранулярность: одно CRM-взаимодействие `Reference67.ID`. Выбран `EXTEND`
-общего logical CRM-core, а не новый общий факт: фильтр воронки, тип встречи и
-outcomes данного отчёта локальны.
+Core grain: одно CRM-взаимодействие `Reference67.ID`. `v_guest_tour` первого
+релиза имеет PBIT-compatible output grain: одна direct phone row `InfoRg7146`,
+а без неё одна interaction row. В output PBIT technical phone key не выводится;
+его скрытая serialisation и null marker остаются `VALIDATION_PENDING` для
+physical SQL review. Выбран `EXTEND` общего logical CRM-core, а не новый общий
+факт: фильтр воронки, тип встречи и outcomes данного отчёта локальны.
 
 | Целевое поле | Описание / преобразование | PostgreSQL тип | NULL | Статус и проверка |
 |---|---|---|---|---|
 | `interaction_id` | `Reference67.ID` | UNKNOWN | нет | CONFIRMED source / V-01,V-08 |
-| `tour_date` | `COALESCE(InfoRg7146.Fld7150, Reference67.Fld820)::date` | `date` | нет | CONFIRMED current rule / V-08 |
+| `interaction_date` | `COALESCE(InfoRg7146.Fld7150, Reference67.Fld820)::date`; PBIT detail field | `date` | UNKNOWN | CONFIRMED current PBIT / V-08 |
+| `report_date` | `CASE Reference67.Fld820 = sentinel THEN Reference67.Fld822 ELSE Reference67.Fld820 END::date` (`ДатаДляОтчета` PBIT) | `date` | UNKNOWN | CONFIRMED current PBIT | sentinel/null profile |
 | `task_id`, `client_id`, `club_id` | `Reference67.Owner → Reference106` поля задачи | UNKNOWN | нет/UNKNOWN | CONFIRMED current join / V-08 |
 | `client_code`, `client_name`, `client_phone` | код, ФИО и телефон в текущей детализации туров | `Reference141X1.Code`, `Reference141X1.Description`, `Reference141X1.Fld1531` | `text`, `text`, `text` | да | CONFIRMED current consumer / PII разрешены пользователем 2026-07-30; V-08 |
 | `interaction_state`, `interaction_status` | `Reference224` + GUID status `Reference67.Fld830` | `text` | да | CONFIRMED current rule / V-08 |
 | `tour_kind` | completed: Закрыто/Выполнено; planned: Запланировано/Не выполнено | `text` | нет | CONFIRMED current rule / V-08 |
+| `tour_scope` | event type «Встреча» + PBIT funnel name «Продажа клубной карты»; exact stable funnel key remains for SQL review | `boolean` | нет | CONFIRMED current PBIT / VALIDATION_PENDING stable key | PBIT scope reconciliation |
 | `performer_id` | `Reference67.Fld824 → Reference225.ID` | UNKNOWN | да | CONFIRMED source / V-08 |
-| `accuniq_booking_flag` | current `InfoRg7006`/`Document329` match client × `tour_date`, latest state excluding 2/3 | `boolean` | нет | CONFIRMED current rule / NV-V09 physical path; 8 latest ties and 128 client-date duplicate excess preserved |
-| `purchase_contract_id`, `purchase_activation_date`, `purchase_lag_days` | первый подходящий контракт в окне `[tour_date, tour_date + 44]` | UNKNOWN, `date`, `integer` | да | CONFIRMED current rule / V-06 |
-| `sex`, `birth_date`, `age_at_tour`, `age_group` | из клиента; возраст и категория на дату тура, так как на событии нет абонемента | `text`, `date`, `integer`, `text` | да | CONFIRMED — решение пользователя 2026-07-30 |
+| `accuniq_booking_flag` | current `InfoRg7006`/`Document329` match client × `report_date`, latest state excluding 2/3 | `boolean` | нет | CONFIRMED current PBIT / NV-V09 physical path; 8 latest ties and 128 client-date duplicate excess preserved |
+| `purchase_contract_id`, `purchase_activation_date`, `purchase_lag_days` | первый подходящий контракт в окне `[report_date, report_date + 44]` | UNKNOWN, `date`, `integer` | да | CONFIRMED current PBIT / V-06 |
+| `sex`, `birth_date`, `age_at_tour`, `age_group` | из клиента; возраст и категория на `report_date`, так как на событии нет абонемента | `text`, `date`, `integer`, `text` | да | CONFIRMED — решение пользователя 2026-07-30 |
 
 ## Reuse review
 

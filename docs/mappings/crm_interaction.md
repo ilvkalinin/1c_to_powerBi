@@ -63,13 +63,13 @@ single report's filter or display bucket into a global row filter.
 | `v_feedback_interaction` | interaction/task/feedback attributes | feedback-type scope, HTML normalization, first follow-up, worked/response calculations and visit denominator |
 | `v_guest_tour` | interaction/task/client/club/state/status | meeting/funnel/status scope, report date, ACCUNIQ and purchase outcomes |
 
-## PBIT reconciliation findings — do not silently alter
+## PBIT reconciliation — resolved report-view rules
 
 | Consumer | Template evidence | Consequence |
 |---|---|---|
-| Sales | `Взаимодействия2025/2026` directly joins `InfoRg7146`; after the personnel filter it applies `Table.Distinct` on business columns and includes `Ведущий менеджер` in addition to two documented roles. | `DECISION_REQUIRED`: exact compatibility rule for phone rows/final `Distinct` and whether the third role belongs to first release. |
-| Feedback | `ОС со звонками` selects feedback from 2025-01-01 to current date, excludes `Jivo` in interaction name, joins phone/HTML, then groups without `Reference67.ID`; first follow-up is minimum non-feedback interaction for `client code × task code` after feedback creation. | `DECISION_REQUIRED`: whether first release preserves this final grouping or exposes one core interaction per row. The core key remains `interaction_id` in either case. |
-| Guest tour | `ТурыВсе` directly joins `InfoRg7146`, filters meeting + `Продажа клубной карты`, computes report date from `Fld820` or `Fld822`, and the final `Туры` keeps only `Закрыто/Выполнено` or `Запланировано/Не выполнено`. | `DECISION_REQUIRED`: exact view multiplicity and `tour_date`/`report_date` semantics. No phone date is allowed to leak into core grain. |
+| Sales | `Взаимодействия2025/2026` directly joins `InfoRg7146`; after the personnel filter it applies `Table.Distinct` on business columns and includes `Ведущий менеджер` in addition to two documented roles. | `RESOLVED`: include the third role; preserve each distinct technical phone row under user decision 2026-08-05. `Distinct` may remove only a true technical duplicate. |
+| Feedback | `ОС со звонками` selects feedback from 2025-01-01 to current date, excludes `Jivo` in interaction name, joins phone/HTML, then groups without `Reference67.ID`; first follow-up is minimum non-feedback interaction for `client code × task code` after feedback creation. | `RESOLVED`: core remains one `interaction_id`; first-release compatibility view preserves final PBIT business-grouping without it, under BR-018 and the approved PBIT. |
+| Guest tour | `ТурыВсе` directly joins `InfoRg7146`, filters meeting + `Продажа клубной карты`, computes report date from `Fld820` or `Fld822`, and the final `Туры` keeps only `Закрыто/Выполнено` or `Запланировано/Не выполнено`. | `RESOLVED`: view preserves PBIT phone-row multiplicity and `report_date`; no phone row alters core grain. Hidden technical key and sentinel profiling remain physical validation. |
 
 The Jivo marketing-name condition in the feedback template is in a `LEFT JOIN`:
 it nulls that label rather than excluding the interaction. The documented

@@ -51,15 +51,16 @@ implementation plan. Реализация не начинается: для не
 | `Pbit_old/Отчет по обращениям.pbit` | `9c46cdc6847ec69617a1abf8eaa5cd0635777109d58ea162558391991bb1242f` | feedback/Jivo scope; HTML/phone grouping без `Reference67.ID`; first-followup по task × client |
 | `Pbit_old/Новички и гостевые визиты.pbit` | `3d54a392bec0d3feed21f998c91bf4607886ca101eac7b0adc94d6bbce180796` | direct phone join; meeting/funnel/status filters; `Fld820`/`Fld822` report date |
 
-Сверка не меняет существующую бизнес-логику. Она выявила три
-`DECISION_REQUIRED` для точного первого релиза:
+Сверка не меняет core business grain. Три compatibility rules для точного
+первого релиза разрешены отдельным локальным пакетом 2026-08-21 на основании
+BR-018, ранее подтверждённого phone-row rule и утверждённых PBIT:
 
-1. Sales: включать ли «Ведущий менеджер» и как воспроизводить PBIT final
-   `Distinct` при подтверждённой phone-row семантике.
-2. Feedback: сохранять ли PBIT grouping без `interaction_id` или строить
-   view строго на одной interaction.
-3. Guest tour: сохранять ли phone-multiplicity и отдельную `report_date`,
-   вместо предполагаемой interaction-grain/tour-date интерпретации view.
+1. Sales включает «Ведущий менеджер» и сохраняет каждую technical phone row;
+   `Distinct` удаляет лишь настоящий technical duplicate.
+2. Feedback core остаётся interaction-grain, а first-release view сохраняет
+   final PBIT grouping без `interaction_id`.
+3. Guest-tour view сохраняет phone-multiplicity и `report_date` из PBIT;
+   core остаётся interaction-grain.
 
 ## Future implementation plan — not executable SQL
 

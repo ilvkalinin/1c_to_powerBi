@@ -10,9 +10,11 @@ Read-only PBIT reconciliation 2026-08-21 с
 подтвердил direct `InfoRg7146` join, но обнаружил две развилки для первого
 релиза: финальный PBIT `Table.Distinct` использует business columns без
 technical phone key, а кадровый фильтр также включает «Ведущий менеджер».
-Обе помечены `DECISION_REQUIRED` в
-[`CRM core mapping`](crm_interaction.md#pbit-reconciliation-findings--do-not-silently-alter);
-этим не меняются согласованные phone-row и `EXISTS` safeguards.
+`COMPATIBILITY RESOLVED` 2026-08-21: «Ведущий менеджер» входит в first-release
+scope по current PBIT; `Table.Distinct` не может убрать две разные technical
+phone rows, потому что пользовательское правило 2026-08-05 подтверждает
+каждую из них самостоятельным звонком. PBIT-compatible view сохраняет
+технический phone key и устраняет только точный технический дубликат.
 
 ## Stage 2 evidence — SV-084
 
@@ -78,6 +80,7 @@ phone row, 25 из 100 interaction имеют 2–3 кадровых match, 42 �
 
 - `Менеджер ОП`;
 - `Старший менеджер ОП`.
+- `Ведущий менеджер`.
 
 Интервал `InfoRg6291.Fld6298..Fld6299` проверяется на `Reference67.Fld823` (`ДатаСоздания`) — CONFIRMED.
 

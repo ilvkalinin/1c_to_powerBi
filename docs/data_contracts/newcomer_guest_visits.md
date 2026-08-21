@@ -15,7 +15,8 @@ latest-state path и outcomes 0/44/45 подтверждены source-side. Ре
 |---|---|---|
 | `mart.new_first_visit` | `Первые посещения New` | контракт × первое посещение; `contract_id` candidate |
 | `mart.guest_visit_conversion` | `Гостевые визиты` | гость × дата; `(guest_registration_id, client_id, guest_visit_date)` candidate |
-| `mart.v_guest_tour` | `Туры` | CRM-взаимодействие; `interaction_id` |
+| `mart.v_guest_tour` core | `Туры` | CRM-взаимодействие; `interaction_id` |
+| `mart.v_guest_tour` output | `Туры` | PBIT phone row; hidden technical key pending physical validation |
 
 ### Первые посещения New
 
@@ -36,7 +37,7 @@ text`, `client_id text`, `client_code text`, `client_name text`,
 
 ### Туры
 
-Поля: `interaction_id text`, `tour_date date`, `task_id/client_id/club_id
+Поля: `interaction_id text`, `interaction_date date`, `report_date date`, `task_id/client_id/club_id
 text`, `client_code/name/phone text`, `interaction_state/status text`,
 `tour_kind text`, `performer_id text`, `accuniq_booking_flag boolean`,
 `purchase_contract_id text`, `purchase_activation_date date`,
@@ -48,6 +49,6 @@ integer`, `age_group text`.
 PostgreSQL рассчитывает first-rank, as-of стаж, ACCUNIQ и outcome `[0,44]`;
 DAX — distinct, конверсии, план-факт и временные сравнения.
 
-Приёмка: deterministic first/tie-break, уникальные candidate keys, status
-coverage, границы 0/44/45, несколько покупок, PII permissions, отсутствие
-размножения, rerun и SLA.
+Приёмка: deterministic first/tie-break, unique core key и PBIT phone-row
+reconciliation в tour view, status coverage, границы 0/44/45, несколько
+покупок, PII permissions, rerun и SLA.
