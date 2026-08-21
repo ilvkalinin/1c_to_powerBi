@@ -18,6 +18,10 @@ SV-097 дополнительно подтвердил bounded путь доку
 `3d54a392bec0d3feed21f998c91bf4607886ca101eac7b0adc94d6bbce180796`) как
 базу правила: 12 service codes, знаковая нормализация `Fld7585` и итог 1/2.
 
+Пользователь 2026-08-21 решил оставить ACCUNIQ и contract outcomes как есть
+в Power BI: они не переносятся в PostgreSQL первого релиза. Это сохраняет
+current ties и multiplicity по BR-018/BR-031, не изменяя detail или конверсию.
+
 История следует `BR-003`; refresh — ежедневно (`CONFIRMED — решение
 пользователя 2026-07-30`).
 
@@ -107,8 +111,8 @@ physical SQL review. Выбран `EXTEND` общего logical CRM-core, а н�
 | `tour_kind` | completed: Закрыто/Выполнено; planned: Запланировано/Не выполнено | `text` | нет | CONFIRMED current rule / V-08 |
 | `tour_scope` | event type «Встреча» + PBIT funnel name «Продажа клубной карты»; exact stable funnel key remains for SQL review | `boolean` | нет | CONFIRMED current PBIT / VALIDATION_PENDING stable key | PBIT scope reconciliation |
 | `performer_id` | `Reference67.Fld824 → Reference225.ID` | UNKNOWN | да | CONFIRMED source / V-08 |
-| `accuniq_booking_flag` | current `InfoRg7006`/`Document329` match client × `report_date`, latest state excluding 2/3 | `boolean` | нет | CONFIRMED current PBIT / NV-V09 physical path; 8 latest ties and 128 client-date duplicate excess preserved |
-| `purchase_contract_id`, `purchase_activation_date`, `purchase_lag_days` | первый подходящий контракт в окне `[report_date, report_date + 44]` | UNKNOWN, `date`, `integer` | да | CONFIRMED current PBIT / V-06 |
+| `accuniq_booking_flag` | current `InfoRg7006`/`Document329` match client × `report_date`, latest state excluding 2/3 | `boolean` | нет | POWER BI ONLY first release — BR-031; 8 latest ties and 128 client-date duplicate excess preserved |
+| `purchase_contract_id`, `purchase_activation_date`, `purchase_lag_days` | первый подходящий контракт в окне `[report_date, report_date + 44]` | UNKNOWN, `date`, `integer` | да | POWER BI ONLY first release — BR-031 |
 | `sex`, `birth_date`, `age_at_tour`, `age_group` | из клиента; возраст и категория на `report_date`, так как на событии нет абонемента | `text`, `date`, `integer`, `text` | да | CONFIRMED — решение пользователя 2026-07-30 |
 
 ## Reuse review
@@ -132,6 +136,12 @@ physical SQL review. Выбран `EXTEND` общего logical CRM-core, а н�
   текущему доступу к отчёту.
 - Сырые `AccumRg7575`, `InfoRg7064`, `InfoRg7006` и CRM-регистры не
   реплицируются; требуемые пересечения/агрегации выполняются source-side.
+
+## Пул возможных методических доработок
+
+| Идея | Наблюдаемый эффект | Статус |
+|---|---|---|
+| Ввести стабильный tie-break ACCUNIQ после latest `Period` и для договоров с равным минимальным lag | Может убрать дубликаты detail и изменить selected contract/конверсию в редких спорных строках. | DEFERRED by BR-031; отдельное решение пользователя, сверка Power BI и новый implementation package. |
 
 ## Результат Stage 2
 

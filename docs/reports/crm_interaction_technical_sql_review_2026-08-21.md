@@ -1,6 +1,6 @@
 # CRM technical validation and exact SQL review
 
-Дата: 2026-08-21. Статус: `ACTIVE / DECISION_REQUIRED`.
+Дата: 2026-08-21. Статус: `ACTIVE`.
 
 Пользователь явно одобрил самостоятельный пакет для подготовки технически
 проверенного, но ещё не исполняемого плана реализации `mart.crm_interaction`.
@@ -60,7 +60,7 @@ create exactly these objects, after resolving the guest outcome choice below:
 | `mart.crm_interaction_comment` | `(interaction_id, comment_id)` / primary key | Preserves feedback HTML/comments, deterministically ordered by `(comment_updated_at, comment_id)`. |
 | `mart.v_sales_interaction` | current PBIT phone-row grain | Three sales roles, existing funnel/Jivo rules and source-side employment `EXISTS`; technical exact duplicates only may be removed. |
 | `mart.v_feedback_interaction` | final PBIT business grouping without `interaction_id` | First follow-up ordered by `(created_at, interaction_id)`; comment order as above. |
-| `mart.v_guest_tour` | direct phone row, otherwise interaction | Meeting / confirmed funnel / state-status / report-date PBIT rules; outcome branch is pending a decision. |
+| `mart.v_guest_tour` | direct phone row, otherwise interaction | Meeting / confirmed funnel / state-status / report-date PBIT rules. ACCUNIQ and contract outcomes stay in Power BI by BR-031. |
 
 The future reviewed implementation script must run one full rebuild: create or
 replace the six objects, revoke all privileges from `PUBLIC`, load the three
@@ -69,7 +69,7 @@ only the specifically approved BI role. Rollback is `DROP VIEW` followed by
 `DROP TABLE` for the six named new objects; it does not touch 1C or existing
 mart objects. Neither an incremental refresh nor an SLA is included.
 
-## Decision required — guest outcomes
+## Resolved guest outcomes
 
 The approved PBIT preserves two ambiguous source behaviours in the guest-tour
 outcome:
@@ -79,14 +79,10 @@ outcome:
 - A contract is selected by minimum conversion lag in 0–44 days, but PBIT does
   not specify an ID order when more than one contract shares that minimum lag.
 
-The exact legacy PBIT result and a deterministic PostgreSQL detail selection
-cannot both be guaranteed for those cases without a new rule. This is the only
-remaining blocker for an immutable SQL plan; core, sales and feedback have no
-remaining unmapped physical columns in this package.
-
-If stable selection is approved, the reviewed candidate is: after the current
-latest ACCUNIQ timestamp, choose the lexicographically smallest encoded
-`(_recordertref, _recorderrref, _lineno)` source row; after the current minimum
-contract lag, choose the smallest encoded `Reference59.ID`. These source key
-columns were read-only confirmed on 2026-08-21; the choice itself is not yet a
-business rule.
+Пользователь 2026-08-21 решил оставить этот результат exactly as current
+Power BI: ties и multiplicity не переносятся в PostgreSQL первого релиза.
+Поэтому exact reviewed SQL для `v_guest_tour` останавливается на CRM-tour
+base; ACCUNIQ/contract branches остаются в текущем PBIT по BR-031. Возможная
+доработка — стабильный выбор ACCUNIQ по `(_recordertref, _recorderrref,
+_lineno)` после latest timestamp и договора по `Reference59.ID` после minimum
+lag — записана в пул, не является частью текущего SQL plan и не меняет отчёт.
