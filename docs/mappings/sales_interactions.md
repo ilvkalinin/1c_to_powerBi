@@ -4,6 +4,16 @@
 
 Mapping основан на текущих SQL/M/DAX, metadata и решениях пользователя 2026-07-24. Общий core `mart.crm_interaction` и view `mart.v_sales_interaction` спроектированы в ADR-0016; DDL и реализация отложены до технической проверки.
 
+Read-only PBIT reconciliation 2026-08-21 с
+`Pbit_old/Загрузка ОП.pbit` (SHA-256
+`0bd13b545645246cb8498e7ac82f5d7b13ee436137be67197d579cdb16d92bfd`)
+подтвердил direct `InfoRg7146` join, но обнаружил две развилки для первого
+релиза: финальный PBIT `Table.Distinct` использует business columns без
+technical phone key, а кадровый фильтр также включает «Ведущий менеджер».
+Обе помечены `DECISION_REQUIRED` в
+[`CRM core mapping`](crm_interaction.md#pbit-reconciliation-findings--do-not-silently-alter);
+этим не меняются согласованные phone-row и `EXISTS` safeguards.
+
 ## Stage 2 evidence — SV-084
 
 На live `gymdb` в `READ ONLY` транзакции SA-V01 подтвердил 5 из 5 центральных

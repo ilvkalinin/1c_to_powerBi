@@ -60,6 +60,13 @@ SV-026 подтверждает 3 103 interaction с 2–3 phone rows за 2026 
 cardinality, first follow-up/comment tie-break, states и контрольные значения
 остаются `VALIDATION_PENDING`.
 
+Read-only PBIT reconciliation 2026-08-21 выявил, что актуальные локальные
+шаблоны также содержат sales final `Distinct` и роль «Ведущий менеджер»,
+feedback grouping без `Reference67.ID`, а в guest-tour — direct phone join и
+отдельную report date. Это `DECISION_REQUIRED` для точного report-view
+воспроизведения; оно не меняет core-grain и не разрешает DDL/DML. Детали — в
+[`CRM admission preparation`](../reports/crm_interaction_admission_preparation_2026-08-21.md).
+
 ## Доказательства
 
 - [Mapping загрузки ОП](../mappings/sales_interactions.md)

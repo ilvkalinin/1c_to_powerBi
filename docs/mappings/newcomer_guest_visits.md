@@ -21,6 +21,14 @@ SV-097 дополнительно подтвердил bounded путь доку
 История следует `BR-003`; refresh — ежедневно (`CONFIRMED — решение
 пользователя 2026-07-30`).
 
+Read-only PBIT reconciliation 2026-08-21 подтвердил, что query `ТурыВсе`
+делает direct `InfoRg7146` join, отбирает встречу в воронке «Продажа клубной
+карты», а `ДатаДляОтчета` выбирает `Fld820`, либо `Fld822` при sentinel start.
+Финальный `Туры` оставляет пары Закрыто/Выполнено и
+Запланировано/Не выполнено. Это `DECISION_REQUIRED` для точной
+report-view multiplicity/date semantics и не меняет core grain
+`Reference67.ID`; см. [CRM core mapping](crm_interaction.md).
+
 ## Подтверждённые источники
 
 | Объект | Роль | Статус / доказательство |

@@ -41,6 +41,13 @@ interactions `Reference67` type «Обратная связь», созданн�
 воронок или кампаний нет: сохранённые значения — состояние слайсеров, а не
 правило source набора.
 
+Повторная read-only сверка этого же PBIT 2026-08-21 подтвердила, что финальная
+группировка query `ОС со звонками` не содержит `Reference67.ID`, а first
+follow-up ищется по `client code × task code` после creation timestamp. Это
+не опровергает core grain, но создаёт `DECISION_REQUIRED` для exact
+report-view compatibility: сохранить финальную PBIT grouping или выдавать
+одну core interaction. См. [CRM core mapping](crm_interaction.md).
+
 ## Reuse review
 
 | Вариант | Вывод | Доказательство |
