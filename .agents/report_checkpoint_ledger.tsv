@@ -3,7 +3,7 @@
 # Only READY_FOR_NEW_CONTROL is allowed by scripts/check_package_selection.sh.
 # A pending risk is not a retry trigger. Update this file in the same commit as the report checkpoint.
 report_id	stage	last_checkpoint	checkpoint_commit	selection_state	new_trigger_or_remaining_controls
-project_stage_gate_review	STAGE_3_GLOBAL_REVIEW	-	-	READY_FOR_NEW_CONTROL	Explicit user approval 2026-08-21 for read-only global Stage-3 review: audit all closed checkpoints and critical questions; no DDL/DML, 1C, Power BI or schedule changes. Evidence: docs/reports/global_stage3_review_authorization_2026-08-21.md.
+project_stage_gate_review	STAGE_3_GLOBAL_REVIEW	GATE-AUDIT-2026-08-21	SELF	CLOSED_CHECKPOINT	Read-only global Stage-3 review closed 2026-08-21: 32 unique Stage-2 checkpoints and 15 Stage-3 admissions are closed; three stale catalog statuses reconciled against primary authorization evidence. New explicit independent package only. Evidence: docs/reports/global_stage3_review_authorization_2026-08-21.md.
 revenue_refresh_chain	STAGE_3_PRODUCT_ADMISSION	S3-REVENUE-CHAIN-001	SELF	CLOSED_CHECKPOINT	Two full ordered runner reruns PASS (348.76s and 347.04s); final live-source sync controls PASS. Daily ≤1 minute applies to a separately approved incremental design for all marts, not this rare full rebuild. Evidence: docs/reports/revenue_refresh_chain_authorization_2026-08-20.md.
 kpi_fitness	STAGE_2_SERVER_VALIDATION	SV-054—SV-061	HISTORICAL_PRE_LEDGER	CLOSED_CHECKPOINT	New source-side control or explicit approved methodology change only
 newcomer_engagement	STAGE_2_SERVER_VALIDATION	SV-075, SV-092	SELF	CLOSED_CHECKPOINT	Class-B accounting closed 2026-08-13; no further Stage-2 rerun. New independent control value, source change or explicit approved methodology change only
