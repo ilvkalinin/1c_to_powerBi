@@ -1,6 +1,6 @@
 # Source-to-target mapping: общий CRM core
 
-Статус: `TECHNICAL SQL REVIEW COMPLETE / IMPLEMENTATION NOT AUTHORIZED`.
+Статус: `REPLANNING UNDER BR-032 / NO FURTHER DML AUTHORIZED`.
 
 Это evidence-based mapping будущего `mart.crm_interaction`, а не DDL и не
 разрешение на создание объекта. Core grain — ровно одно CRM-взаимодействие
@@ -56,9 +56,12 @@ PUBLIC` и отдельного named BI role/grant в implementation package.
 | non-PII display labels for the above IDs | existing reference descriptions used by the three PBITs | `text`, nullable | interaction | ASSUMPTION — storage versus source-side resolution | choose storage/grant model before DDL |
 | client PII (`code`, name, phone), interaction name, HTML/comment | `Reference141X1`, `Reference67.Description`, `Reference137` | view-only, nullable | report detail | CONFIRMED consumer / DECISION_REQUIRED named BI role | BR-017 grants and no PII exposure from core |
 
-Current fixed classifications (event/status/state/funnel/campaign) are
-report-view rules. Core preserves their IDs and timestamps; it does not turn a
-single report's filter or display bucket into a global row filter.
+До решения BR-032 fixed classifications (event/status/state/funnel/campaign)
+сохранялись как широкие core-поля, а report filters оставались во views. Это
+решение заменено: новая загрузка обязана передавать из VM-1 только доказанный
+union трёх report scopes и только нужные им поля. Общий объект допустим, только
+если этот union сохраняет grain и семантику каждого consumer; иначе создаются
+отдельные узкие факты.
 
 ## Reuse boundary
 
@@ -67,6 +70,21 @@ single report's filter or display bucket into a global row filter.
 | `v_sales_interaction` | interaction/task/CRM classification | direct phone-row semantics, sales funnels/Jivo rule, employment `EXISTS`, durations and Power BI measures |
 | `v_feedback_interaction` | interaction/task/feedback attributes | feedback-type scope, HTML normalization, first follow-up, worked/response calculations and visit denominator |
 | `v_guest_tour` | interaction/task/client/club/state/status and phone child | meeting/funnel/status scope and report date; ACCUNIQ and purchase outcomes remain in Power BI by BR-031 |
+
+## BR-032 optimisation requirement
+
+Пользователь 2026-08-21 зафиксировал, что цель — оптимизировать Power BI, а
+не перенести его широкие промежуточные выгрузки в PostgreSQL. Перед следующей
+загрузкой необходимо доказать для каждого из трёх consumers минимальные:
+
+1. source predicates и роль даты;
+2. строки, нужные как detail либо как input к подтверждённой агрегации;
+3. итоговые поля, без которых Power BI не сможет посчитать свои меры и срезы;
+4. допустимый общий union и все преобразования, выполняемые source-side на
+   VM-1.
+
+Текущий reviewed plan, который переносит все `Reference67` за BR-003 по
+`created_at`, этому требованию не соответствует и не выполняется повторно.
 
 ## PBIT reconciliation — resolved report-view rules
 

@@ -1,10 +1,10 @@
 # Data contract: общий CRM core
 
-Статус: `TECHNICAL SQL REVIEW COMPLETE / IMPLEMENTATION NOT AUTHORIZED`.
+Статус: `SUPERSEDED BY BR-032 / EMPTY LEGACY OBJECTS ONLY`.
 
 | Parameter | Value | Status |
 |---|---|---|
-| Future objects | `mart.crm_interaction`, `mart.crm_interaction_phone`, `mart.crm_interaction_comment` | DESIGNED — ADR-0016, no DDL executed |
+| Legacy objects | `mart.crm_interaction`, `mart.crm_interaction_phone`, `mart.crm_interaction_comment` | Created empty on VM-2 by the superseded plan; no CRM DML committed |
 | Grain / logical key | one `Reference67.ID` / `interaction_id` | CONFIRMED business |
 | Consumers | sales, feedback, guest-tour views | CONFIRMED |
 | Refresh | no mechanism selected in this package | DECISION_REQUIRED |
@@ -20,10 +20,8 @@ child changes core grain. The core must not contain phone-row, HTML/comment,
 employment-interval, PBIT final grouping, feedback response, tour conversion
 or sales KPI grain as its own row-grain.
 
-Before an implementation package, the exact public columns, named BI role and
-guest-outcome tie policy must be reviewed together with the three view
-contracts. PBIT reconciliation has resolved the sales `Distinct`/third role,
-feedback grouping without interaction ID and guest-tour phone/date semantics.
-Physical CRM types and hidden child keys were confirmed read-only on
-2026-08-21; guest ACCUNIQ/contract ties remain a decision that changes output
-rows or selected detail.
+BR-032 replaces this shared-core contract: before a further implementation
+package, three minimal report-specific contracts and their source-side
+projections must be reviewed. PBIT reconciliation remains evidence for the
+sales `Distinct`/third role, feedback grouping and guest-tour phone/date
+semantics; it does not justify a raw CRM transfer.
