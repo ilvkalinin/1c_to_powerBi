@@ -5,4 +5,4 @@
 # CLOSED_PENDING_NEXT_APPROVAL rejects all new selections until the user
 # explicitly confirms the next independent package.
 gate_id	state	allowed_stage	allowed_report_ids	reason
-global_stage_gate	CLOSED_PENDING_NEXT_APPROVAL	-	-	Global Stage-3 review closed 2026-08-21: ledger has 32 closed Stage-2 checkpoints and 15 closed Stage-3 admissions; catalog discrepancies were reconciled. A new independently approved package is required before any further selection, DDL/DML, source control, Power BI change or schedule.
+global_stage_gate	READONLY_REVIEW_AUTHORIZED	STAGE_3_ADMISSION_PREPARATION	crm_interaction	User approved the independent read-only admission-preparation package for mart.crm_interaction on 2026-08-21: mapping/core-grain/dependency review and a future implementation plan only; no server access, DDL/DML, 1C, Power BI or schedule changes.
