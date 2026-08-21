@@ -37,14 +37,19 @@ reconciliation будут рассчитаны только по пересмо�
 
 ## Предлагаемая физическая граница
 
-Общий CRM-core не переиспользуется автоматически: BR-002 требует совпадения
-grain и семантики, которого здесь нет.
+После уточнения пользователя действует BR-033: общая compact витрина
+предпочтительна, если её source-side union не меняет grain и семантику
+consumers. У sales, feedback и guest tour совпадает базовое событие
+`Reference67.ID`; поэтому вместо трёх независимых широких facts предлагается
+один отфильтрованный interaction core. Phone и comment имеют другую кратность
+и остаются scoped children.
 
 | Product proposal | Target grain | Выполняется на VM-1 до COPY | Не передаётся |
 |---|---|---|---|
-| `mart.sales_interaction` | одна техническая phone-row; без телефона — marker-row interaction | funnel/Jivo/кадровый `EXISTS`, effective interaction date, duration, answered flag, нужные display classifications | все interactions вне sales scope, raw employment rows, отдельный phone child |
-| `mart.feedback_interaction` | final business attributes × нормализованный comment, с одной null-comment строкой при отсутствии comment | feedback scope, comment HTML→text, deterministic follow-up, answered/worked fields, report grouping | raw HTML, raw phone/comment children, unrelated interactions |
-| `mart.guest_tour` | одна техническая phone-row; без телефона — marker-row interaction | meeting/funnel/state/status scope, report date, `tour_kind` | all non-tour interactions, raw phone child, ACCUNIQ/contract outcomes by BR-031 |
+| `mart.crm_interaction` | одна `interaction_id` | source-side union sales, feedback, required non-feedback follow-up and guest-tour predicates; all shared display classifications and derived dates/statuses | все interactions вне union, raw reference copies, raw employment rows |
+| `mart.crm_interaction_phone` | одна техническая phone-row | только phone rows interaction, попавших в sales/guest scope; `phone_at` и `answered_flag` готовы до COPY | телефония feedback-only и все несвязанные телефонные записи |
+| `mart.crm_interaction_comment` | interaction × нормализованный comment | только feedback scope; HTML→normalised text, deterministic comment update fields | raw HTML и comments вне feedback scope |
+| thin report views | report output | только source-prepared fields; VM-2 выполняет проекцию и связи компактных facts, без повторного чтения VM-1 | report-specific raw staging |
 
 Для feedback source projection обязана сохранять достаточную детализацию для
 динамического distinct `client × normalized comment`; `STRING_AGG` допустим

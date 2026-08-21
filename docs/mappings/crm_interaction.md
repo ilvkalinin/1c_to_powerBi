@@ -59,9 +59,10 @@ PUBLIC` и отдельного named BI role/grant в implementation package.
 До решения BR-032 fixed classifications (event/status/state/funnel/campaign)
 сохранялись как широкие core-поля, а report filters оставались во views. Это
 решение заменено: новая загрузка обязана передавать из VM-1 только доказанный
-union трёх report scopes и только нужные им поля. Общий объект допустим, только
-если этот union сохраняет grain и семантику каждого consumer; иначе создаются
-отдельные узкие факты.
+union трёх report scopes и только нужные им поля. По BR-033 общая interaction
+витрина предпочтительна, если этот union сохраняет grain и семантику каждого
+consumer; отдельными остаются лишь неизбежные phone/comment children с другой
+кратностью.
 
 ## Reuse boundary
 
@@ -85,6 +86,10 @@ union трёх report scopes и только нужные им поля. Общ�
 
 Текущий reviewed plan, который переносит все `Reference67` за BR-003 по
 `created_at`, этому требованию не соответствует и не выполняется повторно.
+Предварительное направление после BR-033: одна `interaction_id`-витрина,
+отфильтрованная source-side union sales/feedback/follow-up/guest scope, и
+узкие source-prepared children только для технических phone-row и
+normalised-comment detail.
 
 ## PBIT reconciliation — resolved report-view rules
 
