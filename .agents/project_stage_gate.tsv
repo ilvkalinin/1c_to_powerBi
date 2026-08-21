@@ -5,4 +5,4 @@
 # CLOSED_PENDING_NEXT_APPROVAL rejects all new selections until the user
 # explicitly confirms the next independent package.
 gate_id	state	allowed_stage	allowed_report_ids	reason
-global_stage_gate	CLOSED_PENDING_NEXT_APPROVAL	-	-	The approved client_base initial-load package completed 2026-08-19: age-contract DDL and atomic DML were separately approved and reconciled. A next independent package requires explicit user confirmation and a new allowed scope.
+global_stage_gate	READONLY_REVIEW_AUTHORIZED	STAGE_3_GLOBAL_REVIEW	project_stage_gate_review	User approved the independent read-only global Stage-3 review on 2026-08-21: audit closed checkpoints and critical questions only; no DDL/DML, 1C changes, Power BI changes or schedules.
