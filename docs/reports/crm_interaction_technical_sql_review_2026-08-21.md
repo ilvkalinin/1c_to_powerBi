@@ -1,6 +1,6 @@
 # CRM technical validation and exact SQL review
 
-Дата: 2026-08-21. Статус: `ACTIVE`.
+Дата: 2026-08-21. Статус: `CLOSED`.
 
 Пользователь явно одобрил самостоятельный пакет для подготовки технически
 проверенного, но ещё не исполняемого плана реализации `mart.crm_interaction`.
@@ -46,12 +46,16 @@ Every source transaction used `REPEATABLE READ READ ONLY` and rolled back.
 | Phone child, bounded sales sample | 1 000 rows = 1 000 `(interaction, phone reference, phone event)` keys; 0 null key parts | `VALIDATED` candidate child key; full-rebuild reconciliation still required. |
 | Feedback comments, July | 11 279 HTML rows for 6 326 interactions; 3 961 interactions have >1 comment | `VALIDATED`: comments cannot join directly to core or be discarded. |
 | Feedback tie controls | 1 earliest-follow-up tie; 0 same-interaction comment timestamp ties in full July | `VALIDATED`: follow-up needs `(timestamp, physical ID)`; the same comment order is a reproducibility safeguard. |
+| Feedback grouping fields | task code/description `mvarchar(9)/(1000)`; theme relation IDs `bytea`; campaign code `mvarchar(9)` | `VALIDATED`: reviewed view reproduces current HTML normalisation and final business grouping. |
 | Guest funnel | `99a9ebb169a4e2a611eecbf18a73ffa6` resolves exactly once to `Продажа клубной карты` | `VALIDATED`: stable physical filter is available. |
 
 ## Reviewed physical design
 
 No SQL below has been executed on VM-2. The next implementation package must
-create exactly these objects, after resolving the guest outcome choice below:
+create exactly these objects; guest outcomes are explicitly retained in Power
+BI below:
+
+The reviewed, non-executed SQL is [CRM implementation plan](../../sql/marts/crm_interaction_reviewed_plan.sql); its target controls are [CRM reconciliation](../../sql/tests/crm_interaction_reconciliation.sql). It contains DDL, three views, `REVOKE FROM PUBLIC`, full-rebuild protocol and rollback boundary. A named BI-role `GRANT` is deliberately omitted until that role is approved.
 
 | Object | Grain / key | Purpose |
 |---|---|---|
@@ -62,12 +66,13 @@ create exactly these objects, after resolving the guest outcome choice below:
 | `mart.v_feedback_interaction` | final PBIT business grouping without `interaction_id` | First follow-up ordered by `(created_at, interaction_id)`; comment order as above. |
 | `mart.v_guest_tour` | direct phone row, otherwise interaction | Meeting / confirmed funnel / state-status / report-date PBIT rules. ACCUNIQ and contract outcomes stay in Power BI by BR-031. |
 
-The future reviewed implementation script must run one full rebuild: create or
-replace the six objects, revoke all privileges from `PUBLIC`, load the three
-tables from a single source read-only snapshot, run reconciliation, then grant
-only the specifically approved BI role. Rollback is `DROP VIEW` followed by
-`DROP TABLE` for the six named new objects; it does not touch 1C or existing
-mart objects. Neither an incremental refresh nor an SLA is included.
+The future reviewed implementation script must run one full rebuild: create the
+six objects, revoke all privileges from `PUBLIC`, load the three tables from a
+single source read-only snapshot, run reconciliation, then grant only the
+specifically approved BI role. Rollback before commit is transaction
+`ROLLBACK`; any post-commit drop/change needs a separate approval. It never
+touches 1C or existing mart objects. Neither an incremental refresh nor an SLA
+is included.
 
 ## Resolved guest outcomes
 

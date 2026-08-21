@@ -5,4 +5,4 @@
 # CLOSED_PENDING_NEXT_APPROVAL rejects all new selections until the user
 # explicitly confirms the next independent package.
 gate_id	state	allowed_stage	allowed_report_ids	reason
-global_stage_gate	READONLY_REVIEW_AUTHORIZED	STAGE_3_TECHNICAL_SQL_REVIEW	crm_interaction	User approved the independent CRM technical validation and exact SQL-review package on 2026-08-21: read-only source checks plus reviewed local SQL artifacts only; no executed DDL/DML, 1C, Power BI or schedule changes.
+global_stage_gate	CLOSED_PENDING_NEXT_APPROVAL	-	-	CRM technical SQL-review package closed 2026-08-21. A new independent package requires explicit user approval; CRM implementation additionally requires named BI role and the immutable reviewed SQL plan.

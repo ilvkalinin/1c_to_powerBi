@@ -16,7 +16,8 @@ JOIN pg_namespace n ON n.oid = c.relnamespace
 JOIN pg_attribute a ON a.attrelid = c.oid
 WHERE n.nspname = 'public'
   AND c.relname IN ('_reference67', '_reference106', '_inforg7146',
-                    '_inforg6291', '_reference137', '_reference141x1')
+                    '_inforg6291', '_reference137', '_reference141x1',
+                    '_inforg5810', '_reference110', '_reference145')
   AND a.attname IN ('_idrref', '_owneridrref', '_fld820', '_fld821',
                     '_fld822', '_fld823', '_fld824rref', '_fld828rref',
                     '_fld829rref', '_fld830rref', '_fld831rref',
@@ -26,7 +27,9 @@ WHERE n.nspname = 'public'
                     '_fld8642rref', '_fld8643rref', '_fld7147rref',
                     '_fld7148', '_fld7150', '_fld7151rref', '_fld6292rref',
                     '_fld6296rref', '_fld6298', '_fld6299', '_fld1462rref',
-                    '_fld1463', '_fld1464', '_fld1507', '_fld1527rref')
+                    '_fld1463', '_fld1464', '_fld1507', '_fld1527rref',
+                    '_code', '_description', '_fld1200', '_fld5811_rrref',
+                    '_fld5813_rrref')
   AND a.attnum > 0
   AND NOT a.attisdropped
 ORDER BY 1, 2;

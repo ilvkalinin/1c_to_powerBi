@@ -1,6 +1,6 @@
 # Data contract: общий CRM core
 
-Статус: `TECHNICAL SQL REVIEW IN PROGRESS / IMPLEMENTATION NOT AUTHORIZED`.
+Статус: `TECHNICAL SQL REVIEW COMPLETE / IMPLEMENTATION NOT AUTHORIZED`.
 
 | Parameter | Value | Status |
 |---|---|---|

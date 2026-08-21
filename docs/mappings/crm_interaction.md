@@ -1,6 +1,6 @@
 # Source-to-target mapping: общий CRM core
 
-Статус: `TECHNICAL SQL REVIEW IN PROGRESS / IMPLEMENTATION NOT AUTHORIZED`.
+Статус: `TECHNICAL SQL REVIEW COMPLETE / IMPLEMENTATION NOT AUTHORIZED`.
 
 Это evidence-based mapping будущего `mart.crm_interaction`, а не DDL и не
 разрешение на создание объекта. Core grain — ровно одно CRM-взаимодействие
@@ -42,6 +42,7 @@ PUBLIC` и отдельного named BI role/grant в implementation package.
 |---|---|---|---|---|---|
 | `interaction_id` | `encode(Reference67.ID, 'hex')`; PBIT sales/guest use the same serialisation | `text`, not null | interaction | CONFIRMED current + physical | source PK = target PK |
 | `task_id` | `encode(Reference67.OwnerID, 'hex') → Reference106.ID` | `text`, not null | interaction | CONFIRMED source + July-2026 orphan profile | full rebuild reconciliation |
+| `task_code`, `task_description` | `Reference106.Code`, `Fld1200` | `text`, not null | interaction | CONFIRMED current PBIT + physical 2026-08-21 (`mvarchar(9)`, `mvarchar(1000)`) | feedback PBIT grouping |
 | `created_at` | `Reference67.Fld823` | `timestamp without time zone`, not null | interaction | CONFIRMED current + physical | sentinel and timezone are source-preserved |
 | `started_at`, `ended_at`, `planned_at` | `Reference67.Fld820`, `Fld821`, `Fld822` | `timestamp without time zone`, not null | interaction | CONFIRMED current + physical | source sentinel profile: 228 834 / 232 344 / 124 221 in July-2026 |
 | `event_type_id` | `Reference67.Fld831` | `text`, nullable | interaction | CONFIRMED source | value coverage and stable encoding |
@@ -50,6 +51,8 @@ PUBLIC` и отдельного named BI role/grant в implementation package.
 | `client_id`, `club_id`, `funnel_id`, `campaign_id`, `channel_id` | `Reference106.Fld1196`, `Fld1195`, `Fld1191`, `Fld1197`, `Fld1194` | `text`, nullable | interaction | CONFIRMED current source / VALIDATION_PENDING representation | task-side null/orphan profile |
 | `tenure_type_id`, `client_status_id` | `Reference106.Fld1190`, `Fld1204` | `text`, not null | interaction | CONFIRMED current + physical | mapping coverage and unknown values |
 | `feedback_topic_id`, `department_id`, `position_id`, `regulated_interaction_id` | `Reference106.Fld8643`, `Fld8642`, `Fld1199`, `Fld1202` | `text`, nullable | interaction | CONFIRMED feedback consumer | source availability and cardinality |
+| `feedback_theme` | `InfoRg5810.Fld5811 = Reference106.ID → Reference110.Fld5813.Description` | `text`, nullable | interaction | CONFIRMED current PBIT + physical 2026-08-21 | feedback PBIT grouping |
+| `campaign_code` | `Reference106.Fld1197 → Reference145.Code` | `text`, nullable | interaction | CONFIRMED current PBIT + physical 2026-08-21 (`mvarchar(9)`) | feedback PBIT grouping |
 | non-PII display labels for the above IDs | existing reference descriptions used by the three PBITs | `text`, nullable | interaction | ASSUMPTION — storage versus source-side resolution | choose storage/grant model before DDL |
 | client PII (`code`, name, phone), interaction name, HTML/comment | `Reference141X1`, `Reference67.Description`, `Reference137` | view-only, nullable | report detail | CONFIRMED consumer / DECISION_REQUIRED named BI role | BR-017 grants and no PII exposure from core |
 
@@ -63,7 +66,7 @@ single report's filter or display bucket into a global row filter.
 |---|---|---|
 | `v_sales_interaction` | interaction/task/CRM classification | direct phone-row semantics, sales funnels/Jivo rule, employment `EXISTS`, durations and Power BI measures |
 | `v_feedback_interaction` | interaction/task/feedback attributes | feedback-type scope, HTML normalization, first follow-up, worked/response calculations and visit denominator |
-| `v_guest_tour` | interaction/task/client/club/state/status and phone child | meeting/funnel/status scope, report date, ACCUNIQ and purchase outcomes |
+| `v_guest_tour` | interaction/task/client/club/state/status and phone child | meeting/funnel/status scope and report date; ACCUNIQ and purchase outcomes remain in Power BI by BR-031 |
 
 ## PBIT reconciliation — resolved report-view rules
 

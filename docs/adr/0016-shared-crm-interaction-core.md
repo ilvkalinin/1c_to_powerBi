@@ -1,6 +1,6 @@
 # ADR-0016: общий факт CRM-взаимодействий
 
-- Статус: `TECHNICAL SQL REVIEW IN PROGRESS / IMPLEMENTATION DEFERRED`
+- Статус: `TECHNICAL SQL REVIEW COMPLETE / IMPLEMENTATION DEFERRED`
 - Дата: 2026-08-03
 - Отчёты: №12 «Загрузка ОП», №20 «Новички и гостевые визиты», №21 «Отчёт по обращениям»
 
@@ -28,7 +28,8 @@ outcomes. Телефония и комментарии могут иметь н�
 
 - `mart.v_sales_interaction` — отбор воронок/должностей «Загрузки ОП»;
 - `mart.v_feedback_interaction` — обратная связь, комментарий и отработка;
-- `mart.v_guest_tour` — туры и report-specific 44-дневные outcomes.
+- `mart.v_guest_tour` — CRM-base туров; current ACCUNIQ и 44-дневные outcomes
+  первого релиза остаются в Power BI по BR-031.
 
 Дневной знаменатель обращений добавляется в существующий
 `mart.club_day_metrics` как `visit_event_count`; новый факт посещений не
