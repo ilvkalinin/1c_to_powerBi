@@ -1,6 +1,6 @@
 # ADR-0016: общий факт CRM-взаимодействий
 
-- Статус: `DESIGNED / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-084, SV-087, SV-088 / IMPLEMENTATION DEFERRED`
+- Статус: `TECHNICAL SQL REVIEW IN PROGRESS / IMPLEMENTATION DEFERRED`
 - Дата: 2026-08-03
 - Отчёты: №12 «Загрузка ОП», №20 «Новички и гостевые визиты», №21 «Отчёт по обращениям»
 
@@ -9,17 +9,22 @@
 Три отчёта используют одно событие `Reference67.ID`, задачу `Reference106`,
 исполнителя, клиента и CRM-классификации. Различаются отборы и product-specific
 outcomes. Телефония и комментарии могут иметь несколько строк на одно
-взаимодействие и должны нормализоваться до core-grain.
+взаимодействие и не могут присоединяться к core без multiplication.
 
 ## Решение
 
-Создать физическую таблицу `mart.crm_interaction` с grain:
+В следующем отдельно одобренном implementation package создать минимальный
+физический набор с grain:
 
 > одно взаимодействие `Reference67.ID`.
 
-`interaction_id` — логический ключ. Телефонные строки, комментарии и кадровые
-интервалы агрегируются/проверяются source-side до присоединения к core. На
-локальной VM создать обычные views без дополнительного хранения:
+`mart.crm_interaction.interaction_id` — логический ключ. Дополнительно нужны
+две fact-children: `mart.crm_interaction_phone` с ключом
+`(interaction_id, phone_reference_id, phone_event_id)` и
+`mart.crm_interaction_comment` с ключом `(interaction_id, comment_id)`.
+Кадровые интервалы остаются source-side `EXISTS`, без репликации. Дочерние
+таблицы сохраняют required PBIT multiplicity; они не меняют core grain. На
+локальной VM создать обычные views без materialized views:
 
 - `mart.v_sales_interaction` — отбор воронок/должностей «Загрузки ОП»;
 - `mart.v_feedback_interaction` — обратная связь, комментарий и отработка;
@@ -30,16 +35,16 @@ outcomes. Телефония и комментарии могут иметь н�
 создаётся. Поля PII выдаются только report-specific views с подтверждённым
 потребителем и политикой BR-017.
 
-Выбрана физическая core-таблица из-за повторного использования и частого
-refresh «Загрузки ОП». Постоянный staging не создаётся. Materialized views
-не выбираются без измерений; обычные локальные views не повторяют чтение VM-1.
+Выбран физический core с двумя малыми factual children из-за повторного
+использования и обязательной PBIT multiplicity. Постоянный staging не
+создаётся. Materialized views не выбираются без измерений; обычные локальные
+views не повторяют чтение VM-1.
 
 ## Обновление и Power BI
 
-Core обновляется восемь раз в день `08–22` для «Загрузки ОП»; дневные
-потребители используют последний согласованный refresh. До надёжного
-watermark применяется атомарный пересчёт ограниченного BR-003 горизонта либо
-подтверждённого изменяемого окна после server validation.
+Частота обновления и способ loading не утверждены этой технической проверкой.
+До отдельного approved incremental package допустим только измеренный
+full rebuild; ежедневный SLA и watermark не заявляются.
 
 Для первого релиза report-compatible `mart.v_sales_interaction` сохраняет
 текущий `LEFT JOIN Reference67 → InfoRg7146`: одна interaction с несколькими
@@ -54,11 +59,15 @@ DAX считает медиану, нормативную загрузку, до
 
 ## Риски
 
-SV-026 подтверждает 3 103 interaction с 2–3 phone rows за 2026 год; это
-отдельные звонки в рамках одного взаимодействия и report-view сохраняет их
-отдельными строками. SV-088 применяет это evidence к feedback-view; HTML
-cardinality, first follow-up/comment tie-break, states и контрольные значения
-остаются `VALIDATION_PENDING`.
+Read-only technical review 2026-08-21 подтвердил source `bytea` IDs,
+`timestamp without time zone`, 0 missing tasks in 342 824 July core rows,
+phone-child candidate key without nulls/duplicates in its bounded sample and
+331 662 July comments with non-null comment ID. The same review observed 1
+earliest-follow-up tie; no same-interaction comment timestamp tie appeared in
+the full July control. Views nevertheless order by timestamp plus physical ID
+as an explicit reproducibility safeguard. Guest outcomes still need an
+explicit policy for legacy ACCUNIQ and contract ties before exact SQL is
+approved.
 
 Read-only PBIT reconciliation 2026-08-21 выявил sales final `Distinct` и роль
 «Ведущий менеджер», feedback grouping без `Reference67.ID`, а в guest-tour —
