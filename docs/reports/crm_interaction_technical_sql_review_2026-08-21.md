@@ -83,3 +83,10 @@ The exact legacy PBIT result and a deterministic PostgreSQL detail selection
 cannot both be guaranteed for those cases without a new rule. This is the only
 remaining blocker for an immutable SQL plan; core, sales and feedback have no
 remaining unmapped physical columns in this package.
+
+If stable selection is approved, the reviewed candidate is: after the current
+latest ACCUNIQ timestamp, choose the lexicographically smallest encoded
+`(_recordertref, _recorderrref, _lineno)` source row; after the current minimum
+contract lag, choose the smallest encoded `Reference59.ID`. These source key
+columns were read-only confirmed on 2026-08-21; the choice itself is not yet a
+business rule.
