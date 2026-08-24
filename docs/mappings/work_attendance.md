@@ -1,9 +1,10 @@
 # Source-to-target mapping: «Работа с посещаемостью»
 
-Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0022 / STAGE_2 SOURCE VALIDATION COMPLETE — SV-065, SV-067, SV-111 / IMPLEMENTATION DEFERRED`.
+Статус: `IMPLEMENTED AND VALIDATED — 2026-08-24`.
 
 Целевой проектный объект: `mart.club_attendance_hourly`. Тип — компактная
-физическая таблица по ADR-0022; реализация отложена. Production SQL не создаётся.
+физическая таблица по ADR-0022; initial load и atomic rerun прошли с нулевыми
+отклонениями. Evidence: [execution](../reports/club_attendance_hourly_execution_2026-08-24.md).
 
 Гранулярность одной строки:
 

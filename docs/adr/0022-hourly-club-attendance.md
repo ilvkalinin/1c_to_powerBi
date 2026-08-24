@@ -1,6 +1,6 @@
 # ADR-0022: почасовая посещаемость клуба
 
-- Статус: `DESIGNED / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-065, SV-067 / IMPLEMENTATION DEFERRED`
+- Статус: `IMPLEMENTED AND VALIDATED — 2026-08-24`
 - Дата: 2026-08-03
 - Отчёты: №24 «Работа с посещаемостью», №26 «Титульный лист»
 
@@ -30,12 +30,12 @@ PostgreSQL считает возраст, длительность и агрег
 
 ## Риски
 
-Единица исходного посещения, кратность join и states current-M population
-2026-01—07, а также сохранение почасового grain на 2026-07-15 подтверждены
-SV-065/SV-067. Приоритет клуба, точность максимальной ЧК по часовым границам,
-upstream daily client base и historical SLA остаются `VALIDATION_PENDING` /
-`BLOCKED`. Если часовой grain не воспроизводит текущую ЧК, только этот
-consumer пересматривается на более точный slot-grain после измерения объёма.
+Единица исходного посещения, кратность join и states current-M population,
+сохранение почасового grain и initial/rerun source-to-target controls
+подтверждены. Full rebuild 413,22 s измерен и не является incremental SLA.
+Если часовой grain не воспроизводит текущую ЧК после будущего Power BI package,
+только этот consumer пересматривается на более точный slot-grain после
+измерения объёма.
 
 ## Доказательства
 
