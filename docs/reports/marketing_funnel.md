@@ -124,12 +124,13 @@ current horizon — 2025–2026; current PBIT 2024–2025 остаётся evide
 максимум — 16 контрактов на задание. Следовательно, гипотеза one-to-one
 `task → contract` имеет статус `VALIDATION_FAILED`.
 
-Task core планируется как отдельный `mart.marketing_funnel_task`; candidate
+Task core реализован как отдельный `mart.marketing_funnel_task`; candidate
 bridge — `mart.marketing_funnel_task_contract`. BR-020 снимает бизнес-развилку:
 `contract_count = 1` только на квалифицированной связи `task × contract`;
 глобальный `DISTINCT` по абонементу и выбор «главного» задания запрещены.
-Никакие объекты PostgreSQL
-и источника 1С не создавались и не изменялись.
+Объекты PostgreSQL созданы в approved Stage-3 package; источник 1С не
+изменялся. Initial load и rerun прошли `MF-R01`—`MF-R06` без отклонений;
+final rerun snapshot содержит 865 891 task и 341 704 bridge строк.
 
 По прямому запросу пользователя MF-V03E показал один реальный пример без ПДн:
 задание `000144962` связано с четырьмя подходящими абонементами —

@@ -100,6 +100,7 @@ def copy_target(cursor, name: str, path: Path, expected: int) -> None:
                 copy.write(block)
     if cursor.rowcount != expected:
         raise RuntimeError(f"COPY total differs for {name}: {cursor.rowcount} != {expected}")
+    print(f"TARGET_COPY_READY name={name} rows={cursor.rowcount} bytes={path.stat().st_size}", flush=True)
 
 
 def reconciliation_statements(task_rows: int, contract_rows: int, start: date, end: date) -> list[str]:
@@ -116,9 +117,10 @@ def require_reconciliation(cursor, counts: dict[str, int], start: date, end: dat
     if len(statements) != 6:
         raise RuntimeError(f"Unexpected reconciliation statement count: {len(statements)}")
     rows = []
-    for statement in statements:
+    for ordinal, statement in enumerate(statements, 1):
         cursor.execute(statement)
         rows.append(cursor.fetchone())
+        print(f"RECONCILIATION_CONTROL_DONE id=MF-R{ordinal:02d}", flush=True)
     if not rows[0][-1] or any(rows[1]) or any(rows[2]) or any(rows[3]) or not rows[4][-1] or rows[5][0] != 0:
         raise RuntimeError(f"Reconciliation failed: {rows}")
     print("RECONCILIATION_PASS MF-R01—MF-R06", flush=True)
@@ -130,21 +132,27 @@ def load(mode: str, paths: dict[str, Path], counts: dict[str, int], start: date,
         try:
             with target.cursor() as cursor:
                 cursor.execute("BEGIN")
+                print("TARGET_TRANSACTION_STARTED", flush=True)
                 found = relation_names(cursor)
                 if mode == "apply":
                     if found:
                         raise RuntimeError(f"Initial DDL requires absent targets, found: {sorted(found)}")
                     cursor.execute(ddl_without_transaction())
+                    print("TARGET_DDL_READY", flush=True)
                 elif found != expected:
                     raise RuntimeError(f"Rebuild requires both targets, found: {sorted(found)}")
                 else:
                     cursor.execute("LOCK TABLE mart.marketing_funnel_task_contract, mart.marketing_funnel_task IN ACCESS EXCLUSIVE MODE")
+                    print("TARGET_LOCK_ACQUIRED", flush=True)
                     cursor.execute("DELETE FROM mart.marketing_funnel_task_contract")
                     cursor.execute("DELETE FROM mart.marketing_funnel_task")
+                    print("TARGET_DELETE_COMPLETE", flush=True)
                 copy_target(cursor, "task", paths["task"], counts["task"])
                 copy_target(cursor, "task_contract", paths["task_contract"], counts["task_contract"])
                 require_reconciliation(cursor, counts, start, end)
+                print("TARGET_COMMIT_STARTED", flush=True)
                 target.commit()
+                print("TARGET_COMMIT_PASS", flush=True)
         except Exception:
             target.rollback()
             raise

@@ -1,6 +1,6 @@
 # Data contract: маркетинговая «Воронка»
 
-Статус: `PLANNED NEW TWO-FACT CONTRACT / BR-003 RETENTION CONFIRMED / NO DDL OR DML`.
+Статус: `IMPLEMENTED / INITIAL LOAD AND RERUN VALIDATED / BR-003 RETENTION CONFIRMED`.
 
 Модель использует два минимальных PostgreSQL-факта:
 `mart.marketing_funnel_task` для task core и
@@ -30,8 +30,11 @@ slices фильтруют только bridge measures. Excel-планы ост�
 SV-080 подтверждает task core для reuse, но не one-to-one bridge: 100 строк
 bridge соответствуют 36 заданиям, 21 из них имеет несколько контрактов.
 BR-020 прямо задаёт единицу: каждая связь считается после условия
-`activation_date >= task_created_at` и history с 2024-01-01; global dedup
-абонемента запрещён. Физические объекты не создавались.
+`activation_date >= task_created_at`; при этом bridge сохраняет всю
+непустую activation history для задач BR-003, чтобы воспроизвести current
+DAX накопленного трафика. Global dedup абонемента запрещён. Физические
+объекты созданы и приняты 2026-08-24: final rerun `865 891` task и
+`341 704` bridge строк; `MF-R01`—`MF-R06` прошли без отклонений.
 
 Приёмка Stage 3: уникальный target task, task→contract bridge без
 размножения, контрольные меры, rerun и SLA созданной витрины. Внешние plans и

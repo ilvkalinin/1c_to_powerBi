@@ -42,16 +42,19 @@ SELECT
    WHERE tc.is_conversion_qualified
      AND tc.activation_date < t.task_date) AS br020_violations;
 
--- MF-R04: BR-003 and source history guard. Expected: all = 0.
+-- MF-R04: BR-003 and historic bridge guard. Expected: all = 0.
 -- Bind the exact run horizon to $3/$4 only when inspecting this statement;
 -- at 2026-08-24 they are DATE '2025-01-01' and DATE '2027-01-01'.
 SELECT
   (SELECT count(*)::bigint FROM mart.marketing_funnel_task
    WHERE task_date < $3::date OR task_date >= $4::date)
     AS task_outside_br003_horizon,
-  (SELECT count(*)::bigint FROM mart.marketing_funnel_task_contract
-   WHERE activation_date < DATE '2024-01-01')
-    AS contract_before_current_history;
+  (SELECT count(*)::bigint
+   FROM mart.marketing_funnel_task_contract AS tc
+   JOIN mart.marketing_funnel_task AS t ON t.task_id = tc.task_id
+   WHERE tc.activation_date < DATE '2024-01-01'
+     AND (tc.is_conversion_qualified OR tc.contract_count <> 0))
+    AS historic_contracts_wrongly_qualified;
 
 -- MF-R05: independent current-PBIT control at 2025-07-01.
 -- Evidence fixed before implementation: 66,404 - 27,319 - 15,221 = 23,864.

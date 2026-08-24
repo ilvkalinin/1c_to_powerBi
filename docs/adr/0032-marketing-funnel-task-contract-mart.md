@@ -1,6 +1,6 @@
 # ADR-0032: минимальный task/contract mart маркетинговой воронки
 
-- Статус: `PLANNED / SQL REVIEW READY / NO DDL OR DML`
+- Статус: `IMPLEMENTED / INITIAL LOAD AND RERUN VALIDATED 2026-08-24`
 - Дата: 2026-08-24
 - Отчёт: №27 «Маркетинговая воронка»
 
@@ -30,7 +30,8 @@
    исключений клуба и двух exact причин дубля.
 2. `mart.marketing_funnel_task_contract`, grain — одна candidate пара
    `(task_id, contract_id)` из `InfoRg6798`; она проходит active-флаг,
-   scope contract type/payment и `activation_date >= 2024-01-01`.
+   scope contract type/payment и непустой `activation_date`; сохраняется
+   историческая activation date, необходимая current-DAX контролю.
    `is_conversion_qualified` отдельно фиксирует
    `activation_date >= task_created_at` (BR-020), а `contract_count` равен
    `1` только для этого qualifying subset, иначе `0`.
@@ -39,9 +40,11 @@
 join: DAX накопленного трафика использует candidate contract client до
 месяца, а меры «Абонементы факт» суммируют только `contract_count = 1`.
 `task_id` — единственный physical bridge key. `task_code` остаётся
-unique display/DAX key, но не участвует в source join. В таблице bridge
-не допускается silent `DISTINCT`: повтор `(task_id, contract_id)` делает
-acceptance check `FAIL`, а не меняет метрику.
+unique display/DAX key, но не участвует в source join. Полный технический
+повтор projected bridge row удаляется reviewed `DISTINCT`: MF-DIAG-001—002
+подтвердил 19 идентичных source повторов. Global dedup по абонементу не
+допускается; иной повтор `(task_id, contract_id)` делает acceptance check
+`FAIL`.
 
 Power BI импортирует две таблицы: `task` фильтрует `task_contract` отношением
 `1:*`, single direction. Меры заданий считают `DISTINCTCOUNT(task_id)` из

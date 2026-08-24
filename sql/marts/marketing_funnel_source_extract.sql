@@ -134,7 +134,8 @@ WITH scoped_tasks AS MATERIALIZED (
           'Найдено аналогичное задание'
       )
 )
-SELECT encode(st.task_id, 'hex') AS task_id,
+SELECT DISTINCT
+       encode(st.task_id, 'hex') AS task_id,
        encode(c._idrref, 'hex') AS contract_id,
        c._description::text AS contract_name,
        encode(client._idrref, 'hex') AS contract_client_key,
@@ -167,4 +168,4 @@ LEFT JOIN public._reference163 AS service ON service._idrref = c._fld685rref
 WHERE r._fld6802
   AND c._fld696rref <> decode('9b656ee141a764e44de79e83cd30c1b2', 'hex')
   AND c._fld699rref <> decode('96976725cebf51f7461429d74d3f6cbe', 'hex')
-  AND c._fld670::date >= DATE '2024-01-01';
+  AND c._fld670 IS NOT NULL;

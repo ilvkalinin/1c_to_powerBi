@@ -1,6 +1,6 @@
 # Reviewed Stage-3 admission plan: «Маркетинговая воронка»
 
-Статус: `REVIEW READY / NOT APPROVED FOR EXECUTION`.
+Статус: `IMPLEMENTED / INITIAL LOAD AND RERUN PASSED 2026-08-24`.
 
 ## Objects and operations
 
@@ -26,6 +26,28 @@ primary/unique keys is proposed without an actual post-load plan.
 Rollback is a separately reviewed `DROP TABLE` transaction and is not
 automatic. It is allowed only when these two objects were created by this
 package and no Power BI consumer has been switched.
+
+`MF-DIAG-001—002` found 19 groups of byte-for-byte identical bridge rows in
+the first source snapshot. The reviewed bridge extract therefore applies
+`DISTINCT` to its complete projected row: it removes only those technical
+repeats, preserves the confirmed `(task_id, contract_id)` grain and changes
+neither BR-003 nor BR-020.
+
+`MF-FIX-002` proved that the previous lower bound `activation_date >=
+2024-01-01` excluded the pre-month contract history required by the approved
+current-PBIT control. The reviewed bridge extract keeps every non-null
+activation date for a BR-003-scoped task; BR-020 remains a separate flag and
+continues to set `contract_count`. On the independent 2025-07 control this
+restores `66 404 - 27 319 - 15 221 = 23 864` exactly.
+
+Accordingly, `MF-R04` guards that any historic bridge row remains
+non-converting under BR-020 rather than incorrectly forbidding the history
+that `MF-R05` requires.
+
+The runner emits non-sensitive progress markers for target transaction,
+lock, delete, each binary COPY (rows and bytes), every reconciliation control
+and commit. This telemetry changes no source predicate, target SQL or result;
+it makes a future VM-2 wait attributable before any intervention.
 
 ## Atomic load design
 
