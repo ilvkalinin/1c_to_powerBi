@@ -1,6 +1,6 @@
 # ADR-0016: общий факт CRM-взаимодействий
 
-- Статус: `TECHNICAL SQL REVIEW COMPLETE / IMPLEMENTATION DEFERRED`
+- Статус: `IMPLEMENTED / compact CRM BR-032 initial load and rerun VALIDATED 2026-08-21`
 - Дата: 2026-08-03
 - Отчёты: №12 «Загрузка ОП», №20 «Новички и гостевые визиты», №21 «Отчёт по обращениям»
 
@@ -13,7 +13,7 @@ outcomes. Телефония и комментарии могут иметь н�
 
 ## Решение
 
-В следующем отдельно одобренном implementation package создать минимальный
+В отдельном одобренном implementation package был создан минимальный
 физический набор с grain:
 
 > одно взаимодействие `Reference67.ID`.
