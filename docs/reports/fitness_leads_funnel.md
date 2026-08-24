@@ -1,15 +1,15 @@
 # Требования отчёта: «Воронка. Лиды. Фитнес»
 
-Договорный отчёт № 5. Статус: `DESIGNED / STAGE_2 SOURCE VALIDATION
-PARTIALLY VALIDATED — SV-078 / IMPLEMENTATION DEFERRED`.
+Договорный отчёт № 5. Статус: `IMPLEMENTED / initial load and rerun
+VALIDATED — FL-R01—FL-R06`.
 Production SQL и объекты PostgreSQL не создаются; Stage 2 ограничен read-only
 source-side сверками.
 
 Stage-3 planning 2026-08-24 confirmed that `mart.marketing_funnel_task` is
 not physically reusable: it contains only «Продажа клубной карты», not the
-four fitness funnels. The separate task-fact design remains, but a runnable
-admission is blocked pending read-only validation of outcome inputs; see
-[`planning`](fitness_leads_funnel_stage_3_planning.md).
+four fitness funnels. The separate task fact and service bridge are now
+implemented; execution evidence is retained in
+[`Stage-3 execution`](fitness_leads_funnel_stage_3_product_admission_execution_2026-08-24.md).
 
 ## Доказательства
 

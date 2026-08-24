@@ -1,8 +1,8 @@
 # Source-to-target mapping: воронка лиды фитнес
 
-Статус: `COMPATIBILITY RESOLVED — one-task grain is confirmed; service is a separate multivalued bridge`.
-Outcome-атрибуция подтверждена calculated columns текущей модели; физические
-ключи, типы, состояния и кардинальности остаются `VALIDATION_PENDING`.
+Статус: `IMPLEMENTED — one-task grain plus current-PBI-compatible multivalued service bridge`.
+Outcome-атрибуция, physical target keys, atomic source-to-target transport
+and rerun are validated by FL-R01—FL-R06.
 
 Stage-3 planning 2026-08-24 confirmed `NEW` separate task fact. The
 implemented `mart.marketing_funnel_task` is not reusable as data because its
@@ -16,7 +16,8 @@ selector. Evidence: `docs/reports/fitness_leads_funnel_service_result_decision_2
 
 > одно CRM-задание `Reference106.ID`.
 
-Логический ключ: `task_id` (`Reference106.ID`; физический тип `UNKNOWN`).
+Логические ключи: `task_id` (`Reference106.ID`; source bytea → target text) и
+`(task_id, service_name, service_source)` для bridge.
 
 ## Целевые колонки
 

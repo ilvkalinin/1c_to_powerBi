@@ -1,6 +1,6 @@
 # ADR-0011: task-level факт «Воронка. Лиды. Фитнес»
 
-- Статус: `COMPATIBILITY RESOLVED / separate task fact plus service bridge / no implementation SQL`
+- Статус: `IMPLEMENTED / separate task fact plus service bridge / rerun validated`
 - Дата: 2026-07-29
 - Отчёт: №5 «Воронка лиды фитнес»
 
@@ -49,9 +49,9 @@ client/date расчётом и необходимостью импортиро�
 
 ## Решение
 
-После технической валидации создать один физический объект:
+После технической валидации созданы два физических объекта:
 
-> `mart.fitness_leads_funnel_task`
+> `mart.fitness_leads_funnel_task` and `mart.fitness_leads_funnel_task_service`
 
 Гранулярность одной строки:
 
@@ -68,7 +68,7 @@ task×service bridge; direct multiple services не дедуплицируютс
 Поток:
 
 > read-only source-side запрос VM-1 → временный объект одной загрузки VM-2 →
-> `mart.fitness_leads_funnel_task` → Power BI Import.
+> task fact + service bridge → Power BI Import.
 
 В source-side наборе выполняются только fixed rules из mapping: отбор воронок,
 исключение дублей, CRM-классификации, текущие правила этапов, client-code/date

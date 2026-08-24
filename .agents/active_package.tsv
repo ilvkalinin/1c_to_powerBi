@@ -4,7 +4,7 @@
 # package_status must be ACTIVE or CLOSED; report_status must be PENDING, IN_PROGRESS, COMPLETE, or BLOCKED.
 # approval_evidence must link to the user-approved full scope and closure criterion.
 package_id	stage	package_status	approved_at	approval_evidence
-fitness_leads_funnel_execution_2026-08-24	STAGE_3_PRODUCT_ADMISSION	ACTIVE	2026-08-24	docs/reports/fitness_leads_funnel_execution_authorization_2026-08-24.md
+fitness_leads_funnel_execution_2026-08-24	STAGE_3_PRODUCT_ADMISSION	CLOSED	2026-08-24	docs/reports/fitness_leads_funnel_execution_authorization_2026-08-24.md
 
 report_id	report_status	completion_commit
 sales_interactions	COMPLETE	SELF
@@ -16,7 +16,7 @@ visits_debt	COMPLETE	SELF
 work_attendance	COMPLETE	SELF
 administrator_card	COMPLETE	SELF
 marketing_funnel	COMPLETE	SELF
-fitness_leads_funnel	IN_PROGRESS	-
+fitness_leads_funnel	COMPLETE	SELF
 membership_board	COMPLETE	SELF
 revenue_group_summary	COMPLETE	SELF
 ip_revenue	COMPLETE	SELF

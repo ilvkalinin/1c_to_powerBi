@@ -1,25 +1,24 @@
 # Data contract: «Воронка. Лиды. Фитнес»
 
-Статус: `COMPATIBILITY RESOLVED / separate task fact plus service bridge / no implementation SQL`.
-SV-078 подтвердил bounded task-to-service join без размножения строк, но не
-полный task-scan, физические типы, client-code attribution или source states.
-Контракт проектный; физических объектов не создавалось.
+Статус: `IMPLEMENTED / task fact plus service bridge / initial load and rerun validated`.
+Физические объекты и current-PBIT-compatible service bridge созданы
+2026-08-24; FL-R01—FL-R06 прошли на initial load и rerun.
 
 Planning 2026-08-24 confirmed that the implemented marketing task mart cannot
 be reused physically because it contains a different funnel scope. This
-contract remains the minimal separate task fact, but the source-side outcome
-columns are not runnable until the read-only controls named in
-[`planning`](../reports/fitness_leads_funnel_stage_3_planning.md) are closed.
+contract remains the minimal separate task fact. Source-side outcome columns,
+bridge cardinality and atomic rerun are evidenced in
+[`execution`](../reports/fitness_leads_funnel_stage_3_product_admission_execution_2026-08-24.md).
 
 ## Общие параметры
 
 | Параметр | Значение | Статус / доказательство |
 |---|---|---|
-| Объект PostgreSQL | `mart.fitness_leads_funnel_task` | ACCEPTED — ADR-0011 |
+| Объекты PostgreSQL | `mart.fitness_leads_funnel_task`, `mart.fitness_leads_funnel_task_service` | IMPLEMENTED — ADR-0011 / FL-R01—FL-R06 |
 | Таблица Power BI | `Задания` | CONFIRMED — текущий DAX |
 | Назначение | задания четырёх фитнес-воронок и fixed task-level конверсии | CONFIRMED |
 | Гранулярность строки | одно CRM-задание `Reference106.ID` | CONFIRMED — mapping/ADR |
-| Логический ключ | `task_id` | VALIDATION_PENDING — V-02 |
+| Логические ключи | `task_id`; `(task_id, service_name, service_source)` | VALIDATED — FL-R02 |
 | Период хранения | BR-003 | CONFIRMED |
 | Режим и правила обновления | атомарный полный пересчёт согласованного горизонта ежедневно | ACCEPTED design / решение пользователя 2026-07-30; техническая валидация pending |
 | SLA | данные доступны не позднее 08:30 по Москве | CONFIRMED — BR-014, решение пользователя 2026-07-30 |
@@ -51,7 +50,7 @@ columns are not runnable until the read-only controls named in
 | `first_interaction_type` | `ТипПервогоВзаимодействия` | text | Text | да | срез/строка визуала | не мера | нет | `first_interaction_type` |
 | `service_name` | `УслугаИтог` | text | Text | да | separate task×service bridge | не мера | нет | current-PBI-compatible bridge |
 | `has_booking` | `Есть запись` | boolean | True/False | нет | task-level признак | не суммировать напрямую | да | `has_booking` |
-| `training_count` | `КоличествоТренировок` | bigint | Whole number | нет | показатель | аддитивен по task-grain; сохраняет перекрытие окон | нет | `training_count` |
+| `training_count` | `КоличествоТренировок` | bigint | Whole number | да, сохраняет current DAX blank | показатель | аддитивен по task-grain; сохраняет перекрытие окон | нет | `training_count` |
 | `has_paid_training_45d` | `ПришелНаТренировку` | boolean | True/False | нет | task-level признак | не суммировать напрямую | да | `has_paid_training_45d` |
 
 `client_code`, `client_key`, ФИО, телефон, описание задания, даты закрытия,
