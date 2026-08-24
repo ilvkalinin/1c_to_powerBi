@@ -101,14 +101,19 @@ gate закрыт; приёмка созданной модели остаётс
    месяце 2025-07-01 source-side MF-V08 дал итог 23 864; фактические числа
    Power BI для независимой сверки не предоставлены.
 
-## Результат reuse review
+## Результат reuse review — обновлён 2026-08-24
 
-Базовый набор отчёта повторно использует `mart.fitness_leads_funnel_task`:
-совпадают grain, ключ `task_id`, CRM-источники и task-to-contract enrichment.
-Новый факт, копия регистра или отдельное извлечение CRM не нужны. Маркетинговая
-классификация первого взаимодействия и меры накопленного трафика остаются
-семантикой Power BI поверх этого набора. Решение `REUSE` является проектным до
-технической валидации существующего факта.
+`mart.crm_interaction` имеет interaction grain и sales/guest scope, а
+выручечные продукты имеют movement grain; они не могут быть расширены без
+смешения строк. `mart.fitness_leads_funnel_task` физически отсутствует и
+покрывает более широкий future scope другого отчёта. Поэтому минимальная
+архитектура фиксирует новые `mart.marketing_funnel_task` (task grain) и
+`mart.marketing_funnel_task_contract` (candidate `task × contract` grain с
+отдельным BR-020 qualification flag).
+Маркетинговая классификация первого взаимодействия и меры накопленного трафика
+остаются семантикой Power BI. Пользователь подтвердил BR-003 retention:
+current horizon — 2025–2026; current PBIT 2024–2025 остаётся evidence, а не
+исключением из горизонта.
 
 ## Результат Stage 2: SV-080
 
@@ -119,10 +124,11 @@ gate закрыт; приёмка созданной модели остаётс
 максимум — 16 контрактов на задание. Следовательно, гипотеза one-to-one
 `task → contract` имеет статус `VALIDATION_FAILED`.
 
-Task core остаётся `REUSE` из `mart.fitness_leads_funnel_task` (также
-опирается на SV-078). BR-020 снимает бизнес-развилку: `contract_count = 1`
-на каждой квалифицированной связи `task × contract`; глобальный `DISTINCT`
-по абонементу и выбор «главного» задания запрещены. Никакие объекты PostgreSQL
+Task core планируется как отдельный `mart.marketing_funnel_task`; candidate
+bridge — `mart.marketing_funnel_task_contract`. BR-020 снимает бизнес-развилку:
+`contract_count = 1` только на квалифицированной связи `task × contract`;
+глобальный `DISTINCT` по абонементу и выбор «главного» задания запрещены.
+Никакие объекты PostgreSQL
 и источника 1С не создавались и не изменялись.
 
 По прямому запросу пользователя MF-V03E показал один реальный пример без ПДн:
