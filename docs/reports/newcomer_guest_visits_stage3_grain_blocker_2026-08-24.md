@@ -1,6 +1,6 @@
 # BLOCKER: воспроизводимый grain «Новички и гостевые визиты»
 
-Статус: `RESOLVED — Power BI selection retained`.
+Статус: `RESOLVED FOR MINIMAL DATE FACTS — validated`.
 
 В согласованном Stage 3 execution package повторены read-only diagnostics в
 одном `REPEATABLE READ, READ ONLY` snapshot без вывода ПДн и raw IDs.
@@ -24,7 +24,7 @@ tie-break или скрытую дедупликацию. Варианты, тр
 До выбора разрешены только работы, не зависящие от этой селекции. DDL, DML и
 reconciliation этих двух фактов fail-closed запрещены.
 
-## Решение пользователя — 2026-08-24
+## Первоначальное истолкование — 2026-08-24 (superseded)
 
 Пользователь выбрал: «оставить как в Power BI». Это фиксируется как BR-035:
 `ROW_NUMBER(contract ORDER BY Period)` без дополнительного порядка и финальный
@@ -35,6 +35,17 @@ reconciliation этих двух фактов fail-closed запрещены.
 Power BI. Не выполнены DDL/DML этих facts, а их отсутствие не маскируется
 source-row таблицей под теми же именами.
 
-Новый допустимый trigger — отдельное явное решение сменить эту границу на
-детерминированный physical tie-break либо на технический source-row grain с
-отдельным Power BI switch/reconciliation package.
+Это истолкование заменено уточнением ниже.
+
+## Уточнение пользователя — 2026-08-24
+
+Предыдущее истолкование «не создавать facts» отменено. Пользователь потребовал
+создать минимальные facts: для `mart.new_first_visit` значимы договор и дата
+квалифицированного посещения, независимо от клиента и документа; для
+`mart.guest_visit_conversion` значимы физический клиент и дата визита,
+независимо от документа регистрации. Это устраняет необходимость выбрать одну
+из tie-строк: source-side результат будет агрегирован только по названным
+устойчивым ключам. Статус/регистрация/время/recorder не будут переноситься в
+эти facts. Read-only club audit завершён: среди 31 tied first-visit contracts
+multi-club групп нет; среди 1 249 duplicate guest client-date groups их 21.
+Поэтому guest club не переносится в minimal fact; current PBI не меняется.

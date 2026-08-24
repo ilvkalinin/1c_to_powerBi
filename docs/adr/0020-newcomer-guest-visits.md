@@ -1,6 +1,6 @@
 # ADR-0020: первые посещения, гостевые визиты и туры новичков
 
-- Статус: `SUPERSEDED FOR FIRST/GUEST FACTS — Power BI selection retained 2026-08-24`
+- Статус: `IMPLEMENTED AS MINIMAL DATE FACTS — 2026-08-24`
 - Дата: 2026-08-03
 - Отчёт: №20 «Новички и гостевые визиты»
 
@@ -27,10 +27,13 @@ source-side до загрузки. Полные регистры посещен�
 
 Read-only diagnostic показал materially different rows при одинаковом первом
 `Period` и при одинаковой паре `client_code × guest_visit_date`. Пользователь
-выбрал «оставить как в Power BI». Поэтому первоначальное решение о создании
-`mart.new_first_visit` и `mart.guest_visit_conversion` отменено для первого
-физического выпуска: их selection остаётся в M/DAX (BR-035), DDL/DML не
-выполняются. `mart.v_guest_tour` остаётся реализованным reusable CRM view.
+уточнил целевой результат: важны договор и дата первого посещения, а для
+гостя — физический клиент и дата; клиент первого посещения и документы не
+важны. Поэтому реализованы `mart.new_first_visit(contract_id,
+first_visit_date)` и `mart.guest_visit_conversion(client_id,
+guest_visit_date, outcomes)` без physical tie-break. Детали, которые требуют
+выбора документа, не переносятся; current Power BI не изменяется. Evidence:
+`newcomer_guest_visits_minimal_date_facts_execution_2026-08-24.md`.
 
 ## Обновление и Power BI
 

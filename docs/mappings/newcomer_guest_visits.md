@@ -1,6 +1,6 @@
 # Source-to-target mapping: «Новички и гостевые визиты»
 
-Статус: `SOURCE MAPPING RETAINED / POWER BI SELECTION RETAINED — physical first/guest facts excluded 2026-08-24`.
+Статус: `CURRENT PBI MAPPING RETAINED / MINIMAL PHYSICAL FACTS IMPLEMENTED — BR-035`.
 
 Ниже описаны наборы, для которых ADR-0020 проектирует
 `mart.new_first_visit`, `mart.guest_visit_conversion` и REUSE
@@ -22,12 +22,10 @@ SV-097 дополнительно подтвердил bounded путь доку
 в Power BI: они не переносятся в PostgreSQL первого релиза. Это сохраняет
 current ties и multiplicity по BR-018/BR-031, не изменяя detail или конверсию.
 
-Пользователь 2026-08-24 распространил ту же границу на selection самих первых
-и гостевых визитов: `ROW_NUMBER(contract ORDER BY Period)` и final
-`Distinct(client_code, guest_visit_date)` остаются в Power BI (BR-035).
-Следовательно, описание наборов 1–2 ниже — mapping текущего PBI, а не
-разрешение или контракт на создание `mart.new_first_visit`/
-`mart.guest_visit_conversion`.
+Пользователь 2026-08-24 уточнил минимальный physical output: договор × дата
+первого посещения и физический клиент × дата гостевого визита. Его exact
+mapping — [`newcomer_guest_visits_minimal_date_facts.md`](newcomer_guest_visits_minimal_date_facts.md).
+Описание наборов 1–2 ниже сохраняется как mapping текущего PBI-detail.
 
 История следует `BR-003`; refresh — ежедневно (`CONFIRMED — решение
 пользователя 2026-07-30`).

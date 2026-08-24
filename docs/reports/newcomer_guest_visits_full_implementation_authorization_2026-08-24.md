@@ -1,6 +1,6 @@
 # Авторизация полного исполнения: «Новички и гостевые визиты»
 
-Статус: `CLOSED — physical facts excluded by resolved Power BI selection`.
+Статус: `SUPERSEDED by minimal date-facts authorization 2026-08-24`.
 
 Дата согласования: 2026-08-24.
 

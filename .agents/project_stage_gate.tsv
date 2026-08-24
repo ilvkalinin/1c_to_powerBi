@@ -5,4 +5,4 @@
 # CLOSED_PENDING_NEXT_APPROVAL rejects all new selections until the user
 # explicitly confirms the next independent package.
 gate_id	state	allowed_stage	allowed_report_ids	reason
-global_stage_gate	CLOSED_PENDING_NEXT_APPROVAL	-	-	Newcomer/guest physical facts excluded by user decision to retain Power BI selection; connection-retry hardening closed 2026-08-24. A new independent package remains required for any further product work.
+global_stage_gate	CLOSED_PENDING_NEXT_APPROVAL	-	-	Newcomer/guest minimal date facts closed with validated initial load and rerun 2026-08-24; PBI switch and all other reports require a new independent package.

@@ -1,17 +1,16 @@
 # Data contract: «Новички и гостевые визиты»
 
-Статус: `CURRENT PBI CONTRACT RETAINED / PHYSICAL FIRST- AND GUEST-VISIT FACTS EXCLUDED — BR-035`.
+Статус: `CURRENT PBI CONTRACT RETAINED / MINIMAL PHYSICAL FACTS IMPLEMENTED — BR-035`.
 
 NV-V01—V09 выполнены с зафиксированными ожиданиями. Physical guest key и
 CRM-tour grain подтверждены; candidate guest key материально неуникален, но
 current `Distinct(client code, visit date)` сохраняется по BR-018. ACCUNIQ,
 latest-state path и outcomes 0/44/45 подтверждены source-side. По BR-031 эти
 неоднозначные outcomes остаются в Power BI первого релиза; в PostgreSQL
-переносится только CRM-tour base. Физическая реализация
-`mart.new_first_visit` и `mart.guest_visit_conversion` исключена решением
-пользователя 2026-08-24 «оставить как в Power BI»: их selection остаётся в
-M/DAX, а listed fields ниже — контракт текущего Power BI, не
-PostgreSQL-DDL-контракт.
+переносится только CRM-tour base. Current PBI fields below remain its own
+contract. Separately implemented minimal physical facts are documented in
+[`newcomer_guest_visits_minimal_date_facts.md`](newcomer_guest_visits_minimal_date_facts.md);
+they do not include club/demographic/document detail and do not switch PBI.
 
 ## Наборы
 

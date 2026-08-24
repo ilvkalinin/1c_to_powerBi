@@ -1,6 +1,6 @@
 # Требования отчёта: «Новички и гостевые визиты»
 
-Статус: `POWER BI SELECTION RETAINED — physical facts excluded by user decision 2026-08-24`.
+Статус: `MINIMAL DATE FACTS IMPLEMENTED — Power BI unchanged`.
 
 Анализ выполнен локально по двум документам: описанию страниц
 `Новички и гостевые визиты.docx` и выгрузке текущих Power Query / DAX
@@ -52,12 +52,12 @@ excluded current groups. Поле `_recordkind` старого validation templa
 
 ## Граница физической реализации — решение 2026-08-24
 
-Пользователь выбрал «оставить как в Power BI». Поэтому `mart.new_first_visit`
-и `mart.guest_visit_conversion` не создаются: нынешний `ROW_NUMBER` без
-второго порядка и `Distinct(client code, guest visit date)` остаются в Power
-BI. Их нельзя перенести как one-row PostgreSQL facts без выбора, которого
-current rule не задаёт. Правило закреплено в BR-035; источник и текущий PBI
-не меняются.
+Пользователь уточнил правило: для первого посещения важны договор и дата, для
+гостевого — физический клиент и дата; клиент первого посещения и документ не
+важны. Поэтому созданы минимальные `mart.new_first_visit` и
+`mart.guest_visit_conversion` без physical tie-break. Current PBI не меняется:
+его клубная, демографическая и document-detail остаются вне этих facts.
+Приёмка и rerun — в `newcomer_guest_visits_minimal_date_facts_execution_2026-08-24.md`.
 
 ## Назначение
 
