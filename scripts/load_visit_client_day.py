@@ -3,6 +3,7 @@
 
 import argparse
 import os
+import sys
 import time
 from datetime import date, datetime
 from pathlib import Path
@@ -12,6 +13,9 @@ import psycopg
 
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+from scripts.mart_connection import connect_with_retry
 EXTRACT = ROOT / "sql/marts/visit_client_day_extract.sql"
 COLUMNS = """visit_date, club_id, client_key, has_visit,
 has_member_visit, has_guest_visit, has_vip_visit,
@@ -83,7 +87,8 @@ def main() -> None:
     if args.chunk_months < 1 or args.chunk_months > 12:
         raise SystemExit("--chunk-months must be between 1 and 12")
     begin = time.monotonic()
-    with psycopg.connect(**config("SOURCE_")) as source, psycopg.connect(**config("MART_")) as target:
+    with connect_with_retry(lambda: psycopg.connect(**config("SOURCE_")), endpoint="source") as source, \
+         connect_with_retry(lambda: psycopg.connect(**config("MART_")), endpoint="mart") as target:
         with source.cursor() as source_cur, target.cursor() as target_cur:
             source_cur.execute("BEGIN ISOLATION LEVEL REPEATABLE READ, READ ONLY")
             target_cur.execute("BEGIN")

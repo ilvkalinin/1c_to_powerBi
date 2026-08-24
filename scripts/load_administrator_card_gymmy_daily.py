@@ -11,6 +11,11 @@ from zoneinfo import ZoneInfo
 
 import psycopg
 
+try:
+    from scripts.mart_connection import connect_with_retry as connect_once_with_retry
+except ModuleNotFoundError:
+    from mart_connection import connect_with_retry as connect_once_with_retry
+
 ROOT = Path(__file__).resolve().parents[1]
 EXTRACT = ROOT / "sql/marts/administrator_card_gymmy_daily_extract.sql"
 SOURCE_CONTROLS = ROOT / "sql/marts/administrator_card_gymmy_daily_source_controls.sql"
@@ -40,14 +45,10 @@ def config(prefix: str) -> dict[str, str]:
 
 
 def connect_with_retry(prefix: str):
-    for attempt in range(1, 4):
-        try:
-            return psycopg.connect(**config(prefix), connect_timeout=15)
-        except psycopg.OperationalError:
-            if attempt == 3:
-                raise
-            print(f"{prefix}CONNECTION_RETRY attempt={attempt + 1}/3", flush=True)
-            time.sleep(3)
+    return connect_once_with_retry(
+        lambda: psycopg.connect(**config(prefix), connect_timeout=15),
+        endpoint=prefix.removesuffix("_").lower(),
+    )
 
 
 def br003_horizon(today: date) -> tuple[date, date]:

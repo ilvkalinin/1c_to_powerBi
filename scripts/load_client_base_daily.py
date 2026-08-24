@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import sys
 import tempfile
 import time
 from datetime import date, datetime
@@ -15,6 +16,9 @@ import psycopg
 
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+from scripts.mart_connection import connect_with_retry
 EXTRACT = ROOT / "sql/marts/client_base_daily_extract.sql"
 SOURCE_CONTROLS = ROOT / "sql/marts/client_base_daily_source_controls.sql"
 TARGET_REPLACE = ROOT / "sql/marts/client_base_daily_target_replace.sql"
@@ -140,7 +144,9 @@ def main() -> None:
             prefix="client_base_daily_", suffix=".copy", delete=False
         ) as transfer_file:
             transfer_path = Path(transfer_file.name)
-            with psycopg.connect(**config("SOURCE_")) as source:
+            with connect_with_retry(
+                lambda: psycopg.connect(**config("SOURCE_")), endpoint="source"
+            ) as source:
                 with source.cursor() as source_cursor:
                     source_cursor.execute("BEGIN ISOLATION LEVEL REPEATABLE READ, READ ONLY")
                     source_cursor.execute("SET LOCAL statement_timeout = '60000'")
@@ -161,7 +167,9 @@ def main() -> None:
                 flush=True,
             )
 
-        with psycopg.connect(**config("MART_")) as target:
+        with connect_with_retry(
+            lambda: psycopg.connect(**config("MART_")), endpoint="mart"
+        ) as target:
             with target.cursor() as target_cursor:
                 target_cursor.execute("BEGIN")
                 target_cursor.execute(

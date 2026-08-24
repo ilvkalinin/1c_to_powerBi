@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import os
 import re
+import sys
 import tempfile
 from datetime import date, datetime
 from pathlib import Path
@@ -15,6 +16,9 @@ import psycopg
 
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+from scripts.mart_connection import connect_with_retry
 EXTRACT = ROOT / "sql/marts/marketing_funnel_source_extract.sql"
 DDL = ROOT / "sql/marts/marketing_funnel_reviewed_plan.sql"
 RECONCILIATION = ROOT / "sql/tests/marketing_funnel_reconciliation.sql"
@@ -70,7 +74,7 @@ def ddl_without_transaction() -> str:
 
 def copy_source(start: date, end: date, directory: Path) -> tuple[dict[str, Path], dict[str, int]]:
     paths, counts = {}, {}
-    with psycopg.connect(**config("SOURCE_")) as source:
+    with connect_with_retry(lambda: psycopg.connect(**config("SOURCE_")), endpoint="source") as source:
         with source.cursor() as cursor:
             cursor.execute("BEGIN ISOLATION LEVEL REPEATABLE READ, READ ONLY")
             for ordinal, name in enumerate(("task", "task_contract"), 1):
@@ -128,7 +132,7 @@ def require_reconciliation(cursor, counts: dict[str, int], start: date, end: dat
 
 def load(mode: str, paths: dict[str, Path], counts: dict[str, int], start: date, end: date) -> None:
     expected = {"marketing_funnel_task", "marketing_funnel_task_contract"}
-    with psycopg.connect(**config("TARGET_")) as target:
+    with connect_with_retry(lambda: psycopg.connect(**config("TARGET_")), endpoint="target") as target:
         try:
             with target.cursor() as cursor:
                 cursor.execute("BEGIN")

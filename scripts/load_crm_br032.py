@@ -63,7 +63,7 @@ TARGETS = {
     "feedback": "mart.feedback_interaction",
     "club_day": "mart.club_day_metrics",
 }
-CONNECT_ATTEMPTS = 5
+CONNECT_ATTEMPTS = 6
 CONNECT_RETRY_INTERVAL_SECONDS = 15
 TARGET_TRANSACTION_ATTEMPTS = 5
 TARGET_COPY_TIMEOUT_MILLISECONDS = 300_000
@@ -98,9 +98,9 @@ def config(prefix: str, application_name: str | None = None) -> dict[str, str | 
 def connect_with_retry(prefix: str, application_name: str | None = None) -> psycopg.Connection:
     """Open a database session with bounded retries for transient admission failures.
 
-    Attempts start 15 seconds apart.  Each attempt has the same 15-second
-    PostgreSQL connection timeout, so an unavailable host can delay this
-    loader by at most 75 seconds before the original connection error is
+    The initial attempt is followed by five retries, each 15 seconds apart.
+    Each attempt has the same 15-second PostgreSQL connection timeout, so an
+    unavailable host can delay this loader by at most 90 seconds before the original connection error is
     surfaced.  SQL errors and authentication failures are intentionally not
     retried: reconnecting cannot make either condition valid.
     """

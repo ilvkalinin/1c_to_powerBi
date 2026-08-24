@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import sys
 from datetime import date, datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -13,6 +14,9 @@ import psycopg
 
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+from scripts.mart_connection import connect_with_retry
 EXTRACTS = (
     ROOT / "sql/marts/dpfu_ancillary_revenue_extract_7575.sql",
     ROOT / "sql/marts/dpfu_ancillary_revenue_extract_7646.sql",
@@ -141,9 +145,8 @@ def main() -> None:
     source_config = config("SOURCE_")
     target_config = config("MART_")
 
-    with psycopg.connect(**source_config) as source, psycopg.connect(
-        **target_config
-    ) as target:
+    with connect_with_retry(lambda: psycopg.connect(**source_config), endpoint="source") as source, \
+         connect_with_retry(lambda: psycopg.connect(**target_config), endpoint="mart") as target:
         with source.cursor() as source_cur, target.cursor() as target_cur:
             source_cur.execute("BEGIN ISOLATION LEVEL REPEATABLE READ, READ ONLY")
             expected: dict[str, tuple[int, object, object]] = {}

@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import sys
 from datetime import date, datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -13,6 +14,9 @@ import psycopg
 
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+from scripts.mart_connection import connect_with_retry
 EXTRACT = ROOT / "sql/marts/dpfu_plan_assignment_extract.sql"
 COLUMNS = """
 plan_date, club_id, activity_id, employee_id, planned_client_key,
@@ -126,7 +130,8 @@ def main() -> None:
 
     horizon_start, horizon_end = br003_horizon(datetime.now(ZoneInfo("Europe/Moscow")).date())
     query = extract_sql(horizon_start, horizon_end)
-    with psycopg.connect(**config("SOURCE_")) as source, psycopg.connect(**config("MART_")) as target:
+    with connect_with_retry(lambda: psycopg.connect(**config("SOURCE_")), endpoint="source") as source, \
+         connect_with_retry(lambda: psycopg.connect(**config("MART_")), endpoint="mart") as target:
         with source.cursor() as source_cur, target.cursor() as target_cur:
             source_cur.execute("BEGIN ISOLATION LEVEL REPEATABLE READ, READ ONLY")
             require_client_code_quality(source_cur, query)
