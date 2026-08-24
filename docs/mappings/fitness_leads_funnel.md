@@ -1,17 +1,16 @@
 # Source-to-target mapping: воронка лиды фитнес
 
-Статус: `STAGE-2 VALIDATED WITH BLOCKER — task grain is confirmed; a one-row service outcome is not runnable`.
+Статус: `COMPATIBILITY RESOLVED — one-task grain is confirmed; service is a separate multivalued bridge`.
 Outcome-атрибуция подтверждена calculated columns текущей модели; физические
 ключи, типы, состояния и кардинальности остаются `VALIDATION_PENDING`.
 
 Stage-3 planning 2026-08-24 confirmed `NEW` separate task fact. The
 implemented `mart.marketing_funnel_task` is not reusable as data because its
 single marketing-funnel scope excludes all four fitness funnels. Its task-fact
-pattern is reusable only. Stage-2 now confirms the physical task key,
-dimensions, client-code and 45-day source path. `service_name` is `BLOCKER`:
-two current tasks are multivalued and 1,432 earliest booking days have DAX
-service ties without an approved source-side selector. Evidence:
-`docs/source_metadata/fitness_leads_funnel_stage2_validation_2026-08-24.md`.
+pattern is reusable only. Stage-2 confirms the physical task key, dimensions,
+client-code and 45-day source path. User decision 2026-08-24 preserves current
+multivalued services in a separate bridge; it does not invent a one-value
+selector. Evidence: `docs/reports/fitness_leads_funnel_service_result_decision_2026-08-24.md`.
 
 Гранулярность одной строки базового набора:
 
@@ -44,7 +43,7 @@ service ties without an approved source-side selector. Evidence:
 | `unsuccessful_reason` | причина неуспеха | `Fld1201 → Reference201.Description` | исключить два exact значения дубля | text | да | task | CONFIRMED current | SQL/M | V-03 |
 | `funnel_stage_name` | этап воронки | `Fld1205 → Reference264.Description` | join | text | да | task | CONFIRMED current | SQL/M | V-04 |
 | `first_interaction_type` | тип первого взаимодействия | `Reference106.Fld8712` | current GUID mapping, затем M-classification | text | да | task | CONFIRMED current | SQL/M | V-07 |
-| `service_name` | итоговая услуга для среза | current `Задания[Услуга]` либо `Записи.НаименованиеУслуги` | current DAX is preserved; no one-value selector is approved | text | да | task | BLOCKER | FL-V05/V06/V09 | separate business decision |
+| `service_name` | current service attribution | current `Задания[Услуга]` либо `Записи.НаименованиеУслуги` | preserve direct multirow result; fallback is current earliest-date DAX `MIN`; store only in future task×service bridge | text | да | task×service bridge | CONFIRMED user decision | service decision 2026-08-24 | bridge controls in runnable admission |
 | `task_count` | вклад задания в число заданий | `task_id` | `1`; для меры distinct key | smallint | нет | task | CONFIRMED by design | DAX | V-02, V-11 |
 | `has_booking` | есть запись по заданию | `Reference106.Fld1205 → Reference264.Description` | `true` для шести current stage names, иначе `false` | boolean | нет | task | CONFIRMED current | DAX `Есть запись` | V-07, V-11 |
 | `training_count` | тренировки, атрибутированные заданию | stage, `Reference141X1.Code`, `ДПФУ факт` | `1` для трёх stages «Пришел…»; иначе `0` для двух ДСУ-воронок; иначе `SUM(ДПФУ факт.КоличествоЗаписей)` того же клиента в `[task_date; task_date + 45]` включительно | bigint | current PBIT may return blank | task | CONFIRMED current and physical source | FL-V08/V09/V11 |

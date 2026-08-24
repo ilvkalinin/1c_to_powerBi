@@ -1,6 +1,6 @@
 # Data contract: «Воронка. Лиды. Фитнес»
 
-Статус: `STAGE-2 VALIDATED WITH BLOCKER / separate task-fact contract retained / no implementation SQL`.
+Статус: `COMPATIBILITY RESOLVED / separate task fact plus service bridge / no implementation SQL`.
 SV-078 подтвердил bounded task-to-service join без размножения строк, но не
 полный task-scan, физические типы, client-code attribution или source states.
 Контракт проектный; физических объектов не создавалось.
@@ -49,7 +49,7 @@ columns are not runnable until the read-only controls named in
 | `campaign_name` | `МаркетинговаяКампания` | text | Text | да | срез/строка визуала | не мера | нет | `campaign_name` |
 | `tenure_type` | `ВидСтажа` | text | Text | да | срез | не мера | нет | `tenure_type` |
 | `first_interaction_type` | `ТипПервогоВзаимодействия` | text | Text | да | срез/строка визуала | не мера | нет | `first_interaction_type` |
-| `service_name` | `УслугаИтог` | text | Text | да | срез | не мера | нет | `service_name` |
+| `service_name` | `УслугаИтог` | text | Text | да | separate task×service bridge | не мера | нет | current-PBI-compatible bridge |
 | `has_booking` | `Есть запись` | boolean | True/False | нет | task-level признак | не суммировать напрямую | да | `has_booking` |
 | `training_count` | `КоличествоТренировок` | bigint | Whole number | нет | показатель | аддитивен по task-grain; сохраняет перекрытие окон | нет | `training_count` |
 | `has_paid_training_45d` | `ПришелНаТренировку` | boolean | True/False | нет | task-level признак | не суммировать напрямую | да | `has_paid_training_45d` |

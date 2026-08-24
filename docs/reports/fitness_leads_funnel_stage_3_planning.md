@@ -1,6 +1,6 @@
 # Stage-3 planning: «Воронка лиды фитнес»
 
-Статус: `BLOCKED — Stage-2 source validation is closed; runnable admission requires a service-selection decision`.
+Статус: `COMPATIBILITY RESOLVED — runnable admission must design one task fact plus a separate service bridge`.
 
 ## Reuse review after marketing-funnel implementation
 

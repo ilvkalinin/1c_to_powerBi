@@ -1,6 +1,6 @@
 # ADR-0011: task-level факт «Воронка. Лиды. Фитнес»
 
-- Статус: `STAGE-2 VALIDATED WITH BLOCKER / separate task fact retained / no implementation SQL`
+- Статус: `COMPATIBILITY RESOLVED / separate task fact plus service bridge / no implementation SQL`
 - Дата: 2026-07-29
 - Отчёт: №5 «Воронка лиды фитнес»
 
@@ -59,6 +59,11 @@ client/date расчётом и необходимостью импортиро�
 
 Логический ключ: `task_id`; его уникальность и конечное физическое
 представление проверяются до реализации.
+
+`service_name` не входит в one-task таблицу. Решение пользователя 2026-08-24
+сохраняет current Power BI multivalue service behaviour в отдельном
+task×service bridge; direct multiple services не дедуплицируются, fallback
+сохраняет DAX earliest-date `MIN`.
 
 Поток:
 
