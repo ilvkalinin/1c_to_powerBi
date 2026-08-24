@@ -1,6 +1,6 @@
 # ADR-0008: контрольные точки вовлечения новичков
 
-- Статус: `DESIGNED / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-075 / IMPLEMENTATION DEFERRED`
+- Статус: `IMPLEMENTED / RECONCILED / RERUN PASSED — 2026-08-24`
 - Дата: 2026-07-28
 - Отчёт: № 2 «Вовлечение новичков»
 
@@ -57,8 +57,9 @@ group/pivot/unpivot в Power Query, объединяет годовые запр
 не выбираются между клиентами одного контракта.
 
 Таблица содержит основной контрактный набор и детские пакеты: для пакета
-клиентом факта является ребёнок из строки чека, а дата старта — максимум даты
-начала контракта и даты чека. Отдельные таблицы для детских пакетов,
+клиентом факта является ребёнок из строки чека, а дата старта — максимум
+`GREATEST(дата начала контракта, дата чека)` среди положительных, не
+возвращённых продаж. Отдельные таблицы для детских пакетов,
 ежедневной страницы, итогов месяца, премий, ОУ и аналитической записки не
 создаются.
 
@@ -192,6 +193,21 @@ Power BI:
   всего удерживаемого горизонта.
 
 ## Блокеры перед SQL
+
+### NE-SV06 — child-package start-date multiplicity, 2026-08-24
+
+Live read-only snapshot confirmed the physical source and current child-package
+selection shape. `RANK() = 1` returns 18,697 source rows. It leaves 66
+duplicate `contract × child` pairs; for 12 of those pairs (25 rows) the derived
+`GREATEST(contract_start, receipt_date)` has more than one value. The approved
+fact key `contract_id + client_id + checkpoint_day` admits only one start date,
+while preserving every source row changes the fact grain and the KPI's unit.
+
+Current Power BI has no child-package branch, so it did not resolve this
+target-only choice. Пользователь 2026-08-24 утвердил `MAX` даты среди
+положительных, не возвращённых продаж child-пакета после исключения
+сторнированных пакетов. Это правило сохраняет один start на
+`contract × child` и входит в реализацию.
 
 SV-075 (live read-only, 2026-08-11) подтвердил техническую уникальность
 3 180 564 строк `AccumRg7575`, но выявил 240 290 orphan-контрактов,
