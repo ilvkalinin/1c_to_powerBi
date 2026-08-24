@@ -1,6 +1,6 @@
 # ADR-0011: task-level факт «Воронка. Лиды. Фитнес»
 
-- Статус: `STAGE-3 PLANNING BLOCKED / separate task fact retained / no implementation SQL`
+- Статус: `STAGE-2 VALIDATED WITH BLOCKER / separate task fact retained / no implementation SQL`
 - Дата: 2026-07-29
 - Отчёт: №5 «Воронка лиды фитнес»
 

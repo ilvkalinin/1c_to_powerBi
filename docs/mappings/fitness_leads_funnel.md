@@ -1,16 +1,17 @@
 # Source-to-target mapping: воронка лиды фитнес
 
-Статус: `STAGE-3 PLANNING BLOCKED — task grain fixed; physical outcome mapping not yet runnable`.
+Статус: `STAGE-2 VALIDATED WITH BLOCKER — task grain is confirmed; a one-row service outcome is not runnable`.
 Outcome-атрибуция подтверждена calculated columns текущей модели; физические
 ключи, типы, состояния и кардинальности остаются `VALIDATION_PENDING`.
 
 Stage-3 planning 2026-08-24 confirmed `NEW` separate task fact. The
 implemented `mart.marketing_funnel_task` is not reusable as data because its
 single marketing-funnel scope excludes all four fitness funnels. Its task-fact
-pattern is reusable only. `service_name`, `training_count` and
-`has_paid_training_45d` remain `VALIDATION_PENDING` until the exact controls
-in `docs/reports/fitness_leads_funnel_stage_3_planning.md` establish physical
-cardinality, state and client-code/date semantics.
+pattern is reusable only. Stage-2 now confirms the physical task key,
+dimensions, client-code and 45-day source path. `service_name` is `BLOCKER`:
+two current tasks are multivalued and 1,432 earliest booking days have DAX
+service ties without an approved source-side selector. Evidence:
+`docs/source_metadata/fitness_leads_funnel_stage2_validation_2026-08-24.md`.
 
 Гранулярность одной строки базового набора:
 
@@ -22,8 +23,8 @@ cardinality, state and client-code/date semantics.
 
 | Целевая колонка | Бизнес-описание | Исходная таблица / колонка | Преобразование | PostgreSQL тип | NULL | Grain | Статус | Источник подтверждения | Тест |
 |---|---|---|---|---|---|---|---|---|---|
-| `task_id` | стабильный ключ задания | `Reference106.ID` | без преобразования | UNKNOWN | нет | task | CONFIRMED source | SQL/M | V-02 |
-| `task_code` | отображаемый код задания | `Reference106.Code` | без преобразования; не использовать как ключ до проверки | text | нет | task | CONFIRMED source | SQL/M | V-02 |
+| `task_id` | стабильный ключ задания | `Reference106.ID` | без преобразования | bytea source / text target | нет | task | CONFIRMED source | FL-V02 |
+| `task_code` | отображаемый код задания | `Reference106.Code` | без преобразования | text | нет | task | CONFIRMED source | FL-V02 |
 | `created_at` | дата формирования задания | `Reference106.Fld1193` | без преобразования | timestamp UNKNOWN | нет | task | CONFIRMED source | SQL/M | V-01, V-09 |
 | `task_date` | дата ключа календаря | `Reference106.Fld1193` | `created_at::date` | date | нет | task | CONFIRMED current | DAX `ДатаКлюч` | V-01, V-09 |
 | `closed_at` | дата закрытия | `Reference106.Fld1192` | без преобразования | timestamp UNKNOWN | да | task | CONFIRMED source | SQL/M | V-01 |
@@ -43,10 +44,10 @@ cardinality, state and client-code/date semantics.
 | `unsuccessful_reason` | причина неуспеха | `Fld1201 → Reference201.Description` | исключить два exact значения дубля | text | да | task | CONFIRMED current | SQL/M | V-03 |
 | `funnel_stage_name` | этап воронки | `Fld1205 → Reference264.Description` | join | text | да | task | CONFIRMED current | SQL/M | V-04 |
 | `first_interaction_type` | тип первого взаимодействия | `Reference106.Fld8712` | current GUID mapping, затем M-classification | text | да | task | CONFIRMED current | SQL/M | V-07 |
-| `service_name` | итоговая услуга для среза | current `Задания[Услуга]` либо `Записи.НаименованиеУслуги` | если current service `NULL`, найти раннюю запись того же клиента в `[task_date; min(closed_at, forced_closed_at, task_date + 45)]` и взять DAX `MIN` названия на этой дате | text | да | task | CONFIRMED current / technical cardinality pending | SQL/M/DAX | V-05, V-06, V-09 |
+| `service_name` | итоговая услуга для среза | current `Задания[Услуга]` либо `Записи.НаименованиеУслуги` | current DAX is preserved; no one-value selector is approved | text | да | task | BLOCKER | FL-V05/V06/V09 | separate business decision |
 | `task_count` | вклад задания в число заданий | `task_id` | `1`; для меры distinct key | smallint | нет | task | CONFIRMED by design | DAX | V-02, V-11 |
 | `has_booking` | есть запись по заданию | `Reference106.Fld1205 → Reference264.Description` | `true` для шести current stage names, иначе `false` | boolean | нет | task | CONFIRMED current | DAX `Есть запись` | V-07, V-11 |
-| `training_count` | тренировки, атрибутированные заданию | stage, `Reference141X1.Code`, `ДПФУ факт` | `1` для трёх stages «Пришел…»; иначе `0` для двух ДСУ-воронок; иначе `SUM(ДПФУ факт.КоличествоЗаписей)` того же клиента в `[task_date; task_date + 45]` включительно | bigint | нет | task | CONFIRMED current | DAX | V-08, V-09, V-11 |
+| `training_count` | тренировки, атрибутированные заданию | stage, `Reference141X1.Code`, `ДПФУ факт` | `1` для трёх stages «Пришел…»; иначе `0` для двух ДСУ-воронок; иначе `SUM(ДПФУ факт.КоличествоЗаписей)` того же клиента в `[task_date; task_date + 45]` включительно | bigint | current PBIT may return blank | task | CONFIRMED current and physical source | FL-V08/V09/V11 |
 | `has_paid_training_45d` | клиент пришёл на тренировку по текущей модели | `training_count` | `training_count > 0` | boolean | нет | task | CONFIRMED current | DAX `ПришелНаТренировку` | V-09, V-11 |
 
 ## Подтверждённые источники

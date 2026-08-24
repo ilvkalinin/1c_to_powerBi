@@ -1,6 +1,6 @@
 # Stage-3 planning: «Воронка лиды фитнес»
 
-Статус: `BLOCKED — exact runnable admission requires a new read-only source-validation package`.
+Статус: `BLOCKED — Stage-2 source validation is closed; runnable admission requires a service-selection decision`.
 
 ## Reuse review after marketing-funnel implementation
 
@@ -35,21 +35,16 @@ the task grain.
 
 ## Runnable-admission blocker
 
-The existing evidence is insufficient to author exact source SQL, target DDL
-or reconciliation without inventing physical rules. The missing confirmed
-inputs are:
+Stage-2 source evidence is now preserved in
+`docs/source_metadata/fitness_leads_funnel_stage2_validation_2026-08-24.md`.
+It confirms task grain and 45-day controls, but the following physical facts
+remain blockers for a one-task fact:
 
-1. full four-funnel task key/cardinality and BR-003 counts, beyond SV-078's
-   bounded 100-task sample;
-2. source-state filters (`Marked`, `Active`, `Posted`, cancellations) for
-   task, booking and DPFU branches;
-3. uniqueness, null behaviour and cross-set stability of client code used by
-   the current outcome attribution;
-4. full task-to-service cardinality and the exact current `MIN` fallback
-   behaviour when several services occur on the earliest booking date;
-5. physical reproduction of the inclusive 45-day outcome interval and
-   independent source controls for the displayed task, booking and training
-   measures.
+1. two task rows have multiple current services, while 1,432 earliest booking
+   dates have multiple DAX-minimised service names;
+2. raw technical close dates end the current DAX booking window before its
+   task start for 142,255 filtered tasks;
+3. raw `Document329.VT4352` is one-to-many for 951 relevant documents.
 
 The screenshots are report observations, not a source-side control value.
 Therefore no `CREATE TABLE`, load SQL, reconciliation SQL, rollback script or

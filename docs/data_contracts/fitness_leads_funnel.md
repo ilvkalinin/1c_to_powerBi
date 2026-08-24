@@ -1,6 +1,6 @@
 # Data contract: «Воронка. Лиды. Фитнес»
 
-Статус: `STAGE-3 PLANNING BLOCKED / separate task-fact contract retained / no implementation SQL`.
+Статус: `STAGE-2 VALIDATED WITH BLOCKER / separate task-fact contract retained / no implementation SQL`.
 SV-078 подтвердил bounded task-to-service join без размножения строк, но не
 полный task-scan, физические типы, client-code attribution или source states.
 Контракт проектный; физических объектов не создавалось.
