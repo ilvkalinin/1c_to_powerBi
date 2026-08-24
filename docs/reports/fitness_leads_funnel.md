@@ -5,6 +5,12 @@ PARTIALLY VALIDATED — SV-078 / IMPLEMENTATION DEFERRED`.
 Production SQL и объекты PostgreSQL не создаются; Stage 2 ограничен read-only
 source-side сверками.
 
+Stage-3 planning 2026-08-24 confirmed that `mart.marketing_funnel_task` is
+not physically reusable: it contains only «Продажа клубной карты», not the
+four fitness funnels. The separate task-fact design remains, but a runnable
+admission is blocked pending read-only validation of outcome inputs; see
+[`planning`](fitness_leads_funnel_stage_3_planning.md).
+
 ## Доказательства
 
 - бизнес-описание и скриншот страницы — `Воронка Лиды Фитнес.docx`, получен

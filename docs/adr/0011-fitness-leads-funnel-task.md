@@ -1,6 +1,6 @@
 # ADR-0011: task-level факт «Воронка. Лиды. Фитнес»
 
-- Статус: `ACCEPTED / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-078 / IMPLEMENTATION DEFERRED`
+- Статус: `STAGE-3 PLANNING BLOCKED / separate task fact retained / no implementation SQL`
 - Дата: 2026-07-29
 - Отчёт: №5 «Воронка лиды фитнес»
 
@@ -25,6 +25,11 @@
 `UNKNOWN — взаимодействия отдела продаж` имеет grain взаимодействия
 `Reference67.ID`; факты ИП и ДПФУ имеют grain события/движения. Ни один из
 них не заменяет task-level факт без смешения grain.
+
+`mart.marketing_funnel_task` was implemented 2026-08-24, but it contains only
+the marketing funnel «Продажа клубной карты». It cannot physically serve the
+four fitness funnels without changing the accepted marketing product. Its
+compact one-task pattern is reused; its rows, filters and contract are not.
 
 ## Рассмотренные варианты
 
@@ -113,6 +118,12 @@ SV-078 (live read-only, 2026-08-11) подтвердил на bounded cohort 100
 client-day match. SV-072 подтверждает технический ключ `InfoRg7006`, но
 фиксирует legacy one-to-many `Document329.VT4352`. Это evidence не меняет
 current client-code/date attribution или task-grain по BR-018.
+
+Stage-3 planning 2026-08-24 turns these unresolved physical predicates into
+an admission blocker: a runnable fact must wait for a separate approved
+read-only validation of task cardinality, state filters, client-code stability,
+service fallback and 45-day outcomes. See
+[`planning`](../reports/fitness_leads_funnel_stage_3_planning.md).
 
 1. `Reference141X1.Code` может быть неуникален, изменяем или null; тогда
    client-code attribution нельзя переносить без отдельного решения.

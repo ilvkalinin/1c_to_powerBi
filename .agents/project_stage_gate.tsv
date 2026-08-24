@@ -5,4 +5,4 @@
 # CLOSED_PENDING_NEXT_APPROVAL rejects all new selections until the user
 # explicitly confirms the next independent package.
 gate_id	state	allowed_stage	allowed_report_ids	reason
-global_stage_gate	READONLY_REVIEW_AUTHORIZED	STAGE_3_PLANNING	fitness_leads_funnel	User explicitly approved 2026-08-24 a local planning-only fitness-leads-funnel package: marketing-core reuse review, fixed mapping/grain, Power BI contract and admission plan or blocker. No VM/1C connection, DDL/DML, Power BI/DAX, Excel, plan, schedule or incremental changes.
+global_stage_gate	CLOSED_PENDING_NEXT_APPROVAL	-	-	Fitness-leads-funnel Stage-3 planning package closed 2026-08-24 with an evidence-based runnable-admission blocker. A new explicit independent package approval is required.

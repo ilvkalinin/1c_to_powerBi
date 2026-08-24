@@ -1,8 +1,16 @@
 # Source-to-target mapping: воронка лиды фитнес
 
-Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE ACCEPTED / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-078`.
+Статус: `STAGE-3 PLANNING BLOCKED — task grain fixed; physical outcome mapping not yet runnable`.
 Outcome-атрибуция подтверждена calculated columns текущей модели; физические
 ключи, типы, состояния и кардинальности остаются `VALIDATION_PENDING`.
+
+Stage-3 planning 2026-08-24 confirmed `NEW` separate task fact. The
+implemented `mart.marketing_funnel_task` is not reusable as data because its
+single marketing-funnel scope excludes all four fitness funnels. Its task-fact
+pattern is reusable only. `service_name`, `training_count` and
+`has_paid_training_45d` remain `VALIDATION_PENDING` until the exact controls
+in `docs/reports/fitness_leads_funnel_stage_3_planning.md` establish physical
+cardinality, state and client-code/date semantics.
 
 Гранулярность одной строки базового набора:
 

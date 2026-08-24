@@ -1,9 +1,15 @@
 # Data contract: «Воронка. Лиды. Фитнес»
 
-Статус: `DESIGNED / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-078 / IMPLEMENTATION DEFERRED`.
+Статус: `STAGE-3 PLANNING BLOCKED / separate task-fact contract retained / no implementation SQL`.
 SV-078 подтвердил bounded task-to-service join без размножения строк, но не
 полный task-scan, физические типы, client-code attribution или source states.
 Контракт проектный; физических объектов не создавалось.
+
+Planning 2026-08-24 confirmed that the implemented marketing task mart cannot
+be reused physically because it contains a different funnel scope. This
+contract remains the minimal separate task fact, but the source-side outcome
+columns are not runnable until the read-only controls named in
+[`planning`](../reports/fitness_leads_funnel_stage_3_planning.md) are closed.
 
 ## Общие параметры
 
