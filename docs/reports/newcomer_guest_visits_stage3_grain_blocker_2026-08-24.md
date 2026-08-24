@@ -1,6 +1,6 @@
 # BLOCKER: воспроизводимый grain «Новички и гостевые визиты»
 
-Статус: `DECISION_REQUIRED`.
+Статус: `RESOLVED — Power BI selection retained`.
 
 В согласованном Stage 3 execution package повторены read-only diagnostics в
 одном `REPEATABLE READ, READ ONLY` snapshot без вывода ПДн и raw IDs.
@@ -23,3 +23,18 @@ tie-break или скрытую дедупликацию. Варианты, тр
 
 До выбора разрешены только работы, не зависящие от этой селекции. DDL, DML и
 reconciliation этих двух фактов fail-closed запрещены.
+
+## Решение пользователя — 2026-08-24
+
+Пользователь выбрал: «оставить как в Power BI». Это фиксируется как BR-035:
+`ROW_NUMBER(contract ORDER BY Period)` без дополнительного порядка и финальный
+`Distinct(client_code, guest_visit_date)` остаются в текущей Power BI-модели.
+Следовательно, `mart.new_first_visit` и `mart.guest_visit_conversion` не
+создаются в этом выпуске: физическая таблица не может одновременно хранить
+одну detail-строку на заявленном grain и честно воспроизводить неявный выбор
+Power BI. Не выполнены DDL/DML этих facts, а их отсутствие не маскируется
+source-row таблицей под теми же именами.
+
+Новый допустимый trigger — отдельное явное решение сменить эту границу на
+детерминированный physical tie-break либо на технический source-row grain с
+отдельным Power BI switch/reconciliation package.

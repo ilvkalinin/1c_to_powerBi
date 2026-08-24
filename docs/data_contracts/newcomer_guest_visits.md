@@ -1,21 +1,24 @@
 # Data contract: «Новички и гостевые визиты»
 
-Статус: `DESIGNED COMPOSITE MODEL / IMPLEMENTATION DEFERRED / STAGE_2 SOURCE VALIDATION VALIDATED WITH PRESERVED RISKS — SV-087, SV-097, SV-102, SV-106, SV-108, SV-109`.
+Статус: `CURRENT PBI CONTRACT RETAINED / PHYSICAL FIRST- AND GUEST-VISIT FACTS EXCLUDED — BR-035`.
 
 NV-V01—V09 выполнены с зафиксированными ожиданиями. Physical guest key и
 CRM-tour grain подтверждены; candidate guest key материально неуникален, но
 current `Distinct(client code, visit date)` сохраняется по BR-018. ACCUNIQ,
 latest-state path и outcomes 0/44/45 подтверждены source-side. По BR-031 эти
 неоднозначные outcomes остаются в Power BI первого релиза; в PostgreSQL
-переносится только CRM-tour base. Реализация остаётся отложенной общим project
-gate.
+переносится только CRM-tour base. Физическая реализация
+`mart.new_first_visit` и `mart.guest_visit_conversion` исключена решением
+пользователя 2026-08-24 «оставить как в Power BI»: их selection остаётся в
+M/DAX, а listed fields ниже — контракт текущего Power BI, не
+PostgreSQL-DDL-контракт.
 
 ## Наборы
 
 | Объект | Таблица Power BI | Grain / ключ |
 |---|---|---|
-| `mart.new_first_visit` | `Первые посещения New` | контракт × первое посещение; `contract_id` candidate |
-| `mart.guest_visit_conversion` | `Гостевые визиты` | гость × дата; `(guest_registration_id, client_id, guest_visit_date)` candidate |
+| Power BI `Первые посещения New` | `Первые посещения New` | contract rank by `Period`; equal timestamps remain selected by current Power BI |
+| Power BI `Гостевые визиты` | `Гостевые визиты` | final `Distinct(client_code, guest_visit_date)`; source detail selection remains Power BI |
 | `mart.v_guest_tour` base | `Туры` | PBIT phone row; hidden technical key pending physical validation |
 | Power BI outcomes | `Туры` | current ACCUNIQ/contract branches, including ties and multiplicity — BR-031 |
 
@@ -49,7 +52,6 @@ PostgreSQL рассчитывает CRM-tour base; current Power BI сохран
 outcome `[0,44]` без нового tie-break по BR-031. DAX — distinct, конверсии,
 план-факт и временные сравнения.
 
-Приёмка: unique core key и PBIT phone-row reconciliation в tour base, status
-coverage, PII permissions и rerun. ACCUNIQ/contract outcomes сверяются в
-Power BI без изменения ties; их PostgreSQL migration требует отдельного
-решения.
+Приёмка будущей PostgreSQL migration этих двух facts требует отдельного
+решения о детерминированном ключе или новом grain с отдельным Power BI switch;
+до него их selection и reconciliation остаются в Power BI.

@@ -1,6 +1,6 @@
 # ADR-0020: первые посещения, гостевые визиты и туры новичков
 
-- Статус: `DESIGNED / STAGE 2 PARTIALLY VALIDATED — SV-087 / STAGE 3 APPROVAL REQUIRED`
+- Статус: `SUPERSEDED FOR FIRST/GUEST FACTS — Power BI selection retained 2026-08-24`
 - Дата: 2026-08-03
 - Отчёт: №20 «Новички и гостевые визиты»
 
@@ -9,7 +9,7 @@
 Отчёт объединяет три бизнес-процесса с разными grain. Их нельзя хранить одной
 таблицей без размножения конверсий и PII-detail.
 
-## Решение
+## Первоначальное решение
 
 Создать два физических факта и один локальный view:
 
@@ -22,6 +22,15 @@ source-side до загрузки. Полные регистры посещен�
 копируются. Постоянный staging не создаётся. Физические таблицы нужны из-за
 ранжирования первого события и 44-дневных lookups; materialized views без
 измерений не выбираются.
+
+## Уточнение решения — 2026-08-24
+
+Read-only diagnostic показал materially different rows при одинаковом первом
+`Period` и при одинаковой паре `client_code × guest_visit_date`. Пользователь
+выбрал «оставить как в Power BI». Поэтому первоначальное решение о создании
+`mart.new_first_visit` и `mart.guest_visit_conversion` отменено для первого
+физического выпуска: их selection остаётся в M/DAX (BR-035), DDL/DML не
+выполняются. `mart.v_guest_tour` остаётся реализованным reusable CRM view.
 
 ## Обновление и Power BI
 

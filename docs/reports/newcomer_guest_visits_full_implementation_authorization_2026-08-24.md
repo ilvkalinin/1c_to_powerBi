@@ -1,6 +1,6 @@
 # Авторизация полного исполнения: «Новички и гостевые визиты»
 
-Статус: `CONFIRMED`.
+Статус: `CLOSED — physical facts excluded by resolved Power BI selection`.
 
 Дата согласования: 2026-08-24.
 
@@ -40,3 +40,17 @@ load и atomic rerun. Все заранее записанные source-to-targe
 нулевые отклонения; целевой grain/key/null/access/date controls и повторный
 прогон passed. Каждый production loader проходит статическую проверку
 connection-retry policy; все исключения доказательно перечислены.
+
+## Изменение границы по критическому решению
+
+При read-only Stage 3 diagnostic обнаружилось, что две требуемые facts не
+имеют воспроизводимого one-row selection в current Power BI. Пользователь
+2026-08-24 выбрал «оставить как в Power BI». Это отменяет только физическое
+создание `mart.new_first_visit` и `mart.guest_visit_conversion` в данном
+пакете; не является успешной initial load этих объектов и не разрешает
+подменить их таблицами иной гранулярности. Выбор закреплён BR-035 и
+[`stage-3 grain blocker`](newcomer_guest_visits_stage3_grain_blocker_2026-08-24.md).
+
+Критерий закрытия пакета в этой части: source evidence и граница Power BI
+documented; DDL/DML/reconciliation двух исключённых facts не выполняются.
+Connection-retry hardening закрыт отдельно с полной проверкой покрытия.

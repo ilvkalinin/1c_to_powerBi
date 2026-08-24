@@ -1,6 +1,6 @@
 # Требования отчёта: «Новички и гостевые визиты»
 
-Статус: `BUSINESS ANALYSIS COMPLETE / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-087 / IMPLEMENTATION DEFERRED`.
+Статус: `POWER BI SELECTION RETAINED — physical facts excluded by user decision 2026-08-24`.
 
 Анализ выполнен локально по двум документам: описанию страниц
 `Новички и гостевые визиты.docx` и выгрузке текущих Power Query / DAX
@@ -49,6 +49,15 @@ excluded current groups. Поле `_recordkind` старого validation templa
   или `DISTINCT`. Внешний план Google Sheets по-прежнему не переносится.
 
 Это safeguards воспроизведения по BR-018, а не методическое изменение.
+
+## Граница физической реализации — решение 2026-08-24
+
+Пользователь выбрал «оставить как в Power BI». Поэтому `mart.new_first_visit`
+и `mart.guest_visit_conversion` не создаются: нынешний `ROW_NUMBER` без
+второго порядка и `Distinct(client code, guest visit date)` остаются в Power
+BI. Их нельзя перенести как one-row PostgreSQL facts без выбора, которого
+current rule не задаёт. Правило закреплено в BR-035; источник и текущий PBI
+не меняются.
 
 ## Назначение
 

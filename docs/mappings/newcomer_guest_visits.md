@@ -1,6 +1,6 @@
 # Source-to-target mapping: «Новички и гостевые визиты»
 
-Статус: `BUSINESS MAPPING COMPLETE / TECHNICAL VALIDATION VALIDATED WITH PRESERVED RISKS — SV-087, SV-097, SV-102, SV-106, SV-108, SV-109 / IMPLEMENTATION DEFERRED`.
+Статус: `SOURCE MAPPING RETAINED / POWER BI SELECTION RETAINED — physical first/guest facts excluded 2026-08-24`.
 
 Ниже описаны наборы, для которых ADR-0020 проектирует
 `mart.new_first_visit`, `mart.guest_visit_conversion` и REUSE
@@ -21,6 +21,13 @@ SV-097 дополнительно подтвердил bounded путь доку
 Пользователь 2026-08-21 решил оставить ACCUNIQ и contract outcomes как есть
 в Power BI: они не переносятся в PostgreSQL первого релиза. Это сохраняет
 current ties и multiplicity по BR-018/BR-031, не изменяя detail или конверсию.
+
+Пользователь 2026-08-24 распространил ту же границу на selection самих первых
+и гостевых визитов: `ROW_NUMBER(contract ORDER BY Period)` и final
+`Distinct(client_code, guest_visit_date)` остаются в Power BI (BR-035).
+Следовательно, описание наборов 1–2 ниже — mapping текущего PBI, а не
+разрешение или контракт на создание `mart.new_first_visit`/
+`mart.guest_visit_conversion`.
 
 История следует `BR-003`; refresh — ежедневно (`CONFIRMED — решение
 пользователя 2026-07-30`).
@@ -123,7 +130,7 @@ physical SQL review. Выбран `EXTEND` общего logical CRM-core, а н�
 | `mart.newcomer_engagement_milestone` | contract × client × fixed checkpoint; другой временной смысл | NOT_APPLICABLE |
 | `mart.crm_interaction` | тот же `Reference67.ID` grain | REUSE core через `mart.v_guest_tour` — ADR-0016/0020 |
 | факт тренировок ИП/предзапись | другой grain и критерий ACCUNIQ | REUSE источников только |
-| `mart.new_first_visit`, `mart.guest_visit_conversion` | PII-детализация подтверждена; ключи и состояния требуют валидации | DESIGNED — ADR-0020 / implementation deferred |
+| `mart.new_first_visit`, `mart.guest_visit_conversion` | Current PBI detail/mapping сохранён, но one-row selection не воспроизводим в physical fact | EXCLUDED FROM PHYSICAL RELEASE — BR-035 |
 
 ## Не переносить и границы ответственности
 
@@ -155,4 +162,5 @@ physical SQL review. Выбран `EXTEND` общего logical CRM-core, а н�
   timestamp; второй порядок не добавлен.
 
 Ключи, ties, дубликаты и source multiplicity сохранены как current behavior;
-новая методика, DDL/DML и Stage 3 этим mapping не разрешаются.
+BR-035 оставляет selection в Power BI. Новая методика, DDL/DML и Stage 3
+создание двух facts этим mapping не разрешаются.
