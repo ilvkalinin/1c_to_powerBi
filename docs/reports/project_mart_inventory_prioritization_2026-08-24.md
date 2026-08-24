@@ -17,7 +17,7 @@
 
 ## Исполненные физические продукты
 
-В каталоге 23 реализованные записи, соответствующие 26 явно названным
+В каталоге 24 реализованные записи, соответствующие 27 явно названным
 объектам: несколько записей содержат fact+bridge либо core+child. Это не
 означает, что 23 отчёта Power BI уже полностью переключены на PostgreSQL:
 один physical product может обслуживать несколько отчётов, а часть
@@ -28,6 +28,7 @@ report-level Power BI-логики сознательно остаётся вн�
 | Клиенты и посещения | `client_base_daily`, `visit_client_day` | initial load, source-to-target checks и rerun закрыты |
 | Тренировки, планы и расписание | `ip_training_daily`, `dpfu_plan_assignment`, `prebooking_state_event`, `group_lesson`, `lesson_room_slot_5m` | initial BR-003 loads validated |
 | Доходы и членство | `ancillary_revenue_movement`, `v_dpfu_ancillary_revenue`, `v_reception_revenue`, `ip_revenue_daily`, `revenue_group_summary_daily`, `membership_receipt_movement`, `membership_contract_kpi_unit` | source/target reconciliation и rerun подтверждены в соответствующих admission evidence |
+| Продление | `preparation_renewal_checkpoint` | initial load, независимый legacy-M reconciliation, rollback и rerun PR-R01—PR-R06 validated |
 | CRM и обращения | `crm_interaction`, `crm_interaction_phone`, `feedback_interaction`, `club_day_metrics`, `v_sales_interaction`, `v_feedback_interaction`, `v_guest_tour` | CRM-BR032 initial load и rerun: 1 519 900 / 1 002 750 / 154 741 / 8 590 строк; все controls passed |
 | Воронки | `marketing_funnel_task`, `marketing_funnel_task_contract`, `fitness_leads_funnel_task`, `fitness_leads_funnel_task_service` | MF-R01—R06 и FL-R01—R06 passed with zero deviations |
 | Администратор | `administrator_card_gymmy_daily` | initial BR-003 load validated |
@@ -47,7 +48,7 @@ phone child, compact feedback fact, `club_day_metrics` и три views были
 
 ## Полный список не реализованных продуктов
 
-Ниже перечислены все 18 оставшихся catalog entries. Их порядок — не
+Ниже перечислены все 17 оставшихся catalog entries. Их порядок — не
 автоматическое разрешение на реализацию: любая Stage 3 admission или новая
 валидация остаётся самостоятельным пакетом.
 
@@ -56,7 +57,6 @@ phone child, compact feedback fact, `club_day_metrics` и три views были
 | 1 | `mart.new_first_visit` | DESIGNED; source validation validated with preserved ties | Для «Новички и гостевые визиты»; CRM core уже реализован. Нужен отдельный Stage 3 planning с PII/access boundary и exact DDL/reconciliation, без новой методики tie handling. |
 | 1 | `mart.guest_visit_conversion` | DESIGNED; validated ACCUNIQ and 0–44 day rules | Та же report wave; остаётся отдельным guest-date grain и не объединяется с CRM tour или first visit. Нужен тот же bounded planning package. |
 | 2 | `mart.club_attendance_hourly` | DESIGNED; SV-065/SV-067 partially validated | `client_base_daily` уже реализован, но нужны exact historical controls и план full rebuild; шкафчики остаются Power BI-only. |
-| 2 | `mart.preparation_renewal_checkpoint` | DESIGNED; SV-077 partially validated | Переиспользует contract/visit evidence, но joins и freeze intervals сохраняют current-rule risks. Сначала read-only planning/controls. |
 | 2 | `mart.newcomer_engagement_milestone` | DESIGNED; SV-075 partially validated | Зависит от contract/freeze/child package semantics; не смешивается с client-day. Сначала bounded technical planning. |
 | 2 | `mart.newcomer_engagement_second_month` | DESIGNED; SV-076 partially validated | Второй месяц имеет отдельную temporal semantics; preserved legacy `RANK` ties не менять. Сначала bounded technical planning. |
 | 3 | `mart.unconfirmed_service_debt_movement` | DESIGNED; SV-089 partially validated | `visit_client_day` можно reuse только как cohort; as-of и document branches ещё не закрыты. Нужен отдельный read-only source-control package. |
@@ -74,17 +74,13 @@ phone child, compact feedback fact, `club_day_metrics` и три views были
 
 ## Рекомендованный следующий пакет
 
-Первой следующей волной рекомендуется только `STAGE_3_PLANNING` для
-«Новички и гостевые визиты»: `mart.new_first_visit` и
-`mart.guest_visit_conversion`. Причины: это два наиболее подготовленных
-не реализованных продукта с validated source controls, уже реализованным CRM
-core и без разрешённой замены их grain. Пакет должен оставаться planning-only:
-проверить exact target object set, PII role, full-rebuild/reconciliation plan
-и отсутствие новых бизнес-решений; DDL/DML и Power BI switch не включать.
-
-Критерий закрытия такого следующего пакета — immutable reviewed plan для
-ровно этих двух facts с зафиксированными controls, rollback boundary и
-отдельно указанными remaining risks, готовый к единому admission approval.
+После закрытия `mart.preparation_renewal_checkpoint` следующий кандидат
+нужно выбрать отдельным пакетом по ledger: текущая inventory не открывает
+самостоятельно ни Stage 2, ни DDL/DML. Приоритет-2 продукты
+`mart.newcomer_engagement_milestone` и
+`mart.newcomer_engagement_second_month` остаются отдельными, поскольку имеют
+разную temporal semantics и не должны объединяться только из-за общего
+домена контрактов.
 
 ## Не изменившиеся ограничения
 

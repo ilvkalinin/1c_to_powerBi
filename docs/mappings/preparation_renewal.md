@@ -1,7 +1,8 @@
 # Source-to-target mapping: «Подготовка к продлению»
 
-Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0013 / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-077`.
-Спроектирован `mart.preparation_renewal_checkpoint`; SQL и физические объекты не создаются.
+Статус: `IMPLEMENTED AND VALIDATED — 2026-08-24`.
+Reviewed DDL/source extract, independent reconciliation path и source evidence
+зафиксированы до первого DDL: [Stage-3 validation](../source_metadata/preparation_renewal_stage3_validation_2026-08-24.md).
 
 ## Гранулярность
 
@@ -28,20 +29,20 @@
 | `visit_bucket` | категория посещаемости | derived | — | `0`, `1`, `2`, `3`, `4+` | `text` | нет | contract × checkpoint | CONFIRMED | описание и DAX | границы |
 | `target_visit_count` | минимум раз в неделю | generated | — | `1,2,3,4,4` для checkpoint `7,14,21,28,30` | `smallint` | нет | contract × checkpoint | CONFIRMED | описание | соответствие точке |
 | `below_target_flag` | ниже целевой посещаемости | derived | — | `visit_count_to_checkpoint < target_visit_count` | `boolean` | нет | contract × checkpoint | CONFIRMED | описание | пороговые значения |
-| `frozen_at_checkpoint_flag` | заморожен на дату среза | `InfoRg5859`, `AccumRg7478` | `Fld5860`, `Fld5862`, `Fld5863`, движения | `EXISTS` по интервалу после доказательства join; не `NATURAL...JOIN` | `boolean` | нет | contract × checkpoint | CONFIRMED current DAX / technical join pending | DAX заморозок | overlap, дубли, границы |
+| `frozen_at_checkpoint_flag` | заморожен на дату среза | `InfoRg5859`, `AccumRg7478` | `Fld5860`, `Fld5862`, `Fld5863`, движения | legacy latest movement по `(contract_code, freeze_start_date)`; затем technical `contract_id` interval predicate | `boolean` | нет | contract × checkpoint | CONFIRMED — PR-V13 | DAX и Stage-3 source validation | legacy ↔ technical difference = 0 |
 | `age_group` | возрастной срез | `Reference141X1`, `Reference59` | `Fld1507`, `Fld670` | точный календарный возраст на дату активации: `<14`, `14–17`, `18+` | `text` | да | contract × checkpoint | CONFIRMED user decision | пользователь 2026-07-29; BR-008 | дни рождения, null |
-| `membership_tenure` | `New` / `Renew` / `Ex` | `Reference59` | `Fld694` | текущий GUID mapping | `text` | нет | contract × checkpoint | CONFIRMED current calculation / IDs technical pending | M | unknown GUIDs |
+| `membership_tenure` | `New` / `Renew` / `Ex` | `Reference59` | `Fld694` | GUID `bc06…41f9` / `91e4…18f2` / `9e36…1498` | `text` | нет | contract × checkpoint | CONFIRMED — M and PR-V10 | current M | unexpected GUID = 0 after filter |
 
 ## Подтверждённые источники
 
 | Объект | Назначение | Статус | Доказательство |
 |---|---|---|---|
 | `Reference59` | контракт, клиент, даты, клуб, стаж | CONFIRMED current source | M, source catalogue |
-| `Reference141X1` | дата рождения и код клиента | CONFIRMED current source / physical name pending | M, source catalogue |
+| `Reference141X1` | дата рождения и код клиента | CONFIRMED physical source | M, source metadata, PR-V10 |
 | `Reference132` | клуб | CONFIRMED current source | M, source catalogue |
-| `AccumRg7575` | события посещений, связанные с контрактом и клиентом | CONFIRMED current source / semantics pending | M, source catalogue |
+| `AccumRg7575` | события посещений, связанные с контрактом и клиентом | CONFIRMED current source pair | M, PR-V12 |
 | `Reference163` | отбор номенклатуры `посещение клуба` | CONFIRMED current source / textual filter pending | M, source catalogue |
-| `AccumRg7478`, `InfoRg5859` | движения и интервалы заморозок | CONFIRMED current source / join pending | M, source catalogue |
+| `AccumRg7478`, `InfoRg5859` | движения и интервалы заморозок | CONFIRMED current legacy rule | M, PR-V13—V15 |
 | `InfoRg6015` | календарь Power BI | CONFIRMED current source | M; source metadata |
 | Excel «Подготовка базы план» | план по дате и клубу | CONFIRMED external / excluded from SQL | пользовательское решение 2026-07-29; скриншот связей |
 
@@ -63,10 +64,10 @@
 
 | Статус | Элемент | Риск / причина | Проверка / следующее действие |
 |---|---|---|---|
-| VALIDATION_PENDING | `AccumRg7575.Fld7578 → Reference59.ID` | основание полиморфно; строка может не быть одним посещением | `NOT_EXECUTED — ожидается подключение к корпоративной сети`: тип ссылки, orphan, cardinality, rows/documents/quantity |
-| VALIDATION_PENDING | состояния контракта, регистра и номенклатуры | `Active`, удаление, проведение, сторно не отобраны | `NOT_EXECUTED — ожидается подключение к корпоративной сети`: metadata и сверка control values |
-| VALIDATION_PENDING | заморозка | `NATURALLEFTOUTERJOIN` может размножить контракт; границы интервала не доказаны | `NOT_EXECUTED — ожидается подключение к корпоративной сети`: key/cardinality, overlap and boundary cases |
-| VALIDATION_PENDING | code/name joins | `Code` и название клуба не технические ключи | `NOT_EXECUTED — ожидается подключение к корпоративной сети`: uniqueness/null/orphan |
+| CONFIRMED safeguard | `AccumRg7575.Fld7578 → Reference59.ID` | 496 089 qualified visit rows сохраняют current pair contract+client; технический key не размножен | PR-V12 |
+| CONFIRMED preserve-current | states | `Active`, deletion, posting and storno не добавлены как filters; marked/inactive source profile записан | PR-V11—V12 |
+| CONFIRMED safeguard | заморозка | direct interval existence отклонён: 2 347 differences; legacy latest-movement rule сохраняется | PR-V13—V14 |
+| CONFIRMED | code/name joins | contract/code/name не используются как target join keys; technical contract and club IDs заполнены без orphan | PR-V11 |
 | NOT_APPLICABLE | внешний план | внешний Excel намеренно не переносится на SQL-сервер | остаётся отдельной таблицей Power BI |
 
 ## Результат read-only проверок
@@ -80,17 +81,6 @@ client-owner mismatch, а `InfoRg5859` — 71 обратный интервал 
 duplicate groups. Эти наблюдения не разрешают менять current joins, границы
 или state-фильтры без отдельного решения по BR-018.
 
-Остающиеся проверки перед SQL:
-
-1. Проверить `Reference59.ID`, `Code`, даты, null/sentinel и соответствие
-   отбору M-кода.
-2. Проверить тип, orphan и кардинальность связи
-   `AccumRg7575.Fld7578 → Reference59.ID`, а также `Fld7576 → client_id`.
-3. Для контрольных контрактов сравнить `COUNT(*)`, distinct документов и
-   ресурс количества в окне 120–90 дней с текущим Power BI.
-4. Проверить `Active`, проведение, удаление, сторно и текстовый фильтр
-   номенклатуры.
-5. Проверить связь и перекрытия `AccumRg7478`/`InfoRg5859`, исключение на
-   точках и отсутствие размножения после join.
-6. Проверить уникальность club/client references и календарные границы
-   `InfoRg6015`.
+Stage-3 PR-V10—V16 и initial/rerun PR-R01—PR-R06 закрыли эти проверки без
+изменения current business logic. Exact totals и measured transport/rollback
+зафиксированы в [execution evidence](../reports/preparation_renewal_checkpoint_execution_2026-08-24.md).

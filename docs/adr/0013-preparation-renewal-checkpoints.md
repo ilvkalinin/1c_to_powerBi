@@ -1,6 +1,6 @@
 # ADR-0013: контрольные точки подготовки к продлению
 
-- Статус: `DESIGNED / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-077 / IMPLEMENTATION DEFERRED`
+- Статус: `IMPLEMENTED AND VALIDATED — 2026-08-24`
 - Дата: 2026-08-03
 - Отчёт: №4 «Подготовка к продлению»
 
@@ -45,10 +45,16 @@ orphan/mismatch visits, обратные и повторные интервал�
 неуникальные отображаемые коды. По BR-018 это current-source evidence, а не
 разрешение менять join, DAX-границы или state-фильтры.
 
-До реализации подтверждаются связь посещения с контрактом, единица посещения,
-интервалы заморозки, source states и уникальность ключа. При доказанном общем
+PR-V10—V16 подтвердили current pair посещения, key, mandatory dimensions и
+эквивалентность technical freeze predicate current DAX result. Прямой interval
+predicate без legacy latest-movement selection отклонён (2 347 differences).
+Source states сохраняются без нового filter. При доказанном общем
 потребителе с тем же окном продукт может быть переименован в общий; похожее
 число контрольных точек без совпадения временной семантики не является reuse.
+
+Initial load и atomic rerun прошли PR-R01—PR-R06 с нулевыми deviations;
+full rebuild baseline — 165,58 s. Evidence:
+[execution](../reports/preparation_renewal_checkpoint_execution_2026-08-24.md).
 
 ## Доказательства
 

@@ -1,11 +1,10 @@
 # Data contract: «Подготовка к продлению»
 
-Статус: `DESIGNED / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-077 / IMPLEMENTATION DEFERRED`.
+Статус: `IMPLEMENTED AND VALIDATED — 2026-08-24`.
 
-SV-077 подтвердил bounded key `(contract_id, checkpoint_day)` и календарь,
-но не единственный valid join посещений/заморозок и не техническую роль
-отображаемых code/name. Контракт сохраняет current source-логику по BR-018;
-физических объектов не создавалось.
+PR-V10—V16 подтвердили technical contract/client pair, mandatory dimensions,
+legacy freeze equivalence и independent source reconciliation path. Power BI
+интеграция остаётся deferred by BR-036.
 
 ## Общие параметры
 
@@ -18,7 +17,7 @@ SV-077 подтвердил bounded key `(contract_id, checkpoint_day)` и ка�
 | Дата | `checkpoint_date` → общий `Календарь` | CONFIRMED |
 | Обновление | ежедневный атомарный rebuild BR-003 | DESIGNED; watermark отсутствует |
 | SLA | до 08:30 МСК | BR-014 |
-| Power BI | Import | DESIGNED |
+| Power BI | Import | DESIGNED / deferred by BR-036 |
 
 ## Колонки
 
@@ -55,4 +54,7 @@ PostgreSQL рассчитывает точки, посещения, заморо
 
 Уникальный ключ; не более пяти допустимых точек на контракт; нет размножения
 после visits/freeze joins; подтверждены границы окна, states, rerun,
-исправления/удаления, контрольные значения и SLA.
+исправления/удаления и control values. PR-R01—PR-R06 прошли на initial load и
+atomic rerun; full rebuild 165,58 s остаётся baseline, не incremental SLA.
+Power BI connection/relationships остаются `VALIDATION_PENDING` до отдельного
+общего пакета по BR-036.
