@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import os
 import sys
+import tempfile
 from datetime import date, datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -22,12 +23,13 @@ EXTRACTS = (
     ROOT / "sql/marts/dpfu_ancillary_revenue_extract_7646.sql",
 )
 RECONCILIATION = ROOT / "sql/tests/dpfu_ancillary_revenue_reconciliation.sql"
-COLUMNS = """
+SOURCE_COLUMNS = """
 source_kind, recorder_id, line_no, service_date, club_id, client_key,
 client_code, employee_id, employee_name, service_id, service_name,
 activity_id, activity_name, training_format_id, training_format_name,
 calculation_category, age_category, service_quantity, revenue_amount
 """.replace("\n", " ")
+COLUMNS = f"{SOURCE_COLUMNS}, revenue_scope"
 
 
 def config(prefix: str) -> dict[str, str]:
@@ -122,10 +124,23 @@ def require_stage_integrity(cursor) -> None:
            OR calculation_category NOT IN ('Прочая услуга', 'Аренда')
            OR age_category NOT IN ('Дети', 'Юниоры', 'Взрослые')
            OR client_key <> client_code
+           OR revenue_scope <> 'dpfu'
         """
     )
     if cursor.fetchone()[0]:
         raise RuntimeError("Fact-contract violation in source stage")
+    cursor.execute(
+        """
+        SELECT count(*)
+        FROM _ancillary_revenue_movement_stage s
+        JOIN mart.ancillary_revenue_movement r
+          ON (r.source_kind, r.recorder_id, r.line_no)
+           = (s.source_kind, s.recorder_id, s.line_no)
+        WHERE r.revenue_scope = 'reception'
+        """
+    )
+    if cursor.fetchone()[0]:
+        raise RuntimeError("DPFU stage collides with an existing reception technical key")
 
 
 def main() -> None:
@@ -204,10 +219,14 @@ def main() -> None:
                 extract_sql = bound_sql(path, horizon_start, horizon_end).rstrip()
                 if extract_sql.endswith(";"):
                     extract_sql = extract_sql[:-1]
+                source_projection = f"""
+                    SELECT {SOURCE_COLUMNS}, 'dpfu'::text AS revenue_scope
+                    FROM ({extract_sql}) source_extract
+                """
                 with target_cur.copy(
                     f"COPY _ancillary_revenue_movement_stage ({COLUMNS}) FROM STDIN WITH (FORMAT BINARY)"
                 ) as target_copy, source_cur.copy(
-                    f"COPY ({extract_sql}) TO STDOUT WITH (FORMAT BINARY)"
+                    f"COPY ({source_projection}) TO STDOUT WITH (FORMAT BINARY)"
                 ) as source_copy:
                     for block in source_copy:
                         target_copy.write(block)
@@ -224,15 +243,29 @@ def main() -> None:
                 flush=True,
             )
 
-            target_cur.execute("DELETE FROM mart.ancillary_revenue_movement")
-            target_cur.execute(
-                f"""
-                INSERT INTO mart.ancillary_revenue_movement ({COLUMNS})
-                SELECT {COLUMNS}
-                FROM _ancillary_revenue_movement_stage
-                """
+            # Promotion uses client-side binary COPY rather than one long
+            # server-side INSERT ... SELECT. The latter exceeded the target
+            # connection timeout at this measured volume. Both steps stay in
+            # the same transaction, so no partial replacement is visible.
+            with tempfile.TemporaryFile() as payload:
+                with target_cur.copy(
+                    f"COPY _ancillary_revenue_movement_stage ({COLUMNS}) TO STDOUT WITH (FORMAT BINARY)"
+                ) as stage_copy:
+                    for block in stage_copy:
+                        payload.write(block)
+                payload.seek(0)
+                target_cur.execute(
+                    "DELETE FROM mart.ancillary_revenue_movement WHERE revenue_scope = 'dpfu'"
+                )
+                with target_cur.copy(
+                    f"COPY mart.ancillary_revenue_movement ({COLUMNS}) FROM STDIN WITH (FORMAT BINARY)"
+                ) as target_copy:
+                    while block := payload.read(1024 * 1024):
+                        target_copy.write(block)
+            persisted = controls(
+                target_cur,
+                "mart.ancillary_revenue_movement WHERE revenue_scope = 'dpfu'",
             )
-            persisted = controls(target_cur, "mart.ancillary_revenue_movement")
             if persisted != expected:
                 raise RuntimeError("Persistent controls differ from source snapshot")
             target.commit()

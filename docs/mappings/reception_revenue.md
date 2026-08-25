@@ -1,6 +1,6 @@
 # Source-to-target mapping: выручка рецепции
 
-Статус: `BUSINESS MAPPING COMPLETE / STAGE 2 VALIDATED / SHARED-SCOPE SCHEMA IMPLEMENTED`.
+Статус: `BUSINESS MAPPING COMPLETE / STAGE 2 VALIDATED / INITIAL LOAD VALIDATED 2026-08-20`.
 
 S3-RR-EXEC-001 создал scope-поля и два view, но не загружал рецепционные
 строки и не менял Power BI.
@@ -11,9 +11,10 @@ S3-RR-EXEC-001 создал scope-поля и два view, но не загру�
 Поэтому view над прежней реализацией был бы неполным. S3-RR-ARCH-001 выбрал
 расширение общего факта; S3-RR-EXEC-001 добавил явно маркированный scope
 `reception` и `reception_category_key`, не создавая второй факт движений.
-Рецепционный initial load остаётся отдельно согласуемым; доказательство и
-решение записаны в
-[`S3-RR-ADMISSION-001`](../reports/reception_revenue_product_admission_assessment_2026-08-19.md).
+Рецепционный initial load выполнен по отдельному пакету S3-RR-LOAD-001:
+150 752 строки, восемь категорий, нулевые duplicate/contract/cross-scope
+violations и подтверждённая сохранность DPFU. Evidence:
+[`S3-RR-LOAD-001`](../reports/reception_revenue_initial_load_authorization_2026-08-20.md).
 
 ## Компонент A: факт
 
@@ -66,8 +67,8 @@ Excel-файл и его запросы остаются без анализа �
 движений дополнительных услуг и товаров был кандидатом вместо отдельных копий
 «ДПФУ» и «Рецепция», но его реализованный scope рецепцию не покрывает.
 Архитектурно подтверждено его расширение scope `reception` и добавление
-требуемой последовательной классификации; после S3-RR-EXEC-001 она является
-источником view, который пока ожидаемо пуст.
+требуемой последовательной классификации; S3-RR-LOAD-001 заполнил этот scope
+и `mart.v_reception_revenue` без второй физической копии регистров.
 
 Прямое объединение с «Записями администраторов» отклонено: там сотрудник —
 автор записи и другая гранулярность.

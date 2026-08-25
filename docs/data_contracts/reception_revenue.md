@@ -1,10 +1,10 @@
 # Data contract: «Выручка рецепции»
 
-Статус: `SHARED-SCOPE SCHEMA IMPLEMENTED / RECEPTION INITIAL LOAD NOT REQUESTED / STAGE 2 VALIDATED`.
+Статус: `SHARED-SCOPE SCHEMA IMPLEMENTED / RECEPTION INITIAL LOAD VALIDATED 2026-08-20 / STAGE 2 VALIDATED`.
 S3-RR-EXEC-001 расширил общий факт scope `reception`, добавил
-`reception_category_key` и создал `mart.v_reception_revenue`. View корректно
-пуст до отдельной согласованной загрузки рецепционных строк; текущий источник
-Power BI не менялся.
+`reception_category_key` и создал `mart.v_reception_revenue`. S3-RR-LOAD-001
+загрузил 150 752 рецепционных строки и прошёл source/stage/target/rerun
+controls; текущий источник Power BI не менялся.
 
 ## Общие параметры
 

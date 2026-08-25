@@ -1,6 +1,6 @@
 # CRM: optimisation review under BR-032
 
-Дата: 2026-08-21. Статус: `DESIGN PROPOSAL / DML NOT AUTHORIZED`.
+Дата: 2026-08-21. Статус: `IMPLEMENTATION EVIDENCE / PACKAGE ACTIVE`.
 
 ## Причина пересмотра
 
@@ -9,6 +9,14 @@ Power BI или широким зеркалом `Reference67`. Все подтв
 классификации, normalisation и допустимые агрегации выполняются в одном
 `REPEATABLE READ READ ONLY` snapshot VM-1 до передачи; VM-2 получает только
 готовые строки и колонки, необходимые Power BI.
+
+Проверка локальных current PBIT перед запуском уточнила границу: `Загрузка
+ОП.pbit` отбирает sales-строку по phone date `InfoRg7146.Fld7150`, а при её
+отсутствии — по `Reference67.Fld820`; `Fld822` передаётся как план, но не
+является source predicate. Один minimum effective date используется только
+как безопасный квартальный transport anchor. `Отчет по обращениям.pbit`
+группирует feedback по бизнес-полям, включая имя взаимодействия, но не по
+CRM/task/client/reference IDs. Эти ID не передаются в compact feedback fact.
 
 Исходный approved plan этому не соответствует: его runner выбирал все CRM
 interactions по `Reference67.Fld823` за BR-003 и уже на VM-2 применял
@@ -46,10 +54,11 @@ consumers. У sales, feedback и guest tour совпадает базовое с
 
 | Product proposal | Target grain | Выполняется на VM-1 до COPY | Не передаётся |
 |---|---|---|---|
-| `mart.crm_interaction` | одна `interaction_id` | source-side union sales, feedback, required non-feedback follow-up and guest-tour predicates; all shared display classifications and derived dates/statuses | все interactions вне union, raw reference copies, raw employment rows |
+| `mart.crm_interaction` | одна `interaction_id` | source-side union sales и guest-tour predicates; shared classifications and derived dates/statuses | все interactions вне union, raw reference copies, raw employment rows |
 | `mart.crm_interaction_phone` | одна техническая phone-row | только phone rows interaction, попавших в sales/guest scope; `phone_at` и `answered_flag` готовы до COPY | телефония feedback-only и все несвязанные телефонные записи |
-| `mart.crm_interaction_comment` | interaction × нормализованный comment | только feedback scope; HTML→normalised text, deterministic comment update fields | raw HTML и comments вне feedback scope |
-| thin report views | report output | только source-prepared fields; VM-2 выполняет проекцию и связи компактных facts, без повторного чтения VM-1 | report-specific raw staging |
+| `mart.feedback_interaction` | final PBIT business group | feedback predicate, HTML→text, phone flag, grouping, first non-feedback follow-up and worked fields | raw HTML, phones, interactions и technical IDs |
+| `mart.club_day_metrics` | дата × фактический клуб | additive calls denominator | client/contract visit detail |
+| thin report views | report output | только source-prepared fields; VM-2 выполняет проекцию и scoped phone join, без повторного чтения VM-1 | report-specific raw staging |
 
 Для feedback source projection обязана сохранять достаточную детализацию для
 динамического distinct `client × normalized comment`; `STRING_AGG` допустим

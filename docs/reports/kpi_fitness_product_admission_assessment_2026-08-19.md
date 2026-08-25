@@ -1,6 +1,6 @@
 # S3-KF-ADMISSION-001: оценка допуска «KPI Фитнеса»
 
-Дата: 2026-08-19. Статус: `BLOCKER — required dependency not yet created`.
+Дата: 2026-08-19. Статус: `BLOCKER CLOSED 2026-08-20 — composite implemented`.
 Проверка проведена по утверждённым mapping, data contract, ADR и каталогу
 созданных объектов; SQL, DDL, DML и источники не изменялись.
 
@@ -25,17 +25,15 @@ grain, что ADR-0012 прямо запрещает.
 ## Статус зависимости
 
 Source formation, физический контракт и product admission
-`mart.client_base_daily` теперь подготовлены: SV-111 и
-S3-CBD-ADMISSION-001 подтвердили cohort, scope, возраст/пол и агрегатный
-grain. Пустая схема создана по отдельному разрешению; initial load будет
-отдельным пакетом.
+`mart.client_base_daily` подтверждены: S3-CBD-REFRESH-001 загрузил 1 657 353
+агрегированные строки, а S3-KF-COMPOSITE-001 подтвердил полный contract пяти
+фактов. Пустой dependency больше не существует.
 
 ## Вывод
 
-`KPI Фитнеса` не имеет безопасного самостоятельного DDL/DML-пакета до
-начальной загрузки `mart.client_base_daily`. Блокер не меняет готовые четыре
-факта и не требует их повторной загрузки. Следующее действие — отдельный
-initial-load пакет общей дневной КБ; новая KPI-таблица по-прежнему не нужна.
+`KPI Фитнеса` реализован как composite PostgreSQL contract без отдельного
+DDL/DML-пакета и без новой KPI-таблицы. Power BI switch, внешние планы и
+interactive DAX остаются отдельной границей реализации.
 
 ## Evidence
 

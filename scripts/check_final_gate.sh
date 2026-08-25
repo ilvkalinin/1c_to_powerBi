@@ -23,10 +23,22 @@ if [[ ! -f "$state_file" ]]; then
   exit 1
 fi
 
-package_status=$(awk -F '\t' '$1 !~ /^#/ && $1 != "package_id" && NF == 4 { print $3; exit }' "$state_file")
+package_row=$(awk -F '\t' '$1 !~ /^#/ && $1 != "package_id" && NF == 5 { print; exit }' "$state_file")
+package_status=$(printf '%s\n' "$package_row" | awk -F '\t' '{ print $3 }')
+approval_evidence=$(printf '%s\n' "$package_row" | awk -F '\t' '{ print $5 }')
 if [[ "$package_status" != "CLOSED" ]]; then
   printf 'FINAL FORBIDDEN: package status is %s, not CLOSED.\n' "${package_status:-MISSING}" >&2
   awk -F '\t' '$1 !~ /^#/ && $1 != "report_id" && NF == 3 && $2 != "COMPLETE" { printf "  %s: %s\n", $1, $2 > "/dev/stderr" }' "$state_file"
+  exit 1
+fi
+
+if [[ -z "$approval_evidence" || "$approval_evidence" == "-" ]]; then
+  printf 'FINAL FORBIDDEN: package has no approval evidence for its full scope.\n' >&2
+  exit 1
+fi
+
+if [[ "$approval_evidence" != /* && ! -f "$repo_root/$approval_evidence" ]]; then
+  printf 'FINAL FORBIDDEN: approval evidence is not a readable project artifact: %s\n' "$approval_evidence" >&2
   exit 1
 fi
 

@@ -1,7 +1,8 @@
 # Требования отчёта: «Выручка рецепции»
 
-Статус: `BUSINESS LOGIC COMPLETE / STAGE 2 VALIDATED / IMPLEMENTATION DEFERRED`.
-Договорный отчёт № 18. SQL и физические таблицы не создаются.
+Статус: `BUSINESS LOGIC COMPLETE / STAGE 2 VALIDATED / INITIAL LOAD VALIDATED 2026-08-20`.
+Договорный отчёт № 18. Использует existing `mart.v_reception_revenue` над
+общим фактом; Power BI и Excel в initial-load пакете не менялись.
 PBIT `Выручка рецепции.pbit` получен 2026-07-31 (SHA-256
 `611b6e7bddae1099af77e8c55a2a5e3b449d30899ed4e98bd9130184e3490017`).
 
@@ -178,6 +179,16 @@ SV-053 измерил текущий source-side baseline: детальный з
 является замером end-to-end refresh и не меняет решение реализации без Stage 3.
 
 Обновление: один раз в день.
+
+## Initial load 2026-08-20
+
+В общий факт без второй витрины загружено 150 752 рецепционных движения:
+474 023,000 количества и 46 552 824,44 выручки. Все восемь категорий,
+source/stage/target controls, DPFU-preservation и rerun прошли; refresh занял
+74,20 с, rerun — 82,21 с. Чтение полного view заняло 415,186 мс.
+
+Во время S3-RGS-REUSE-005 scope обновлён по новому source key: 150 753 строки
+и 46 553 069,44; DPFU scope сохранён.
 
 ## Проектные артефакты
 

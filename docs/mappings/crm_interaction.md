@@ -99,6 +99,16 @@ normalised-comment detail.
 | Feedback | `ОС со звонками` selects feedback from 2025-01-01 to current date, excludes `Jivo` in interaction name, joins phone/HTML, then groups without `Reference67.ID`; first follow-up is minimum non-feedback interaction for `client code × task code` after feedback creation. | `RESOLVED`: core remains one `interaction_id`; first-release compatibility view preserves final PBIT business-grouping without it, under BR-018 and the approved PBIT. |
 | Guest tour | `ТурыВсе` directly joins `InfoRg7146`, filters meeting + `Продажа клубной карты`, computes report date from `Fld820` or `Fld822`, and the final `Туры` keeps only `Закрыто/Выполнено` or `Запланировано/Не выполнено`. | `RESOLVED`: view preserves PBIT phone-row multiplicity and `report_date`; no phone row alters core grain. Funnel key `99a9ebb169a4e2a611eecbf18a73ffa6` was read-only confirmed 2026-08-21 as the sole `Продажа клубной карты` key. |
 
+The checked current `Загрузка ОП.pbit` filters a sales source row by
+`InfoRg7146.Fld7150` and uses `Reference67.Fld820` only when that phone date
+is null. `Fld822` is transferred but is not a source-scope predicate. The
+runner's minimum effective date is only a transport-quarter anchor; all
+qualifying phone children remain attached to their interaction.
+
+The checked current `Отчет по обращениям.pbit` groups feedback on business
+names/codes (including interaction name), not CRM/task/client/reference IDs.
+The compact feedback fact therefore transfers those business fields only.
+
 The Jivo marketing-name condition in the feedback template is in a `LEFT JOIN`:
 it nulls that label rather than excluding the interaction. The documented
 source-scope statement therefore remains unchanged; implementation must test

@@ -1,6 +1,6 @@
 # Source-to-target mapping: Свод выручка ГК
 
-Статус: `SCHEMA IMPLEMENTED 2026-08-19 / INITIAL LOAD NOT REQUESTED / INTERNAL POSTGRESQL BRANCHES VALIDATED — SV-035—SV-050, SV-066`.
+Статус: `SCHEMA IMPLEMENTED 2026-08-19 / INITIAL LOAD AND RECEPTION REUSE VALIDATED 2026-08-20 / INTERNAL POSTGRESQL BRANCHES VALIDATED — SV-035—SV-050, SV-066`.
 
 Этот mapping фиксирует текущий отчётный результат, а не разрешает создание
 физической витрины. Никакого SQL/DDL для VM-1 или VM-2 не создано.
@@ -28,13 +28,16 @@ Power BI и соединяются с внутренней частью толь
 отчёта. Статья `03` сворачивается из существующего
 `mart.ancillary_revenue_movement`; статья `04` — из существующего
 `mart.ip_revenue_daily`, но без его строк с пустым клубом, поскольку текущий
-M-код свода их отбрасывает. Статья `05` не может читаться из ancillary-факта:
-он содержит только фитнес-направления, а текущий M-код рецепции выбирает
-непересекающийся scope. Поэтому для неё допускается только временная
-source-side ветвь в загрузке единственного дневного факта, без постоянной
-копии регистра. Ветви `02` и `06` также воспроизводят текущую source-side
-логику внутри этой загрузки до отдельной сверки с новыми empty-схемами
-членства. Новые постоянные core- или staging-таблицы не создаются.
+M-код свода их отбрасывает. Первоначальный ancillary-факт содержал только
+фитнес-направления, но S3-RR-LOAD-001 заполнил его независимый scope
+`reception`. S3-RGS-REUSE-005 сверил этот scope с exact-M статьёй 05 и
+перевёл её на `REUSE`; временная source-side логика осталась только для 02/06.
+Новые постоянные core- или staging-таблицы не создаются.
+
+Initial load 2026-08-20 подтвердил этот mapping: 25 339 строк, нулевые
+duplicate/contract violations и совпадающие source/stage/target/reuse controls;
+refresh 52,34 с, rerun 38,02 с. Reuse статьи 05 после fresh control: 7 860
+ключей / 46 553 069,44 / 0 различий; итоговый refresh 29,60 с, rerun 29,11 с.
 
 ## Целевые колонки
 
@@ -67,12 +70,12 @@ source-side ветвь в загрузке единственного дневн
 | Проверка | Результат | Статус / доказательство |
 |---|---|---|
 | Проверенные источники из `source_objects` | найдены `AccumRg7370/7575/7646/7739`, `InfoRg6612`, клубы/услуги/контракт | CONFIRMED |
-| Проверенные продукты из `data_products` | `mart.ancillary_revenue_movement`, `mart.ip_revenue_daily`, будущие membership marts; рецепционный view не реализован | CONFIRMED |
+| Проверенные продукты из `data_products` | `mart.ancillary_revenue_movement` содержит independently reconciled scopes `dpfu` и `reception`; `mart.ip_revenue_daily`, membership source branches | CONFIRMED |
 | Проверенные правила | BR-001, BR-002, BR-003, BR-004, BR-010, BR-013 | CONFIRMED; user selected BR-003 |
 | Сравнение гранулярности | общий ancillary факт детальнее; отчёт — дневной клуб×статья. План не совпадает с фактом | CONFIRMED |
 | Сравнение ключей | ключ движения `(recorder_type, recorder_id, line_no)` уникален и NOT NULL во всех 4 регистрах (SV-035); ДПФУ и рецепция по текущим фильтрам не пересекаются (SV-039); внутренний агрегат уникален по `(дата, клуб, статья)` (SV-048) | CONFIRMED technical key / anti-overlap validated |
-| Сравнение бизнес-семантики | `03` совпадает с ancillary; `04` совпадает с IP daily после исключения пустого клуба; `05` отсутствует в ancillary; `02`/`06` имеют собственное current-M правило | CONFIRMED PBIT + implemented-contract review |
-| Решение (`REUSE` / `EXTEND` / `NEW` / `NOT_APPLICABLE`) | `REUSE` ancillary для `03`, `REUSE` IP daily для `04`, `NEW` только один итоговый факт с временными ветвями `02`/`05`/`06`; `NOT_APPLICABLE` для Excel `07`–`13` | CONFIRMED — Stage 3 admission 2026-08-19 |
+| Сравнение бизнес-семантики | `03` совпадает с ancillary scope `dpfu`; `04` совпадает с IP daily после исключения пустого клуба; `05` совпадает с ancillary scope `reception` по 7 860 ключам и сумме; `02`/`06` имеют собственное current-M правило | CONFIRMED — S3-RGS-REUSE-005 |
+| Решение (`REUSE` / `EXTEND` / `NEW` / `NOT_APPLICABLE`) | `REUSE` ancillary для `03`/`05`, `REUSE` IP daily для `04`, один итоговый факт с временными ветвями только `02`/`06`; `NOT_APPLICABLE` для Excel `07`–`13` | CONFIRMED — S3-RGS-REUSE-005 |
 | Причина решения | не дублировать постоянные факты, не подменять рецепционный scope неполным ancillary, не объединять планы с фактами и не переносить Excel | CONFIRMED evidence + decision |
 | Затронутые существующие потребители | Выручка ДПФУ, Выручка рецепции, Записи администраторов | CONFIRMED catalogs/ADR-0004/0005 |
 

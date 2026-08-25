@@ -27,22 +27,28 @@ reconciliation SQL. Назови все target-объекты, DDL/DML, rollback
 
 ## Соединения, источники и транспорт
 
-1. Все runner'ы используют общую `connect_with_retry`: первая попытка и ровно
+1. До любого full-range `EXPLAIN`, `COPY`, DDL/DML или transport выполнить
+   `EXPLAIN (ANALYZE, BUFFERS)` точного source extract на репрезентативной
+   ограниченной выборке. Записать границы, rows, execution time и I/O, оценить
+   масштабирование и не выполнять параллельно тяжёлый plan/transport. Только
+   после этого разрешён full-range baseline; target read-plan снимается после
+   successful atomic load до acceptance.
+2. Все runner'ы используют общую `connect_with_retry`: первая попытка и ровно
    пять повторов только при `OperationalError`; остальные ошибки не ретраятся
    бесконечно. Логируются endpoint, номер попытки, итоговая ошибка и время.
-2. На VM-1 открыть один `REPEATABLE READ, READ ONLY` snapshot. Ограничить
+3. На VM-1 открыть один `REPEATABLE READ, READ ONLY` snapshot. Ограничить
    период и колонки в source SQL; выполнить фильтрацию и агрегацию на VM-1.
    Нельзя создавать raw/staging-реплику регистров на VM-2.
-3. Не держать один многогигабайтный psycopg portal, пока открыты оба сервера.
+4. Не держать один многогигабайтный psycopg portal, пока открыты оба сервера.
    Передавать measured batch (обычно месяц) через один временный binary
    COPY-файл: source COPY завершается, затем file COPY на VM-2, затем файл
    удаляется до следующей порции. В логе обязательны границы batch, строки и
    байты; перед запуском проверяется достаточное место для одной порции.
-4. Временный файл — транспортный буфер, а не второй persistent dataset:
+5. Временный файл — транспортный буфер, а не второй persistent dataset:
    одновременно разрешена только текущая порция; raw и client-level details
    не сохраняются. Если безопасный bounded transport невозможен, это
    `BLOCKER`, а не повод создавать вторую полную копию.
-5. Изменять session-local planner setting разрешено только после сохранённого
+6. Изменять session-local planner setting разрешено только после сохранённого
    `EXPLAIN (ANALYZE, BUFFERS)` того же запроса и сравнения до/после. Не менять
    параметры или индексы 1С ради предположения.
 
@@ -90,6 +96,8 @@ reconciliation SQL. Назови все target-объекты, DDL/DML, rollback
 - [ ] Immutable reviewed set и перечень опасных операций показаны до approval.
 - [ ] Все SQL-колонки полностью mapped; нет скрытых `UNKNOWN`.
 - [ ] Grain/key/JOIN/states проверены на полном горизонте.
+- [ ] Sample actual plan измерен до full-range plan/transport; масштабирование
+      и отсутствие параллельного тяжёлого запроса зафиксированы.
 - [ ] Source/target endpoints применяют initial + five retry policy.
 - [ ] Snapshot, bounded batch, temporary-file cap и cleanup определены.
 - [ ] Target transaction, lock, rollback и rebuild strategy измерены.

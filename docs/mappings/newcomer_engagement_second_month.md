@@ -1,12 +1,14 @@
 # Source-to-target mapping: `newcomer_engagement_second_month`
 
-Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE ACCEPTED / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-076`.
+Статус: `MAPPING COMPLETE / STAGE_3 SOURCE CONTROLS VALIDATED — 2026-08-25 / IMPLEMENTATION IN PROGRESS`.
 Физический объект — `mart.newcomer_engagement_second_month` по ADR-0009.
 
-Гранулярность одной строки: подходящий контракт × клиент × месяц вовлечения.
-Отсутствие дублей по этой гранулярности — техническая проверка перед SQL.
+Гранулярность одной строки: подходящий контракт × клиент × месяц вовлечения ×
+техническая исходная строка. `source_row_id` сохраняет legacy child `RANK()` ties.
 
-Логический ключ: `(contract_id, client_id, month_of_engagement)`.
+Логический ключ KPI: `(contract_id, client_id, month_of_engagement)`.
+Физический ключ: `source_row_id` (`main:<contract>:<client>` либо
+`child:<receipt>:<line>`).
 
 Единица KPI — пара `клиент × контракт`. Взрослый и ребёнок, привязанные к
 одному контракту, считаются раздельно; их посещения и группы не объединяются.
@@ -15,22 +17,23 @@
 
 | Целевая колонка | Бизнес-описание | Исходная таблица | Исходная колонка | Преобразование | PostgreSQL тип | NULL | Гранулярность | Статус | Источник подтверждения | Тест |
 |---|---|---|---|---|---|---|---|---|---|---|
-| `АбонементСсылка` | техническая ссылка контракта | `Reference59` | `ID` | `encode(..., 'hex')` в текущем SQL | `text` | UNKNOWN | контракт | CONFIRMED current query | `АбонементыИсходный` | уникальность ID; orphan |
-| `АбонементКод` | отображаемый код контракта | `Reference59` | `Code` | явное преобразование в текст | `text` | UNKNOWN | контракт | CONFIRMED current query | `АбонементыИсходный` | дубли Code |
-| `КлиентСсылка` | техническая ссылка клиента | `Reference141X1` | `ID` | `encode(..., 'hex')` | `text` | UNKNOWN | клиент | CONFIRMED current query | текущий SQL | orphan; NULL |
-| `КлиентКод` | отображаемый код клиента | `Reference141X1` | `Code` | текущий SQL | `text` | UNKNOWN | клиент | CONFIRMED current query | текущий SQL | дубли; NULL |
-| `Клиент` | имя клиента для списка | `Reference141X1` | `Description` | текущий SQL | `text` | UNKNOWN | клиент | CONFIRMED current query | текущий SQL | подтверждение потребителя PII |
+| `АбонементСсылка` | техническая ссылка контракта | `Reference59` | `ID` | `encode(..., 'hex')` в current SQL | `text` | нет | контракт | VALIDATED 2026-08-25 | full source control | source identity |
+| `АбонементКод` | отображаемый код контракта | `Reference59` | `Code` | явное преобразование в текст | `text` | нет | контракт | VALIDATED 2026-08-25 | full source control | NULL=0 |
+| `КлиентСсылка` | техническая ссылка клиента | `Reference141X1` | `ID` | `encode(..., 'hex')` | `text` | нет | клиент | VALIDATED 2026-08-25 | full source control | NULL=0 |
+| `КлиентКод` | отображаемый код клиента | `Reference141X1` | `Code` | current SQL | `text` | нет | клиент | VALIDATED 2026-08-25 | full source control | NULL=0 |
+| `Клиент` | имя клиента для списка | `Reference141X1` | `Description` | current SQL | `text` | нет | клиент | VALIDATED 2026-08-25 | full source control | NULL=0 |
 | `ДатаРождения` | дата рождения клиента | `Reference141X1` | `Fld1507` | текущий SQL | `date` | UNKNOWN | клиент | CONFIRMED current query | текущий SQL | sentinel; подтверждение PII |
-| `ДатаНачала` | дата начала контракта | `Reference59` | `Fld671`; для детских пакетов также `Document346.Date_Time` | main: `Fld671`; children: `GREATEST(Fld671, Date_Time)` | `date` | UNKNOWN | контракт | CONFIRMED current query / business semantics pending | текущий SQL | границы; различия веток |
+| `ДатаНачала` | дата начала контракта | `Reference59` | `Fld671`; для детских пакетов также `Document346.Date_Time` | main: `Fld671`; children: maximum eligible `GREATEST(Fld671, Date_Time)` under BR-037 | `date` | UNKNOWN | контракт | CONFIRMED user decision 2026-08-25 | BR-037; reused reviewed child-sales logic | границы; valid sale/return and repeated-sale controls |
 | `ДатаВовлечения` | первый день второго календарного месяца | вычисление | `ДатаНачала` | `Date.StartOfMonth(Date.AddMonths(ДатаНачала, 1))` | `date` | нет | контракт | CONFIRMED current M | запрос `АбонементыИсходный` | даты на границах месяца |
-| `IDКлубаДоступа` | техническая ссылка клуба доступа | `Reference59` | `Fld687` | `encode(..., 'hex')` | `text` | UNKNOWN | контракт | CONFIRMED current query | `АбонементыИсходный` | тип, NULL и orphan клуба |
-| `КлубДоступа` | клуб доступа контракта | `Reference59` → `Reference132` | `Fld687` → `Description` | left join | `text` | UNKNOWN | контракт | CONFIRMED current query | `АбонементыИсходный` | orphan; NULL |
-| `ВозрастнаяКатегория` | возрастной разрез | `Reference87`; для детских пакетов константа | `Description` | main: номенклатура → `Reference87`; children: `'Дети'` | `text` | UNKNOWN | контракт | CONFIRMED user decision | current M; решение пользователя 2026-07-28 | согласованность двух веток |
-| `Стаж` | вид стажа контракта | `Reference59`; `InfoRg5654` для детских пакетов | `Fld694`; `Fld5656` | GUID → `New`/`Ex`/`Renew`; для отсутствия history — `New`; когорта отчёта — `New` | `text` | UNKNOWN | контракт | CONFIRMED user decision | current SQL; решение пользователя 2026-07-28 | сверка без изменения правила |
+| `IDКлубаДоступа` | техническая ссылка клуба доступа | `Reference59` | `Fld687` | `encode(..., 'hex')` | `text` | нет | контракт | VALIDATED 2026-08-25 | full source control | NULL=0 |
+| `КлубДоступа` | клуб доступа контракта | `Reference59` → `Reference132` | `Fld687` → `Description` | left join | `text` | нет | контракт | VALIDATED 2026-08-25 | full source control | NULL=0 |
+| `ВозрастнаяКатегория` | возрастной разрез | `Reference87`; для детских пакетов константа | `Description` | main: номенклатура → `Reference87`; children: `'Дети'` | `text` | да | контракт | VALIDATED 2026-08-25 | full source control | NULL=998; child=`Дети` |
+| `Стаж` | вид стажа контракта | `Reference59`; `InfoRg5654` для детских пакетов | `Fld694`; `Fld5656` | GUID → `New`/`Ex`/`Renew`; для отсутствия history — `New` | `text` | нет | контракт | VALIDATED 2026-08-25 | full source control | NULL=0 |
 | `КоличествоПосещений` | число посещений во втором календарном месяце | `AccumRg7575` | `Period`, `Fld7576`, `Fld7578`, `Fld7579` | `COUNT` строк при связи контракт + клиент и интервале второго месяца | `bigint` | нет (`0`) | контракт × клиент | CONFIRMED user decision | `ПосещенияНовичков_Агрегат`; решение пользователя 2026-07-28 | техническая сверка без изменения правила |
 | `ПоследнийВизит` | последняя дата посещения во втором календарном месяце | `AccumRg7575` | `Period` | `MAX(Period::date)` в том же интервале | `date` | да | контракт × клиент | CONFIRMED current query | `ПосещенияНовичков_Агрегат` | interval; future dates |
 | `ГруппаПосещений` | категория посещений | вычисление | `КоличествоПосещений` | `0`, `1`, `2`, `3`, `4+` | `text` | нет | контракт × клиент | CONFIRMED current M | `Абонементы` | границы 0–4+ |
 | `ПрошелСПТ` | признак прохождения стартовой тренировки | `InfoRg7006`, `Document329`, `Document325`, `Reference59` | несколько полей | совпадение клиента и даты занятия/посещения, затем contract as-of | `text` | нет (`Не прошел`) | контракт × клиент | CONFIRMED user decision | `СПТ_Уникальные`; решение пользователя 2026-07-28 | техническая сверка без изменения правила |
+| `source_row_id` | скрытая physical identity | `Reference59`; для child `Document346.VT4913` | contract/client либо receipt/line | `main:<contract>:<client>`; `child:<receipt>:<line>` | `text` | нет | исходная строка | CONFIRMED design | BR-018; source control 2026-08-25 | uniqueness |
 
 ## Подтверждённые источники
 
@@ -40,7 +43,7 @@
 | `Reference141X1` | клиент, код, имя, дата рождения | CONFIRMED current source | Power Query в приложенном DOCX |
 | `Reference132` | клуб доступа | CONFIRMED current source | Power Query в приложенном DOCX |
 | `Reference163`, `Reference87` | фильтры/категория номенклатуры | CONFIRMED current source / semantics pending | Power Query в приложенном DOCX |
-| `InfoRg5654`, `Document346`, `Document346.VT4913` | детские пакеты и стаж | CONFIRMED current source / join pending | Power Query в приложенном DOCX |
+| `InfoRg5654`, `Document346`, `Document346.VT4913`, `Document346.VT4924`, `AccumRg7646` | детские пакеты, стаж и sales/return eligibility | CONFIRMED user-approved reuse / join pending | PBIT; BR-037; решение пользователя 2026-08-25 |
 | `AccumRg7575` | посещения | CONFIRMED current source / states and unit pending | Power Query в приложенном DOCX |
 | `InfoRg7006`, `Document329`, `Enum448`, `Document325` | признак СПТ | CONFIRMED current source / relation pending | Power Query в приложенном DOCX |
 | `InfoRg6015` | календарь | CONFIRMED current source | Power Query в приложенном DOCX |
@@ -65,7 +68,7 @@ source-side набор без добавления гипотетических 
 |---|---|---|
 | основной контракт | `Reference59.Fld671 >= 2023-12-01`; дата окончания позже начала; длительность более 30 дней; клиент существует; текущие GUID-фильтры типа абонемента и исключённой служебной номенклатуры; `Fld693 > 30` | CONFIRMED current SQL и решение пользователя 2026-07-28 |
 | New-когорта | стаж контракта `New`; детская ветка использует текущий as-of расчёт `InfoRg5654` и `COALESCE(..., 'New')` | CONFIRMED user decision и current SQL |
-| детские пакеты | строки `Document346.VT4913` соединяются с чеком, контрактом, клубом и ребёнком; дата начала — максимум даты начала контракта и даты чека; применяется текущий фильтр типа чека и `RANK() = 1` | CONFIRMED current SQL; кардинальность и ties — техническая валидация |
+| детские пакеты | строки `Document346.VT4913` соединяются с чеком, контрактом, клубом и ребёнком; возрастная категория — константа `Дети`; eligibility и повторная дата продажи применяют BR-037 через sales-group `чек × взрослый × продукт`, а legacy `RANK() = 1` ties сохраняются после eligibility | CONFIRMED user decision 2026-08-25; BR-037; кардинальность — техническая валидация |
 | квалифицированное посещение | `AccumRg7575` соединяется с `Reference163`; используются текущие фильтры `Period >= 2023-12-01`, услуга `посещение клуба`, исключения `%ИП%` и `%Контракт сотрудника%`; связь с фактом — `Fld7578 = contract_id` и `Fld7576 = client_id` | CONFIRMED current SQL и решение пользователя 2026-07-28 |
 | интервал посещений | от первого дня месяца после месяца старта до первого дня ещё следующего месяца, верхняя граница исключается | CONFIRMED business description и current SQL |
 | СПТ | текущая связь клиента и даты предварительной записи/посещения, затем действующий контракт на эту дату | CONFIRMED user decision и current SQL |
@@ -98,7 +101,7 @@ mapping не разрешает SQL до технической валидаци
 | CONFIRMED | единица посещения | `COUNT` строк `AccumRg7575` в заданном интервале — утверждённый расчёт | техническая сверка без замены правила |
 | CONFIRMED | статусы 1С | все фильтры текущих SQL признаны полными для отчёта | не добавлять неподтверждённые условия без реального расхождения |
 | CONFIRMED | New-когорта | контракт со стажем `New`; текущая ветка детских пакетов сохраняется как есть | зафиксировать место применения фильтра при экспорте модели |
-| VALIDATION_FAILED | ключ `Абонементы` | 3 144 child-пары contract × child повторяются (max 11); код контракта не применяется как ключ | current `RANK()`/joins сохраняются по BR-018; перед Stage 3 требуется решение о явной кратности |
+| VALIDATED | ключ целевого набора | 166 969 source rows, 166 969 business pairs и 0 duplicate technical identities после BR-037 на BR-003 horizon | physical PK = `source_row_id`; не обещать такую же уникальность при future source change |
 | CONFIRMED current model | связи Power BI | PBIT: дата вовлечения, клуб доступа и возрастная категория связаны с `_Даты`, `_Клубы` и `Возраст` активными однонаправленными связями; `Выпускники план` связан с клубами | `Вовлечение_новичков_Второй_месяц.pbit`, 2026-07-31; уникальность измерений — read-only validation |
 | CONFIRMED | возраст | сохраняются категория номенклатуры и константа `Дети` для детских пакетов | не заменять расчётом по дате рождения |
 | CONFIRMED | СПТ | сохраняется текущая связь по клиенту и дате с поиском действующего контракта | техническая сверка без изменения правила |

@@ -1,6 +1,6 @@
 # Data contract: «Вовлечение новичков Второй месяц»
 
-Статус: `DESIGNED / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-076 / IMPLEMENTATION DEFERRED`.
+Статус: `IMPLEMENTED / RECONCILED / RERUN PASSED — 2026-08-25 / Power BI deferred by BR-036`.
 
 SV-076 подтвердил physical sources, bounded second-month interval и ключ
 контрольной выборки, но не уникальность child-кандидата и one-to-one match
@@ -12,8 +12,8 @@ SV-076 подтвердил physical sources, bounded second-month interval и �
 | Объект PostgreSQL | `mart.newcomer_engagement_second_month` | ADR-0009 |
 | Таблица Power BI | `Вовлечение новичков Второй месяц` | CONFIRMED naming rule |
 | Назначение | вовлечение New-контрактов во второй полный календарный месяц после месяца начала | CONFIRMED |
-| Гранулярность строки | подходящий контракт × клиент × месяц вовлечения | CONFIRMED BY DESIGN |
-| Логический/первичный ключ | `(contract_id, client_id, month_of_engagement)` | CONFIRMED BY DESIGN; NM-V08 100-row control без дублей, child-source duplicates требуют сохранения current logic по BR-018 |
+| Гранулярность строки | подходящий контракт × клиент × месяц вовлечения × technical source row | CONFIRMED source control 2026-08-25 |
+| Логический/первичный ключ | KPI key `(contract_id, client_id, month_of_engagement)`; physical PK `source_row_id` | CONFIRMED: preserves BR-018 ties; 166 969 source rows and 0 duplicate physical identities |
 | Единица KPI | пара клиент × контракт; взрослый и ребёнок одного контракта считаются раздельно | CONFIRMED user decision 2026-07-28 |
 | Период хранения | по BR-003, применённому к месяцу вовлечения | CONFIRMED project rule |
 | Режим и правила обновления | полный ограниченный rebuild с атомарной заменой на каждом разрешённом запуске | CONFIRMED BY DESIGN; частота UNKNOWN |
@@ -36,14 +36,15 @@ SV-076 подтвердил physical sources, bounded second-month interval и �
 | `client_name` | `Клиент` | имя клиента в списке новичков | `text` | Text | нет | детализация / PII | не мера | нет | `Клиент` |
 | `membership_start_date` | `Дата начала` | дата начала контракта | `date` | Date | нет | атрибут | не мера | нет | `ДатаНачала` |
 | `month_of_engagement` | `Месяц вовлечения` | первый день второго календарного месяца | `date` | Date | нет | дата факта, часть PK | не мера | нет | `ДатаВовлечения` |
-| `access_club_id` | `ID клуба доступа` | технический ID клуба доступа | `text` | Text | UNKNOWN | FK клуба | не мера | да | `IDКлубаДоступа` |
-| `access_club_name` | `Клуб доступа` | клуб доступа | `text` | Text | UNKNOWN | разрез | не мера | нет | `КлубДоступа` |
-| `age_category` | `Возрастная категория` | текущая категория возраста/детского пакета | `text` | Text | UNKNOWN | разрез | не мера | нет | `ВозрастнаяКатегория` |
+| `access_club_id` | `ID клуба доступа` | технический ID клуба доступа | `text` | Text | нет | FK клуба | не мера | да | `IDКлубаДоступа` |
+| `access_club_name` | `Клуб доступа` | клуб доступа | `text` | Text | нет | разрез | не мера | нет | `КлубДоступа` |
+| `age_category` | `Возрастная категория` | текущая категория возраста/детского пакета | `text` | Text | да | разрез | не мера | нет | `ВозрастнаяКатегория` |
 | `tenure` | `Стаж` | стаж контракта; целевая когорта `New` | `text` | Text | нет | подтверждённый фильтр | не мера | нет | `Стаж` |
 | `second_month_visit_count` | `Количество посещений` | число строк посещений за второй календарный месяц | `bigint` | Whole number | нет, `0` | показатель строки | не суммировать как KPI пар клиент-контракт | нет | `КоличествоПосещений` |
 | `last_visit_date` | `Последний визит` | последняя дата посещения второго месяца | `date` | Date | да | детализация | не мера | нет | `ПоследнийВизит` |
 | `visit_bucket` | `Группа посещений` | группа `0/1/2/3/4+` | `text` | Text | нет | разрез | не мера | нет | `ГруппаПосещений` |
 | `intro_training_status` | `Прошел СПТ` | текущий признак прохождения СПТ | `text` | Text | нет, `Не прошел` | детализация | не мера | нет | `ПрошелСПТ` |
+| `source_row_id` | — | hidden physical source identity | `text` | Text | нет | primary key / technical | не мера | да | Stage-3 mapping |
 
 Поля детализации `Код контракта`, `Код клиента` и `Клиент` доступны всем
 пользователям с доступом к отчёту (BR-017, решение пользователя 2026-07-31).

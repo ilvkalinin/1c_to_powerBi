@@ -1,6 +1,6 @@
 # Stage 3 PRODUCT ADMISSION: `mart.revenue_group_summary_daily`
 
-Статус: `SHARED SCHEMA IMPLEMENTED 2026-08-19 / INITIAL LOAD NOT REQUESTED`.
+Статус: `SHARED SCHEMA IMPLEMENTED 2026-08-19 / INITIAL LOAD VALIDATED 2026-08-20`.
 
 ## Результат audit
 
@@ -46,6 +46,7 @@
 
 После отдельного подтверждения пользователя точный DDL выполнен одной
 транзакцией. Post-check подтвердил: 4 колонки, один primary key, одно правило
-допустимых статей, 4 обязательных поля и 0 строк. DML, загрузка данных,
-изменение Power Query/DAX и внешних Excel не выполнялись. Перед будущим
-initial load отдельно подтверждаются extract, branch controls, rerun и SLA.
+допустимых статей и 4 обязательных поля. Initial load 2026-08-20 заполнил
+25 339 строк и прошёл source/stage/target, reused, key, branch, sum и rerun
+controls; полный refresh занял 52,34 с, rerun — 38,02 с. Power Query/DAX и
+внешние Excel не менялись.

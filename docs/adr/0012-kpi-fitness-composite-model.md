@@ -1,6 +1,6 @@
 # ADR-0012: составная модель «KPI Фитнеса» без отдельной копии фактов
 
-- Статус: `DESIGNED / TECHNICAL VALIDATION COMPLETE / IMPLEMENTATION DEFERRED`
+- Статус: `POSTGRESQL COMPOSITE IMPLEMENTED / POWER BI SWITCH DEFERRED`
 - Дата: 2026-08-03
 - Отчёт: №1 «KPI Фитнеса»
 

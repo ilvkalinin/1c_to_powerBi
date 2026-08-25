@@ -5,9 +5,9 @@
 -- grouped_revenue, null_club_target_rows and zero_revenue_target_rows with
 -- IP-REC-001 below. Tolerance is exactly zero.
 --
--- Initial-load controls (2026-08-14, BR-003 2025-01-01..2027-01-01):
--- source movements = 178022; target-grain rows = 47151;
--- revenue = 268944858.22; null-club rows = 14321; zero groups = 92.
+-- Initial-load controls (2026-08-14) used an invalid case-insensitive
+-- predicate and are superseded by S3-IP-REMEDIATION-001. The runner records
+-- the new same-snapshot control values before commit.
 
 -- IP-REC-001 / IP-REC-002: volume, additivity, logical key and contract.
 SELECT

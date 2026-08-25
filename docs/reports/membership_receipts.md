@@ -1,7 +1,7 @@
 # Отчёт по поступлениям
 
 Статус:
-`BUSINESS ANALYSIS COMPLETE / MODEL REVIEW COMPLETE / SHARED SCHEMA IMPLEMENTED 2026-08-19; INITIAL LOAD NOT REQUESTED`.
+`BUSINESS ANALYSIS COMPLETE / MODEL REVIEW COMPLETE / SHARED SCHEMA IMPLEMENTED 2026-08-19; INITIAL LOAD COMPLETED AND VALIDATED 2026-08-20`.
 
 Первичные доказательства:
 
@@ -19,8 +19,9 @@
 
 Проверенные source controls и их результаты зафиксированы в
 `docs/source_metadata/server_validation_2026-08-14.md` и в admission-пакете.
-DDL, DML и загрузка целевых объектов не выполнялись и остаются запрещёнными
-до отдельного просмотра SQL.
+DDL выполнен по отдельному разрешению; initial load двух существующих целевых
+таблиц выполнен и валидирован 2026-08-20. Последующие DML требуют отдельного
+разрешения пользователя.
 
 ## Stage 2: SV-083 (2026-08-11)
 

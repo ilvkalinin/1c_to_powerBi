@@ -1,0 +1,16 @@
+run_id	label	stage	seconds	status	control
+2026-08-20T14:41:49+03:00	initial	dpfu	264.79	PASS	TARGET_CONTROL 7646 rows=498 quantity=492.000 revenue=27835.00
+2026-08-20T14:41:49+03:00	initial	reception	113.56	PASS	TARGET_CONTROL 7646 category=Товары рецепции rows=34189 quantity=36893.000 revenue=8550795.00
+2026-08-20T14:41:49+03:00	initial	ip	1.31	PASS	DML_COMMITTED rows=1253 revenue_amount=142374861.98
+2026-08-20T15:04:51+03:00	initial_recovery_2	dpfu	202.72	PASS	TARGET_CONTROL 7646 rows=498 quantity=492.000 revenue=27835.00
+2026-08-20T15:12:18+03:00	initial_recovery_3	dpfu	209.57	PASS	TARGET_CONTROL 7646 rows=498 quantity=492.000 revenue=27835.00
+2026-08-20T15:22:59+03:00	rerun	dpfu	221.38	PASS	-
+2026-08-20T15:22:59+03:00	rerun	reception	93.67	PASS	-
+2026-08-20T15:22:59+03:00	rerun	ip	0.98	PASS	-
+2026-08-20T15:22:59+03:00	rerun	summary	32.72	PASS	-
+2026-08-20T15:33:29+03:00	performance_rerun	dpfu	239.20	PASS	-
+2026-08-20T15:33:29+03:00	performance_rerun	reception	72.90	PASS	-
+2026-08-20T15:33:29+03:00	performance_rerun	ip	0.96	PASS	-
+2026-08-20T15:33:29+03:00	performance_rerun	summary	33.98	PASS	-
+2026-08-20T15:40:40+03:00	performance_rerun_timed	dpfu	212.84	PASS	-
+2026-08-20T15:52:12+0300\tshell_runner_rerun_2\tdpfu\t229.00\tPASS\t-

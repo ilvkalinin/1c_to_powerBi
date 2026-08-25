@@ -1,6 +1,6 @@
 # S3-RR-ADMISSION-001: оценка допуска «Выручки рецепции»
 
-Дата: 2026-08-19. Статус: `SHARED-SCOPE SCHEMA IMPLEMENTED / RECEPTION INITIAL LOAD NOT AUTHORIZED`.
+Дата: 2026-08-19. Статус: `SHARED-SCOPE SCHEMA IMPLEMENTED / RECEPTION INITIAL LOAD VALIDATED 2026-08-20`.
 S3-RR-EXEC-001 применил ровно reviewed миграцию на VM-2; источник 1С не
 изменялся. Загрузка рецепционных строк, refresh и изменения Power BI не
 входили в пакет.
@@ -10,9 +10,9 @@ S3-RR-EXEC-001 применил ровно reviewed миграцию на VM-2; 
 Пост-DDL контракт прошёл: в общем факте 21 колонка, одна первичная и шесть
 проверочных constraints, 10 физически обязательных колонок. Все 504 691
 прежняя строки сохранены с `revenue_scope = dpfu`; созданы
-`mart.v_dpfu_ancillary_revenue` и `mart.v_reception_revenue`. Первый view
-возвращает те же 504 691 строк ДПФУ, второй пока возвращает 0 строк. Это
-ожидаемо: рецепционный initial load отдельно не запрашивался.
+`mart.v_dpfu_ancillary_revenue` и `mart.v_reception_revenue`. После S3-RR-LOAD-001
+второй view возвращает 150 752 рецепционных строки; DPFU scope сохранён
+контрольным сравнением до/после загрузки.
 
 ## Проверенный факт
 

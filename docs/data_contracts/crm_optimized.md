@@ -10,6 +10,10 @@ guest tour, потому что у них общий event/key `Reference67.ID`.
 присоединяется к этому core как raw detail: его итоговый business grain и
 comment logic несовместимы и строятся source-side отдельным компактным фактом.
 
+Для initial CRM load верхняя граница — начало текущего дня (`current_date`),
+а не 1 января следующего года из общего BR-003: будущие запланированные
+события не являются необходимым объёмом передачи (BR-034).
+
 | Target object | Grain / key | Consumer | Source-side preparation |
 |---|---|---|---|
 | `mart.crm_interaction` | one `interaction_id` | sales, guest tour | only union sales/guest scope; task/client/classification joins and reusable derived fields |
@@ -41,6 +45,11 @@ sales/tour detail fields under BR-017. Marked/archive fields, raw HTML,
 unscoped phone rows, employment history and all interactions outside the
 union are not transferred.
 
+The task-side client, club, funnel, campaign and channel references are
+nullable in the compact contract because their current-PBIT lookups are left
+joins. A missing marketing campaign was observed during initial COPY; it is a
+valid source row, not a reason to exclude the interaction.
+
 For sales `network_name` is computed source-side exactly as the checked PBIT:
 `club_name IN ('Пушкинский', 'Пушкинский VIP') → 'Пушкинский'`, otherwise
 `'Физкульт'`. This is evidence from `Загрузка ОП.pbit`, not an inferred club
@@ -52,6 +61,15 @@ hierarchy.
 calls scope: feedback type, created date in BR-003 and source interaction name
 not containing `Jivo`. It keeps the final business grouping specified by the
 checked PBIT, not `Reference67.ID`.
+
+The checked template also groups and returns the interaction name. Therefore
+`interaction_name` is retained in this compact fact; it adds no source event
+or raw child detail.
+
+Technical interaction, task, client and reference IDs are intentionally not
+present in this fact: the checked template neither returns nor groups by them.
+Keeping them would both enlarge the transfer and risk splitting an existing
+PBIT business group where display codes/names coincide.
 
 VM-1 computes normalized comment text with raw-text fallback, distinct comment
 aggregation, earliest post-creation comment update, earliest later

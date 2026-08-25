@@ -1,6 +1,6 @@
 # Data contract: «KPI Фитнеса»
 
-Статус: `DESIGNED COMPOSITE MODEL / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION COMPLETE`.
+Статус: `POSTGRESQL COMPOSITE IMPLEMENTED / POWER BI SWITCH DEFERRED / TECHNICAL VALIDATION COMPLETE`.
 
 Отдельный KPI-факт не создаётся (ADR-0012). Модель Power BI использует общие
 факты с разными grain.
@@ -53,3 +53,7 @@ BR-018.
 измерения уникальны; суммы не размножаются; distinct клиента совпадает на
 клубе и сети; шесть KPI и Renew воспроизводят контрольный полный/неполный
 месяц; refresh укладывается до 08:30.
+
+S3-KF-COMPOSITE-001 подтвердил, что все пять фактов физически заполнены и
+покрывают contract. Создание отдельной KPI-таблицы, DDL/DML и Power BI switch
+не требовались; внешние планы и interactive DAX остаются в Power BI.

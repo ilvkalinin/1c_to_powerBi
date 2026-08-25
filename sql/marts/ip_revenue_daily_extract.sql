@@ -21,7 +21,7 @@ WITH qualified AS (
     WHERE r._period >= $1::date
       AND r._period < $2::date
       AND r._recordkind = 0
-      AND CAST(service._description AS varchar(1000)) ILIKE '%ИП%'
+      AND CAST(service._description AS varchar(1000)) LIKE '%ИП%'
 )
 SELECT revenue_date, club_id, service_id,
        max(service_name) AS service_name,

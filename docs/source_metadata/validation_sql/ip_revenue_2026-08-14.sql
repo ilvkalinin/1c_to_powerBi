@@ -21,7 +21,7 @@ WITH calendar_bounds AS (
     WHERE r._period >= b.date_from
       AND r._period < b.date_to
       AND r._recordkind = 0
-      AND CAST(s._description AS varchar(1000)) ILIKE '%ИП%'
+      AND CAST(s._description AS varchar(1000)) LIKE '%ИП%'
 ), grouped AS (
     SELECT revenue_date, club_id, service_id,
            sum(revenue_amount)::numeric(18, 2) AS revenue_amount

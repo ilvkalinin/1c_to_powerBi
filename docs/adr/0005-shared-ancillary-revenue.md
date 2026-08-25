@@ -1,6 +1,6 @@
 # ADR-0005: общий факт дополнительных услуг и товаров
 
-- Статус: `SHARED-SCOPE SCHEMA IMPLEMENTED / RECEPTION INITIAL LOAD PENDING SEPARATE APPROVAL`
+- Статус: `SHARED-SCOPE SCHEMA IMPLEMENTED / RECEPTION INITIAL LOAD VALIDATED 2026-08-20`
 - Дата: 2026-07-27
 - Отчёт: № 18 «Выручка рецепции»
 
@@ -33,8 +33,9 @@ scope-зависимая обязательность ДПФУ-атрибуто�
 Точный reviewed migration и её post-DDL проверка хранятся в
 `docs/reports/reception_revenue_shared_fact_extension_ddl_review.sql` и
 `sql/tests/reception_revenue_shared_fact_schema_contract.sql`; они применены и
-прошли post-DDL контракт S3-RR-EXEC-001. Рецепционный initial load остаётся
-отдельным пакетом.
+прошли post-DDL контракт S3-RR-EXEC-001. Отдельный S3-RR-LOAD-001 завершён:
+150 752 рецепционных движения в existing shared fact, без второй витрины и
+без изменения DPFU scope.
 
 ## Рассмотренные варианты
 
