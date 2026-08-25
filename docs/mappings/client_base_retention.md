@@ -1,10 +1,10 @@
 # Source-to-target mapping: retention клиентской базы
 
-Статус: `DRAFT / STAGE_2 FOUNDATION PARTIALLY VALIDATED — SV-069`.
-SV-069 подтверждает только общую для cohort membership-границу BR-005 и
-раздельные club/network dedupe на 2026-07-01; retention-пересечение и его
-атрибуты не выполнялись. SQL и реализация остаются отложенными до проверки
-source statuses, физических типов и контрольных значений.
+Статус: `STAGE_2 PACKAGE-AWARE SOURCE VALIDATED — 2026-08-25 / physical implementation deferred`.
+SV-069 подтвердил общую membership-границу BR-005 и раздельные club/network
+dedupe. Package-readiness control 2026-08-25 подтвердил BR-037/BR-038
+baseline/current universe и retention semi-join для обоих comparison type и
+scope; physical fact, DDL/DML and rerun remain `NOT_EXECUTED`.
 
 Предлагаемый объект: `mart.client_base_retention`.
 
@@ -42,16 +42,16 @@ semi-join. Это `CONFIRMED user decision`; physical mart и source SQL пок�
 
 | Целевая колонка | Бизнес-описание | Источник/преобразование | PostgreSQL тип | NULL | Статус | Тест |
 |---|---|---|---|---|---|---|
-| `scope_level` | `club` или `network` | явная branch | UNKNOWN | нет | CONFIRMED | allowed values |
+| `scope_level` | `club` или `network` | явная branch | `text` | нет | CONFIRMED | allowed values |
 | `report_date` | Текущая отчётная дата | календарь отчёта | `date` | нет | CONFIRMED | report calendar |
-| `comparison_type` | `year_start` или `previous_year` | явная константа | UNKNOWN | нет | CONFIRMED | allowed values |
+| `comparison_type` | `year_start` или `previous_year` | явная константа | `text` | нет | CONFIRMED | allowed values |
 | `comparison_date` | Baseline-дата | 1 января либо nearest prior-year report date | `date` | нет | CONFIRMED | date mapping tests |
-| `baseline_club_id` | Клуб baseline cohort | клуб клиента на comparison date; NULL для network | UNKNOWN | по scope | CONFIRMED | required iff club |
-| `baseline_club_name` | Имя baseline-клуба | `Reference132.Description` | UNKNOWN | по scope | CONFIRMED source | ID/name mapping |
-| `current_age_years` | Возраст на текущую report date | birth date + report date | `smallint` | UNKNOWN | CONFIRMED | birthday/leap tests |
-| `current_age_group` | Текущая возрастная группа | current age | UNKNOWN | UNKNOWN | CONFIRMED boundaries | 13/14/17/18 |
-| `current_gender` | Пол из текущей карточки клиента | `Reference141.Fld1527` | UNKNOWN | да | ASSUMPTION attribution | enum coverage |
-| `current_membership_tenure` | Стаж на текущую report date | latest `InfoRg5654` before report date | UNKNOWN | UNKNOWN | CONFIRMED | as-of controls |
+| `baseline_club_id` | Клуб baseline cohort | клуб клиента на comparison date; NULL для network | `text` | по scope | CONFIRMED | required iff club |
+| `baseline_club_name` | Имя baseline-клуба | Не хранить в факте; Power BI получает имя через `Клубы[Код клуба]` | — | — | CONFIRMED contract | исключён из physical fact |
+| `current_age_years` | Возраст на текущую report date | birth date + report date | `smallint` | да | CONFIRMED | birthday/leap tests |
+| `current_age_group` | Текущая возрастная группа | current age; BR-038 `Дети` при current child-package interval | `text` | нет | CONFIRMED | 13/14/17/18, NULL, package provenance |
+| `current_gender` | Пол из текущей карточки клиента | `Reference141X1.Fld1527` | `text` | нет | CONFIRMED | enum coverage; unknown → `Не указано` |
+| `current_membership_tenure` | Стаж на текущую report date | latest `InfoRg5654` before report date | `text` | нет | CONFIRMED | as-of controls; unknown → `Не указано` |
 | `baseline_client_count` | Размер baseline cohort | distinct client count после baseline dedupe | `integer`/`bigint` | нет | CONFIRMED | sum vs source distinct |
 | `retained_client_count` | Клиенты baseline cohort, присутствующие в сети на текущую дату | baseline client semi-join current network client set | `integer`/`bigint` | нет | CONFIRMED | `0 <= retained <= baseline` |
 

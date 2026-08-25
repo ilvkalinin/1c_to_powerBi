@@ -1,6 +1,6 @@
 # Source-to-target mapping: агрегированный снимок «Клиентская база»
 
-Статус: `SNAPSHOT/RETENTION DEFERRED / client_base_daily BR-038 IMPLEMENTATION AND RERUN VALIDATED 2026-08-25`.
+Статус: `SNAPSHOT Stage 2 package-aware source mapping and performance baseline validated / RETENTION package-aware contract confirmed, source semi-join validation pending / client_base_daily BR-038 implementation and rerun validated 2026-08-25`.
 Граница membership-снимка и необходимость раздельных scope подтверждены.
 Этот пакет касается только `mart.client_base_daily`; редкий snapshot, retention
 и их дополнительные разрезы остаются отдельными отложенными продуктами.
@@ -66,7 +66,7 @@ BR-037 valid child-package intervals. BR-038 присваивает package inte
 | `scope_level` | `club` или `network` | явная grouping branch | UNKNOWN | нет | CONFIRMED | allowed values |
 | `report_date` | Отчётная дата снимка | календарь отчётных дат | `date` | нет | CONFIRMED | понедельник или первое число; unique |
 | `club_id` | Стабильный клуб | `Reference132.ID`; NULL для network | UNKNOWN | по scope | CONFIRMED source | required iff club |
-| `club_name` | Название клуба | `Reference132.Description`; NULL для network | UNKNOWN | по scope | CONFIRMED source | ID → одно актуальное имя |
+| `club_name` | Название клуба | Не хранить в факте; Power BI получает имя через малый справочник `Клубы` по `club_id` | — | — | CONFIRMED contract | исключён из physical snapshot, чтобы не дублировать dimension |
 | `age_years` | Полных лет на отчётную дату | `report_date`, `Reference141.Fld1507` | `smallint` | UNKNOWN | CONFIRMED rule | дни рождения/29 февраля |
 | `age_group` | Дети `<14`, Юниоры `14–17`, Взрослые `18+`, `Не указано` | `age_years` | `NULL age_years → «Не указано»` | text | нет | CONFIRMED user decision 2026-07-30 | 13/14/17/18, NULL |
 | `gender` | Пол клиента либо `Не указано` | `Reference141.Fld1527` → enum | `NULL → «Не указано»`; нераспознанный enum требует технической валидации | text | нет | CONFIRMED user decision 2026-07-30 | enum coverage, NULL |

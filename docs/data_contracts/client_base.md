@@ -1,6 +1,6 @@
 # Data contract: «Клиентская база»
 
-Статус: `client_base_daily BR-038 implementation and atomic rerun validated / snapshot and retention deferred`. Контракт Power BI определён. SV-111 подтвердил daily membership-source formation на всём BR-003; начальная загрузка 2026-08-19 прошла точную source-to-target сверку. CB-PKG-001—003 2026-08-25 подтвердил child-package gap; S3-CBD-PKG-001 добавил его без изменения stable target columns или Power BI. BR-038 относит любой valid child package к `Дети` при сохранении factual age и independent source-side provenance control. Snapshot и retention сохраняют свои отдельные отложенные вопросы.
+Статус: `client_base_daily BR-038 implementation and atomic rerun validated / snapshot package-aware Stage 2 mapping and full-rebuild performance baseline validated / retention package-aware semi-join validated; physical facts deferred`. Контракт Power BI определён. SV-111 подтвердил daily membership-source formation на всём BR-003; начальная загрузка 2026-08-19 прошла точную source-to-target сверку. CB-PKG-001—003 2026-08-25 подтвердил child-package gap; S3-CBD-PKG-001 добавил его без изменения stable target columns или Power BI. BR-038 относит любой valid child package к `Дети` при сохранении factual age и independent source-side provenance control. Physical snapshot/retention objects still do not exist.
 
 ## Общие параметры
 
