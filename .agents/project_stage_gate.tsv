@@ -5,4 +5,4 @@
 # CLOSED_PENDING_NEXT_APPROVAL rejects all new selections until the user
 # explicitly confirms the next independent package.
 gate_id	state	allowed_stage	allowed_report_ids	reason
-global_stage_gate	CLOSED_PENDING_NEXT_APPROVAL	-	-	Package-aware Stage 2 readiness for client_base_snapshot and client_base_retention closed 2026-08-25. A separate explicit Stage 3 admission with immutable reviewed SQL is required before DDL/DML.
+global_stage_gate	CLOSED_PENDING_NEXT_APPROVAL	-	-	Stage 3 planning for client_base_snapshot and client_base_retention closed 2026-08-25. Explicit product-admission approval of the immutable reviewed SQL set is required before DDL/DML/COPY.
