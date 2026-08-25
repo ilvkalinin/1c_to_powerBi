@@ -65,6 +65,10 @@ many-to-many запрещены. DAX выбирает scope и считает с
 > `(scope_level, report_date, club_id, age_years, age_group, gender, membership_tenure, activity_bucket)`.
 
 До реализации требуется определить техническое представление `NULL/Не определено`, чтобы логический ключ можно было обеспечить физически.
+Package-aware source contract уже фиксирован: BR-037 valid child package имеет
+BR-038 category `Дети` при любом фактическом/неизвестном возрасте и приоритет
+над обычным membership interval до агрегации. Это не меняет future grain или
+Power BI contract.
 
 | PostgreSQL | Power BI | PostgreSQL тип | Power BI тип | NULL | Роль | Аддитивность | Скрыть |
 |---|---|---|---|---|---|---|---|
@@ -91,6 +95,9 @@ many-to-many запрещены. DAX выбирает scope и считает с
 Логический ключ:
 
 > `(scope_level, report_date, comparison_type, comparison_date, baseline_club_id, current_age_years, current_age_group, current_gender, current_membership_tenure)`.
+
+Baseline и current universe должны включать BR-037/BR-038 child-package branch
+до cohort dedupe и пересечения; package classification остаётся `Дети`.
 
 | PostgreSQL | Power BI | PostgreSQL тип | Power BI тип | NULL | Роль | Аддитивность | Скрыть |
 |---|---|---|---|---|---|---|---|

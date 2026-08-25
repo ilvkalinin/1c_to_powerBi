@@ -52,6 +52,15 @@ membership-строки, 79 710 уникальных `клиент × клуб` 
 
 ## Целевые колонки `mart.client_base_snapshot`
 
+### Обязательная package-ветвь при будущей реализации
+
+`mart.client_base_snapshot` пока physical отсутствует (`NOT_EXECUTED`), но его
+source universe зафиксирован: обычные membership intervals объединяются с
+BR-037 valid child-package intervals. BR-038 присваивает package interval
+`age_group = «Дети»` при любом фактическом/неизвестном возрасте и вычитает его
+из обычного interval до club/network dedupe. Это `CONFIRMED user decision`;
+не создавать snapshot с одним `Reference59` universe.
+
 | Целевая колонка | Бизнес-описание | Источник/преобразование | PostgreSQL тип | NULL | Статус | Тест |
 |---|---|---|---|---|---|---|
 | `scope_level` | `club` или `network` | явная grouping branch | UNKNOWN | нет | CONFIRMED | allowed values |

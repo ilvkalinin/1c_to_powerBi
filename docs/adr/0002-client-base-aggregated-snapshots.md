@@ -24,7 +24,13 @@
 
 > scope level × report date × club (для club scope) × age × age group × gender × tenure × activity bucket.
 
-Хранить только `client_count`. Источник формирует временное объединение абонементов и детских пакетов, рассчитывает network-wide 30-дневную активность и создаёт два явных scope:
+Хранить только `client_count`. Источник формирует временное объединение
+абонементов и детских пакетов: package-ветвь обязана применять BR-037
+(positive, non-returned sales group; maximum eligible start; fallback при
+отсутствующей sales-group) и BR-038 (любой package — `Дети`, приоритет package
+interval над обычным membership interval). `age_years` остаётся фактическим.
+После source-side dedupe источник рассчитывает network-wide 30-дневную
+активность и создаёт два явных scope:
 
 - `club`: dedupe `(report_date, club_id, client_id)`;
 - `network`: dedupe `(report_date, client_id)`.
@@ -44,6 +50,11 @@
 ## Retention
 
 Retention требует пересечения client sets на VM-1, но на VM-2 должен попадать только агрегат. Создать отдельную физическую таблицу `mart.client_base_retention`.
+
+Baseline и current client set строятся из того же BR-037/BR-038 package-aware
+universe, что и snapshot. При package/membership overlap сохраняется один
+client-day с package classification `Дети`; правило применяется до
+baseline/current dedupe и пересечения cohorts.
 
 - baseline cohort строится на 1 января или сопоставимую дату прошлого года;
 - переход A → B считается удержанием для исходного клуба A;

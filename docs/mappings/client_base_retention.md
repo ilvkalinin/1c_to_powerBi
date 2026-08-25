@@ -24,6 +24,16 @@ Baseline cohort — уникальные клиенты на сравнител�
 
 Client IDs используются только внутри source-side пересечения и не сохраняются на VM-2.
 
+## Обязательная package-ветвь
+
+Baseline cohort и current set обязаны использовать тот же BR-037/BR-038
+package-aware universe, что `mart.client_base_daily`: valid child package
+включается после sales/return and maximum-start rule, получает тип `Дети` при
+любом фактическом/неизвестном возрасте и имеет приоритет над пересекающимся
+обычным membership interval. Правило применяется до baseline/current dedupe и
+semi-join. Это `CONFIRMED user decision`; physical mart и source SQL пока
+`NOT_EXECUTED`.
+
 ## Гранулярность
 
 > scope level × report date × comparison type/date × baseline club (для club scope) × current age × current age group × current gender × current tenure.
