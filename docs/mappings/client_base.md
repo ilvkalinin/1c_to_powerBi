@@ -1,6 +1,6 @@
 # Source-to-target mapping: агрегированный снимок «Клиентская база»
 
-Статус: `SNAPSHOT/RETENTION DEFERRED / client_base_daily INITIAL LOAD COMPLETED 2026-08-19`.
+Статус: `SNAPSHOT/RETENTION DEFERRED / client_base_daily BR-038 IMPLEMENTATION AND RERUN VALIDATED 2026-08-25`.
 Граница membership-снимка и необходимость раздельных scope подтверждены.
 Этот пакет касается только `mart.client_base_daily`; редкий snapshot, retention
 и их дополнительные разрезы остаются отдельными отложенными продуктами.
@@ -93,6 +93,29 @@ membership-строки, 79 710 уникальных `клиент × клуб` 
 не менять контракт редких снимков, а расширить домен отдельным компактным
 дневным набором `mart.client_base_daily`.
 
+### Подтверждённый gap детских пакетов
+
+Read-only review CB-PKG-001—003 2026-08-25 установил, что текущий extract
+`mart.client_base_daily` формирует universe только из `Reference59`; ветвь
+`Document346.VT4913 → ребёнок` в него не входит. Это противоречит
+подтверждённому определению клиентской базы «действующий абонемент **или
+детский пакет**», а не отсутствию package-полей в минимальном target grain.
+
+На 2026-08-25 child-package branch добавила бы 15 759 уникальных
+`ребёнок × клуб` и 15 714 уникальных детей сети сверх current membership
+universe. На всём BR-003 `[2025-01-01, 2027-01-01)` gap существует на каждом
+из 730 дней: 5 154 048/5 141 198 package-only client-days для club/network.
+Подробные controls и source-state границы: [review 2026-08-25](../reports/client_base_package_coverage_review_2026-08-25.md).
+
+S3-CBD-PKG-001 применяет BR-037 sales/return scope: 399 неположительных sales
+rows исключены, 52 строки без physical sales group сохранены. Пользователь
+подтвердил BR-038: все valid child packages получают `age_group = «Дети»`
+независимо от фактического возраста, который сохраняется в `age_years`.
+Package interval вычитается из обычного membership interval до агрегации, чтобы
+клиент не задваивался. У факта остаются семь колонок и тот же grain; наличие
+`Дети` при возрасте 14+ или неизвестном возрасте контролируется отдельным
+independent source reconciliation. Подробности: [решение](../reports/client_base_children_packages_age_contract_decision_2026-08-25.md) и [execution evidence](../reports/client_base_children_packages_execution_2026-08-25.md).
+
 Гранулярность:
 
 > уровень охвата × календарная дата × клуб (только для `club`) × возраст ×
@@ -104,7 +127,7 @@ membership-строки, 79 710 уникальных `клиент × клуб` 
 | `report_date` | каждый календарный день целевой истории; снимок на 00:00 | календарь дней вместо понедельников/первых чисел | `date` | нет | CONFIRMED — решение пользователя | BR-005, SV-111 |
 | `club_id` | основной клуб доступа; `NULL` только для network | `Reference59.Fld687 → Reference132.ID` после membership dedupe → canonical hex text | `text` | только `network` | CONFIRMED source key | SV-111, S3-CBD-ADMISSION-001 |
 | `age_years` | возраст на отчётную дату | `Reference141X1.Fld1507` и `report_date`; sentinel `0001-01-01` → `NULL` | `smallint` | да | CONFIRMED current client-base rule | SV-111 |
-| `age_group` | дети `<14`, юниоры `14–17`, взрослые `18+`, `Не указано` | `age_years` | `NULL age_years → «Не указано»`; рассчитанный возраст `<14`, включая отрицательный при будущей дате рождения, → «Дети» | `text` | нет | CONFIRMED user decision 2026-07-30, clarified 2026-08-19 | full-horizon CBD load |
+| `age_group` | `Дети` для BR-038 package-interval либо возраста `<14`; юниоры `14–17`, взрослые `18+`, `Не указано` | `age_years` и source-kind до агрегации | package получает `Дети` при любом фактическом/неизвестном возрасте; иначе `NULL → «Не указано»`, возраст `<14`, включая отрицательный, → `Дети` | `text` | нет | CONFIRMED BR-038 user decision 2026-08-25 | full-horizon CBD load + independent package-origin control |
 | `gender` | пол клиента на отчётную дату либо `Не указано` | `Reference141X1.Fld1527` → two confirmed current codes; other/`NULL` → `Не указано` | `text` | нет | CONFIRMED current rule | SV-111 |
 | `client_count` | уникальные действующие клиенты в scope и разрезах | distinct client after BR-005 and scope-specific dedupe | `bigint` | нет | CONFIRMED source formation | SV-111, S3-CBD-ADMISSION-001 |
 

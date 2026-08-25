@@ -24,8 +24,8 @@ SELECT
            OR gender NOT IN ('Женский', 'Мужской', 'Не указано')
            OR client_count IS NULL OR client_count <= 0
            OR NOT (
-               (age_years IS NULL AND age_group = 'Не указано')
-               OR (age_years < 14 AND age_group = 'Дети')
+               age_group = 'Дети'
+               OR (age_years IS NULL AND age_group = 'Не указано')
                OR (age_years BETWEEN 14 AND 17 AND age_group = 'Юниоры')
                OR (age_years >= 18 AND age_group = 'Взрослые')
            )
@@ -34,6 +34,20 @@ SELECT
         WHERE report_date < $1::date OR report_date >= $2::date
     ) AS rows_outside_horizon
 FROM mart.client_base_daily;
+
+-- CBD-REC-001A: BR-038 visibility. Age 14+ or unknown values in `Дети` are
+-- permitted only for the child-package source branch and must be reconciled to
+-- its independent source control captured for the same snapshot.
+SELECT scope_level,
+       count(*)::bigint AS aggregate_rows,
+       coalesce(sum(client_count), 0)::bigint AS client_days
+FROM mart.client_base_daily
+WHERE report_date >= $1::date
+  AND report_date < $2::date
+  AND age_group = 'Дети'
+  AND (age_years IS NULL OR age_years >= 14)
+GROUP BY scope_level
+ORDER BY scope_level;
 
 -- CBD-REC-002: target daily totals by scope. Expected one positive total for
 -- every date and scope; each value equals the independently captured source

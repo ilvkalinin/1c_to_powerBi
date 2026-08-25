@@ -5,4 +5,4 @@
 # CLOSED_PENDING_NEXT_APPROVAL rejects all new selections until the user
 # explicitly confirms the next independent package.
 gate_id	state	allowed_stage	allowed_report_ids	reason
-global_stage_gate	CLOSED_PENDING_NEXT_APPROVAL	-	-	preparation_renewal_checkpoint closed 2026-08-24 with validated initial load and atomic rerun; Power BI remains outside scope under BR-036 and every further report requires a new independent package.
+global_stage_gate	CLOSED_PENDING_NEXT_APPROVAL	-	-	Client-base BR-037/BR-038 implementation closed 2026-08-25. A new independent package requires explicit user approval after normal package-selection review.

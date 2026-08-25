@@ -1,6 +1,6 @@
 # Data contract: «Клиентская база»
 
-Статус: `client_base_daily INITIAL LOAD COMPLETED / snapshot and retention deferred`. Контракт Power BI определён. SV-111 подтвердил daily source formation на всём BR-003; начальная загрузка 2026-08-19 прошла точную source-to-target сверку. Snapshot и retention сохраняют свои отдельные отложенные вопросы.
+Статус: `client_base_daily BR-038 implementation and atomic rerun validated / snapshot and retention deferred`. Контракт Power BI определён. SV-111 подтвердил daily membership-source formation на всём BR-003; начальная загрузка 2026-08-19 прошла точную source-to-target сверку. CB-PKG-001—003 2026-08-25 подтвердил child-package gap; S3-CBD-PKG-001 добавил его без изменения stable target columns или Power BI. BR-038 относит любой valid child package к `Дети` при сохранении factual age и independent source-side provenance control. Snapshot и retention сохраняют свои отдельные отложенные вопросы.
 
 ## Общие параметры
 
@@ -43,8 +43,12 @@
 `scope_level = club` требует клуб; `network` требует пустой клуб. Пол и
 возрастная группа не бывают пустыми: неизвестное значение — `Не указано`.
 Для `mart.client_base_daily` рассчитанный возраст меньше 14 лет, включая
-отрицательный возраст при будущей дате рождения, сохраняется в группе `Дети`:
-это подтверждённое воспроизведение текущего Power Query отчёта.
+отрицательный возраст при будущей дате рождения, сохраняется в группе `Дети`.
+По BR-038 valid child package также получает группу `Дети` при любом
+фактическом или неизвестном возрасте; package interval имеет source-side
+приоритет над обычным membership interval. В fact не добавляется source-type
+колонка, поэтому age 14+/unknown в `Дети` сверяется с отдельным независимым
+package-origin control. Power BI contract, import и модель не меняются.
 Календарь и клубы фильтруют факт `1:*`, однонаправленно; связи fact-to-fact и
 many-to-many запрещены. DAX выбирает scope и считает среднее по выбранным дням.
 
