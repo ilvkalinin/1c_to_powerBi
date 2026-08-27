@@ -5,4 +5,4 @@
 # CLOSED_PENDING_NEXT_APPROVAL rejects all new selections until the user
 # explicitly confirms the next independent package.
 gate_id	state	allowed_stage	allowed_report_ids	reason
-global_stage_gate	CLOSED_PENDING_NEXT_APPROVAL	-	-	Client-base snapshot/retention product-admission package closed 2026-08-27 with successful atomic rerun and zero-deviation controls. A new independent package requires explicit user approval.
+global_stage_gate	CLOSED_PENDING_NEXT_APPROVAL	-	-	Project future-date compliance audit closed 2026-08-27 with all canonical physical mart facts at zero future rows. A new independent package requires explicit user approval.

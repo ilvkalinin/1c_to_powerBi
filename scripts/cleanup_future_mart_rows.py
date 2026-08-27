@@ -20,16 +20,39 @@ if str(ROOT) not in sys.path:
 from scripts.mart_connection import connect_with_retry, load_project_env
 
 
-# Only materialized facts whose date field represents a fact/checkpoint date.
-# Views, loading tables and descriptive contract dates are deliberately absent.
+# Only materialized facts whose column is the date/timestamp of the fact itself.
+# Views and descriptive dates (for example contract end or activation attributes)
+# are deliberately absent: they may be future while the fact row is valid today.
 FACT_DATE_COLUMNS = (
+    ("administrator_card_gymmy_daily", "event_date"),
+    ("ancillary_revenue_movement", "service_date"),
     ("client_base_daily", "report_date"),
     ("client_base_snapshot", "report_date"),
     ("client_base_retention", "report_date"),
+    ("club_attendance_hourly", "visit_date"),
+    ("club_day_metrics", "event_date"),
+    ("crm_interaction", "report_date"),
+    ("crm_interaction_phone", "phone_at"),
+    ("dpfu_plan_assignment", "plan_date"),
+    ("feedback_interaction", "created_at"),
+    ("fitness_leads_funnel_task", "task_date"),
+    ("fitness_leads_funnel_task_service", "service_date"),
+    ("group_lesson", "lesson_start_at"),
+    ("guest_visit_conversion", "guest_visit_date"),
+    ("ip_revenue_daily", "revenue_date"),
+    ("ip_training_daily", "training_date"),
+    ("lesson_room_slot_5m", "slot_start_at"),
+    ("marketing_funnel_task", "task_date"),
     ("membership_contract_kpi_unit", "metric_date"),
+    ("membership_receipt_movement", "receipt_date"),
+    ("new_first_visit", "first_visit_date"),
     ("newcomer_engagement_milestone", "checkpoint_date"),
     ("newcomer_engagement_second_month", "month_of_engagement"),
+    ("prebooking_state_event", "state_event_at"),
     ("preparation_renewal_checkpoint", "checkpoint_date"),
+    ("revenue_group_summary_daily", "revenue_date"),
+    ("visit_client_day", "visit_date"),
+    ("visit_client_day__loading", "visit_date"),
 )
 
 
@@ -88,7 +111,7 @@ def main() -> None:
     )
     try:
         with target.cursor() as cursor:
-            cursor.execute("BEGIN")
+            cursor.execute("BEGIN ISOLATION LEVEL REPEATABLE READ")
             cursor.execute("SET LOCAL lock_timeout = '60s'")
             cursor.execute("SET LOCAL statement_timeout = '180s'")
             before = {
