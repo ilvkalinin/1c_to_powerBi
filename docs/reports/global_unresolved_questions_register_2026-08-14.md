@@ -68,7 +68,7 @@ blocker и не подменяется догадкой. Граница и то�
 | 12 | Загрузка ОП | `VALIDATION_REQUIRED` | Interaction/phone grain, кадровые даты и full-population/state controls CRM. | `mart.crm_interaction`, `mart.v_sales_interaction`; SV-084; ADR-0016 |
 | 13 | Отчёт по поступлениям | `VALIDATION_REQUIRED` | States/sign и predecessor `MIN(ID)` остаются к проверке. Recurring KPI-unit подтверждён как `contract × payment_period` с суммой движений (SV-096). | `mart.membership_receipt_movement`, `mart.membership_contract_kpi_unit`; SV-083/096; ADR-0017 |
 | 14 | Отчёт по промокодам | `DECISION_REQUIRED` | Join размножает движения; legacy `MAX/SUM/Table.Distinct` и DAX fallback нельзя заменить дедупликацией. | `mart.promo_application`; SV-090/091; ADR-0018 |
-| 15 | Продажа детских пакетов | `VALIDATION_REQUIRED` | Для 38 строк без line-to-line price/product согласован fallback `0`; знак возврата и source states остаются к проверке. | `mart.children_package_sale`; SV-085/095; ADR-0019 |
+| 15 | Продажа детских пакетов | `IMPLEMENTED / VALIDATED` | BR-039 воспроизводит report-grain возвратов без выдуманной line-level allocation; 2026-08-27 atomic rerun и 11 reconciliation controls прошли с нулевым отклонением. | `mart.children_package_sale`; CPS-LOAD-001—006; ADR-0019 |
 | 16 | Управление продлением | `VALIDATION_REQUIRED` | Требуются полные cardinality controls для same-client/first-start, статусов и CRM; текущая эвристика не становится прямой ссылкой. | `mart.renewal_management_contract`; SV-081; ADR-0007 |
 | 17 | Отчёт по %Renew | `VALIDATION_REQUIRED` | Contract key, current window/`COUNT(*)`, `Fld693` и финализация закрытого месяца. | `mart.contract_usage`; SV-082; ADR-0006 |
 | 18 | Выручка рецепции | `VALIDATION_REQUIRED` | Атрибуция продавца и точный report view поверх общего факта; `_document294` не добавляется без решения об изменении атрибуции. | `mart.v_reception_revenue_daily`; SV-050—053; ADR-0005 |
@@ -117,7 +117,7 @@ blocker и не подменяется догадкой. Граница и то�
 | `mart.new_first_visit` | `VALIDATION_REQUIRED` | First-rank tie-break и PII-detail grain. |
 | `mart.guest_visit_conversion` | `BLOCKED` | Точный PBI service/rank artifact отсутствует; статус/конверсия не выбираются эвристикой. |
 | `mart.fitness_leads_funnel_task` | `VALIDATION_REQUIRED` | Task code уникален в report scope; CRM joins/states наблюдены. Остаются traffic/reconciliation/SLA controls. |
-| `mart.children_package_sale` | `VALIDATION_REQUIRED` | Check-line price/product, возвраты и states. |
+| `mart.children_package_sale` | `IMPLEMENTED / VALIDATED` | Signed BR-039 output, states, contract, horizon and atomic rerun accepted 2026-08-27; Power BI switch remains deferred by BR-036. |
 | `mart.promo_application` | `DECISION_REQUIRED` | Устранение join-multiplicity без изменения legacy результата. |
 | `mart.ancillary_revenue_movement` | `IMPLEMENTED` | Собственный admission закрыт; повторная загрузка запрещена без нового триггера. |
 | `mart.dpfu_plan_assignment` | `IMPLEMENTED` | Собственный admission закрыт; плановые потребители ещё требуют report-level controls. |

@@ -63,7 +63,7 @@ phone child, compact feedback fact, `club_day_metrics` и три views были
 | 3 | `mart.v_administrator_bookings_daily` | PROPOSED; technical validation blocked | Есть общий revenue fact, но booking-to-movement cardinality и суммы не подтверждены; нельзя создавать view до этой проверки. |
 | 3 | `mart.client_base_snapshot` | ACCEPTED; SV-069 partially validated | Daily fact не заменяет редкие snapshot-строки; требуются точные package/visit/state controls и output representation. |
 | 3 | `mart.client_base_retention` | ACCEPTED; SV-069 foundation only | Имеет иной baseline-cohort grain, поэтому не является расширением daily/snapshot; нужно отдельное retention evidence. |
-| 4 | `mart.children_package_sale` | DESIGNED; technical validation blocked | Child × package × receipt и return semantics требуют завершить технические checks; общий revenue fact не утверждён как замена. |
+| 4 | `mart.children_package_sale` | IMPLEMENTED / VALIDATED — BR-039 | 19,412-row atomic rerun and zero-deviation reconciliation closed 2026-08-27; общий revenue fact не утверждён как замена. |
 | 4 | `mart.promo_application` | DESIGNED; technical validation required | Discount/gift и 45-day outcomes имеют отдельные grains; нужна source validation до planning. |
 | 4 | `mart.contract_usage` | PROPOSED; technical validation blocked | Нужен для %Renew; frozen semantics явно не совместима с renewal-management. |
 | 4 | `mart.renewal_management_contract` | PROPOSED; technical validation blocked | Широкий current-contract продукт с Renew, PII и CRM; не reuse `contract_usage`. |

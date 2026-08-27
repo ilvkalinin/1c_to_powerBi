@@ -1,8 +1,35 @@
 # Source-to-target mapping: продажи детских пакетов
 
-Статус: `BUSINESS RULES CONFIRMED / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-085; Stage 3 deferred`.
+Статус: `VALIDATED — Stage 3 product admission 2026-08-27`.
 
-Mapping основан на текущем SQL/M/DAX, metadata и решениях пользователя от 2026-07-24. Для 38 строк без доказанной цены/номенклатуры пользователь 2026-08-17 подтвердил fallback `0`; source-артефакт сохранён. `mart.children_package_sale` спроектирован в ADR-0019; реализация по-прежнему требует проверки возврата и source states.
+Mapping сохраняет отображаемый contract current Power BI и применяет для
+возвратов точный алгоритм переданного 1С-отчёта `ПродажиДопПакетов.erf` по
+BR-039. Для 38 строк без доказанной цены/номенклатуры пользователь 2026-08-17
+подтвердил fallback `0`; source-артефакт сохранён. Physical rerun,
+source-to-target reconciliation и target contract закрыты с нулевым
+отклонением; подробные execution values — в Stage 3 admission evidence.
+
+## Active Stage 3 mapping — BR-039
+
+Этот раздел имеет приоритет над историческим SV-085 mapping ниже. Он
+воспроизводит одновременно current-Power-BI eligibility взрослого абонемента
+и return branch отчёта 1С; `BR-037` в нём не используется.
+
+| Target | Source / transformation | NULL | Status / control |
+|---|---|---|---|
+| `report_row_id` | MD5 canonical raw values final `DISTINCT` output BR-039 | нет | VALIDATED full: duplicate = 0 |
+| `sale_at`, `sale_date` | `AccumRg7646.Fld7647 → Document346.Date_Time`, calendar date | нет | CONFIRMED ERF / current PBI horizon |
+| `source_sale_club_id`, `source_sale_employee_id` | `Document346.Fld4895/Fld4909` | да | CONFIRMED ERF; hidden output-key fields |
+| `club_id`, `club_name` | `VT4913.Fld4915 → Reference59.Fld687 → Reference132` | ID нет; name да | CONFIRMED current PBI; 28 name orphans preserved |
+| membership fields | `VT4913.Fld4915 → Reference59` | нет | CONFIRMED; PBI filters `end > start`, activation and adult non-null |
+| adult fields | `AccumRg7646.Fld7648 → Reference141X1` | нет | CONFIRMED ERF; 4 mismatches prohibit membership substitution |
+| child fields | `VT4913.Fld4916 → Reference141X1` | нет | VALIDATED full: orphan = 0 after scope |
+| product fields | `AccumRg7646.Fld7649 → Reference163` | нет | CONFIRMED ERF; 54 mismatches prohibit stock substitution |
+| `package_amount`, `package_amount_without_discount`, `package_count`, `movement_kind` | exact `CASE` of `ПродажиДопПакетов.erf` from `Fld7657/7659/7660` and matched stock amount/quantity | нет | VALIDATED source output: 123 returns / −227 500 |
+| `sold_correctly_flag` | month(sale date) = month(`Reference59.Fld674`) | нет | CONFIRMED current report rule; null/sentinel = 0 |
+
+Final source set filters `child_ref IS NOT NULL`, so the 598 no-child rows of
+the external-report intermediate output do not become a mart fact by BR-038.
 
 ## Stage 2 evidence — SV-085
 
@@ -18,15 +45,20 @@ SV-076: `VT4913` содержит 46 470 unique physical rows; каждая им
 
 ## Подтверждённая гранулярность
 
-Одна строка:
+Одна строка — результат переданного 1С-отчёта после его двух `DISTINCT`:
 
-> один дополнительный пакет одного ребёнка из строки `Document346.VT4913`; две строки детей в одном чеке считаются двумя пакетами.
+> movement `AccumRg7646` × child-package row, соединённые по
+> `ДокументПродажи × Контрагент`; child row предварительно связана со строкой
+> запасов строго по `receipt_id × КлючСтроки`.
 
-Кандидат логического ключа:
+Это намеренно не line-level allocation возврата: так устроен подтверждённый
+отчёт 1С (BR-039). После current-PBI filters в месяце `2025-08` он дал 2 001
+output row с ребёнком, включая 1 возврат; full BR-003 current snapshot —
+19 412 rows с ребёнком, включая 123 возвратных. Технический deterministic key
+конечного output validated: duplicate = 0; все columns final extract имеют
+mapped source/type/NULL-policy/control.
 
-> `(receipt_id, additional_package_line_no)`.
-
-## Предварительные целевые поля
+## Исторический SV-085 mapping (не используется в реализации BR-039)
 
 | Целевая колонка | Бизнес-описание | Источник / преобразование | Тип PostgreSQL | NULL | Статус | Проверка до SQL |
 |---|---|---|---|---|---|---|
@@ -51,7 +83,7 @@ SV-076: `VT4913` содержит 46 470 unique physical rows; каждая им
 | `product_id` | номенклатура пакета | `VT4924.Fld4932`; для отсутствующей строки `VT4924` → `'0'` | `text` | нет | CONFIRMED user fallback 2026-08-17 | SV-095 coverage |
 | `product_name` | название пакета | `Reference163.Description`; для отсутствующей строки `VT4924` → `'0'` | `text` | нет | CONFIRMED user fallback 2026-08-17 | SV-095 coverage |
 | `package_amount` | итоговая стоимость строки; возврат отражается отрицательной суммой | `VT4924.Fld4938`; для отсутствующей строки `VT4924` → `0` | `numeric` | нет | CONFIRMED user fallback 2026-08-17 | SV-095 coverage; возврат отдельно |
-| `package_count` | одна продажная строка ребёнка — один пакет; возврат использует доказанный знак движения источника | `1` для подтверждённой продажи; знак возврата из `AccumRg7739.Fld7748` либо иного доказанного признака | `integer` | нет | CONFIRMED grain / source VALIDATION_PENDING — implementation blocker | количество > 1, знак возврата |
+| `package_count` | количество строки output со знаком | точный `CASE` `ПродажиДопПакетов.erf`: сверить `AccumRg7646.Fld7657` и `VT4924.Fld4930`; для `Fld7660 < 0` умножить итог на `-1` | `numeric` | нет | CONFIRMED BR-039 / output-key validation pending | return and multiplicity reconciliation |
 | `sold_correctly_flag` | продажа в том же месяце и году, что приобретение взрослого абонемента | `date_trunc('month', sale_at) = date_trunc('month', Reference59.Fld674)`; активация не участвует | `boolean` | нет | CONFIRMED — report description | null/sentinel purchase date |
 
 ## Отбор
@@ -65,7 +97,10 @@ SV-076: `VT4913` содержит 46 470 unique physical rows; каждая им
 - тип номенклатуры `Дополнительный клиент`;
 - дата чека от `2025-06-01`.
 
-Целевой период следует общей календарной политике. Возврат не исключается: его сумма должна поступать со знаком минус. Статус, sentinel, проведение и технический признак возврата проверяются на источнике.
+Целевой период следует общей календарной политике. Возврат не исключается:
+его сумма и количество считаются точным `CASE` `ПродажиДопПакетов.erf` по
+BR-039. `AccumRg7739` не является источником знака возврата в этой витрине.
+Статус, sentinel, проведение и output-key проверяются на источнике.
 
 ## Power BI
 
@@ -93,18 +128,15 @@ SV-076: `VT4913` содержит 46 470 unique physical rows; каждая им
 
 До разбора остальных отчётов не создавать универсальный факт продаж. Проверить общий grain и правила с отчётами поступлений, рецепции, ДПФУ и сводной выручки.
 
-## Блокеры
+## Открытые technical controls
 
-1. `DECISION_REQUIRED`: return movements `AccumRg7646` подтверждены только на
-   группе чек × взрослый × номенклатура; в fresh snapshot 5 712 child-package
-   lines находятся в multi-line sales-group, поэтому знак нельзя распределить
-   на `VT4913` child-line
-   без нового бизнес-правила. `LIMIT 1` и произвольное распределение запрещены.
-   Проверка технических полей за репрезентативный месяц не расширила ключ:
-   `AccumRg7646.LineNo` не совпадает с line ребёнка глобально, а
-   `VT4913.Fld9108` по metadata означает «ТипДополненияАбонемента» и не может
-   служить ключом для полей регистра «Партия», «Договор» или «Абонемент».
-   Формальное совпадение их `bytea`-значений не является relationship evidence.
+1. `VALIDATED`: BR-039 снимает прежний `DECISION_REQUIRED` по
+   line-level allocation. Распаковка `.erf` подтвердила фактический report join
+   `ДокументПродажи × Контрагент`, без line/product/party matching. Попытка
+   «улучшить» его через партию неэквивалентна: на месяце 548 из 2 000 child
+   lines всё ещё делят один movement key. Full ERF control доказал стабильный
+   `DISTINCT` output-key (duplicate = 0); exact report multiplicity сохраняется,
+   а не преобразуется в line allocation.
 2. `VALIDATED`: в fresh BR-003 snapshot все 19 284 строки current legacy
    status `859cb45b51f9e02c4fb16764c804af3d` проведены и не помечены на
    удаление; все 18 387 соответствующих движений `AccumRg7646` имеют
