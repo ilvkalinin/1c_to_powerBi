@@ -360,7 +360,8 @@ WITH constants AS (
            count(DISTINCT visit_at)::bigint AS visit_payloads,
            count(DISTINCT visit_at::date)::bigint AS visit_day_payloads,
            count(DISTINCT (contract_start, contract_end))::bigint AS contract_payloads,
-           count(DISTINCT (client_ref, club_ref, employee_id, service_id))::bigint AS dimension_payloads
+           count(DISTINCT (client_ref, club_ref, employee_id, service_id))::bigint AS dimension_payloads,
+           max((quantity * service_time)::numeric) AS coupon_minutes
     FROM salary_candidate
     GROUP BY client_code, club_name, division_name, employee_name, service_name, class_start
 )
@@ -377,10 +378,123 @@ SELECT 'EW-V03B'::text AS control_id,
        count(*) FILTER (WHERE visit_day_payloads > 1)::bigint AS collapsed_keys_with_divergent_visit_day,
        count(*) FILTER (WHERE contract_payloads > 1)::bigint AS collapsed_keys_with_divergent_contract_payload,
        count(*) FILTER (WHERE dimension_payloads > 1)::bigint AS collapsed_keys_with_divergent_dimension_ids,
+       coalesce(sum(coupon_minutes), 0)::numeric AS current_m_distinct_coupon_minutes,
        (SELECT count(*)::bigint FROM salary_candidate
          WHERE quantity IS NULL OR service_time IS NULL OR quantity * service_time <= 0)
            AS nonpositive_or_null_coupon_minutes_rows
 FROM key_groups;
+
+-- EW-S3-LESSON. Independent aggregate for the two direct lesson branches of
+-- the physical target. It intentionally does not reuse the COPY extract.
+WITH constants AS (
+    SELECT decode('a0d533e2ede766b3408ad9ef5403fadd', 'hex') AS pz_status_ref,
+           decode('00000000000000000000000000000000', 'hex') AS empty_ref
+), pz AS MATERIALIZED (
+    SELECT p._fld4306 AS start_at, p._fld4307 AS end_at
+    FROM public._document329 AS p
+    JOIN public._reference163 AS service ON service._idrref = p._fld4316rref
+    JOIN public._reference70 AS activity ON activity._idrref = service._fld1733rref
+    LEFT JOIN public._document329_vt4352 AS vt ON vt._document329_idrref = p._idrref
+    CROSS JOIN constants AS c
+    WHERE p._fld4306 >= $1::date AND p._fld4306 < $2::date
+      AND p._fld4323rref = c.pz_status_ref AND p._posted
+      AND p._fld4306 IS NOT NULL AND p._fld4307 > p._fld4306
+      AND p._fld4310rref IS NOT NULL AND p._fld4322rref IS NOT NULL
+      AND NOT EXISTS (
+          SELECT 1 FROM public._document313 AS cancel
+          WHERE cancel._fld3810_rrref = p._idrref
+      )
+), gz AS MATERIALIZED (
+    SELECT g._fld3218 AS start_at, g._fld3219 AS end_at
+    FROM public._document279 AS g
+    JOIN public._reference163 AS service ON service._idrref = g._fld3226rref
+    JOIN public._reference70 AS activity ON activity._idrref = service._fld1733rref
+    CROSS JOIN constants AS c
+    WHERE g._fld3218 >= $1::date AND g._fld3218 < $2::date
+      AND g._fld3231rref = c.empty_ref AND NOT g._marked
+      AND g._fld3218 IS NOT NULL AND g._fld3219 > g._fld3218
+      AND g._fld3224rref IS NOT NULL AND g._fld3223rref IS NOT NULL
+)
+SELECT 'EW-S3-LESSON'::text AS control_id,
+       (SELECT count(*)::bigint FROM pz) AS pz_target_rows,
+       (SELECT coalesce(sum(extract(epoch FROM end_at - start_at) / 60.0), 0)::numeric FROM pz)
+           AS pz_target_minutes,
+       (SELECT count(*)::bigint FROM gz) AS gz_target_rows,
+       (SELECT coalesce(sum(extract(epoch FROM end_at - start_at) / 60.0), 0)::numeric FROM gz)
+           AS gz_target_minutes,
+       least((SELECT min(start_at::date) FROM pz), (SELECT min(start_at::date) FROM gz))
+           AS lesson_min_date,
+       greatest((SELECT max(start_at::date) FROM pz), (SELECT max(start_at::date) FROM gz))
+           AS lesson_max_date;
+
+-- EW-S3-DUTY. Independent BR-040 aggregate.  The raw join multiplicity is
+-- preserved; only its final residual is clamped to zero.
+WITH constants AS (
+    SELECT decode('4296a4bf013441d111e7cae05001072c', 'hex') AS coupons_parent_ref,
+           decode('9a5a4c90d2b1aede4b91dcd1abe84c43', 'hex') AS visit_operation_ref,
+           decode('bf4b50662e88eb7b44046ebf4849976f', 'hex') AS club_card_type_ref,
+           decode('bd57e817bb8afd31455f678cd21a2f8e', 'hex') AS duty_type_ref
+), coupon_services AS MATERIALIZED (
+    SELECT s._idrref FROM public._reference163 AS s CROSS JOIN constants AS c
+    WHERE s._parentidrref = c.coupons_parent_ref
+), sessions_pre AS MATERIALIZED (
+    SELECT rg._period::date AS session_date, rg._fld7008rref AS client_ref,
+           rg._fld7009rref AS club_ref, doc._fld4322rref AS employee_ref,
+           doc._fld4306 AS session_start, doc._fld4307 AS session_end,
+           service._fld1733rref AS activity_ref
+    FROM public._inforg7006 AS rg
+    JOIN public._document329 AS doc ON doc._idrref = rg._fld7007_rrref
+    JOIN public._enum448 AS state ON state._idrref = rg._fld7013rref
+    JOIN coupon_services AS cs ON cs._idrref = rg._fld7010rref
+    JOIN public._reference163 AS service ON service._idrref = rg._fld7010rref
+    WHERE rg._period >= $1::date AND rg._period < $2::date
+      AND state._enumorder = 4 AND doc._fld4306 IS NOT NULL AND doc._fld4307 > doc._fld4306
+), visits AS MATERIALIZED (
+    SELECT v._fld4171rref AS client_ref, v._fld4167rref AS club_ref,
+           v._date_time::date AS visit_date, v._fld4172 AS visit_start
+    FROM public._document325 AS v CROSS JOIN constants AS c
+    JOIN (SELECT DISTINCT client_ref FROM sessions_pre) AS clients ON clients.client_ref = v._fld4171rref
+    WHERE v._date_time >= $1::date AND v._date_time < $2::date
+      AND v._fld4164rref = c.visit_operation_ref
+), contracts AS MATERIALIZED (
+    SELECT r._fld681rref AS client_ref,
+           CASE WHEN r._fld671 <> DATE '0001-01-01' THEN r._fld671 ELSE r._fld674 END AS contract_start,
+           r._fld672 AS contract_end
+    FROM public._reference59 AS r CROSS JOIN constants AS c
+    WHERE r._fld696rref = c.club_card_type_ref AND r._fld672 > $1::date
+      AND r._fld681rref IN (SELECT DISTINCT client_ref FROM sessions_pre)
+), sessions AS MATERIALIZED (
+    SELECT p.session_date, p.club_ref, p.employee_ref, p.session_start, p.session_end
+    FROM sessions_pre AS p
+    JOIN visits AS v ON v.client_ref = p.client_ref AND v.club_ref = p.club_ref
+                    AND v.visit_date = p.session_date AND v.visit_start <= p.session_end
+    JOIN contracts AS c ON c.client_ref = p.client_ref
+    LEFT JOIN public._reference70 AS division ON division._idrref = p.activity_ref
+    WHERE c.contract_end > p.session_start
+      AND ((division._description::text = 'Водные программы' AND p.session_start::date >= c.contract_start::date)
+        OR (p.session_start::date >= c.contract_start::date
+            AND p.session_start::date - c.contract_start::date < 31))
+), duties AS MATERIALIZED (
+    SELECT d._fld7108rref AS club_ref, d._fld7109rref AS employee_ref,
+           d._fld7113rref AS room_ref, d._fld7110 AS start_at, d._fld7111 AS end_at,
+           d._fld7115::numeric AS duty_minutes
+    FROM public._inforg7107 AS d CROSS JOIN constants AS c
+    WHERE d._fld7112rref = c.duty_type_ref AND d._fld7110 >= $1::date AND d._fld7110 < $2::date
+      AND d._fld7111 > d._fld7110
+), clean AS MATERIALIZED (
+    SELECT d.start_at, greatest(0::numeric, d.duty_minutes - coalesce(sum(
+               extract(epoch FROM least(d.end_at, s.session_end) - greatest(d.start_at, s.session_start)) / 60.0
+           ), 0::numeric)) AS clean_minutes
+    FROM duties AS d LEFT JOIN sessions AS s
+      ON s.club_ref = d.club_ref AND s.employee_ref = d.employee_ref
+     AND s.session_date = d.start_at::date AND s.session_start < d.end_at AND s.session_end > d.start_at
+    GROUP BY d.club_ref, d.employee_ref, d.room_ref, d.start_at, d.end_at, d.duty_minutes
+)
+SELECT 'EW-S3-DUTY'::text AS control_id, count(*)::bigint AS duty_target_rows,
+       coalesce(sum(clean_minutes), 0)::numeric AS clean_duty_minutes,
+       min(start_at::date) AS duty_min_date, max(start_at::date) AS duty_max_date,
+       count(*) FILTER (WHERE clean_minutes = 0)::bigint AS zero_clean_duty_rows
+FROM clean;
 
 -- EW-V04. Expected: each active plan registry technical key occurs once.
 SELECT 'EW-V04'::text AS control_id,

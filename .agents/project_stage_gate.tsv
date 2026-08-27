@@ -5,4 +5,4 @@
 # CLOSED_PENDING_NEXT_APPROVAL rejects all new selections until the user
 # explicitly confirms the next independent package.
 gate_id	state	allowed_stage	allowed_report_ids	reason
-global_stage_gate	CLOSED_PENDING_NEXT_APPROVAL	-	-	Employee activity follow-up Stage 2 closed 2026-08-27: coupon-visit repeats do not change output day/minutes/IDs and BR-040 clamps negative clean duty to zero. An independently approved immutable Stage 3 plan is required before DDL/DML/COPY; Power BI remains prohibited.
+global_stage_gate	CLOSED_PENDING_NEXT_APPROVAL	-	-	Employee activity Stage 3 technical SQL review closed 2026-08-27. The immutable physical set is ready, but DDL/DML/COPY require explicit admission approval after review; Power BI remains prohibited.
