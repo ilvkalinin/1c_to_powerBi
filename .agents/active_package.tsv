@@ -4,7 +4,7 @@
 # package_status must be ACTIVE or CLOSED; report_status must be PENDING, IN_PROGRESS, COMPLETE, or BLOCKED.
 # approval_evidence must link to the user-approved full scope and closure criterion.
 package_id	stage	package_status	approved_at	approval_evidence
-children_package_sales_product_admission_2026-08-27	STAGE_3_PRODUCT_ADMISSION	CLOSED	2026-08-27	docs/reports/children_package_sales_stage3_product_admission_2026-08-27.md
+global_gate_employee_activity_interval_readonly_2026-08-27	STAGE_3_GLOBAL_REVIEW	CLOSED	2026-08-27	docs/reports/global_gate_employee_activity_interval_readonly_2026-08-27.md
 
 report_id	report_status	completion_commit
-children_package_sales	COMPLETE	SELF
+project_stage_gate_review	COMPLETE	SELF
