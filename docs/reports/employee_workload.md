@@ -1,6 +1,6 @@
 # Требования отчёта: «Загрузка сотрудников»
 
-Статус: `BUSINESS LOGIC COMPLETE / STAGE 2 VALIDATED / COUPON TIE DECISION REQUIRED`.
+Статус: `BUSINESS LOGIC COMPLETE / STAGE 2 VALIDATED / STAGE 3 SQL PLAN REQUIRED`.
 
 Договорной отчёт №6, блок «Фитнес». Анализ выполнен локально по двум
 предоставленным DOCX, текущему Power Query, DAX и скриншотам Power BI. К 1С и
@@ -57,9 +57,9 @@ BR-014).
   уменьшаются на пересечение с квалифицированными купонными занятиями.
 - Купоны: последние по `Period` записи `InfoRg7006`, статус `Enum448` order 4,
   посещение клиента в том же клубе/дне и интервал занятия. Фитнес-тест и
-  ACCUNIQ — «Купон 1», остальные найденные купоны — «Купон 2». Текущий
-  `Table.Distinct` имеет 149 ключей с разным сохраняемым payload, в том числе
-  `visit_date`, поэтому physical coupon row требует решения до DDL.
+  ACCUNIQ — «Купон 1», остальные найденные купоны — «Купон 2». У 149 текущих
+  `Table.Distinct` групп различается только время визита; день, минуты,
+  договор и IDs совпадают, поэтому physical coupon row детерминирован.
 - Часы в клубе: `Document325`, сотрудник связан с клиентом через
   `Reference225.Fld2504`; незакрытый визит заканчивается концом дня.
 
@@ -82,8 +82,8 @@ BR-014).
 |---|---|---|
 | CONFIRMED | `InfoRg7006 → Document329/Document279` и `VT4352`: PZ multiplicity сохраняется по `VT` line, GZ key — документ | EW-V02A |
 | BLOCKED (separate fact) | связь СКУД сотрудника через клиента может быть many-to-many | EW-V05: 1,292 multiple-link visits |
-| CONFIRMED legacy | пересечение купона и дежурства даёт 4 отрицательных остатка; первый релиз сохраняет current M по BR-018 | EW-V03A |
-| DECISION_REQUIRED | купонная `Table.Distinct` не задаёт детерминированный physical row | EW-V03B: 149 divergent payload keys |
+| CONFIRMED user decision | пересечение купона и дежурства даёт 4 отрицательных остатка; они обнуляются по BR-040 | EW-V03A |
+| CONFIRMED | coupon `Table.Distinct` имеет 149 повторов только по времени визита; physical row детерминирован | EW-FOLLOWUP-V03B |
 | NOT_APPLICABLE | `_СпрСтавки` — внешний файл Power BI | по решению пользователя 2026-07-30 не переносить в PostgreSQL; порог остаётся в модели Power BI |
 
 ## Учёт class-C критичности — 2026-08-13
@@ -107,3 +107,4 @@ SQL-атрибуции.
 - [разбор текущих запросов](employee_workload_query_review.md);
 - [source-to-target mapping](../mappings/employee_workload.md).
 - [Stage 2 validation](employee_activity_interval_stage2_validation_2026-08-27.md).
+- [Follow-up validation](employee_activity_interval_followup_validation_2026-08-27.md).

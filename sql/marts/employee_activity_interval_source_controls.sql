@@ -65,7 +65,7 @@ FROM states;
 -- cancellation document, and left-joins VT4352; it filters GZ by the empty
 -- cancellation-reason reference and deletion mark.  The VT join's observed
 -- excess is evidence only: current M assigns an index after the join, so a
--- future physical event key cannot choose to collapse it without a decision.
+-- future physical event key must preserve it.
 WITH constants AS (
     SELECT decode('a0d533e2ede766b3408ad9ef5403fadd', 'hex') AS pz_status_ref,
            decode('00000000000000000000000000000000', 'hex') AS empty_ref
@@ -278,9 +278,9 @@ JOIN unioned USING (duty_id);
 
 -- EW-V03B. Exact current-M coupon path within BR-003.  Power Query first
 -- retains the latest InfoRg7006 record per PZ × service and later applies
--- Table.Distinct to a descriptive business key.  A collapsed key with
--- divergent retained payload has no deterministic physical equivalent until
--- a business tie-break is approved.
+-- Table.Distinct to a descriptive business key. The expanded metrics separate
+-- a harmless visit-timestamp repeat from a divergence in a physical output
+-- field; only the latter would require a business tie-break.
 WITH constants AS (
     SELECT decode('4296a4bf013441d111e7cae05001072c', 'hex') AS coupons_parent_ref,
            decode('9a5a4c90d2b1aede4b91dcd1abe84c43', 'hex') AS visit_operation_ref,
@@ -355,7 +355,12 @@ WITH constants AS (
     SELECT client_code, club_name, division_name, employee_name, service_name, class_start,
            count(*)::bigint AS current_m_key_rows,
            count(DISTINCT (quantity, service_time, visit_at, contract_start, contract_end))::bigint
-               AS current_m_key_payloads
+               AS current_m_key_payloads,
+           count(DISTINCT (quantity, service_time))::bigint AS minute_payloads,
+           count(DISTINCT visit_at)::bigint AS visit_payloads,
+           count(DISTINCT visit_at::date)::bigint AS visit_day_payloads,
+           count(DISTINCT (contract_start, contract_end))::bigint AS contract_payloads,
+           count(DISTINCT (client_ref, club_ref, employee_id, service_id))::bigint AS dimension_payloads
     FROM salary_candidate
     GROUP BY client_code, club_name, division_name, employee_name, service_name, class_start
 )
@@ -367,6 +372,11 @@ SELECT 'EW-V03B'::text AS control_id,
        coalesce(sum(current_m_key_rows) FILTER (WHERE current_m_key_rows > 1), 0)::bigint
            AS rows_collapsed_by_current_m_distinct,
        count(*) FILTER (WHERE current_m_key_payloads > 1)::bigint AS collapsed_keys_with_divergent_payload,
+       count(*) FILTER (WHERE minute_payloads > 1)::bigint AS collapsed_keys_with_divergent_coupon_minutes,
+       count(*) FILTER (WHERE visit_payloads > 1)::bigint AS collapsed_keys_with_divergent_visit_payload,
+       count(*) FILTER (WHERE visit_day_payloads > 1)::bigint AS collapsed_keys_with_divergent_visit_day,
+       count(*) FILTER (WHERE contract_payloads > 1)::bigint AS collapsed_keys_with_divergent_contract_payload,
+       count(*) FILTER (WHERE dimension_payloads > 1)::bigint AS collapsed_keys_with_divergent_dimension_ids,
        (SELECT count(*)::bigint FROM salary_candidate
          WHERE quantity IS NULL OR service_time IS NULL OR quantity * service_time <= 0)
            AS nonpositive_or_null_coupon_minutes_rows

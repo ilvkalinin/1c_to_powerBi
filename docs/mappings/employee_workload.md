@@ -1,6 +1,6 @@
 # Source-to-target mapping: «Загрузка сотрудников»
 
-Статус: `BUSINESS MAPPING COMPLETE / STAGE 2 VALIDATED / COUPON TIE DECISION REQUIRED`.
+Статус: `BUSINESS MAPPING COMPLETE / STAGE 2 VALIDATED / STAGE 3 SQL PLAN REQUIRED`.
 
 Единственного source grain нет. Отчёт использует общий факт ДПФУ и дневной
 план, а для загрузки — самостоятельные события занятий, дежурств, купонов и
@@ -17,21 +17,22 @@
 
 Логический ключ: `activity_event_key`. ПЗ подтверждён как
 `Document329 ID × VT4352 line`, ГЗ — `Document279 ID`, дежурство — hash точной
-current-M группы. Купонная ветка не имеет детерминированного physical key:
-current `Table.Distinct` сокращает 13,584 строк до 13,428 и у 149 ключей
-сохраняемый payload различается.
+current-M группы, coupon — hash `(client_code, club_id, activity_id,
+employee_id, service_id, class_start)`. Current `Table.Distinct` сокращает
+13,584 строк до 13,428; у 149 ключей отличается только visit timestamp, а
+день, минуты, договор и IDs совпадают.
 
 | Целевая колонка | Бизнес-описание | Исходная таблица / колонка | Преобразование | PostgreSQL тип | NULL | Статус | Тест |
 |---|---|---|---|---|---|---|---|
-| `activity_date` | дата начала | `Document329.Fld4306` / `Document279.Fld3218` / `InfoRg7107.Fld7110` | дата начала ветки | `date` | нет | CONFIRMED current | EW-V01, EW-V03 |
+| `activity_date` | дата активности | `Document329.Fld4306` / `Document279.Fld3218` / `InfoRg7107.Fld7110` / `Document325.Date_Time` | дата начала; coupon — calendar day qualifying visit | `date` | нет | CONFIRMED current | EW-V01, EW-V03, EW-FOLLOWUP-V03B |
 | `club_id` | фактический клуб | `Document329.Fld4310` / `Document279.Fld3224` / `InfoRg7107.Fld7108` | стабильный ID, не название | UNKNOWN | нет | CONFIRMED source | EW-V01 |
 | `employee_id` | тренер/дежурный | `Document329.Fld4322` / `Document279.Fld3223` / `InfoRg7107.Fld7109` | ID `Reference225` | UNKNOWN | нет | CONFIRMED source | EW-V01 |
 | `activity_id` | направление | услуга → `Reference163.Fld1733 → Reference70`; дежурство — помещение → rule | не подменять помещением | `text` | да | CONFIRMED source / current classification pending for duty | EW-V03 |
 | `service_id` | услуга занятия | `Document329.Fld4316` / `Document279.Fld3226` | стабильный ID; `NULL` у дежурства | `text` | да | CONFIRMED source | EW-V02A |
 | `room_id` | помещение | `InfoRg7107.Fld7113` / `Document329.Fld4320` / `Document279.Fld3227` | ID `Reference191` | `text` | да | CONFIRMED source | EW-V03C |
-| `activity_kind` | тренировка / дежурство / купон 1 / купон 2 | ветка и классификация купона | явная константа | `text` | нет | CONFIRMED business; coupon materialization pending | EW-V02A, EW-V03B |
+| `activity_kind` | тренировка / дежурство / купон 1 / купон 2 | ветка и классификация купона | явная константа | `text` | нет | CONFIRMED business | EW-V02A, EW-V03B, EW-FOLLOWUP-V03B |
 | `start_at`, `end_at` | границы интервала | ветка занятия/дежурства | без округления до 15 минут | `timestamp` | нет | CONFIRMED current; 3 invalid GZ rows excluded | EW-V02A |
-| `duration_minutes` | длительность | интервалы; купон: `Fld7012 × Fld1767` | current M raw duty subtraction; coupon formula after a chosen tie rule | `numeric` | нет | CONFIRMED current / `DECISION_REQUIRED` for coupon row | EW-V03A, EW-V03B |
+| `duration_minutes` | длительность | интервалы; купон: `Fld7012 × Fld1767` | coupon formula; `GREATEST(0, raw duty − raw coupon overlap)` для дежурства | `numeric` | нет | CONFIRMED user decision | EW-V03A, EW-FOLLOWUP-V03B, BR-040 |
 | `payment_kind` | платно / бесплатно / дежурство | `Reference163.Fld1778`, ветка дежурства | текущая DAX-классификация | `text` | нет | CONFIRMED current / value pending | EW-V02 |
 
 ## Компонент B: переиспользуемые факты
@@ -73,8 +74,8 @@ current `Table.Distinct` сокращает 13,584 строк до 13,428 и у 
 | Статус | Элемент | Риск / причина | Проверка |
 |---|---|---|---|
 | CONFIRMED | ключи занятий и `VT4352` | PZ `Document329 × VT line`, GZ `Document279`; current VT multiplicity сохраняется | EW-V02A |
-| CONFIRMED legacy | купоны/дежурства | raw current-M subtraction даёт 4 отрицательных чистых дежурства; union не применяется без решения | EW-V03A / BR-018 |
-| DECISION_REQUIRED | купонный physical row | current `Table.Distinct` имеет 149 ключей с разным сохраняемым payload | EW-V03B |
+| CONFIRMED user decision | купоны/дежурства | `GREATEST(0, raw duty − raw coupon overlap)`; union не применяется | EW-V03A / BR-040 |
+| CONFIRMED | coupon physical row | 149 `Table.Distinct` повторов отличаются лишь visit timestamp; business key, minutes, day, contract и IDs инвариантны | EW-FOLLOWUP-V03B |
 | CONFIRMED | `InfoRg6612` | active/unique technical rows | EW-V04 |
 | BLOCKED (separate fact) | СКУД сотрудника | 1,292 visits имеют multiple employee links; `employee_presence_day` не создаётся | EW-V05 |
 | BLOCKED (not activity source) | кадровые интервалы | 655 nonpositive и 187 overlapping pairs; historical attribution не выдумывается | EW-V07 |

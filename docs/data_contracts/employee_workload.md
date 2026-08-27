@@ -1,12 +1,12 @@
 # Data contract: «Загрузка сотрудников»
 
-Статус: `STAGE 2 VALIDATED / COUPON TIE DECISION REQUIRED / IMPLEMENTATION BLOCKED`.
+Статус: `STAGE 2 VALIDATED / STAGE 3 SQL PLAN REQUIRED / IMPLEMENTATION DEFERRED`.
 
 ## Новые объекты
 
 | Объект | Таблица Power BI | Grain / ключ |
 |---|---|---|
-| `mart.employee_activity_interval` | `Активность сотрудников` | урок ПЗ/ГЗ или дежурство × сотрудник × клуб × интервал; coupon row policy pending |
+| `mart.employee_activity_interval` | `Активность сотрудников` | урок ПЗ/ГЗ, дежурство или coupon event × сотрудник × клуб × интервал |
 | `mart.employee_presence_day` | `Присутствие сотрудников` | `(employee_id, presence_date, club_id)`; implementation blocked by SCUD cardinality |
 
 ### `mart.employee_activity_interval`
@@ -14,7 +14,7 @@
 | PostgreSQL | Power BI | Тип | NULL | Роль | Аддитивность | Скрыть |
 |---|---|---|---|---|---|---|
 | `activity_event_key` | `Ключ события` | text | нет | ключ | не мера | да |
-| `activity_date` | `Дата активности` | date | нет | FK даты | не мера | нет |
+| `activity_date` | `Дата активности` | date | нет | FK даты | не мера; coupon = visit day | нет |
 | `club_id` | `ID клуба` | text | нет | FK клуба | не мера | да |
 | `employee_id` | `ID сотрудника` | text | нет | FK сотрудника | не мера | да |
 | `activity_id` | `ID вида деятельности` | text | да | FK | не мера | да |
@@ -23,7 +23,7 @@
 | `activity_kind` | `Вид активности` | text | нет | срез | не мера | нет |
 | `start_at` | `Начало` | timestamp | нет | detail | не мера | нет |
 | `end_at` | `Окончание` | timestamp | нет | detail | не мера | нет |
-| `duration_minutes` | `Минуты активности` | numeric | нет | показатель | legacy-additive; current duty result may be negative | нет |
+| `duration_minutes` | `Минуты активности` | numeric | нет | показатель | coupon formula; clean duty is nonnegative by BR-040 | нет |
 | `payment_kind` | `Вид оплаты` | text | нет | срез | не мера | нет |
 
 ### `mart.employee_presence_day`
@@ -47,7 +47,8 @@ reconciliation часов/выручки/плана, rerun и SLA. `employee_pre
 остаётся отдельной витриной и не получает неоднозначную СКУД-атрибуцию.
 
 `activity_event_key` подтверждён для ПЗ (`PZ + Document329 + VT4352 line`),
-ГЗ (`GZ + Document279`) и дежурства (hash точной M-группы). Купоны не получают
-ключ и не входят в runnable physical plan, пока не выбрана детерминированная
-политика для 149 ambiguous `Table.Distinct` groups. Evidence:
-[`Stage 2 validation`](../reports/employee_activity_interval_stage2_validation_2026-08-27.md).
+ГЗ (`GZ + Document279`), дежурства (hash точной M-группы) и coupon event
+(hash current-M distinct group). В 149 coupon groups различалось только время
+визита: день, минуты, договор и dimension IDs совпадают, поэтому ключ
+детерминирован. Evidence: [`Stage 2 validation`](../reports/employee_activity_interval_stage2_validation_2026-08-27.md) и
+[`follow-up`](../reports/employee_activity_interval_followup_validation_2026-08-27.md).
