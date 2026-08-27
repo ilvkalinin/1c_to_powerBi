@@ -1,11 +1,12 @@
 # Data contract: «Посещаемость клиентов с долгами»
 
-Статус: `DESIGNED COMPOSITE MODEL / IMPLEMENTATION DEFERRED / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-089`.
+Статус: `IMPLEMENTED COMPOSITE MODEL / STAGE_3 PRODUCT ADMISSION VALIDATED — VD-LOAD-001 / Power BI unchanged`.
 
-SV-089 переиспользует physical evidence для relation, `RecordKind` и основной
-visit branch. Ключ движения долга, states/sign, полиморфные document branches,
-as-of control, rerun и SLA остаются перед реализацией. Физические объекты не
-создавались.
+SV-089/SV-099/SV-110/DV-V05B подтверждают physical relation, ключ,
+`RecordKind`, документные ветки, states/sign и source-side as-of component.
+Initial load, rerun и target read-plan выполнены с нулевыми deviations;
+evidence — `visits_debt_stage3_execution_2026-08-27.md`. Power BI в этом
+пакете не изменяется.
 
 ## Движения долга
 
@@ -13,18 +14,18 @@ as-of control, rerun и SLA остаются перед реализацией. 
 |---|---|
 | Объект | `mart.unconfirmed_service_debt_movement` |
 | Таблица Power BI | `Движения задолженности` |
-| Grain / key | движение регистра / `(debt_event_at, recorder_id, recorder_line_no)` candidate |
+| Grain / key | движение регистра / `(debt_event_at, recorder_type, recorder_id, recorder_line_no)` |
 
 | PostgreSQL | Power BI | Тип | NULL | Роль | Скрыть |
 |---|---|---|---|---|---|
 | `debt_event_at` | `Дата и время движения` | timestamp | нет | event/as-of | нет |
-| `recorder_id`, `recorder_line_no`, `record_kind` | technical | text/integer/smallint | нет | ключ/sign | да |
-| `client_key`, `client_code`, `client_name` | `Ключ клиента`, `Код клиента`, `Клиент` | text | code/name да | PII-detail | key |
-| `club_id` | `ID клуба` | text | нет | FK клуба | да |
-| `prebooking_id` | `ID предварительной записи` | text | нет | as-of group | да |
-| `service_id`, `service_name` | `ID услуги`, `Услуга` | text | да | FK/detail | ID |
-| `employee_id`, `employee_name` | `ID сотрудника`, `Сотрудник` | text | да | FK/detail | ID |
-| `service_start_at`, `service_end_at` | `Начало услуги`, `Окончание услуги` | timestamp | да | detail | нет |
+| `recorder_type`, `recorder_id`, `recorder_line_no`, `record_kind` | technical | bytea/bytea/integer/smallint | нет | ключ/sign | да |
+| `client_key`, `client_code`, `client_name` | `Ключ клиента`, `Код клиента`, `Клиент` | bytea/text/text | code/name да | PII-detail | key |
+| `club_id` | `ID клуба` | bytea | нет | FK клуба | да |
+| `prebooking_id` | `ID предварительной записи` | bytea | нет | as-of group | да |
+| `service_id`, `service_name` | `ID услуги`, `Услуга` | bytea/text | имя да | FK/detail | ID |
+| `employee_id`, `employee_name` | `ID сотрудника`, `Сотрудник` | bytea/text | имя да | FK/detail | ID |
+| `service_start_at`, `service_end_at` | `Начало услуги`, `Окончание услуги` | timestamp | нет | detail | нет |
 | `quantity_delta`, `amount_delta` | `Изменение количества`, `Изменение суммы` | numeric | нет | аддитивные движения | нет |
 
 ## Когорта

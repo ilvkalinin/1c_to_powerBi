@@ -1,6 +1,6 @@
 # Требования отчёта: «Отчет по посещаемости клиентов с долгами»
 
-Статус: `BUSINESS ANALYSIS COMPLETE / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED / BLOCKED SOURCE COHORT — SV-089, SV-099, SV-110 / IMPLEMENTATION DEFERRED`.
+Статус: `IMPLEMENTED — mart.unconfirmed_service_debt_movement / VD-LOAD-001 validated / Power BI unchanged`.
 
 Договорный отчёт №22, блок «Гостеприимство». Анализ выполнен локально по
 бизнес-описанию, current M/DAX и снимкам модели. Новые SQL-контроли не

@@ -1,6 +1,6 @@
 # ADR-0021: движения задолженности по неподтверждённым услугам
 
-- Статус: `DESIGNED / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-089 / IMPLEMENTATION DEFERRED`
+- Статус: `IMPLEMENTED / VALIDATED — VD-LOAD-001 / Power BI unchanged`
 - Дата: 2026-08-03
 - Отчёт: №22 «Посещаемость клиентов с долгами»
 
@@ -10,7 +10,8 @@
 
 > одно движение `AccumRg7509`: период × регистратор × номер строки.
 
-Ключ-кандидат `(debt_event_at, recorder_id, recorder_line_no)`. Посетительская
+Подтверждённый физический ключ `(debt_event_at, recorder_type, recorder_id,
+recorder_line_no)`. Посетительская
 когорта REUSE `mart.visit_client_day`; PII туда не добавляется. Движение и
 когорта остаются разными фактами, связанными только общими датой, клубом и
 защищённым client key на уровне мер/контролируемой модели.
@@ -23,15 +24,16 @@ as-of, второй теряет произвольный момент и раз
 
 ## Обновление и Power BI
 
-Ежедневный bounded rebuild BR-003. PostgreSQL хранит движения и report-specific
+Full atomic rebuild по BR-003 — операция приёмки, не ежедневный incremental
+SLA. PostgreSQL хранит движения и report-specific
 detail; DAX считает остаток на начало/конец, погашение, новые долги и distinct
 клиентов в выбранной когорте. PII выдаётся по BR-017.
 
 ## Риски
 
-Физические relations, `RecordKind` и PK-side visit branch подтверждены
-SV-089 через existing source evidence; ключ/state/sign регистра, полиморфные
-документы и контрольный as-of — `VALIDATION_PENDING`. При недоказанной общей форме client key модель не
+Физические relations, `RecordKind`, ключ/state/sign регистра, полиморфные
+документы и source-side as-of подтверждены SV-099/SV-110/DV-V05B. При
+недоказанной общей форме client key модель не
 связывает два факта скрытым many-to-many.
 
 ## Доказательства

@@ -1,9 +1,9 @@
 # Source-to-target mapping: «Отчет по посещаемости клиентов с долгами»
 
-Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0021 / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-089, SV-099 / IMPLEMENTATION DEFERRED`.
+Статус: `IMPLEMENTED / STAGE_3 PRODUCT ADMISSION VALIDATED — VD-LOAD-001 / Power BI unchanged`.
 
-Спроектирован `mart.unconfirmed_service_debt_movement`; DDL и реализация
-отложены. Mapping описывает
+Для `mart.unconfirmed_service_debt_movement` выполнены DDL и atomic loader в
+пакете `visits_debt_product_admission_2026-08-27`. Mapping описывает
 два несовместимых по grain логических набора, которые не должны смешиваться.
 
 ## Stage 2 evidence — SV-089, SV-099
@@ -31,23 +31,24 @@ multiplication. `prebooking_id` не уникален по клиенту, по�
 
 > одно движение регистра неподтверждённой услуги: `период × регистратор × номер строки`.
 
-Логический ключ: кандидат `(debt_event_at, recorder_id, recorder_line_no)`;
-не подтверждён до DV-V01. Бизнесовый as-of ключ: `client_key × prebooking_id`.
+Физический ключ: `(debt_event_at, recorder_type, recorder_id, recorder_line_no)`.
+`recorder_type` обязателен: без него `recorder_id` полиморфного 1С не образует
+доказанный ключ. Бизнесовый as-of ключ: `client_key × prebooking_id`.
 
 | Целевая колонка | Бизнес-описание | Источник / колонка | Преобразование | PostgreSQL тип | NULL | Статус | Тест |
 |---|---|---|---|---|---|---|---|
-| `debt_event_at` | момент движения долга | `AccumRg7509.Period` | без округления до момента as-of; день визуала = `::date` | `timestamp` UNKNOWN | нет | CONFIRMED source | DV-V01 |
-| `recorder_id`, `recorder_line_no` | технический ключ движения | `AccumRg7509.Recorder`, `LineNo` | сохранить до source-side дедупликации | `UNKNOWN`, `integer` UNKNOWN | нет | CONFIRMED metadata | DV-V01 |
-| `record_kind` | вид движения | `AccumRg7509.RecordKind` | сохранить исходный код; DAX-классы определяются количеством | `smallint` UNKNOWN | нет | CONFIRMED source | DV-V01, DV-V02 |
-| `client_key` | стабильный ключ cohort/as-of | `AccumRg7509.Fld7511` | защищённый стабильный ключ | `UNKNOWN` | нет | CONFIRMED need | DV-V04 |
+| `debt_event_at` | момент движения долга | `_accumrg7509._period` | без округления до момента as-of; день визуала = `::date` | `timestamp` | нет | CONFIRMED source | SV-099, VD-REC-007 |
+| `recorder_type`, `recorder_id`, `recorder_line_no` | полный технический ключ движения | `_recordertref`, `_recorderrref`, `_lineno` | сохранить без source-side дедупликации | `bytea`, `bytea`, `integer` | нет | CONFIRMED source | SV-099, VD-REC-002 |
+| `record_kind` | вид движения | `_recordkind` | сохранить исходный код `0/1`; DAX-классы определяются количеством | `smallint` | нет | CONFIRMED source | SV-099, VD-REC-007 |
+| `client_key` | стабильный ключ cohort/as-of | `_fld7511rref` | защищённый стабильный ключ | `bytea` | нет | CONFIRMED source | DV-V05B, VD-REC-007 |
 | `client_code`, `client_name` | отображаемый код и ФИО | `Reference141X1.Code`, `Description` | report-specific PII detail; доступен всем, у кого есть доступ к данному Power BI-отчёту | `text` | да | CONFIRMED — решение пользователя 2026-07-31 | DV-V04 |
-| `club_id` | клуб услуги/долга | `AccumRg7509.Fld7510` | стабильный идентификатор, не имя | `UNKNOWN` | нет | CONFIRMED source | DV-V03 |
-| `prebooking_id` | предварительная/групповая запись, по которой возникает долг | `AccumRg7509.Fld7512` | сохранить до source-side aggregation | `UNKNOWN` | нет | CONFIRMED metadata | DV-V04 |
-| `service_id`, `service_name` | услуга долга и название в detail | `AccumRg7509.Fld7513`, `Reference163.Description` | ID — всегда; имя — только detail | `UNKNOWN`, `text` | да | CONFIRMED current consumer | DV-V03, DV-V06 |
-| `employee_id`, `employee_name` | оказавший услугу сотрудник | `Document329.Fld4322` / `Document279.Fld3223` → `Reference225` | выбрать ветку по типу регистратора | `UNKNOWN`, `text` | да | CONFIRMED current source / branch pending | DV-V03 |
-| `service_start_at`, `service_end_at` | время услуги | `AccumRg7509.Fld7514`, `Fld7515` | без замены на период движения | `timestamp` UNKNOWN | да | CONFIRMED source | DV-V03 |
-| `quantity_delta` | вклад в статус неподтверждённой услуги | `AccumRg7509.Fld7516`, `RecordKind` | только `RecordKind × ±1` участвуют в DAX `unconfirmed`; другие quantity не меняют его, но их amount не исключается из суммы открытой группы | `numeric` UNKNOWN | нет | CONFIRMED current DAX | DV-V02, DV-V05 |
-| `amount_delta` | знаковая сумма движения | `AccumRg7509.Fld7517`, `RecordKind` | current M: `RecordKind = 1` умножить на `-1`, иначе оставить знак | `numeric` UNKNOWN | нет | CONFIRMED current calculation | DV-V05 |
+| `club_id` | клуб услуги/долга | `_fld7510rref` | стабильный идентификатор, не имя | `bytea` | нет | CONFIRMED source | SV-099, VD-REC-007 |
+| `prebooking_id` | предварительная/групповая запись, по которой возникает долг | `_fld7512_rrref` | сохранить до source-side aggregation | `bytea` | нет | CONFIRMED source | SV-099, VD-REC-007 |
+| `service_id`, `service_name` | услуга долга и название в detail | `_fld7513rref`, `_reference163._description` | ID — всегда; имя — detail | `bytea`, `text` | ID нет, имя да | CONFIRMED current consumer | SV-099, VD-REC-007 |
+| `employee_id`, `employee_name` | оказавший услугу сотрудник | `_document329._fld4322rref` / `_document279._fld3223rref` → `_reference225` | две сохранённые current-M ветки `UNION ALL` | `bytea`, `text` | ID нет, имя да | CONFIRMED source | SV-099, VD-REC-007 |
+| `service_start_at`, `service_end_at` | время услуги | `_fld7514`, `_fld7515` | без замены на период движения | `timestamp` | нет | CONFIRMED source | VD-REC-007 |
+| `quantity_delta` | вклад в статус неподтверждённой услуги | `_fld7516`, `_recordkind` | только `RecordKind × ±1` участвуют в DAX `unconfirmed`; другие quantity не меняют его, но их amount не исключается из суммы открытой группы | `numeric(10,0)` | нет | CONFIRMED current DAX | SV-099, VD-REC-007 |
+| `amount_delta` | знаковая сумма движения | `_fld7517`, `_recordkind` | current M: `RecordKind = 1` умножить на `-1`, иначе оставить знак | `numeric(15,2)` | нет | CONFIRMED current calculation | SV-099, VD-REC-003 |
 
 ## 2. Когорта посетителей
 
@@ -78,9 +79,9 @@ multiplication. `prebooking_id` не уникален по клиенту, по�
 
 | Объект | Назначение | Статус | Доказательство |
 |---|---|---|---|
-| `AccumRg7509` | движения неподтверждённых услуг | CONFIRMED source / states pending | M и source metadata |
+| `_accumrg7509` | движения неподтверждённых услуг | CONFIRMED source / states preserved | SV-099; full horizon state control before VD load: `Active=false = 0`, null key refs = 0; новый filter не вводится |
 | `AccumRg7575`, `Document325` | посещения для когорты | CONFIRMED source / states pending | M, source catalog, BR-006 |
-| `Document329`, `Document279`, `Document313` | ветки предварительной, групповой записи и отмены | CONFIRMED current source / cardinality pending | M и source catalog |
+| `_document329`, `_document279` | ветки предварительной и групповой записи | CONFIRMED source / no multiplication | SV-099; independent branch-map control in `unconfirmed_service_debt_movement_source_control.sql` |
 | `Reference132`, `Reference141X1`, `Reference163`, `Reference225` | клуб, клиент, услуга, сотрудник | CONFIRMED current sources | M, metadata, source catalog |
 
 ## Reuse review
@@ -93,7 +94,7 @@ multiplication. `prebooking_id` не уникален по клиенту, по�
 | Сравнение гранулярности | `visit_client_day` — client-day; движение долга — event/ПЗ; `club_day_metrics` — только club-day. | CONFIRMED current M/DAX |
 | Сравнение ключей | общий visit факт не хранит `prebooking_id`, движение долга не является событием посещения. | CONFIRMED |
 | Сравнение семантики | ДПФУ/ИП — оказанные услуги, а данный факт — остаток неподтверждённой услуги as-of; контроль предзаписи не подтверждает денежный остаток. | CONFIRMED |
-| Решение | `REUSE` `mart.visit_client_day` для обезличенной когорты; `NEW` `mart.unconfirmed_service_debt_movement`. | DESIGNED — ADR-0021 |
+| Решение | `REUSE` `mart.visit_client_day` для обезличенной когорты; `NEW` `mart.unconfirmed_service_debt_movement`. | CONFIRMED — ADR-0021 / product admission |
 | Причина решения | расширение client-day движениями и PII смешает event-grain с cohort-grain и нарушит BR-007; копия посещений не нужна. | CONFIRMED |
 | Затронутые потребители | «Посещения Физкульт», «Посещения Пушкинский», «Контроль предварительной записи», ИП и ДПФУ не меняют grain или поля. | CONFIRMED |
 
@@ -105,7 +106,7 @@ multiplication. `prebooking_id` не уникален по клиенту, по�
 | CONFIRMED | Доставка PII | код и ФИО клиента допускаются в report-specific detail для всех, у кого уже есть доступ к данному Power BI-отчёту. | решение пользователя 2026-07-31; физический механизм ограничения выбирается на реализации. |
 | CONFIRMED | Частота обновления | ежедневная; Power BI доступен до 08:30 МСК, витрина завершается раньше. | BR-014 и решение пользователя 2026-07-31; end-to-end производительность — приёмка созданной витрины. |
 | VALIDATED WITH OBSERVATION | ключ и state `AccumRg7509` | 482 347 movements имеют уникальный physical key; inactive/null ключи = 0. DAX sign и quantity `other` воспроизводятся по TXT; новый state-filter не вводится. | SV-099; as-of компонент дополнительно проверен DV-V05B. |
-| VALIDATED WITH ROW-LOSS RISK | документные ветки | current branches не размножают движения, но 917 из 457 556 base rows не выводятся через ветвление/inner employee join. | SV-099; current branch не меняется без отдельного решения. |
+| VALIDATED WITH OBSERVATION | документные ветки | current branches не размножают движения; строки без ровно одной документной ветки намеренно не входят в current-M-compatible fact. Их число фиксируется independent source control на каждом snapshot (3 459 на horizon до 2026-08-28). | SV-099; current branch не меняется без отдельного решения. |
 | VALIDATED SOURCE-SIDE | as-of остаток | На двух датах и двух фактических клубах BR-025 нет null/mismatch client-key и excess технического ключа; current DAX-алгебра дала сохранённые контрольные суммы. | DV-V05B; это не выдаётся за отсутствующую сверку с фактическим Power BI. |
 | CONFIRMED | классификация посещения | BR-025 устанавливает общий физический ключ `Document325.Fld4164RRef = 9a5a4c90d2b1aede4b91dcd1abe84c43`. Он намеренно заменяет legacy `LIKE '%Посещение%'`; наблюдаемое расхождение 36 против 3 003 981 строк сохраняется как критичный артефакт. | user decision 2026-08-19; SV-099 DV-V06B; повторная замена правила без нового решения запрещена. |
 | DEFERRED TO ACCEPTANCE | объём и SLA | Узкий current count измерен: `AccumRg7575` ≈ 33,6 млн строк / 29,1 ГБ, execution = 25,7 мс на горячем кэше и без disk/temp reads. End-to-end SLA проверяется при приёмке созданной витрины и её расписания. | DV-V07; global user decision 2026-08-19. |
