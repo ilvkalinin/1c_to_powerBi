@@ -38,7 +38,7 @@ def config(prefix: str) -> dict[str, str]:
 
 def horizon() -> tuple[date, date]:
     today = datetime.now(ZoneInfo("Europe/Moscow")).date()
-    return date(today.year - (2 if today.month <= 3 else 1), 1, 1), date(today.year + 1, 1, 1)
+    return date(today.year - (2 if today.month <= 3 else 1), 1, 1), date.fromordinal(today.toordinal() + 1)
 
 
 def projection(start: date, end: date) -> str:

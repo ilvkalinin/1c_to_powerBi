@@ -102,7 +102,7 @@ WITH contract_base AS MATERIALIZED (
     LEFT JOIN public._reference141x1 AS freeze_client
       ON freeze_client._idrref = f._fld7480rref
     WHERE f._period > TIMESTAMP '2021-01-01'
-      AND f._period < TIMESTAMP '2027-01-01'
+      AND f._period < $2::timestamp without time zone
       AND f._recordkind = 1
       AND i._fld5862 IS NOT NULL
       AND i._fld5863::date <> i._fld5862::date

@@ -1,5 +1,5 @@
--- REVIEWED PLANNING ONLY: do not execute until a Stage 3 admission explicitly
--- approves this exact file together with loader/reconciliation/rollback.
+-- Stage 3 product-admission reviewed DDL. The runner owns the outer
+-- transaction; it never issues automatic DROP on failure.
 BEGIN;
 
 CREATE TABLE mart.client_base_retention (

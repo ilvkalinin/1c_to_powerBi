@@ -1,21 +1,53 @@
--- Independent BR-037/BR-038 retention control at 2026-07-01.
--- It returns only aggregate baseline/retained counts; no client ID leaves VM-1.
-WITH comparisons AS (
-    SELECT DATE '2026-07-01' AS report_date, 'year_start'::text AS comparison_type, DATE '2026-01-01' AS comparison_date
+-- Independent BR-037/BR-038 retention controls. Bind $1/$2 to the current
+-- output horizon. It returns aggregate cohorts only; no client ID leaves VM-1.
+WITH params AS (
+    SELECT $1::date AS horizon_start,
+           $2::date AS horizon_end,
+           ($1::date - interval '1 year')::date AS comparison_start
+), report_dates AS (
+    SELECT d::date AS report_date
+    FROM params AS p,
+         generate_series(p.horizon_start, p.horizon_end - 1, interval '1 day') AS d
+    WHERE extract(isodow FROM d) = 1 OR extract(day FROM d) = 1
+), comparison_calendar AS (
+    SELECT d::date AS report_date
+    FROM params AS p,
+         generate_series(p.comparison_start, p.horizon_end - 1, interval '1 day') AS d
+    WHERE extract(isodow FROM d) = 1 OR extract(day FROM d) = 1
+), comparisons AS (
+    SELECT report_date, 'year_start'::text AS comparison_type,
+           make_date(extract(year FROM report_date)::int, 1, 1) AS comparison_date
+    FROM report_dates
     UNION ALL
-    SELECT DATE '2026-07-01', 'previous_year'::text, DATE '2025-07-01'
+    SELECT report_date, 'previous_year'::text, report_date - interval '1 year'
+    FROM report_dates
+    WHERE extract(day FROM report_date) = 1
+    UNION ALL
+    SELECT d.report_date, 'previous_year'::text, previous.report_date
+    FROM report_dates AS d
+    JOIN LATERAL (
+        SELECT c.report_date
+        FROM comparison_calendar AS c
+        WHERE extract(isodow FROM d.report_date) = 1
+          AND extract(isodow FROM c.report_date) = 1
+          AND c.report_date < d.report_date
+        ORDER BY abs(c.report_date - (d.report_date - interval '1 year')::date), c.report_date DESC
+        LIMIT 1
+    ) AS previous ON true
+    WHERE extract(isodow FROM d.report_date) = 1
 ), control_dates AS (
     SELECT report_date FROM comparisons
     UNION
-    SELECT comparison_date FROM comparisons
+    SELECT comparison_date::date FROM comparisons
 ), membership_raw AS MATERIALIZED (
     SELECT ab._fld681rref AS client_id, ab._fld687rref AS club_ref,
            ab._fld671::date AS active_from, ab._fld672::date AS active_to
     FROM public._reference59 AS ab
     JOIN public._reference141x1 AS cl ON cl._idrref = ab._fld681rref
     JOIN public._reference132 AS club ON club._idrref = ab._fld687rref
-    WHERE ab._fld672 >= DATE '2025-06-30'
-      AND ab._fld671 < DATE '2026-07-01'
+    CROSS JOIN params AS p
+    WHERE ab._fld672 >= p.comparison_start - 1
+      AND ab._fld671 < p.horizon_end
       AND ab._fld672 > ab._fld671
       AND ab._description::varchar NOT ILIKE '%сотруд%'
       AND ab._description::varchar NOT ILIKE '%ип%'
@@ -39,6 +71,7 @@ WITH comparisons AS (
     JOIN public._reference132 AS club ON club._idrref = r._fld687rref
     LEFT JOIN public._document346_vt4924 AS stock
       ON stock._document346_idrref = d._idrref AND stock._fld4929 = v._fld4917
+    CROSS JOIN params AS p
     WHERE d._fld4910rref = decode('859cb45b51f9e02c4fb16764c804af3d', 'hex')
       AND r._fld672 > r._fld671
       AND (r._fld670 IS NOT NULL OR r._fld670 <> TIMESTAMP '0001-01-01 00:00:00')
@@ -47,7 +80,7 @@ WITH comparisons AS (
       AND r._description::varchar NOT ILIKE '%сотруд%'
       AND r._description::varchar NOT ILIKE '%ип%'
       AND club._description::varchar <> 'Детский развивающий центр'
-      AND r._fld672 >= DATE '2025-06-30'
+      AND r._fld672 >= p.comparison_start - 1
 ), child_sales AS MATERIALIZED (
     SELECT a._fld7647_rrref AS receipt_ref, a._fld7648rref AS adult_ref,
            a._fld7649rref AS product_ref, sum(a._fld7657)::numeric AS net_quantity,
@@ -88,12 +121,12 @@ WITH comparisons AS (
            'network'::text, NULL::bytea, b.client_id
     FROM comparisons AS c JOIN network_scope AS b ON b.report_date = c.comparison_date
 )
-SELECT b.comparison_type, b.scope_level,
+SELECT b.report_date, b.comparison_type, b.comparison_date::date, b.scope_level,
        count(*)::bigint AS baseline_client_count,
        count(current_set.client_id)::bigint AS retained_client_count,
        count(*) FILTER (WHERE current_set.is_child)::bigint AS retained_child_package_clients
 FROM baseline_cohort AS b
 LEFT JOIN network_scope AS current_set
   ON current_set.report_date = b.report_date AND current_set.client_id = b.client_id
-GROUP BY b.comparison_type, b.scope_level
-ORDER BY b.comparison_type, b.scope_level;
+GROUP BY b.report_date, b.comparison_type, b.comparison_date, b.scope_level
+ORDER BY b.report_date, b.comparison_type, b.scope_level;

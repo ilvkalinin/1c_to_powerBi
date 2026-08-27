@@ -52,7 +52,7 @@ def connect_with_retry(prefix: str):
 
 
 def br003_horizon(today: date) -> tuple[date, date]:
-    return date(today.year - (2 if today.month <= 3 else 1), 1, 1), date(today.year + 1, 1, 1)
+    return date(today.year - (2 if today.month <= 3 else 1), 1, 1), date.fromordinal(today.toordinal() + 1)
 
 
 def rendered(path: Path, start: date, end: date) -> str:

@@ -1,0 +1,2 @@
+# Source binary COPY implementation for client-base snapshot/retention runner.
+psycopg2-binary==2.9.12

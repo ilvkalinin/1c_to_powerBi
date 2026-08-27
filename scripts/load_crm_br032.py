@@ -16,6 +16,14 @@ from zoneinfo import ZoneInfo
 import psycopg
 from psycopg import sql as pg_sql
 
+try:
+    from scripts.mart_connection import load_project_env
+except ModuleNotFoundError:
+    from mart_connection import load_project_env
+
+
+load_project_env()
+
 
 ROOT = Path(__file__).resolve().parents[1]
 EXTRACT = ROOT / "sql/marts/crm_br032_source_extract.sql"

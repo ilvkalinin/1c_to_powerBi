@@ -14,6 +14,14 @@ from zoneinfo import ZoneInfo
 
 import psycopg
 
+try:
+    from scripts.mart_connection import load_project_env
+except ModuleNotFoundError:
+    from mart_connection import load_project_env
+
+
+load_project_env()
+
 
 ROOT = Path(__file__).resolve().parents[1]
 EXTRACT = ROOT / "sql/marts/fitness_leads_funnel_source_extract.sql"
@@ -72,7 +80,7 @@ def connect_with_retry(prefix: str) -> psycopg.Connection:
 
 
 def br003_horizon(today: date) -> tuple[date, date]:
-    return date(today.year - (2 if today.month <= 3 else 1), 1, 1), date(today.year + 1, 1, 1)
+    return date(today.year - (2 if today.month <= 3 else 1), 1, 1), date.fromordinal(today.toordinal() + 1)
 
 
 def sections() -> dict[str, str]:
