@@ -1,6 +1,6 @@
 # Требования отчёта: «Загрузка сотрудников»
 
-Статус: `BUSINESS LOGIC COMPLETE / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-074`.
+Статус: `BUSINESS LOGIC COMPLETE / STAGE 2 VALIDATED / COUPON TIE DECISION REQUIRED`.
 
 Договорной отчёт №6, блок «Фитнес». Анализ выполнен локально по двум
 предоставленным DOCX, текущему Power Query, DAX и скриншотам Power BI. К 1С и
@@ -50,12 +50,16 @@ BR-014).
   уник, сумма. Текущее KPI считает строку клиента как одну плановую услугу.
 - Занятия: ПЗ (`Document329` + `InfoRg7006`) и ГП (`Document279`). ПЗ
   исключает отмены `Document313`, требует конкретный статус и проведение; ГП
-  исключает помеченные на удаление и отменённые. Значения требуют валидации.
+  исключает помеченные на удаление и отменённые. Stage 2 подтвердил 389,006
+  eligible ПЗ и 348,538 eligible ГЗ в BR-003; 3 ГЗ с невалидным интервалом не
+  попадают в physical interval.
 - Дежурства: `InfoRg7107` по типу рабочего времени «дежурство»; их минуты
   уменьшаются на пересечение с квалифицированными купонными занятиями.
 - Купоны: последние по `Period` записи `InfoRg7006`, статус `Enum448` order 4,
   посещение клиента в том же клубе/дне и интервал занятия. Фитнес-тест и
-  ACCUNIQ — «Купон 1», остальные найденные купоны — «Купон 2».
+  ACCUNIQ — «Купон 1», остальные найденные купоны — «Купон 2». Текущий
+  `Table.Distinct` имеет 149 ключей с разным сохраняемым payload, в том числе
+  `visit_date`, поэтому physical coupon row требует решения до DDL.
 - Часы в клубе: `Document325`, сотрудник связан с клиентом через
   `Reference225.Fld2504`; незакрытый визит заканчивается концом дня.
 
@@ -76,9 +80,10 @@ BR-014).
 
 | Статус | Факт / риск | Следующее действие |
 |---|---|---|
-| VALIDATION_PENDING | `InfoRg7006 → Document329/Document279` и `VT4352` могут размножать занятия | EW-V01, EW-V02 |
-| VALIDATION_PENDING | связь СКУД сотрудника через клиента может быть many-to-many | EW-V05 |
-| VALIDATION_PENDING | пересечение купона и дежурства не должно давать отрицательный остаток | EW-V03 |
+| CONFIRMED | `InfoRg7006 → Document329/Document279` и `VT4352`: PZ multiplicity сохраняется по `VT` line, GZ key — документ | EW-V02A |
+| BLOCKED (separate fact) | связь СКУД сотрудника через клиента может быть many-to-many | EW-V05: 1,292 multiple-link visits |
+| CONFIRMED legacy | пересечение купона и дежурства даёт 4 отрицательных остатка; первый релиз сохраняет current M по BR-018 | EW-V03A |
+| DECISION_REQUIRED | купонная `Table.Distinct` не задаёт детерминированный physical row | EW-V03B: 149 divergent payload keys |
 | NOT_APPLICABLE | `_СпрСтавки` — внешний файл Power BI | по решению пользователя 2026-07-30 не переносить в PostgreSQL; порог остаётся в модели Power BI |
 
 ## Учёт class-C критичности — 2026-08-13
@@ -101,3 +106,4 @@ SQL-атрибуции.
 - `docs/source_metadata/Структура хранения базы данных.txt`;
 - [разбор текущих запросов](employee_workload_query_review.md);
 - [source-to-target mapping](../mappings/employee_workload.md).
+- [Stage 2 validation](employee_activity_interval_stage2_validation_2026-08-27.md).

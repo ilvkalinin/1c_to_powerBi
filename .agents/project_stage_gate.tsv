@@ -5,4 +5,4 @@
 # CLOSED_PENDING_NEXT_APPROVAL rejects all new selections until the user
 # explicitly confirms the next independent package.
 gate_id	state	allowed_stage	allowed_report_ids	reason
-global_stage_gate	CLOSED_PENDING_NEXT_APPROVAL	-	-	Global audit closed 2026-08-27: 72 current checkpoints and all linked evidence paths reconciled; historical discovery statuses do not reopen controls. The gate remains closed until the user explicitly decides after this documented review to authorize a named next package.
+global_stage_gate	CLOSED_PENDING_NEXT_APPROVAL	-	-	Employee activity Stage 2 closed 2026-08-27. A coupon-row tie decision and then a separately approved immutable Stage 3 SQL plan are required before any DDL/DML/COPY; Power BI remains prohibited.

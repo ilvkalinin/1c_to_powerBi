@@ -1,6 +1,6 @@
 # ADR-0014: многомерная модель загрузки сотрудников
 
-- Статус: `DESIGNED / TECHNICAL VALIDATION REQUIRED / IMPLEMENTATION DEFERRED`
+- Статус: `STAGE 2 VALIDATED / COUPON TIE DECISION REQUIRED / IMPLEMENTATION BLOCKED`
 - Дата: 2026-08-03
 - Отчёт: №6 «Загрузка сотрудников»
 
@@ -33,19 +33,23 @@
 деятельность и сотрудник фильтруют каждый факт однонаправленно; fact-to-fact
 связей нет.
 
-PostgreSQL нормализует интервалы, рассчитывает длительность и защищает
-дежурства от двойного вычитания купонов. DAX считает сумму загрузки, долю,
+PostgreSQL воспроизводит current-M интервалы, длительность и raw-сумму
+пересечений купон/дежурство; в первом релизе он не заменяет эту сумму union
+интервалов, потому что это изменило бы legacy-результат. DAX считает сумму загрузки, долю,
 процент от времени в клубе, эффективность и план-факт.
 
 ## Риски
 
-Ключи занятий, кратность `VT4352`, связь сотрудника со СКУД, интервалы
-дежурств и source states — `VALIDATION_PENDING`. При недоказанной однозначной
-связи СКУД строка не включается в `employee_presence_day` до отдельного
-правила; many-to-many не материализуется скрыто.
+Ключи уроков, `VT4352`, source states и duty-grain проверены. Для купонов
+осталось `DECISION_REQUIRED`: 149 текущих `Table.Distinct` keys имеют разные
+сохраняемые поля, включая `visit_date`, связанный с общим календарём. При
+недоказанной однозначной связи СКУД строка не включается в
+`employee_presence_day`; 1,292 multiple-link visits не материализуются скрыто.
+Historical employment attribution также отложена из-за 655 nonpositive и 187
+overlapping intervals. См. Stage 2 evidence.
 
 ## Доказательства
 
 - [Требования](../reports/employee_workload.md)
 - [Mapping](../mappings/employee_workload.md)
-
+- [Stage 2 evidence](../reports/employee_activity_interval_stage2_validation_2026-08-27.md)
