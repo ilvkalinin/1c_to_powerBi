@@ -1,6 +1,6 @@
 # Data contract: «Загрузка сотрудников»
 
-Статус: `employee_activity_interval IMPLEMENTED / presence facts DESIGNED, physical implementation deferred`.
+Статус: `employee_activity_interval IMPLEMENTED / presence facts RE-PLANNING REQUIRED, physical implementation deferred`.
 
 ## Новые объекты
 
@@ -8,7 +8,7 @@
 |---|---|---|
 | `mart.employee_activity_interval` | `Активность сотрудников` | урок ПЗ/ГЗ, дежурство или coupon event × сотрудник × клуб × интервал |
 | `mart.employee_presence_day` | `Присутствие сотрудников` | `(employee_id, presence_date, club_id)`; only exact-one employee domain by BR-043 |
-| `mart.employee_presence_unattributed_day` | `Присутствие без сотрудника` | `(presence_date, club_id, attribution_status)`; `NO_EMPLOYEE`/`MULTIPLE_EMPLOYEES`, no `employee_id`, by BR-043 |
+| `mart.employee_presence_unattributed_day` | `Присутствие без сотрудника` | `(presence_date, club_id, attribution_status)`; only `MULTIPLE_EMPLOYEES`, no `employee_id`, by BR-043/BR-044 |
 
 ### `mart.employee_activity_interval`
 
@@ -45,8 +45,9 @@
 | `attribution_status` | `Статус атрибуции` | text | нет | срез | не мера | нет |
 | `presence_minutes` | `Минуты без сотрудника` | numeric | нет | показатель | аддитивна | нет |
 
-`attribution_status` ограничен `NO_EMPLOYEE` и `MULTIPLE_EMPLOYEES`; связи с
-employee dimension нет. Power BI остаётся `DESIGNED` по BR-036, без switch.
+`attribution_status` ограничен `MULTIPLE_EMPLOYEES`; связи с employee dimension
+нет. BR-044 исключает no-link visits. Power BI остаётся `DESIGNED` по BR-036,
+без switch.
 
 Модель также REUSE факты ДПФУ, план ДПФУ и ИП. Общие дата, клуб, сотрудник,
 вид деятельности, услуга и помещение фильтруют применимые факты `1:*`, single
@@ -60,9 +61,10 @@ reconciliation часов/выручки/плана, rerun и SLA. `employee_pre
 остаётся отдельной витриной и не получает неоднозначную СКУД-атрибуцию.
 
 `employee_presence_day` не получает ни fallback employee, ни hidden
-deduplication. BR-043 сохраняет 30,139 проблемных current-M-qualified visits
-в отдельном non-personal product, поэтому split — явная целевая методика, а не
-current-result reproduction. Evidence: [`EPD decision`](../reports/employee_presence_day_attribution_decision_2026-08-28.md).
+deduplication. BR-044 исключает 29,431 no-link current-M-qualified visits, а
+BR-043 сохраняет 708 multi-link visits в отдельном non-personal product. Это
+целевая методика, а не current-result reproduction. Evidence:
+[`EPD decision`](../reports/employee_presence_day_no_employee_exclusion_decision_2026-08-28.md).
 
 `activity_event_key` подтверждён для ПЗ (`PZ + Document329 + VT4352 line`),
 ГЗ (`GZ + Document279`), дежурства (hash точной M-группы) и coupon event

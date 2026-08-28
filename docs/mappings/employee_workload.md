@@ -45,11 +45,12 @@ employee_id, service_id, class_start)`. Current `Table.Distinct` сокраща�
 | Часы пребывания | `Document325` + `Reference225.Fld2504` | сотрудник × день × клуб | `NEW` компактный агрегат-кандидат |
 | Порог отчислений | `_СпрСтавки` | внешний файл Power BI | `NOT_APPLICABLE`: не переносить в PostgreSQL по решению пользователя 2026-07-30 |
 
-## Компонент C: раздельное присутствие СКУД — physical implementation deferred
+## Компонент C: раздельное присутствие СКУД — re-planning required
 
 Персональный целевой grain — `employee × presence_date × actual club`; для
-неоднозначного домена — отдельный `presence_date × club × attribution_status`
-без `employee_id`. Текущий M группирует по display-name, однако будущие
+многосвязного домена — отдельный `presence_date × club × attribution_status`
+без `employee_id`. Посещения без любой `Reference225`-связи исключаются по
+BR-044. Текущий M группирует по display-name, однако будущие
 PostgreSQL-contracts используют стабильные IDs. BR-043 — явное целевое
 решение, но не разрешение на SQL или витрину.
 
@@ -57,18 +58,19 @@ PostgreSQL-contracts используют стабильные IDs. BR-043 — �
 |---|---|---|---|---|---|---|---|
 | `presence_date` | дата присутствия | `AccumRg7575.Period` | `Period::date` из exact current-M path | `date` | нет | CONFIRMED current | EPD-V02 |
 | `club_id` | фактический клуб | `AccumRg7575.Fld7577RRef` | стабильный ID, не название клуба | `text` | нет | CONFIRMED source | EPD-V01, EPD-V02 |
-| `employee_id` | сотрудник | `Reference225.ID` через `Reference225.Fld2504RRef = AccumRg7575.Fld7576RRef` | только exact-one domain; 29,431 no-link и 708 multi-link visits уходят в separate non-personal product | `text` | нет | CONFIRMED target decision | EPD-V04, BR-043 |
+| `employee_id` | сотрудник | `Reference225.ID` через `Reference225.Fld2504RRef = AccumRg7575.Fld7576RRef` | только exact-one domain; 29,431 no-link visits исключены по BR-044, 708 multi-link visits уходят в separate non-personal product | `text` | нет | CONFIRMED target decision | EPD-V04, BR-043, BR-044 |
 | `presence_minutes` | минуты в клубе | `Document325.Fld4172`, `Document325.Fld4174` | `effective_end - start`; sentinel/open and after-day end клиппируются концом start-day точно как current M | `numeric` | нет | CONFIRMED current formula / target decision | EPD-V02, EPD-V05, BR-043 |
 
 Для отдельного non-personal продукта `employee_id` не является колонкой:
 `attribution_status` — только явные константы `NO_EMPLOYEE` и
-`MULTIPLE_EMPLOYEES`, а его minutes используют ту же подтверждённую формулу.
+`MULTIPLE_EMPLOYEES`; no-link branch исключается по BR-044, а minutes
+используют ту же подтверждённую формулу.
 
 | Целевая колонка non-personal продукта | Источник / преобразование | PostgreSQL тип / NULL | Статус / evidence |
 |---|---|---|---|
 | `presence_date` | `AccumRg7575.Period::date` | `date` / нет | CONFIRMED, EPD-V02 |
 | `club_id` | stable `AccumRg7575.Fld7577RRef` ID | `text` / нет | CONFIRMED, EPD-V01 |
-| `attribution_status` | `NO_EMPLOYEE` при отсутствии client-link; `MULTIPLE_EMPLOYEES` при `count(employee)>1` | `text` / нет | CONFIRMED user decision, BR-043 / EPD-V04 |
+| `attribution_status` | только `MULTIPLE_EMPLOYEES` при `count(employee)>1` | `text` / нет | CONFIRMED user decision, BR-043/BR-044 / EPD-V04 |
 | `presence_minutes` | same end-of-day-clipped `Document325` interval | `numeric` / нет | CONFIRMED, EPD-V02 / BR-043 |
 
 ## Подтверждённые источники
@@ -77,7 +79,7 @@ PostgreSQL-contracts используют стабильные IDs. BR-043 — �
 |---|---|---|---|
 | `InfoRg7006`, `Document329`, `Document279`, `Document313`, `Document329.VT4352`, `Enum448` | занятия, состояние, отмена | CONFIRMED current sources; key/state pending | Power Query и metadata |
 | `InfoRg7107`, `Reference191` | дежурства, помещение и минуты | CONFIRMED current sources | Power Query и metadata |
-| `Document325`, `AccumRg7575`, `Reference225`, `Reference59` | СКУД и сотрудник-клиент/ИП | CONFIRMED source; BR-043 separates 29,431 no-link and 708 multi-link visits without employee | [EPD decision](../reports/employee_presence_day_attribution_decision_2026-08-28.md) |
+| `Document325`, `AccumRg7575`, `Reference225`, `Reference59` | СКУД и сотрудник-клиент/ИП | CONFIRMED source; BR-044 excludes 29,431 no-link visits, while BR-043 retains 708 multi-link visits without employee | [EPD decision](../reports/employee_presence_day_no_employee_exclusion_decision_2026-08-28.md) |
 | `AccumRg7575`, `AccumRg7646`, `Reference163`, `Reference70`, `Reference132`, `Reference141X1` | услуги и выручка | CONFIRMED reuse sources | mapping ДПФУ |
 | `InfoRg6612`, `Reference217`, `Reference183` | дневной план | CONFIRMED current sources; key/active pending | Power Query и metadata |
 | `InfoRg6291`, `Reference101` | должность и ранг | CONFIRMED current sources; interval pending | Power Query и metadata |
@@ -103,7 +105,7 @@ PostgreSQL-contracts используют стабильные IDs. BR-043 — �
 | CONFIRMED user decision | купоны/дежурства | `GREATEST(0, raw duty − raw coupon overlap)`; union не применяется | EW-V03A / BR-040 |
 | CONFIRMED | coupon physical row | 149 `Table.Distinct` повторов отличаются лишь visit timestamp; business key, minutes, day, contract и IDs инвариантны | EW-FOLLOWUP-V03B |
 | CONFIRMED | `InfoRg6612` | active/unique technical rows | EW-V04 |
-| CONFIRMED user decision | СКУД сотрудника | Exact current-M domain: 29,431 qualified visits without employee and 708 with two employees; BR-043 stores them separately without employee. Historical EW-V05 broader visit domain had 1,292 multi-link visits. | EPD-V04 / BR-043 |
+| CONFIRMED user decision | СКУД сотрудника | Exact current-M domain: 29,431 qualified visits without employee are excluded by BR-044; 708 with two employees remain separately without employee by BR-043. Historical EW-V05 broader visit domain had 1,292 multi-link visits. | EPD-V04 / BR-043 / BR-044 |
 | BLOCKED (not activity source) | кадровые интервалы | 655 nonpositive и 187 overlapping pairs; historical attribution не выдумывается | EW-V07 |
 | CONFIRMED | ДПФУ reuse | независимые source totals for 7575/7646 captured | EW-V06 |
 | NOT_APPLICABLE | `_СпрСтавки` | внешний файл остаётся в Power BI | EW-V08 не выполняется для PostgreSQL |

@@ -1,6 +1,6 @@
 # Technical SQL review: two employee-presence products
 
-Status: `REVIEWED / READY FOR SEPARATE PHYSICAL ADMISSION`.
+Status: `SUPERSEDED BY BR-044 / NOT ADMISSIBLE FOR PHYSICAL EXECUTION`.
 
 ## Immutable reviewed set
 
@@ -9,7 +9,7 @@ Status: `REVIEWED / READY FOR SEPARATE PHYSICAL ADMISSION`.
 - [independent source controls](../../sql/marts/employee_presence_source_controls.sql);
 - [DDL](../../sql/marts/employee_presence_ddl.sql) and [target reconciliation](../../sql/tests/employee_presence_reconciliation.sql).
 
-`mart.employee_presence_day` has key `(presence_date, club_id, employee_id)` and receives only exact-one employee rows. `mart.employee_presence_unattributed_day` has key `(presence_date, club_id, attribution_status)`, has no employee column and receives only BR-043 statuses. Both preserve the current-M operation/service/club/end-of-day formula; the split itself is the user-approved target method, not current-M reproduction.
+`mart.employee_presence_day` has key `(presence_date, club_id, employee_id)` and receives only exact-one employee rows. This reviewed set originally put both BR-043 statuses in `mart.employee_presence_unattributed_day`. BR-044 subsequently excludes the `NO_EMPLOYEE` branch, so neither its extract nor its DDL/reconciliation contract may be physically executed; a new technical review is required.
 
 ## Architecture and rollback
 
