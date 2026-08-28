@@ -62,9 +62,9 @@ PostgreSQL-contracts используют стабильные IDs. BR-043 — �
 | `presence_minutes` | минуты в клубе | `Document325.Fld4172`, `Document325.Fld4174` | `effective_end - start`; sentinel/open and after-day end клиппируются концом start-day точно как current M | `numeric` | нет | CONFIRMED current formula / target decision | EPD-V02, EPD-V05, BR-043 |
 
 Для отдельного non-personal продукта `employee_id` не является колонкой:
-`attribution_status` — только явные константы `NO_EMPLOYEE` и
-`MULTIPLE_EMPLOYEES`; no-link branch исключается по BR-044, а minutes
-используют ту же подтверждённую формулу.
+`attribution_status` — только явная константа `MULTIPLE_EMPLOYEES`; no-link
+branch исключается по BR-044, а minutes используют ту же подтверждённую
+формулу.
 
 | Целевая колонка non-personal продукта | Источник / преобразование | PostgreSQL тип / NULL | Статус / evidence |
 |---|---|---|---|
