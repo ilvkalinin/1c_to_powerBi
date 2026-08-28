@@ -1,6 +1,6 @@
 # ADR-0018: факт применений промокодов
 
-- Статус: `DESIGNED / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-090, SV-091 / IMPLEMENTATION DEFERRED`
+- Статус: `DESIGNED / CARDINALITY RECHECK EXECUTED 2026-08-28 / DECISION_REQUIRED / IMPLEMENTATION DEFERRED`
 - Дата: 2026-08-03
 - Отчёт: №14 «Отчёт по промокодам»
 
@@ -31,11 +31,13 @@ filter-dependent конверсии. Технические ID скрыты, PII
 ## Риски
 
 Physical source key, states and 1–44-day outcomes are validated in SV-091.
-Document-line and gift joins have observed one-to-many multiplicity; current
-M/DAX remains the first-release rule under BR-018. Any protection that changes
-aggregation, grain or category result requires a separate methodology decision.
+The 2026-08-28 recheck repeats the document-line excess 33 and gift-join excess
+406, while action-parent orphan rows remain zero. Current M/DAX remains the
+first-release rule under BR-018. Any protection that changes aggregation, grain
+or category result requires a separate methodology decision.
 
 ## Доказательства
 
 - [Требования](../reports/promo_codes.md)
 - [Mapping](../mappings/promo_codes.md)
+- [Cardinality recheck](../reports/promo_application_stage2_cardinality_execution_2026-08-28.md)

@@ -1,6 +1,6 @@
 # Source-to-target mapping: применения промокодов
 
-Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0018 / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-090, SV-091; Stage 3 deferred`.
+Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0018 / CARDINALITY RECHECK EXECUTED 2026-08-28; DECISION_REQUIRED; Stage 3 deferred`.
 Спроектирован `mart.promo_application`; SQL не создаётся.
 
 ## Гранулярность
@@ -66,7 +66,7 @@ SQL этих полей нет, поэтому уникальность и да�
 | Статус | Элемент | Риск / причина | Следующее действие |
 |---|---|---|---|
 | VALIDATED | источник ключа и grain | candidate `(RecorderTRef, RecorderRRef, LineNo)` unique/non-null in both registers | SV-091; business grain retains current M aggregation |
-| VALIDATION_PENDING | связь с маркетинговой акцией `Document298.VT3596` | SV-090 подтвердил `_document298_vt3596`; кардинальность и сохранение строк текущего join не проверены | выполнить PC-V02 и PC-V04 в отдельном read-only пакете |
-| VALIDATION_FAILED | joins и суммы скидки | SV-091: 33 excess rows after current June document-line joins; gift join also has excess 406 | preserve current `MAX`/`SUM`; methodology decision required before implementation |
+| VALIDATED | связь с маркетинговой акцией `Document298.VT3596` | PC-V04 2026-08-28: 7,904 action rows, parent/null-discount = 0/0 | `promo_application_stage2_cardinality_execution_2026-08-28.md`; no new filter follows |
+| VALIDATION_FAILED | joins и суммы скидки | PC-V02 2026-08-28 repeats 7,535 technical discount rows → 7,568 current-M joined rows (excess 33); PC-V04 repeats gift-join excess 406 | preserve current `MAX`/`SUM`/`Table.Distinct`; methodology decision required before implementation |
 | VALIDATED observation | состояния и сторно | SV-091 measured active/posted/marked state; no new filter follows | preserve current source filters |
 | PARTIALLY VALIDATED | текстовые категории/дни | 100+ day gifts absent; source predicates total, but current DAX fallback and join multiplicity remain | preserve current DAX; methodology decision required for change |

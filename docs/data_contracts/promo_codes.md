@@ -1,6 +1,6 @@
 # Data contract: «Отчёт по промокодам»
 
-Статус: `DESIGNED / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-090, SV-091`.
+Статус: `DESIGNED / IMPLEMENTATION DEFERRED / CARDINALITY DECISION_REQUIRED — PC-V02, PC-V04 rechecked 2026-08-28`.
 
 | Параметр | Значение |
 |---|---|
@@ -36,5 +36,6 @@ PII не входит.
 Приёмка Stage 2: physical key, states, 1/44/45 boundaries, source input and
 gift-day parser completed in SV-091. Document-line and gift joins have
 observed one-to-many risks; legacy result remains unchanged under BR-018.
-Stage 3 remains deferred and requires separate authorization plus a decision
-on source-side protection of those joins.
+The 2026-08-28 recheck repeats PC-V02 excess 33 and PC-V04 gift excess 406;
+Stage 3 remains deferred and requires a methodology decision on source-side
+protection of those joins.

@@ -1,6 +1,6 @@
 # Query review: «Отчет по промокодам»
 
-Статус: `REVIEW COMPLETE / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-091`.
+Статус: `REVIEW COMPLETE / CARDINALITY RECHECK EXECUTED 2026-08-28 / DECISION_REQUIRED`.
 
 ## Текущая модель
 
@@ -67,9 +67,9 @@
 | ID | Проверка | Ожидаемый результат | Статус |
 |---|---|---|---|
 | PC-V01 | Уникальность и не-NULL `(Recorder, LineNo)` каждого регистра | ключ однозначно идентифицирует движение | `VALIDATED — SV-091; 974 162/974 162 technical keys` |
-| PC-V02 | Сравнение строк до/после joins | joins не размножают движения | `VALIDATION_FAILED — SV-091; июнь 2026: excess 33` |
+| PC-V02 | Сравнение строк до/после joins | joins не размножают движения | `VALIDATION_FAILED — SV-091 and 2026-08-28 recheck; June: 7,535 → 7,568, excess 33` |
 | PC-V03 | `RecordKind`, `Active`, Posted/Marked | состояния измерены, без нового фильтра | `VALIDATED observation — SV-091` |
-| PC-V04 | Связи promo/serial/gift/action и их кардинальности | no parent orphan; risks фиксируются | `PARTIALLY VALIDATED — SV-091; action parent orphan 0, duplicate/action and gift multiplicity present` |
+| PC-V04 | Связи promo/serial/gift/action и их кардинальности | no parent orphan; risks фиксируются | `VALIDATION_FAILED for gift multiplicity — 2026-08-28: action parent/null-discount 0/0; 905 duplicate groups; gift excess 406` |
 | PC-V05 | Контрольные 45-дневные outcomes | строго 1–44 дня | `VALIDATED — SV-091` |
 | PC-V06 | Подарки с числом дней 100+ | отсутствуют либо фиксируются | `VALIDATED — SV-091; 0 values 100+` |
 | PC-V07 | Source-side период/клуб/категория | input null-free; category predicates total | `PARTIALLY VALIDATED — SV-091; independent Power BI export не требуется` |
