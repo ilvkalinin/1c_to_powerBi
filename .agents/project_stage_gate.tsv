@@ -5,4 +5,4 @@
 # CLOSED_PENDING_NEXT_APPROVAL rejects all new selections until the user
 # explicitly confirms the next independent package.
 gate_id	state	allowed_stage	allowed_report_ids	reason
-global_stage_gate	CLOSED_PENDING_NEXT_APPROVAL	-	-	Fitness-funnel BR-048 physical admission closed 2026-08-28: initial load, atomic rerun, source/target controls and target plan passed; new independent package approval is required.
+global_stage_gate	STAGE3_TECHNICAL_SQL_REVIEW_AUTHORIZED	STAGE_3_TECHNICAL_SQL_REVIEW	fitness_funnel	User approved read-only technical review for `mart.fitness_funnel_client_outcome` on 2026-08-28; target, Power BI and source changes prohibited.

@@ -56,7 +56,7 @@ for report_id in "$@"; do
   fi
 
   row=$(awk -F '\t' -v id="$report_id" -v wanted_stage="$stage" \
-    '$1 !~ /^#/ && $1 == id && $2 == wanted_stage { print; exit }' "$ledger")
+    '$1 !~ /^#/ && $1 == id && $2 == wanted_stage { row=$0 } END { print row }' "$ledger")
   if [ -z "$row" ]; then
     echo "PACKAGE SELECTION REJECTED: $report_id has no ledger row for $stage" >&2
     failed=1

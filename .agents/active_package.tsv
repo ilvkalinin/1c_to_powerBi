@@ -4,7 +4,7 @@
 # package_status must be ACTIVE or CLOSED; report_status must be PENDING, IN_PROGRESS, COMPLETE, or BLOCKED.
 # approval_evidence must link to the user-approved full scope and closure criterion.
 package_id	stage	package_status	approved_at	approval_evidence
-fitness_funnel_client_start_stage3_product_admission_br048_2026-08-28	STAGE_3_PRODUCT_ADMISSION	CLOSED	2026-08-28	docs/reports/fitness_funnel_client_start_stage3_product_admission_br048_authorization_2026-08-28.md
+fitness_funnel_client_outcome_stage3_technical_review_2026-08-28	STAGE_3_TECHNICAL_SQL_REVIEW	ACTIVE	2026-08-28	docs/reports/fitness_funnel_client_outcome_stage3_technical_review_authorization_2026-08-28.md
 
 report_id	report_status	completion_commit
-fitness_funnel	COMPLETE	SELF
+fitness_funnel	IN_PROGRESS	-
