@@ -109,3 +109,19 @@ PBIT с SHA-256 `9890f4a9c7734617557ebfb4aec1d8e4d9d8b801b9b8eb0e8c67a7171b64f20
 client-start rule. Exact target extract намеренно не переносит `contract_id`,
 contract code, PII или detail attributes: они требуют отдельной child-detail
 projection и не могут выбирать «главный» contract.
+
+## Outcome technical review — `VALIDATED`
+
+Read-only review 2026-08-28 подтвердил физические ключи outcome-источников,
+формат protected `client_key` и current PBIT-агрегацию движений ДПФУ. PBIT
+сворачивает ИП в одну строку `(client_code, outcome_date)` без порядка клуба,
+услуги, сотрудника или source key; на полном горизонте это 425 ПЗ ИП и 56 ГЗ
+ИП multivalue client-day. Пользователь принял BR-049: разные услуги остаются
+разными source-event строками. Поэтому `outcome_source_key`,
+`outcome_club_id`, `service_id`, `outcome_employee_id` и
+`outcome_event_count = 1` фиксируются на уровне source-service event, без
+client-day `ROW_NUMBER()`. Подробное доказательство и пример без PII:
+`docs/reports/fitness_funnel_client_outcome_stage3_technical_review_execution_2026-08-28.md`.
+Exact full extract прошёл output-contract control: 1 036 251 строк и source
+keys, duplicate/NULL/horizon deviations = 0. Physical admission остаётся
+отдельным пакетом с target DDL/DML/COPY/reconciliation.

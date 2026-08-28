@@ -37,3 +37,15 @@ distinct клиентов и конверсии.
 дату схлопываются, один клиент может иметь несколько исходов, оконные границы,
 states, PII, rerun и SLA. В текущем пакете PBIT read-only проверен, но
 Power BI connection, relationships и measures остаются `DESIGNED` по BR-036.
+
+## Условие реализации outcome
+
+Статус `mart.fitness_funnel_client_outcome`: `STAGE_3 TECHNICAL SQL REVIEW VALIDATED / PHYSICAL ADMISSION DECISION_REQUIRED`.
+Для ИП current PBIT хранит один client-day, но не определяет, какой из
+нескольких клубов/услуг/сотрудников остаётся в этой строке. Full-horizon
+control 2026-08-28 нашёл 481 такой client-day. Пользователь принял BR-049:
+разные услуги сохраняются отдельными source-event строками. Поэтому
+`outcome_source_key` включает физический source key и branch discriminator,
+а `outcome_count = 1`; distinct-клиенты не меняются, legacy `COUNTROWS` может
+увеличиться. Evidence:
+`docs/reports/fitness_funnel_client_outcome_stage3_technical_review_execution_2026-08-28.md`.

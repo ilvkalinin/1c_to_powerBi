@@ -149,6 +149,22 @@ validation. Выбор «главного» контракта, изменени
 contract attribution не выполняются по BR-018. Новых отсутствующих источников
 не выявлено; внешние Excel-файлы не анализировались.
 
+## Outcome technical review — 2026-08-28
+
+Read-only technical review outcome-факта выявил не cohort-проблему, а
+неопределённую свёртку ИП. Current M оставляет один исход на клиента и дату,
+но при нескольких реальных занятиях в день не задаёт, чьи клуб, услуга и
+сотрудник остаются. На `[2024-01-01, 2026-08-28)` таких строк 481. До
+явного решения это `DECISION_REQUIRED`; source/target SQL, Power BI и 1С не
+менялись. Полные измерения и варианты правила:
+`fitness_funnel_client_outcome_stage3_technical_review_execution_2026-08-28.md`.
+
+Пользователь 2026-08-28 принял BR-049: разные услуги ИП остаются отдельными
+исходами. Точный outcome extract, controls, DDL, guarded runner и target
+reconciliation прошли технический review; full source result содержит
+1 036 251 уникальных source events без contract/null/horizon нарушений.
+Target, Power BI и источник не изменялись; physical admission нужен отдельно.
+
 ## Учёт class-B условия — 2026-08-13
 
 Пользовательское решение не требуется. `SV-079` подтверждает уже принятое
