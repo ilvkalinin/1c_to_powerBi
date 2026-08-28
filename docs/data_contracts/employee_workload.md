@@ -1,13 +1,14 @@
 # Data contract: «Загрузка сотрудников»
 
-Статус: `employee_activity_interval IMPLEMENTED / employee_presence_day STAGE 2 BLOCKED`.
+Статус: `employee_activity_interval IMPLEMENTED / presence facts DESIGNED, physical implementation deferred`.
 
 ## Новые объекты
 
 | Объект | Таблица Power BI | Grain / ключ |
 |---|---|---|
 | `mart.employee_activity_interval` | `Активность сотрудников` | урок ПЗ/ГЗ, дежурство или coupon event × сотрудник × клуб × интервал |
-| `mart.employee_presence_day` | `Присутствие сотрудников` | `(employee_id, presence_date, club_id)`; implementation BLOCKED: 29,431 qualified visits lack employee and 708 have two |
+| `mart.employee_presence_day` | `Присутствие сотрудников` | `(employee_id, presence_date, club_id)`; only exact-one employee domain by BR-043 |
+| `mart.employee_presence_unattributed_day` | `Присутствие без сотрудника` | `(presence_date, club_id, attribution_status)`; `NO_EMPLOYEE`/`MULTIPLE_EMPLOYEES`, no `employee_id`, by BR-043 |
 
 ### `mart.employee_activity_interval`
 
@@ -35,6 +36,18 @@
 | `employee_id` | `ID сотрудника` | text | нет | FK сотрудника | не мера | да |
 | `presence_minutes` | `Минуты в клубе` | numeric | нет | показатель | аддитивна | нет |
 
+### `mart.employee_presence_unattributed_day`
+
+| PostgreSQL | Power BI | Тип | NULL | Роль | Аддитивность | Скрыть |
+|---|---|---|---|---|---|---|
+| `presence_date` | `Дата присутствия` | date | нет | FK даты | не мера | нет |
+| `club_id` | `ID клуба` | text | нет | FK клуба | не мера | да |
+| `attribution_status` | `Статус атрибуции` | text | нет | срез | не мера | нет |
+| `presence_minutes` | `Минуты без сотрудника` | numeric | нет | показатель | аддитивна | нет |
+
+`attribution_status` ограничен `NO_EMPLOYEE` и `MULTIPLE_EMPLOYEES`; связи с
+employee dimension нет. Power BI остаётся `DESIGNED` по BR-036, без switch.
+
 Модель также REUSE факты ДПФУ, план ДПФУ и ИП. Общие дата, клуб, сотрудник,
 вид деятельности, услуга и помещение фильтруют применимые факты `1:*`, single
 direction. Пороги остаются внешним Power BI-фактом без прямой связи к фактам.
@@ -47,9 +60,9 @@ reconciliation часов/выручки/плана, rerun и SLA. `employee_pre
 остаётся отдельной витриной и не получает неоднозначную СКУД-атрибуцию.
 
 `employee_presence_day` не получает ни fallback employee, ни hidden
-deduplication: safe one-employee control omits 30,139 current-M-qualified
-visits and therefore is not current-result reproduction. Evidence:
-[`EPD Stage 2`](../reports/employee_presence_day_stage2_validation_2026-08-28.md).
+deduplication. BR-043 сохраняет 30,139 проблемных current-M-qualified visits
+в отдельном non-personal product, поэтому split — явная целевая методика, а не
+current-result reproduction. Evidence: [`EPD decision`](../reports/employee_presence_day_attribution_decision_2026-08-28.md).
 
 `activity_event_key` подтверждён для ПЗ (`PZ + Document329 + VT4352 line`),
 ГЗ (`GZ + Document279`), дежурства (hash точной M-группы) и coupon event

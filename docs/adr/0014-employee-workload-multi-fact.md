@@ -17,7 +17,9 @@
 - `mart.employee_activity_interval`: одно квалифицированное событие
   `занятие/дежурство/купон × сотрудник × клуб × интервал × тип`;
 - `mart.employee_presence_day`: `сотрудник × дата × фактический клуб`, с
-  суммарными минутами пребывания;
+  суммарными минутами только exact-one employee domain;
+- отдельный candidate non-personal fact: `дата × фактический клуб × причина
+  отсутствия атрибуции`, без employee;
 - REUSE `mart.ancillary_revenue_movement`,
   `mart.dpfu_plan_assignment` и `mart.ip_training_daily`.
 
@@ -39,6 +41,13 @@ PostgreSQL воспроизводит current-M интервалы, длител
 DAX считает сумму загрузки, долю,
 процент от времени в клубе, эффективность и план-факт.
 
+BR-043 разделяет СКУД на two isolated facts. Recommended storage is two
+physical tables with source-side aggregation; no persistent source replica,
+index or incremental watermark is planned. Initial load and rebuild use derived
+monthly binary COPY files prepared before a short target transaction, an
+advisory lock, temporary target stages, `DELETE + INSERT` replacement and
+rollback on every failed reconciliation. This is a full-rebuild baseline only.
+
 ## Риски
 
 Ключи уроков, `VT4352`, source states, duty-grain и coupon grain проверены.
@@ -46,7 +55,9 @@ DAX считает сумму загрузки, долю,
 одинаковые calendar day, duration, contract и dimension IDs, поэтому текущий
 output grain воспроизводим. При
 недоказанной однозначной связи СКУД строка не включается в
-`employee_presence_day`; 1,292 multiple-link visits не материализуются скрыто.
+`employee_presence_day`. BR-043 сохраняет exact current-M no-link и multi-link
+visits в отдельном non-personal product без employee; это целевое правило,
+принятое после EPD Stage 2, а не скрытая атрибуция.
 Historical employment attribution также отложена из-за 655 nonpositive и 187
 overlapping intervals. См. Stage 2 evidence.
 
@@ -56,3 +67,4 @@ overlapping intervals. См. Stage 2 evidence.
 - [Mapping](../mappings/employee_workload.md)
 - [Stage 2 evidence](../reports/employee_activity_interval_stage2_validation_2026-08-27.md)
 - [Follow-up evidence](../reports/employee_activity_interval_followup_validation_2026-08-27.md)
+- [EPD decision](../reports/employee_presence_day_attribution_decision_2026-08-28.md)
