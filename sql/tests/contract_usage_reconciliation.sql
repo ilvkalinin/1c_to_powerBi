@@ -12,7 +12,7 @@ WITH stage AS MATERIALIZED (
                   OR membership_start_date IS NULL OR membership_end_date IS NULL
                   OR contract_end_month IS NULL OR active_calendar_months < 1
                   OR visit_count <= 0
-                  OR membership_end_date < membership_start_date
+                  OR membership_end_date <= membership_start_date
                   OR contract_end_month <> date_trunc('month', membership_end_date)::date
            )::bigint AS stage_contract_violations
     FROM _contract_usage_stage
@@ -34,7 +34,7 @@ WITH stage AS MATERIALIZED (
     WHERE contract_id IS NULL OR contract_code IS NULL
        OR membership_start_date IS NULL OR membership_end_date IS NULL
        OR contract_end_month IS NULL OR active_calendar_months < 1
-       OR visit_count <= 0 OR membership_end_date < membership_start_date
+       OR visit_count <= 0 OR membership_end_date <= membership_start_date
        OR contract_end_month <> date_trunc('month', membership_end_date)::date
 )
 SELECT control_id, expected, actual, tolerance,

@@ -19,6 +19,7 @@ WITH current_m_rows AS MATERIALIZED (
       AND a._period >= $1::date AND a._period < $2::date
       AND client._fld1532rref = decode('9e8eaa7b2e77c19f4a1c22a8d9c3efa1', 'hex')
       AND c._code IS NOT NULL
+      AND c._fld672::date > c._fld671::date
 ), type_pairs AS (
     SELECT encode(_fld7578_type, 'hex') AS type_hex,
            encode(_fld7578_rtref, 'hex') AS rtref_hex
@@ -53,6 +54,7 @@ WITH current_m_rows AS MATERIALIZED (
       AND a._period >= $1::date AND a._period < $2::date
       AND client._fld1532rref = decode('9e8eaa7b2e77c19f4a1c22a8d9c3efa1', 'hex')
       AND c._code IS NOT NULL
+      AND c._fld672::date > c._fld671::date
 ), code_groups AS (
     SELECT contract_code, count(DISTINCT contract_id)::bigint AS contract_ids
     FROM current_m_rows GROUP BY contract_code
@@ -84,6 +86,7 @@ WITH current_m_rows AS MATERIALIZED (
       AND a._period >= $1::date AND a._period < $2::date
       AND client._fld1532rref = decode('9e8eaa7b2e77c19f4a1c22a8d9c3efa1', 'hex')
       AND c._code IS NOT NULL
+      AND c._fld672::date > c._fld671::date
 ), contract_groups AS (
     SELECT contract_id, contract_code, membership_start_date, membership_end_date,
            membership_term_days, count(*)::bigint AS visit_count
@@ -98,9 +101,33 @@ SELECT 'CU-S03'::text AS control_id,
        max(membership_end_date) AS max_membership_end_date,
        count(*) FILTER (WHERE membership_start_date IS NULL OR membership_end_date IS NULL)
            ::bigint AS null_membership_date_rows,
-       count(*) FILTER (WHERE membership_end_date < membership_start_date)::bigint
-           AS reversed_membership_interval_rows,
+       count(*) FILTER (WHERE membership_end_date <= membership_start_date)::bigint
+           AS invalid_membership_interval_rows,
+       count(*) FILTER (
+           WHERE 12 * (extract(year FROM membership_end_date)::integer
+                     - extract(year FROM membership_start_date)::integer)
+                 + extract(month FROM membership_end_date)::integer
+                 - extract(month FROM membership_start_date)::integer
+                 + 1 < 1
+       )::bigint AS nonpositive_active_calendar_month_rows,
        count(*) FILTER (WHERE membership_term_days IS NULL)::bigint AS null_term_rows,
        count(*) FILTER (WHERE membership_term_days < 0)::bigint AS negative_term_rows,
        count(*) FILTER (WHERE visit_count <= 0)::bigint AS nonpositive_visit_count_rows
 FROM contract_groups;
+
+-- CU-S04: BR-003 permits the current Moscow day but no future visit fact.
+-- Membership dates remain descriptive contract attributes, not a fact horizon.
+SELECT 'CU-S04'::text AS control_id,
+       $2::date AS exclusive_horizon_end,
+       count(*)::bigint AS future_visit_rows
+FROM public._accumrg7575 AS a
+JOIN public._document325 AS d ON d._idrref = a._recorderrref
+JOIN public._reference132 AS club ON club._idrref = a._fld7577rref
+JOIN public._reference141x1 AS client ON client._idrref = d._fld4171rref
+JOIN public._reference59 AS c ON c._idrref = a._fld7578_rrref
+WHERE d._fld4164rref = decode('9a5a4c90d2b1aede4b91dcd1abe84c43', 'hex')
+  AND club._description NOT IN ('Детский развивающий центр', 'Управляющая компания')
+  AND a._period >= $2::date
+  AND client._fld1532rref = decode('9e8eaa7b2e77c19f4a1c22a8d9c3efa1', 'hex')
+  AND c._code IS NOT NULL
+  AND c._fld672::date > c._fld671::date;

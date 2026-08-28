@@ -1,7 +1,7 @@
 # Source-to-target mapping: использование контрактов для %Renew
 
-Статус: `STAGE 3 TECHNICAL SQL REVIEW — CU-TR-002 / PHYSICAL ADMISSION PENDING`.
-Локальный reviewed SQL set подготовлен; VM-2 не изменялась.
+Статус: `IMPLEMENTED / initial load and atomic rerun VALIDATED — CU-LOAD-001—008`.
+Physical target создан и принят 2026-08-28; Power BI не менялся по BR-036.
 
 ## Гранулярность
 
@@ -19,13 +19,13 @@
 | Целевая колонка | Бизнес-описание | Источник / преобразование | PostgreSQL тип | NULL | Статус / доказательство | Проверка |
 |---|---|---|---|---|---|---|
 | `contract_id` | стабильный ID контракта | `encode(Reference59.ID, 'hex')` | `text` | нет | CONFIRMED Stage 3 representation | CU-S01, PK |
-| `contract_code` | код для связи с существующей выгрузкой 1С | `Reference59.Code::text` | `text` | нет | VALIDATION_PENDING full legacy window; 7-day CU-S02: 0 duplicate code groups | CU-S02, UNIQUE |
+| `contract_code` | код для связи с существующей выгрузкой 1С | `Reference59.Code::text` | `text` | нет | full dynamic BR-003 CU-S02 passed; `UNIQUE` accepted | CU-S02, UNIQUE |
 | `membership_start_date` | дата начала контракта | `Reference59.Fld671::date` | `date` | нет | CONFIRMED physical type; sentinel `0001-01-01` observed and retained | CU-S03 |
-| `membership_end_date` | дата окончания контракта | `Reference59.Fld672::date` | `date` | нет | CONFIRMED physical type; `2300-03-12` observed and retained | CU-S03 |
+| `membership_end_date` | дата окончания контракта | `Reference59.Fld672::date`; `end > start` | `date` | нет | BR-047: reused valid-membership predicate; full revalidation after filter change pending | CU-S03, target CHECK |
 | `contract_end_month` | месяц когорты окончания | первый день месяца `membership_end_date` | `date` | нет | CONFIRMED requirement | month boundary |
 | `membership_term_days` | срок действия в днях | `Reference59.Fld693::numeric` | `numeric` | да | CONFIRMED physical type `numeric(5,0)`; не подменяется разницей дат | CU-S03; RU-V04 |
-| `active_calendar_months` | число затронутых календарных месяцев inclusive | `12 * (year(end)-year(start)) + month(end)-month(start) + 1` | `integer` | нет | CONFIRMED user rule | пример 13 |
-| `visit_count` | посещения, отнесённые к контракту | current-M `COUNT(*)` по `AccumRg7575` в fixed legacy window; без нового interval filter | `bigint` | нет | CONFIRMED BR-018; 7-day CU-S01: 69,562 rows = technical keys = documents | CU-S01, CU-S03 |
+| `active_calendar_months` | число затронутых календарных месяцев inclusive | `12 * (year(end)-year(start)) + month(end)-month(start) + 1` | `integer` | нет | BR-047 guarantees `>=1` after invalid intervals are excluded | CU-S03, target CHECK |
+| `visit_count` | посещения, отнесённые к контракту | current-M `COUNT(*)` по `AccumRg7575` в dynamic BR-003 window; только для valid-membership domain BR-047 | `bigint` | нет | CONFIRMED BR-003/BR-018; 7-day CU-S01: 69,562 rows = technical keys = documents | CU-S01, CU-S03, CU-S04 |
 | `usage_rate` | использование на один день срока | `visit_count / NULLIF(membership_term_days,0)` | `numeric` | да | CONFIRMED user formula | format and >100% |
 | `average_monthly_visits` | среднемесячные посещения | `visit_count / NULLIF(active_calendar_months,0)` | `numeric` | да | CONFIRMED user formula | example and rounding |
 
@@ -39,7 +39,8 @@
 | посещение внутри интервала контракта | Не добавлять filter: current M его не содержит, первый релиз сохраняет exact legacy domain |
 | `AccumRg7575.Active` | Не добавлять filter; CU-S01 записывает observed inactive rows |
 | `Document325.Posted/Marked` | Не добавлять filter; CU-S01 записывает observed states |
-| тип полиморфного `AccumRg7575.Fld7578` = абонемент | 7-day CU-S01 observed только `08/0000003b`; full fixed-window control обязателен перед COPY |
+| тип полиморфного `AccumRg7575.Fld7578` = абонемент | full dynamic BR-003 CU-S01 passed; observed domain remains `08/0000003b` |
+| `Reference59.Fld672::date <= Reference59.Fld671::date` | исключить по повторно используемому BR-047 valid-membership predicate; source 1С не изменяется |
 
 ## Не переносить
 
@@ -62,7 +63,9 @@ grain и объём для всех посещенческих отчётов.
 
 ## Обновление
 
-- компактный контрактный набор обновляется полным fixed legacy window;
+- компактный контрактный набор обновляется полным dynamic BR-003 horizon;
+- runner вычисляет dynamic BR-003 horizon по Москве: текущий день допустим,
+  будущие посещения блокируются (`CU-S04`);
 - source-first runner записывает только производный набор в ограниченный
   временный файл, затем атомарно заменяет target внутри одной транзакции;
 - watermark и инкрементальная семантика не проектируются;
@@ -105,5 +108,6 @@ rows равны нулю; они не превращены в новые фил�
 После удаления неподтверждённой finalization-механики CU-TR-002 повторил
 точный revised extract: 31,788 строк за 1,513.934 ms, planning 7.249 ms,
 shared hit 1,060,822, без read/temp I/O. До admission CU-S01--CU-S03
-выполняются на полном fixed legacy window; DDL/DML/COPY требуют отдельного
-явно одобренного physical package.
+выполнены на полном dynamic BR-003 horizon; initial DDL/DML/COPY, target
+reconciliation и fresh-snapshot rerun приняты в CU-LOAD-001—008. См.
+[execution evidence](../reports/contract_usage_stage3_product_admission_execution_2026-08-28.md).

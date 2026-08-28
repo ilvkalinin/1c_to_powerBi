@@ -1,6 +1,6 @@
 # ADR-0006: компактные метрики использования контрактов для %Renew
 
-- Статус: `TECHNICAL REVIEWED — CU-TR-002 / PHYSICAL ADMISSION PENDING`
+- Статус: `IMPLEMENTED / initial load and atomic rerun VALIDATED — CU-LOAD-001—008`
 - Дата: 2026-07-28
 - Отчёт: № 17 «Отчет по %Renew»
 
@@ -10,9 +10,9 @@
 PostgreSQL нужен только для количества посещений по контракту и двух
 коэффициентов использования.
 
-Отчёт должен получать компактные контрактные метрики из подтверждённого
-current-M fixed legacy window. Первый релиз воспроизводит его без добавления
-новой исторической или инкрементальной семантики.
+Отчёт получает компактные контрактные метрики из current-M домена в
+подтверждённом dynamic BR-003 horizon. Верхняя граница — день после текущей
+московской даты: текущий день разрешён, будущие visit facts запрещены.
 
 Полная копия `AccumRg7575` на VM витрин запрещена. Общий
 `mart.visit_client_day` не подходит: он намеренно не хранит контракт и
@@ -67,23 +67,32 @@ current-M fixed legacy window. Первый релиз воспроизводи�
 > source-side агрегация на VM-1 → временный объект загрузки на VM-2 →
 > атомарное обновление `mart.contract_usage` → Power BI Import.
 
-Каждый refresh полностью извлекает approved fixed legacy window. После
+Каждый refresh полностью извлекает dynamic BR-003 horizon. После
 source-side controls runner передаёт только производный набор на VM-2,
 загружает временную stage-таблицу и в одной транзакции атомарно заменяет
-`mart.contract_usage`. Power BI обновляется после успешной замены.
+`mart.contract_usage`. Изменение или refresh Power BI не входит в этот пакет и
+остается запрещённым BR-036.
 
 Это не watermark-инкремент и не ежедневный SLA: размер полного окна, transfer
 cap и full-range baseline фиксируются только в отдельном physical package.
 
 ## Подсчёт
 
-- посещения отбираются в current-M fixed legacy window без нового interval filter;
+- посещения отбираются в current-M dynamic BR-003 horizon только для
+  действительного абонемента `Reference59.Fld672::date > Reference59.Fld671::date`
+  по повторно используемому BR-047;
 - текущая формула совместимости — `COUNT(*)`;
 - перед реализацией она сравнивается с уникальными документами и ресурсом
   количества;
 - срок действия берётся из `Reference59.Fld693`;
 - календарные месяцы считаются inclusive;
 - деление на ноль возвращает `NULL`.
+
+Предыдущий full BR-003 CU-S03 выявил 113 обратных интервалов до включения
+BR-047. Итоговые числа после строгого reused predicate будут сняты заново до
+COPY. BR-047 исключает из target все интервалы с `end <= start`; источник 1С
+не меняется. Поэтому target contract требует `end > start` и
+`active_calendar_months >= 1`.
 
 ## Слои
 
@@ -99,7 +108,7 @@ PostgreSQL выполняет:
 
 - отбор валидных посещений;
 - связь с контрактом;
-- fixed legacy-window фильтр current M;
+- dynamic BR-003 horizon текущего M;
 - подсчёт посещений, дней и календарных месяцев;
 - расчёт строковых коэффициентов для сегментации;
 - полный atomic rebuild target.
@@ -122,7 +131,7 @@ Power BI:
 ## Последствия
 
 - переносится одна строка на контракт вместо движений посещений;
-- target воспроизводится из полного fixed legacy window;
+- target воспроизводится из полного dynamic BR-003 horizon без будущих фактов;
 - архитектура существующего отчёта и внешние выгрузки не меняются;
 - общий client-day факт не раздувается контрактным измерением.
 
@@ -166,6 +175,13 @@ groups. Это evidence sample, не замена full fixed-window pre-COPY con
 
 CU-TR-002 убрал неподтверждённую finalization-механику и повторил exact short
 plan: 31,788 target-grain rows за 1,513.934 ms, planning 7.249 ms, shared hit
-1,060,822, без read/temp I/O. Runner требует явные `legacy_start`,
-`legacy_end` и `max_transfer_bytes`; target connection, DDL/DML/COPY в review
-не выполнялись. Physical admission требует отдельного одобренного пакета.
+1,060,822, без read/temp I/O. Последующий runner derives dynamic BR-003 horizon
+в Москве и требует `max_transfer_bytes`; admission execution записан отдельно.
+
+## Admission execution — CU-LOAD-001—008
+
+2026-08-28 initial load и fresh-snapshot atomic rerun прошли independent
+CU-S01--CU-S04 и CU-R01--CU-R08 без отклонений. Final target содержит 218,376
+строк и 7,223,594 посещения; strict BR-047 interval violations отсутствуют.
+Full rebuild остаётся только measured baseline, Power BI не изменён. Полное
+evidence: [contract usage product-admission execution](../reports/contract_usage_stage3_product_admission_execution_2026-08-28.md).

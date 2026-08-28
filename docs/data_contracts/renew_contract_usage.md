@@ -1,21 +1,21 @@
 # Data contract: «Использование контрактов»
 
-Статус: `TECHNICAL REVIEWED — CU-TR-002 / PHYSICAL ADMISSION PENDING`.
+Статус: `IMPLEMENTED / initial load and atomic rerun VALIDATED — CU-LOAD-001—008`.
 Контракт относится только к PostgreSQL-обогащению отчёта `%Renew`.
 
 ## Общие параметры
 
 | Параметр | Значение | Статус |
 |---|---|---|
-| Объект PostgreSQL | `mart.contract_usage` | REVIEWED local DDL; no VM-2 object |
+| Объект PostgreSQL | `mart.contract_usage` | IMPLEMENTED on VM-2; final rerun accepted |
 | Таблица Power BI | `Использование контрактов` | CONFIRMED naming rule |
 | Назначение | сегментация контрактов по посещаемости | CONFIRMED |
 | Гранулярность | один контракт | CONFIRMED BY DESIGN |
 | Технический ключ | `contract_id` | `encode(Reference59.ID, 'hex')::text`; reviewed |
-| Текущий ключ связи Power BI | `contract_code` | 7-day uniqueness observed; full-window CU-S02 pending |
+| Текущий ключ связи Power BI | `contract_code` | full dynamic BR-003 CU-S02 passed; Power BI switch remains gated by BR-036 |
 | Режим Power BI | `Import` | CONFIRMED BY DESIGN |
 | Обновление | ежедневно | CONFIRMED user decision |
-| Режим refresh | полный atomic rebuild fixed legacy window | TECHNICAL REVIEWED; не incremental |
+| Режим refresh | полный atomic rebuild dynamic BR-003 horizon | CONFIRMED BR-003; не incremental, будущие visit facts запрещены |
 | Watermark | отсутствует | NOT APPLICABLE / full rebuild |
 | SLA | данные доступны не позднее 08:30 по Москве | BR-014; end-to-end evidence pending physical admission |
 
@@ -29,7 +29,7 @@
 | `membership_end_date` | `Дата окончания` | `date` | Date | нет | атрибут | не мера | нет |
 | `contract_end_month` | `Месяц окончания` | `date` | Date | нет | атрибут | не мера | нет |
 | `membership_term_days` | `Срок действия, дней` | `numeric` | Whole/Decimal number | да | знаменатель | не суммировать | нет |
-| `active_calendar_months` | `Активных календарных месяцев` | `integer` | Whole number | нет | знаменатель | не суммировать | нет |
+| `active_calendar_months` | `Активных календарных месяцев` | `integer` | Whole number | нет | знаменатель, `>=1` по BR-047 | не суммировать | нет |
 | `visit_count` | `Количество посещений` | `bigint` | Whole number | нет | показатель контракта | не суммировать вне distinct контрактов | нет |
 | `usage_rate` | `% использования` | `numeric` | Decimal number / Percentage | да | коэффициент | неаддитивна | нет |
 | `average_monthly_visits` | `Среднемесячные посещения` | `numeric` | Decimal number | да | коэффициент | неаддитивна | нет |
@@ -38,7 +38,7 @@
 
 | От | К | Кардинальность | Фильтрация | Статус |
 |---|---|---|---|---|
-| `Использование контрактов[Код контракта]` | существующие контрактные snapshots `[Код контракта]` | `1:*` | однонаправленная | source 7-day uniqueness observed; full CU-S02 and Power BI switch remain pending |
+| `Использование контрактов[Код контракта]` | существующие контрактные snapshots `[Код контракта]` | `1:*` | однонаправленная | full dynamic BR-003 CU-S02 passed; Power BI switch remains pending by BR-036 |
 
 Новая таблица не связывается напрямую с фактами рекарринга, планами или
 календарём. Месяц окончания в существующем контрактном снимке остаётся основной
@@ -82,7 +82,7 @@ PostgreSQL:
 - возвращает подтверждённый срок действия;
 - считает календарные месяцы inclusive;
 - рассчитывает два контрактных коэффициента;
-- атомарно заменяет весь target результатом fixed legacy window.
+- атомарно заменяет весь target результатом dynamic BR-003 horizon.
 
 Power Query:
 
@@ -113,7 +113,7 @@ DAX сохраняет существующие расчёты Renew, рекар
 6. Проверка контракта, пересекающего Новый год.
 7. Измерение full-window source-side запроса и Power BI refresh.
 
-SV-082 и CU-TR-001/CU-TR-002 подтвердили bounded physical current-PBI path,
-но full-window CU-S01--CU-S03 и measured full-range baseline остаются
-обязательными pre-COPY controls. DDL/DML/COPY, target reconciliation и Power
-BI switch не выполнялись и требуют отдельного physical-admission package.
+CU-LOAD-001—008 подтвердили full dynamic BR-003 controls, measured source plan
+и derived transport, initial target reconciliation, target read plan и atomic
+rerun. Полный rebuild — только measured baseline; Power BI switch не выполнен
+и остаётся запрещённым BR-036. См. [execution evidence](../reports/contract_usage_stage3_product_admission_execution_2026-08-28.md).

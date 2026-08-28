@@ -3,8 +3,10 @@
 --
 -- This preserves the current `%Renew` Power Query domain and COUNT(*) unit.
 -- It deliberately does not add Active/Posted/Marked filters or a polymorphic
--- type predicate. CU-S01 and CU-S03 must pass before physical delivery.
-WITH current_m_rows AS MATERIALIZED (
+-- type predicate.  It reuses the established valid-membership predicate
+-- Reference59.Fld672 > Reference59.Fld671 (BR-047). CU-S01 and CU-S03 must
+-- pass before physical delivery.
+WITH current_m_rows AS (
     SELECT a._recordertref,
            a._recorderrref,
            a._lineno,
@@ -30,7 +32,8 @@ WITH current_m_rows AS MATERIALIZED (
       AND a._period < $2::date
       AND client._fld1532rref = decode('9e8eaa7b2e77c19f4a1c22a8d9c3efa1', 'hex')
       AND c._code IS NOT NULL
-), contract_counts AS MATERIALIZED (
+      AND c._fld672::date > c._fld671::date
+), contract_counts AS (
     SELECT contract_id,
            contract_code,
            membership_start_date,
@@ -43,7 +46,7 @@ WITH current_m_rows AS MATERIALIZED (
              membership_start_date,
              membership_end_date,
              membership_term_days
-), prepared AS MATERIALIZED (
+), prepared AS (
     SELECT encode(contract_id, 'hex')::text AS contract_id,
            contract_code,
            membership_start_date,

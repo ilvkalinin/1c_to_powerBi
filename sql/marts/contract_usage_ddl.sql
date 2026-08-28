@@ -14,7 +14,7 @@ CREATE TABLE mart.contract_usage (
     usage_rate numeric,
     average_monthly_visits numeric,
     CONSTRAINT contract_usage_membership_interval_check
-        CHECK (membership_end_date >= membership_start_date),
+        CHECK (membership_end_date > membership_start_date),
     CONSTRAINT contract_usage_end_month_check
         CHECK (contract_end_month = date_trunc('month', membership_end_date)::date),
     CONSTRAINT contract_usage_active_months_check
