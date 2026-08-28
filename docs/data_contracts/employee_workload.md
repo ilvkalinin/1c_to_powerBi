@@ -1,6 +1,6 @@
 # Data contract: «Загрузка сотрудников»
 
-Статус: `employee_activity_interval IMPLEMENTED / employee_presence_day REVIEWED, physical implementation deferred`.
+Статус: `employee_activity_interval IMPLEMENTED / employee_presence_day IMPLEMENTED, full-rebuild baseline validated`.
 
 ## Новые объекты
 
