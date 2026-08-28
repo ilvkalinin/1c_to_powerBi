@@ -101,6 +101,9 @@ def export_derived_snapshot(start: date, end: date, max_bytes: int) -> tuple[Pat
             with source_connection("fitness_funnel_client_start_source") as source, source.cursor() as cursor:
                 cursor.execute("BEGIN ISOLATION LEVEL REPEATABLE READ, READ ONLY")
                 cursor.execute("SET LOCAL statement_timeout = '300s'")
+                # Measured on the exact full extract: prevents the final sort
+                # from spilling while remaining scoped to this read-only session.
+                cursor.execute("SET LOCAL work_mem = '64MB'")
                 controls = source_controls(cursor, start, end)
                 with cursor.copy(f"COPY ({render(EXTRACT, start, end)}) TO STDOUT (FORMAT BINARY)") as copy:
                     for block in copy:

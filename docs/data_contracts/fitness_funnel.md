@@ -1,6 +1,6 @@
 # Data contract: «Фитнес воронка»
 
-Статус: `DESIGNED COMPOSITE MODEL / STAGE_3 TECHNICAL SQL REVIEW VALIDATED / PHYSICAL ADMISSION DEFERRED`.
+Статус: `DESIGNED COMPOSITE MODEL / STAGE_3 TECHNICAL SQL REVIEW VALIDATED / PHYSICAL ADMISSION DECISION_REQUIRED`.
 
 SV-079 подтверждает client-start dedupe bounded cohort, но не полный cohort
 или source-key исходов. Контракт сохраняет client-level outcome semantics;
@@ -18,7 +18,9 @@ SV-079 подтверждает client-start dedupe bounded cohort, но не п
 Возрастные, договорные и PII-атрибуты остаются contract-detail полями и не
 могут появиться в client-start fact без отдельного доказанного grain. Полный
 admission обязан подтвердить отсутствие multi-contract конфликтов
-`access_club_id`/`tenure_type` для каждого ключа cohort.
+`access_club_id`/`tenure_type` для каждого ключа cohort. Full-horizon control
+2026-08-28 не прошёл это условие (32 multi-club, 24 multi-tenure, 46 duplicate
+target keys); новый grain или business selector требует отдельного решения.
 Исход содержит `outcome_source_key text`, `client_key text`, `outcome_date
 date`, `outcome_type text`, `club_id text`, `service_id text`,
 `outcome_count numeric`. Технические keys скрыты; подтверждённая detail

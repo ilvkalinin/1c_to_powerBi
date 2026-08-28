@@ -1,6 +1,6 @@
 # ADR-0026: клиентская фитнес-воронка через cohort и события исходов
 
-- Статус: `DESIGNED / STAGE_3 TECHNICAL SQL REVIEW VALIDATED / PHYSICAL ADMISSION DEFERRED`
+- Статус: `DESIGNED / STAGE_3 TECHNICAL SQL REVIEW VALIDATED / PHYSICAL ADMISSION DECISION_REQUIRED`
 - Дата: 2026-08-03
 - Отчёт: №11 «Фитнес воронка»
 
@@ -38,6 +38,12 @@ eligible contract rows дают 98 client-start строк: две cohort-гру
 Ключ исхода, client key, source states, связи документов и контрольные окна —
 `VALIDATION_PENDING`. Если один исход не имеет стабильного source key,
 контракт пересматривается до реализации.
+
+Full-horizon admission 2026-08-28 показал 32 client-date cohorts с разными
+клубами и 24 с разными tenure type, что даёт 46 duplicate target keys при
+текущем PK. Это `DECISION_REQUIRED`: нельзя ни выбрать главный контракт, ни
+создать текущую таблицу до нового business-rule решения. Evidence:
+`docs/reports/fitness_funnel_client_start_stage3_product_admission_execution_2026-08-28.md`.
 
 ## Доказательства
 

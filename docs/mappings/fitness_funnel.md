@@ -1,9 +1,10 @@
 # Source-to-target mapping: фитнес воронка
 
-Статус: `BUSINESS MAPPING COMPLETE / STAGE_3 TECHNICAL SQL REVIEW VALIDATED / PHYSICAL ADMISSION DEFERRED`.
-Физическая delivery не разрешена. FF-S01—FF-S03 фиксируют exact current-M
-source population и обязательные full-horizon admission controls; до их
-успешного physical execution target не создаётся.
+Статус: `BUSINESS MAPPING COMPLETE / STAGE_3 TECHNICAL SQL REVIEW VALIDATED / PHYSICAL ADMISSION DECISION_REQUIRED`.
+Full-horizon admission 2026-08-28 выявил 32 cohort с несколькими клубами и
+24 с несколькими `tenure_type`: это создаёт 46 дубликатов логического ключа.
+До отдельного решения о таких cohort target не создаётся; evidence:
+`docs/reports/fitness_funnel_client_start_stage3_product_admission_execution_2026-08-28.md`.
 
 ## Гранулярность
 
