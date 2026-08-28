@@ -1,12 +1,12 @@
 # Technical SQL review: `mart.contract_usage`
 
-Статус: `REVIEWED / PHYSICAL ADMISSION BLOCKED`.
+Статус: `SUPERSEDED BY CU-TR-002`.
 
 Пакет относится только к отчёту № 17 `%Renew` (`renew_contract_usage`). Он
 сохраняет first-release current-M domain: fixed legacy year window, current
 joins and `COUNT(*)`; не добавляет фильтр `Active`, `Posted`, `Marked`,
-interval-фильтр или методическую замену `Fld693` по BR-018. Power BI, Excel и
-VM-2 в пакете не изменялись.
+interval-фильтр или методическую замену `Fld693` по BR-018. Power BI,
+внешние артефакты и VM-2 в пакете не изменялись.
 
 ## Immutable reviewed set
 
@@ -56,25 +56,13 @@ different join order, session-local planner setting or an index proposal on
 read-only 1C. This is an accepted short-sample baseline, not a full-range
 baseline or daily SLA claim.
 
-## Delivery design
+## Superseded delivery design
 
-The future runner has no default legacy window, finalization cutoff or transfer
-cap. Its physical-admission invocation must provide all four values explicitly:
-`legacy_start`, `legacy_end`, `mutable_from_month`, `max_transfer_bytes`.
-It captures independent controls then writes only derived target columns into a
-bounded binary temporary file. VM-1 closes before the target transaction opens.
-The target transaction takes an advisory lock, loads a temporary stage, updates
-newly finalizing rows, replaces only the mutable section, reconciles before
-commit and rolls back on any error. It never creates a raw 1C replica.
-
-## Blocker before physical admission
-
-`is_finalized` / `finalized_month` need a named operational authority that
-provides `mutable_from_month` at each close. No physical source field expresses
-the close boundary, and the project prohibition on Excel analysis means it must
-not be inferred from an Excel snapshot. Until this authority and the initial
-cutoff are supplied, DDL/DML/COPY, target reconciliation, full-range plan,
-initial load and rerun remain `NOT_EXECUTED`.
+Этот документ сохраняет evidence CU-TR-001, но delivery design заменён
+исправленным review CU-TR-002: [remediation execution](contract_usage_finalization_remediation_execution_2026-08-28.md).
+Текущий design — полный atomic rebuild без дополнительной семантики. До
+отдельного physical-admission package DDL/DML/COPY, target reconciliation,
+full-range plan, initial load и rerun остаются `NOT_EXECUTED`.
 
 The eventual physical package must run CU-S01--CU-S03 on the full approved
 legacy window before COPY, set a measured transfer cap, then collect a

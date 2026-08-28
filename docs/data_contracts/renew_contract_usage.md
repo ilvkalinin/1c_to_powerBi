@@ -1,6 +1,6 @@
 # Data contract: «Использование контрактов»
 
-Статус: `TECHNICAL REVIEWED / PHYSICAL ADMISSION BLOCKED BY FINALIZATION AUTHORITY`.
+Статус: `TECHNICAL REVIEWED — CU-TR-002 / PHYSICAL ADMISSION PENDING`.
 Контракт относится только к PostgreSQL-обогащению отчёта `%Renew`.
 
 ## Общие параметры
@@ -15,9 +15,8 @@
 | Текущий ключ связи Power BI | `contract_code` | 7-day uniqueness observed; full-window CU-S02 pending |
 | Режим Power BI | `Import` | CONFIRMED BY DESIGN |
 | Обновление | ежедневно | CONFIRMED user decision |
-| История | финализированные контракты подключённых Excel-снимков | CONFIRMED BY DESIGN |
-| Mutable-секция | текущие и будущие окончания | CONFIRMED user process |
-| Watermark | отсутствует | NOT APPLICABLE / hybrid close boundary |
+| Режим refresh | полный atomic rebuild fixed legacy window | TECHNICAL REVIEWED; не incremental |
+| Watermark | отсутствует | NOT APPLICABLE / full rebuild |
 | SLA | данные доступны не позднее 08:30 по Москве | BR-014; end-to-end evidence pending physical admission |
 
 ## Колонки
@@ -34,14 +33,12 @@
 | `visit_count` | `Количество посещений` | `bigint` | Whole number | нет | показатель контракта | не суммировать вне distinct контрактов | нет |
 | `usage_rate` | `% использования` | `numeric` | Decimal number / Percentage | да | коэффициент | неаддитивна | нет |
 | `average_monthly_visits` | `Среднемесячные посещения` | `numeric` | Decimal number | да | коэффициент | неаддитивна | нет |
-| `is_finalized` | `Месяц закрыт` | `boolean` | True/False | нет | технический статус | не мера | да |
-| `finalized_month` | `Месяц фиксации` | `date` | Date | да | техническая дата | не мера | да |
 
 ## Связь с существующей моделью
 
 | От | К | Кардинальность | Фильтрация | Статус |
 |---|---|---|---|---|
-| `Использование контрактов[Код контракта]` | существующие контрактные снимки `[Код контракта]` | `1:*` | однонаправленная | source 7-day uniqueness observed; full CU-S02 and Power BI switch remain pending |
+| `Использование контрактов[Код контракта]` | существующие контрактные snapshots `[Код контракта]` | `1:*` | однонаправленная | source 7-day uniqueness observed; full CU-S02 and Power BI switch remain pending |
 
 Новая таблица не связывается напрямую с фактами рекарринга, планами или
 календарём. Месяц окончания в существующем контрактном снимке остаётся основной
@@ -85,7 +82,7 @@ PostgreSQL:
 - возвращает подтверждённый срок действия;
 - считает календарные месяцы inclusive;
 - рассчитывает два контрактных коэффициента;
-- сохраняет финальные строки и ежедневно заменяет mutable-секцию.
+- атомарно заменяет весь target результатом fixed legacy window.
 
 Power Query:
 
@@ -109,16 +106,14 @@ DAX сохраняет существующие расчёты Renew, рекар
 ## Условия принятия
 
 1. Уникальность `contract_id` и `contract_code`.
-2. Кардинальность связи с Excel-снимками.
+2. Кардинальность связи с существующими контрактными snapshots.
 3. Семантика одной строки посещения и состояния источника.
 4. Физические типы и единица срока действия.
 5. Контроль inclusive-месяцев.
-6. Контрольное закрытие месяца без изменения финализированных строк.
-7. Проверка контракта, пересекающего Новый год.
-8. Измерение ежедневного source-side запроса и Power BI refresh.
+6. Проверка контракта, пересекающего Новый год.
+7. Измерение full-window source-side запроса и Power BI refresh.
 
-SV-082 и CU-TR-001 подтвердили bounded physical current-PBI path, но
-full-window CU-S01--CU-S03 остаются обязательными pre-COPY controls. Сам
-physical admission заблокирован до named authority, задающей
-`mutable_from_month`: PostgreSQL не читает и не копирует Excel-снимки для
-вывода этого boundary.
+SV-082 и CU-TR-001/CU-TR-002 подтвердили bounded physical current-PBI path,
+но full-window CU-S01--CU-S03 и measured full-range baseline остаются
+обязательными pre-COPY controls. DDL/DML/COPY, target reconciliation и Power
+BI switch не выполнялись и требуют отдельного physical-admission package.

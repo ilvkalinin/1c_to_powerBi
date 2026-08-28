@@ -1,7 +1,7 @@
 # Source-to-target mapping: использование контрактов для %Renew
 
-Статус: `STAGE 3 TECHNICAL SQL REVIEW / PHYSICAL ADMISSION BLOCKED BY FINALIZATION AUTHORITY`.
-Локальный immutable SQL set подготовлен; VM-2 не изменялась.
+Статус: `STAGE 3 TECHNICAL SQL REVIEW — CU-TR-002 / PHYSICAL ADMISSION PENDING`.
+Локальный reviewed SQL set подготовлен; VM-2 не изменялась.
 
 ## Гранулярность
 
@@ -28,8 +28,6 @@
 | `visit_count` | посещения, отнесённые к контракту | current-M `COUNT(*)` по `AccumRg7575` в fixed legacy window; без нового interval filter | `bigint` | нет | CONFIRMED BR-018; 7-day CU-S01: 69,562 rows = technical keys = documents | CU-S01, CU-S03 |
 | `usage_rate` | использование на один день срока | `visit_count / NULLIF(membership_term_days,0)` | `numeric` | да | CONFIRMED user formula | format and >100% |
 | `average_monthly_visits` | среднемесячные посещения | `visit_count / NULLIF(active_calendar_months,0)` | `numeric` | да | CONFIRMED user formula | example and rounding |
-| `is_finalized` | контракт относится к закрытому неизменяемому месяцу | `membership_end_date < :mutable_from_month`, cutoff передаётся runner'у явно | `boolean` | нет | BLOCKER physical admission: нет named operational authority/процедуры, задающей cutoff | CU-R05/CU-R08 |
-| `finalized_month` | закрытый месяц, в котором зафиксированы метрики | `contract_end_month` только когда `is_finalized`; иначе `NULL` | `date` | да | BLOCKER вместе с `is_finalized` | CU-R07/CU-R08 |
 
 ## Source-фильтры
 
@@ -62,16 +60,13 @@ grain и объём для всех посещенческих отчётов.
 контракта, который потенциально переиспользует «Управление продлением».
 Физический объект утверждается только после разбора этого отчёта.
 
-## Снимки и обновление
+## Обновление
 
-- закрытый месяц сохраняется отдельным неизменяемым Excel-снимком;
-- PostgreSQL не хранит копии Excel, но сохраняет одну финальную строку метрик
-  использования на контракт, чтобы исторический снимок продолжал находить её;
-- компактный контрактный набор обновляется ежедневно;
-- строки закрытых месяцев не пересчитываются;
-- текущие и будущие окончания образуют mutable-секцию и атомарно заменяются;
-- бизнес-инвариант-кандидат: один контракт фиксируется только в одном закрытом
-  месяце и после фиксации не переносится в другую когорту.
+- компактный контрактный набор обновляется полным fixed legacy window;
+- source-first runner записывает только производный набор в ограниченный
+  временный файл, затем атомарно заменяет target внутри одной транзакции;
+- watermark и инкрементальная семантика не проектируются;
+- ежедневный SLA не заявляется до отдельного измеренного physical baseline.
 
 ## Проверки перед архитектурным решением
 
@@ -83,8 +78,6 @@ grain и объём для всех посещенческих отчётов.
 6. Контрольный контракт, пересекающий границу года.
 7. Контракт с заморозкой/разморозкой.
 8. Размер целевой когорты и время source-side агрегации.
-9. Один контракт не появляется в двух закрытых Excel-снимках.
-10. Named operational authority и порядок `mutable_from_month`; Excel не анализируется и не является источником PostgreSQL.
 
 ## Stage 2 evidence — SV-082 (2026-08-11)
 
@@ -100,7 +93,7 @@ bounded current-PBI пути 133 строк равны 133 technical keys и 133
 неположительны, один интервал неположителен, срок не совпал с календарной
 разницей ни в одной строке; не подменять `Fld693` вычислением по датам.
 
-## Stage 3 technical-review evidence — CU-TR-001 (2026-08-28)
+## Stage 3 technical-review evidence — CU-TR-001 / CU-TR-002 (2026-08-28)
 
 В fresh `REPEATABLE READ, READ ONLY` sample `[2026-08-17, 2026-08-24)`
 independent controls дали 69,562 legacy rows, столько же technical keys и
@@ -109,6 +102,8 @@ observed polymorphic pair `08/0000003b`. Наблюдаемые inactive/unposte
 rows равны нулю; они не превращены в новые фильтры. Два точных short plans
 вернули 31,788 строк за 1,138.317 и 1,505.871 ms без disk/temp I/O.
 
-До admission CU-S01--CU-S03 выполняются на полном fixed legacy window.
-Physical delivery заблокирована до передачи named authority, которая задаёт
-`mutable_from_month`; runner не имеет default cutoff.
+После удаления неподтверждённой finalization-механики CU-TR-002 повторил
+точный revised extract: 31,788 строк за 1,513.934 ms, planning 7.249 ms,
+shared hit 1,060,822, без read/temp I/O. До admission CU-S01--CU-S03
+выполняются на полном fixed legacy window; DDL/DML/COPY требуют отдельного
+явно одобренного physical package.

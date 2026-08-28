@@ -13,8 +13,6 @@ CREATE TABLE mart.contract_usage (
     visit_count bigint NOT NULL,
     usage_rate numeric,
     average_monthly_visits numeric,
-    is_finalized boolean NOT NULL,
-    finalized_month date,
     CONSTRAINT contract_usage_membership_interval_check
         CHECK (membership_end_date >= membership_start_date),
     CONSTRAINT contract_usage_end_month_check
@@ -22,10 +20,7 @@ CREATE TABLE mart.contract_usage (
     CONSTRAINT contract_usage_active_months_check
         CHECK (active_calendar_months >= 1),
     CONSTRAINT contract_usage_visit_count_check
-        CHECK (visit_count > 0),
-    CONSTRAINT contract_usage_finalization_shape_check
-        CHECK ((is_finalized AND finalized_month = contract_end_month)
-               OR (NOT is_finalized AND finalized_month IS NULL))
+        CHECK (visit_count > 0)
 );
 
 REVOKE ALL ON mart.contract_usage FROM PUBLIC;

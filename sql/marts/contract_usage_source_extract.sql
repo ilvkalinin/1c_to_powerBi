@@ -1,7 +1,5 @@
 -- First-release source extract for mart.contract_usage.
 -- $1: inclusive legacy-window start; $2: exclusive legacy-window end.
--- $3: first day of the mutable end-month; finalization is a target-state
--- boundary supplied by the approved runner, not inferred from a source flag.
 --
 -- This preserves the current `%Renew` Power Query domain and COUNT(*) unit.
 -- It deliberately does not add Active/Posted/Marked filters or a polymorphic
@@ -57,8 +55,7 @@ WITH current_m_rows AS MATERIALIZED (
              + extract(month FROM membership_end_date)::integer
              - extract(month FROM membership_start_date)::integer
              + 1)::integer AS active_calendar_months,
-           visit_count,
-           membership_end_date < $3::date AS is_finalized
+           visit_count
     FROM contract_counts
 )
 SELECT contract_id,
@@ -70,8 +67,6 @@ SELECT contract_id,
        active_calendar_months,
        visit_count,
        visit_count::numeric / NULLIF(membership_term_days, 0) AS usage_rate,
-       visit_count::numeric / NULLIF(active_calendar_months, 0) AS average_monthly_visits,
-       is_finalized,
-       CASE WHEN is_finalized THEN contract_end_month END AS finalized_month
+       visit_count::numeric / NULLIF(active_calendar_months, 0) AS average_monthly_visits
 FROM prepared
 ORDER BY contract_id;

@@ -2,12 +2,11 @@
 """Atomically deliver mart.contract_usage only after physical admission.
 
 This reviewed runner is intentionally parameter-only: it has no default source
-window or finalization cutoff.  Technical review never invokes it.
+window. Technical review never invokes it.
 """
 from __future__ import annotations
 
 import argparse
-import os
 import re
 import shutil
 import sys
@@ -16,7 +15,6 @@ from datetime import date
 from pathlib import Path
 
 import psycopg
-from psycopg import sql
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -33,7 +31,7 @@ TABLE = "mart.contract_usage"
 COLUMNS = (
     "contract_id,contract_code,membership_start_date,membership_end_date,"
     "contract_end_month,membership_term_days,active_calendar_months,visit_count,"
-    "usage_rate,average_monthly_visits,is_finalized,finalized_month"
+    "usage_rate,average_monthly_visits"
 )
 CONNECTION_OPTIONS = {
     "connect_timeout": 15,
@@ -43,13 +41,6 @@ CONNECTION_OPTIONS = {
     "keepalives_count": 4,
     "tcp_user_timeout": 180_000,
 }
-
-
-def parse_month(value: str) -> date:
-    parsed = date.fromisoformat(value)
-    if parsed.day != 1:
-        raise argparse.ArgumentTypeError("--mutable-from-month must be the first day of a month")
-    return parsed
 
 
 def parse_date(value: str) -> date:
@@ -125,9 +116,7 @@ def render_statement(statement: str, parameters: tuple[date, ...]) -> str:
     return statement
 
 
-def copy_source_to_file(
-    start: date, end: date, mutable_from_month: date, transfer: Path, max_transfer_bytes: int
-) -> dict[str, object]:
+def copy_source_to_file(start: date, end: date, transfer: Path, max_transfer_bytes: int) -> dict[str, object]:
     source = source_connection("contract_usage_source_copy")
     try:
         with source.cursor() as cursor, transfer.open("wb") as output:
@@ -135,7 +124,7 @@ def copy_source_to_file(
             cursor.execute("SET LOCAL statement_timeout = '300s'")
             expected = independent_expected(cursor, start, end)
             with cursor.copy(
-                "COPY (" + render(EXTRACT, (start, end, mutable_from_month)) + ") TO STDOUT WITH (FORMAT BINARY)"
+                "COPY (" + render(EXTRACT, (start, end)) + ") TO STDOUT WITH (FORMAT BINARY)"
             ) as copied:
                 for block in copied:
                     output.write(block)
@@ -162,41 +151,10 @@ def prepare_target_stage(cursor: psycopg.Cursor, initial: bool) -> None:
 
 
 def apply_stage(cursor: psycopg.Cursor, initial: bool) -> None:
-    """Apply a populated stage after all source work has completed."""
+    """Atomically replace the full target after all source work has completed."""
     if not initial:
-        cursor.execute(
-            """UPDATE mart.contract_usage AS target
-                  SET contract_code = stage.contract_code,
-                      membership_start_date = stage.membership_start_date,
-                      membership_end_date = stage.membership_end_date,
-                      contract_end_month = stage.contract_end_month,
-                      membership_term_days = stage.membership_term_days,
-                      active_calendar_months = stage.active_calendar_months,
-                      visit_count = stage.visit_count,
-                      usage_rate = stage.usage_rate,
-                      average_monthly_visits = stage.average_monthly_visits,
-                      is_finalized = TRUE,
-                      finalized_month = stage.finalized_month
-                 FROM _contract_usage_stage AS stage
-                WHERE target.contract_id = stage.contract_id
-                  AND NOT target.is_finalized
-                  AND stage.is_finalized"""
-        )
-        cursor.execute(
-            f"""INSERT INTO {TABLE} ({COLUMNS})
-                SELECT {COLUMNS} FROM _contract_usage_stage AS stage
-                 WHERE stage.is_finalized
-                   AND NOT EXISTS (
-                       SELECT 1 FROM {TABLE} AS target WHERE target.contract_id = stage.contract_id
-                   )"""
-        )
-        cursor.execute(f"DELETE FROM {TABLE} WHERE NOT is_finalized")
-    if initial:
-        cursor.execute(f"INSERT INTO {TABLE} ({COLUMNS}) SELECT {COLUMNS} FROM _contract_usage_stage")
-    else:
-        cursor.execute(
-            f"INSERT INTO {TABLE} ({COLUMNS}) SELECT {COLUMNS} FROM _contract_usage_stage WHERE NOT is_finalized"
-        )
+        cursor.execute(f"DELETE FROM {TABLE}")
+    cursor.execute(f"INSERT INTO {TABLE} ({COLUMNS}) SELECT {COLUMNS} FROM _contract_usage_stage")
 
 
 def reconcile(cursor: psycopg.Cursor, expected: dict[str, object]) -> None:
@@ -227,7 +185,6 @@ def run(arguments: argparse.Namespace) -> None:
         expected = copy_source_to_file(
             arguments.legacy_start,
             arguments.legacy_end,
-            arguments.mutable_from_month,
             transfer,
             arguments.max_transfer_bytes,
         )
@@ -252,7 +209,6 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--legacy-start", type=parse_date, required=True)
     parser.add_argument("--legacy-end", type=parse_date, required=True)
-    parser.add_argument("--mutable-from-month", type=parse_month, required=True)
     parser.add_argument("--max-transfer-bytes", type=int, required=True)
     parser.add_argument("--transfer-dir", type=Path, default=Path("/tmp"))
     parser.add_argument("--initial", action="store_true")
