@@ -1,6 +1,6 @@
 # Source-to-target mapping: «Загрузка сотрудников»
 
-Статус: `BUSINESS MAPPING COMPLETE / STAGE 2 VALIDATED / STAGE 3 SQL PLAN REQUIRED`.
+Статус: `BUSINESS MAPPING COMPLETE / employee_activity_interval IMPLEMENTED / employee_presence_day STAGE 2 BLOCKED`.
 
 Единственного source grain нет. Отчёт использует общий факт ДПФУ и дневной
 план, а для загрузки — самостоятельные события занятий, дежурств, купонов и
@@ -45,13 +45,27 @@ employee_id, service_id, class_start)`. Current `Table.Distinct` сокраща�
 | Часы пребывания | `Document325` + `Reference225.Fld2504` | сотрудник × день × клуб | `NEW` компактный агрегат-кандидат |
 | Порог отчислений | `_СпрСтавки` | внешний файл Power BI | `NOT_APPLICABLE`: не переносить в PostgreSQL по решению пользователя 2026-07-30 |
 
+## Компонент C: `employee_presence_day` — реализация заблокирована
+
+Целевой grain остаётся `employee × presence_date × actual club`. Текущий M
+группирует по display-name, однако для возможного PostgreSQL-contract нужны
+стабильные IDs. Ни одна из строк ниже не разрешает создание SQL или витрины:
+атрибуция полного current-M domain блокирована EPD-V04.
+
+| Целевая колонка | Бизнес-описание | Исходная таблица / колонка | Преобразование | PostgreSQL тип | NULL | Статус | Evidence / test |
+|---|---|---|---|---|---|---|---|
+| `presence_date` | дата присутствия | `AccumRg7575.Period` | `Period::date` из exact current-M path | `date` | нет | CONFIRMED current | EPD-V02 |
+| `club_id` | фактический клуб | `AccumRg7575.Fld7577RRef` | стабильный ID, не название клуба | `text` | нет | CONFIRMED source | EPD-V01, EPD-V02 |
+| `employee_id` | сотрудник | `Reference225.ID` через `Reference225.Fld2504RRef = AccumRg7575.Fld7576RRef` | допустим только когда у клиента ровно один employee ID; 29,431 visits не имеют связи, 708 имеют две | `text` | нет | BLOCKED | EPD-V04 |
+| `presence_minutes` | минуты в клубе | `Document325.Fld4172`, `Document325.Fld4174` | `effective_end - start`; sentinel/open and after-day end клиппируются концом start-day точно как current M | `numeric` | нет | CONFIRMED current formula / target blocked | EPD-V02, EPD-V05 |
+
 ## Подтверждённые источники
 
 | Объект | Назначение | Статус | Доказательство |
 |---|---|---|---|
 | `InfoRg7006`, `Document329`, `Document279`, `Document313`, `Document329.VT4352`, `Enum448` | занятия, состояние, отмена | CONFIRMED current sources; key/state pending | Power Query и metadata |
 | `InfoRg7107`, `Reference191` | дежурства, помещение и минуты | CONFIRMED current sources | Power Query и metadata |
-| `Document325`, `AccumRg7575`, `Reference225`, `Reference59` | СКУД и сотрудник-клиент/ИП | CONFIRMED sources; cardinality pending | Power Query и metadata |
+| `Document325`, `AccumRg7575`, `Reference225`, `Reference59` | СКУД и сотрудник-клиент/ИП | BLOCKED for `employee_presence_day`: 29,431 qualified visits lack employee and 708 have two | [EPD Stage 2](../reports/employee_presence_day_stage2_validation_2026-08-28.md) |
 | `AccumRg7575`, `AccumRg7646`, `Reference163`, `Reference70`, `Reference132`, `Reference141X1` | услуги и выручка | CONFIRMED reuse sources | mapping ДПФУ |
 | `InfoRg6612`, `Reference217`, `Reference183` | дневной план | CONFIRMED current sources; key/active pending | Power Query и metadata |
 | `InfoRg6291`, `Reference101` | должность и ранг | CONFIRMED current sources; interval pending | Power Query и metadata |
@@ -77,7 +91,7 @@ employee_id, service_id, class_start)`. Current `Table.Distinct` сокраща�
 | CONFIRMED user decision | купоны/дежурства | `GREATEST(0, raw duty − raw coupon overlap)`; union не применяется | EW-V03A / BR-040 |
 | CONFIRMED | coupon physical row | 149 `Table.Distinct` повторов отличаются лишь visit timestamp; business key, minutes, day, contract и IDs инвариантны | EW-FOLLOWUP-V03B |
 | CONFIRMED | `InfoRg6612` | active/unique technical rows | EW-V04 |
-| BLOCKED (separate fact) | СКУД сотрудника | 1,292 visits имеют multiple employee links; `employee_presence_day` не создаётся | EW-V05 |
+| BLOCKED (separate fact) | СКУД сотрудника | Exact current-M domain: 29,431 qualified visits without employee and 708 with two employees; `employee_presence_day` не создаётся. Historical EW-V05 broader visit domain had 1,292 multi-link visits. | EPD-V04 / EW-V05 |
 | BLOCKED (not activity source) | кадровые интервалы | 655 nonpositive и 187 overlapping pairs; historical attribution не выдумывается | EW-V07 |
 | CONFIRMED | ДПФУ reuse | независимые source totals for 7575/7646 captured | EW-V06 |
 | NOT_APPLICABLE | `_СпрСтавки` | внешний файл остаётся в Power BI | EW-V08 не выполняется для PostgreSQL |

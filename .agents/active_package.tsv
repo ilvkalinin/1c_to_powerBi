@@ -4,7 +4,7 @@
 # package_status must be ACTIVE or CLOSED; report_status must be PENDING, IN_PROGRESS, COMPLETE, or BLOCKED.
 # approval_evidence must link to the user-approved full scope and closure criterion.
 package_id	stage	package_status	approved_at	approval_evidence
-employee_activity_interval_stage3_technical_sql_review_2026-08-27	STAGE_3_TECHNICAL_SQL_REVIEW	CLOSED	2026-08-27	docs/reports/employee_activity_interval_stage3_technical_sql_review_authorization_2026-08-27.md
+employee_presence_day_stage2_validation_2026-08-28	STAGE_2_SERVER_VALIDATION	CLOSED	2026-08-28	docs/reports/employee_presence_day_stage2_authorization_2026-08-28.md
 
 report_id	report_status	completion_commit
-employee_workload	COMPLETE	SELF
+employee_workload	BLOCKED	SELF

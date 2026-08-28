@@ -1,13 +1,13 @@
 # Data contract: «Загрузка сотрудников»
 
-Статус: `STAGE 2 VALIDATED / STAGE 3 SQL PLAN REQUIRED / IMPLEMENTATION DEFERRED`.
+Статус: `employee_activity_interval IMPLEMENTED / employee_presence_day STAGE 2 BLOCKED`.
 
 ## Новые объекты
 
 | Объект | Таблица Power BI | Grain / ключ |
 |---|---|---|
 | `mart.employee_activity_interval` | `Активность сотрудников` | урок ПЗ/ГЗ, дежурство или coupon event × сотрудник × клуб × интервал |
-| `mart.employee_presence_day` | `Присутствие сотрудников` | `(employee_id, presence_date, club_id)`; implementation blocked by SCUD cardinality |
+| `mart.employee_presence_day` | `Присутствие сотрудников` | `(employee_id, presence_date, club_id)`; implementation BLOCKED: 29,431 qualified visits lack employee and 708 have two |
 
 ### `mart.employee_activity_interval`
 
@@ -45,6 +45,11 @@ direction. Пороги остаются внешним Power BI-фактом б
 эффективность. Приёмка требует уникальность технически определённых событий,
 reconciliation часов/выручки/плана, rerun и SLA. `employee_presence_day`
 остаётся отдельной витриной и не получает неоднозначную СКУД-атрибуцию.
+
+`employee_presence_day` не получает ни fallback employee, ни hidden
+deduplication: safe one-employee control omits 30,139 current-M-qualified
+visits and therefore is not current-result reproduction. Evidence:
+[`EPD Stage 2`](../reports/employee_presence_day_stage2_validation_2026-08-28.md).
 
 `activity_event_key` подтверждён для ПЗ (`PZ + Document329 + VT4352 line`),
 ГЗ (`GZ + Document279`), дежурства (hash точной M-группы) и coupon event
