@@ -85,8 +85,8 @@ def source_controls(cursor: psycopg.Cursor, start: date, end: date) -> dict[str,
     s01, s02, s03 = results["FF-S01"], results["FF-S02"], results["FF-S03"]
     if any(int(s01[name]) != 0 for name in ("duplicate_contract_ref_rows", "client_orphan_rows", "club_orphan_rows")):
         raise RuntimeError(f"FF-S01 failed: {s01}")
-    if any(int(s02[name]) != 0 for name in ("multi_club_cohorts", "multi_tenure_cohorts")):
-        raise RuntimeError(f"FF-S02 cannot choose cohort attributes: {s02}")
+    if any(int(s02[name]) != 0 for name in ("invalid_selected_rows", "duplicate_selected_key_rows")):
+        raise RuntimeError(f"FF-S02 selector failed: {s02}")
     if any(int(s03[name]) != 0 for name in ("required_null_rows", "future_start_rows", "duplicate_target_key_rows")):
         raise RuntimeError(f"FF-S03 failed: {s03}")
     return results
