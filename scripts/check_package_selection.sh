@@ -1,7 +1,8 @@
 #!/bin/sh
 # Reject package targets whose latest checkpoint is already closed.
 # STAGE3_PLANNING_AUTHORIZED permits local planning only; it never permits a
-# runnable Stage 3 package, DDL or DML.
+# runnable Stage 3 package, DDL or DML.  The technical-review state permits
+# only the exact named VM-1 read-only Stage 3 technical package.
 set -eu
 
 if [ "$#" -lt 2 ]; then
@@ -25,7 +26,7 @@ allowed_report_ids=$(awk -F '\t' '$1 !~ /^#/ && $1 == "global_stage_gate" { prin
 project_reason=$(awk -F '\t' '$1 !~ /^#/ && $1 == "global_stage_gate" { print $5; exit }' "$project_gate")
 if [ "$project_state" = "OPEN" ]; then
   :
-elif { [ "$project_state" = "READONLY_REVIEW_AUTHORIZED" ] || [ "$project_state" = "STAGE3_PRODUCT_ADMISSION_AUTHORIZED" ]; } \
+elif { [ "$project_state" = "READONLY_REVIEW_AUTHORIZED" ] || [ "$project_state" = "STAGE3_PRODUCT_ADMISSION_AUTHORIZED" ] || [ "$project_state" = "STAGE3_TECHNICAL_SQL_REVIEW_AUTHORIZED" ]; } \
   && [ "$stage" = "$allowed_stage" ]; then
   :
 elif [ "$project_state" = "STAGE3_PLANNING_AUTHORIZED" ]; then
@@ -43,7 +44,7 @@ fi
 
 failed=0
 for report_id in "$@"; do
-  if [ "$project_state" = "READONLY_REVIEW_AUTHORIZED" ] || [ "$project_state" = "STAGE3_PRODUCT_ADMISSION_AUTHORIZED" ]; then
+  if [ "$project_state" = "READONLY_REVIEW_AUTHORIZED" ] || [ "$project_state" = "STAGE3_PRODUCT_ADMISSION_AUTHORIZED" ] || [ "$project_state" = "STAGE3_TECHNICAL_SQL_REVIEW_AUTHORIZED" ]; then
     case ",$allowed_report_ids," in
       *,"$report_id",*) ;;
       *)
