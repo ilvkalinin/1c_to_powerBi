@@ -5,4 +5,4 @@
 # CLOSED_PENDING_NEXT_APPROVAL rejects all new selections until the user
 # explicitly confirms the next independent package.
 gate_id	state	allowed_stage	allowed_report_ids	reason
-global_stage_gate	CLOSED_PENDING_NEXT_APPROVAL	-	-	Fitness funnel outcome technical SQL review closed 2026-08-28; physical target admission requires a new explicit package with DDL/DML/COPY/reconciliation authority.
+global_stage_gate	CLOSED_PENDING_NEXT_APPROVAL	-	-	Fitness funnel outcome physical admission closed 2026-08-28; any refresh-strategy change, independent control or source change requires a new explicit package.

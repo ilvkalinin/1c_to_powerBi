@@ -1,10 +1,11 @@
 # Data contract: «Фитнес воронка»
 
-Статус: `DESIGNED COMPOSITE MODEL / STAGE_3 TECHNICAL SQL REVIEW VALIDATED / PHYSICAL ADMISSION DECISION_REQUIRED`.
+Статус: `DESIGNED COMPOSITE MODEL / OUTCOME PHYSICAL ADMISSION VALIDATED / POWER BI DESIGNED`.
 
 SV-079 подтверждает client-start dedupe bounded cohort, но не полный cohort
 или source-key исходов. Контракт сохраняет client-level outcome semantics;
-физические объекты не создавались.
+`mart.fitness_funnel_client_outcome` физически создан, а Power BI boundary
+остаётся неизменной.
 
 ## Объекты
 
@@ -40,12 +41,17 @@ Power BI connection, relationships и measures остаются `DESIGNED` по 
 
 ## Условие реализации outcome
 
-Статус `mart.fitness_funnel_client_outcome`: `STAGE_3 TECHNICAL SQL REVIEW VALIDATED / PHYSICAL ADMISSION DECISION_REQUIRED`.
+Статус `mart.fitness_funnel_client_outcome`: `PHYSICAL ADMISSION VALIDATED / FULL-REBUILD BASELINE ONLY`.
 Для ИП current PBIT хранит один client-day, но не определяет, какой из
 нескольких клубов/услуг/сотрудников остаётся в этой строке. Full-horizon
 control 2026-08-28 нашёл 481 такой client-day. Пользователь принял BR-049:
 разные услуги сохраняются отдельными source-event строками. Поэтому
 `outcome_source_key` включает физический source key и branch discriminator,
 а `outcome_count = 1`; distinct-клиенты не меняются, legacy `COUNTROWS` может
-увеличиться. Evidence:
+увеличиться. Technical evidence:
 `docs/reports/fitness_funnel_client_outcome_stage3_technical_review_execution_2026-08-28.md`.
+Physical evidence:
+`docs/reports/fitness_funnel_client_outcome_stage3_product_admission_execution_2026-08-28.md`.
+Final target rerun has 1 037 064 unique source keys and zero required/horizon
+violations. Refresh is a measured full rebuild only; no incremental field/SLA
+is declared. Power BI remains unchanged by BR-036.

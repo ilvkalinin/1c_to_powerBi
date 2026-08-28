@@ -1,6 +1,6 @@
 # Source-to-target mapping: фитнес воронка
 
-Статус: `BUSINESS MAPPING COMPLETE / STAGE_3 TECHNICAL SQL REVIEW VALIDATED / PHYSICAL ADMISSION DECISION_REQUIRED`.
+Статус: `BUSINESS MAPPING COMPLETE / OUTCOME PHYSICAL ADMISSION VALIDATED / POWER BI DESIGNED`.
 Full-horizon admission 2026-08-28 выявил 32 cohort с несколькими клубами и
 24 с несколькими `tenure_type`: это создаёт 46 дубликатов логического ключа.
 Пользователь выбрал договор с более поздней датой приобретения
@@ -123,5 +123,7 @@ Read-only review 2026-08-28 подтвердил физические ключи
 client-day `ROW_NUMBER()`. Подробное доказательство и пример без PII:
 `docs/reports/fitness_funnel_client_outcome_stage3_technical_review_execution_2026-08-28.md`.
 Exact full extract прошёл output-contract control: 1 036 251 строк и source
-keys, duplicate/NULL/horizon deviations = 0. Physical admission остаётся
-отдельным пакетом с target DDL/DML/COPY/reconciliation.
+keys, duplicate/NULL/horizon deviations = 0. Physical admission 2026-08-28
+создал и дважды атомарно сверил `mart.fitness_funnel_client_outcome`; final
+rerun = 1 037 064 unique source keys с нулевыми contract/horizon deviations.
+Evidence: `docs/reports/fitness_funnel_client_outcome_stage3_product_admission_execution_2026-08-28.md`.

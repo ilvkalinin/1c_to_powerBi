@@ -1,9 +1,10 @@
 # Требования отчёта: «Фитнес воронка»
 
 Договорный отчёт № 11. Статус: `BUSINESS ANALYSIS COMPLETE / SOURCE MAPPING
-COMPLETE / ARCHITECTURE DESIGNED / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-079 / STAGE_3 TECHNICAL SQL REVIEW VALIDATED / PHYSICAL ADMISSION DEFERRED`.
+COMPLETE / ARCHITECTURE DESIGNED / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-079 / OUTCOME PHYSICAL ADMISSION VALIDATED / POWER BI DEFERRED`.
 
-SQL-объекты не создаются; Stage 2 ограничен read-only source-side сверками.
+`mart.fitness_funnel_client_outcome` создан в отдельном Stage 3 пакете;
+исторический Stage 2 оставался ограничен read-only source-side сверками.
 
 ## Доказательства
 
@@ -163,7 +164,11 @@ Read-only technical review outcome-факта выявил не cohort-проб�
 исходами. Точный outcome extract, controls, DDL, guarded runner и target
 reconciliation прошли технический review; full source result содержит
 1 036 251 уникальных source events без contract/null/horizon нарушений.
-Target, Power BI и источник не изменялись; physical admission нужен отдельно.
+Physical admission 2026-08-28 создал `mart.fitness_funnel_client_outcome` и
+прошёл два atomic runs с independent source/stage/target reconciliation.
+Final rerun: 1 037 064 unique source keys, required/horizon deviations 0.
+Power BI и источник не изменялись. Evidence:
+`fitness_funnel_client_outcome_stage3_product_admission_execution_2026-08-28.md`.
 
 ## Учёт class-B условия — 2026-08-13
 

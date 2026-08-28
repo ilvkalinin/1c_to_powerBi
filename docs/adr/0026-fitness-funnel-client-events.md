@@ -1,6 +1,6 @@
 # ADR-0026: клиентская фитнес-воронка через cohort и события исходов
 
-- Статус: `DESIGNED / STAGE_3 TECHNICAL SQL REVIEW VALIDATED / PHYSICAL ADMISSION DECISION_REQUIRED`
+- Статус: `IMPLEMENTED / OUTCOME PHYSICAL ADMISSION VALIDATED / POWER BI DESIGNED`
 - Дата: 2026-08-03
 - Отчёт: №11 «Фитнес воронка»
 
@@ -22,11 +22,26 @@
 
 ## Обновление и Power BI
 
-Ежедневный bounded rebuild BR-003. Общие календарь, клуб и client key
-обслуживают два факта; физическая fact-to-fact relationship не создаётся.
+Общие календарь, клуб и client key обслуживают два факта; физическая
+fact-to-fact relationship не создаётся. Для outcome измерен только
+source-first месячный full rebuild через временный derived binary COPY pool.
+Ежедневный SLA и incremental refresh не заявляются: нет доказанных watermark,
+late changes и deletions.
 DAX считает cohort size, исходы в выбранном окне, конверсии и накопительные
 показатели. PII-detail доступна только report-specific представлению по
 BR-017.
+
+## Physical admission outcome — 2026-08-28
+
+`mart.fitness_funnel_client_outcome` создан и дважды атомарно загружен.
+Initial и rerun прошли independent source/stage/target controls. Выбран
+source-first пул из 32 месячных derived files: он не хранит raw 1С и открывает
+target transaction только после закрытия source readers. Final rerun содержит
+1 037 064 unique source keys, обязательных/horizon deviations = 0. Target
+August read = 288.341 ms; table 973 MB после `DELETE + INSERT` rerun.
+Следовательно, текущая стратегия — full-rebuild baseline, а не ежедневная
+операция. Evidence:
+`docs/reports/fitness_funnel_client_outcome_stage3_product_admission_execution_2026-08-28.md`.
 
 ## Риски
 
