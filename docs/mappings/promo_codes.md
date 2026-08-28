@@ -70,3 +70,20 @@ SQL этих полей нет, поэтому уникальность и да�
 | VALIDATION_FAILED | joins и суммы скидки | PC-V02 2026-08-28 repeats 7,535 technical discount rows → 7,568 current-M joined rows (excess 33); PC-V04 repeats gift-join excess 406 | preserve current `MAX`/`SUM`/`Table.Distinct`; methodology decision required before implementation |
 | VALIDATED observation | состояния и сторно | SV-091 measured active/posted/marked state; no new filter follows | preserve current source filters |
 | PARTIALLY VALIDATED | текстовые категории/дни | 100+ day gifts absent; source predicates total, but current DAX fallback and join multiplicity remain | preserve current DAX; methodology decision required for change |
+
+## Stage 3 technical decision — 2026-08-28
+
+User-approved BR-046 resolves the earlier methodology decision: target grain
+is the final post-M report row, not an arbitrary technical register line.
+`sql/marts/promo_application_source_extract.sql` reproduces both exact PBIT
+branches, including their aggregation and multiplicity, then assigns a
+full-snapshot `report_row_id`. This does not change source filters, state
+policy, joins, DAX categories, or Power BI relationships.
+
+The accepted source plan is a semantic candidate only after successful
+one-day-to-six-month ladder: it materializes the shared 45-day outcome inputs
+once and pushes the final application-date horizon into branch base inputs.
+Full BR-003 `[2025-01-01, 2026-08-29)` actual plan: 132,801 rows,
+39,236.433 ms execution, 16,678,651 shared-hit blocks, 0 reads, and
+68,767/62,606 temp read/write blocks. It is a full-rebuild baseline, not an
+incremental SLA. Physical delivery remains separately unapproved.

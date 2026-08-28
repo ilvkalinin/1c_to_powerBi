@@ -39,3 +39,15 @@ observed one-to-many risks; legacy result remains unchanged under BR-018.
 The 2026-08-28 recheck repeats PC-V02 excess 33 and PC-V04 gift excess 406;
 Stage 3 remains deferred and requires a methodology decision on source-side
 protection of those joins.
+
+## Stage 3 technical decision — 2026-08-28
+
+BR-046 supersedes the candidate source-row grain only for this first physical
+release: the fact is the post-M report row, preserving each branch's current
+`MAX`, `SUM`, and `Table.Distinct` behaviour, including observed
+one-to-many multiplication. `report_row_id bigint` is a technical ordinal
+within a full snapshot, not a durable business key. The reviewed physical
+columns are defined in `sql/marts/promo_application_ddl.sql`; client name and
+other PII remain excluded. Refresh is an atomic full rebuild only: incremental
+watermark, late changes, and deletion processing are not designed. Power BI is
+not switched by this package (BR-036).
