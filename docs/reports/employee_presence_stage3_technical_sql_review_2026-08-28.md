@@ -1,6 +1,6 @@
 # Technical SQL review: two employee-presence products
 
-Status: `SUPERSEDED BY BR-044 / NOT ADMISSIBLE FOR PHYSICAL EXECUTION`.
+Status: `SUPERSEDED BY BR-044/BR-045 / NOT ADMISSIBLE FOR PHYSICAL EXECUTION`.
 
 ## Immutable reviewed set
 
@@ -9,7 +9,7 @@ Status: `SUPERSEDED BY BR-044 / NOT ADMISSIBLE FOR PHYSICAL EXECUTION`.
 - [independent source controls](../../sql/marts/employee_presence_source_controls.sql);
 - [DDL](../../sql/marts/employee_presence_ddl.sql) and [target reconciliation](../../sql/tests/employee_presence_reconciliation.sql).
 
-`mart.employee_presence_day` has key `(presence_date, club_id, employee_id)` and receives only exact-one employee rows. This reviewed set originally put both BR-043 statuses in `mart.employee_presence_unattributed_day`. BR-044 subsequently excludes the `NO_EMPLOYEE` branch, so neither its extract nor its DDL/reconciliation contract may be physically executed; a new technical review is required.
+`mart.employee_presence_day` has key `(presence_date, club_id, employee_id)` and originally receives only exact-one employee rows. This reviewed set originally put both BR-043 statuses in `mart.employee_presence_unattributed_day`. BR-044 subsequently excludes the `NO_EMPLOYEE` branch and BR-045 instead puts multi-link visits into the personal product through `MIN(_idrref)`, so neither its extract nor its DDL/reconciliation contract may be physically executed; a new technical review is required.
 
 ## Architecture and rollback
 

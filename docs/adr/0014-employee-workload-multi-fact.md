@@ -17,9 +17,8 @@
 - `mart.employee_activity_interval`: одно квалифицированное событие
   `занятие/дежурство/купон × сотрудник × клуб × интервал × тип`;
 - `mart.employee_presence_day`: `сотрудник × дата × фактический клуб`, с
-  суммарными минутами только exact-one employee domain;
-- отдельный candidate non-personal fact: `дата × фактический клуб × причина
-  отсутствия атрибуции`, без employee;
+  суммарными минутами каждого visit, где client имеет хотя бы одну
+  employee-карточку;
 - REUSE `mart.ancillary_revenue_movement`,
   `mart.dpfu_plan_assignment` и `mart.ip_training_daily`.
 
@@ -41,13 +40,14 @@ PostgreSQL воспроизводит current-M интервалы, длител
 DAX считает сумму загрузки, долю,
 процент от времени в клубе, эффективность и план-факт.
 
-BR-043/BR-044 разделяют СКУД на two isolated facts: no-link visits исключены,
-а multi-link visits остаются не-персональными. Recommended storage is two
-physical tables with source-side aggregation; no persistent source replica,
-index or incremental watermark is planned. Initial load and rebuild use derived
-monthly binary COPY files prepared before a short target transaction, an
-advisory lock, temporary target stages, `DELETE + INSERT` replacement and
-rollback on every failed reconciliation. This is a full-rebuild baseline only.
+BR-044/BR-045 задают одну персональную СКУД-витрину: no-link visits исключены,
+а multi-link visits получают `MIN(Reference225._idrref)` как произвольный
+стабильный representative. Recommended storage is one physical table with
+source-side aggregation; no persistent source replica, index or incremental
+watermark is planned. Initial load and rebuild use derived monthly binary COPY
+files prepared before a short target transaction, an advisory lock, temporary
+target stages, `DELETE + INSERT` replacement and rollback on every failed
+reconciliation. This is a full-rebuild baseline only.
 
 ## Риски
 
@@ -57,9 +57,9 @@ rollback on every failed reconciliation. This is a full-rebuild baseline only.
 output grain воспроизводим. При
 недоказанной однозначной связи СКУД строка не включается в
 `employee_presence_day`. BR-044 исключает exact current-M no-link visits;
-BR-043 сохраняет multi-link visits в отдельном non-personal product без
-employee. Это целевые правила, принятые после EPD Stage 2, а не скрытая
-атрибуция.
+BR-045 выбирает произвольного, но стабильного employee representative для
+multi-link visits. Это целевые правила, принятые после EPD Stage 2, а не
+current-M атрибуция.
 Historical employment attribution также отложена из-за 655 nonpositive и 187
 overlapping intervals. См. Stage 2 evidence.
 
@@ -70,4 +70,4 @@ overlapping intervals. См. Stage 2 evidence.
 - [Stage 2 evidence](../reports/employee_activity_interval_stage2_validation_2026-08-27.md)
 - [Follow-up evidence](../reports/employee_activity_interval_followup_validation_2026-08-27.md)
 - [EPD decision](../reports/employee_presence_day_attribution_decision_2026-08-28.md)
-- [No-link exclusion decision](../reports/employee_presence_day_no_employee_exclusion_decision_2026-08-28.md)
+- [Any-link attribution decision](../reports/employee_presence_day_any_link_attribution_decision_2026-08-28.md)
