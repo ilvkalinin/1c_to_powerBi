@@ -1,7 +1,7 @@
 # Требования отчёта: «Фитнес воронка»
 
 Договорный отчёт № 11. Статус: `BUSINESS ANALYSIS COMPLETE / SOURCE MAPPING
-COMPLETE / ARCHITECTURE DESIGNED / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-079 / IMPLEMENTATION DEFERRED`.
+COMPLETE / ARCHITECTURE DESIGNED / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-079 / STAGE_3 TECHNICAL SQL REVIEW VALIDATED / PHYSICAL ADMISSION DEFERRED`.
 
 SQL-объекты не создаются; Stage 2 ограничен read-only source-side сверками.
 
@@ -113,6 +113,18 @@ PBIT содержит девять содержательных таблиц, 33
 Это объясняет текущую модель, но не меняет утверждённую целевую семантику:
 исходы принадлежат клиенту, а не контракту. Детальная PII-таблица доступна
 всем пользователям, которым предоставлен доступ к отчёту (BR-017).
+
+### Повторная read-only проверка PBIT — 2026-08-28
+
+Файл `Фитнес воронка.pbit` имеет тот же SHA-256, что и зафиксированный
+template: `9890f4a9c7734617557ebfb4aec1d8e4d9d8b801b9b8eb0e8c67a7171b64f20a`.
+В DataModelSchema присутствуют девять содержательных таблиц, 33 меры и 17
+relationships, из которых семь связывают содержательные наборы, а остальные
+служат auto-date tables. Legacy мера `НачалосьКонтрактов1` считает
+`COUNT(Спр Абонементы[Ссылка])`; меры СПТ и detail используют contract links.
+Это подтверждает current PBIT, но не отменяет согласованное client-start
+правило первого PostgreSQL release. PBIT не изменялся; перенос measures и
+relationships остаётся за отдельным пакетом после BR-036.
 
 ## Реестр фактов и следующих проверок
 

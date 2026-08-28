@@ -1,6 +1,6 @@
 # Data contract: «Фитнес воронка»
 
-Статус: `DESIGNED COMPOSITE MODEL / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-079 / IMPLEMENTATION DEFERRED`.
+Статус: `DESIGNED COMPOSITE MODEL / STAGE_3 TECHNICAL SQL REVIEW VALIDATED / PHYSICAL ADMISSION DEFERRED`.
 
 SV-079 подтверждает client-start dedupe bounded cohort, но не полный cohort
 или source-key исходов. Контракт сохраняет client-level outcome semantics;
@@ -13,8 +13,12 @@ SV-079 подтверждает client-start dedupe bounded cohort, но не п
 | `mart.fitness_funnel_client_start` | `Старт клиентов` | клиент × дата начала / `(client_key, membership_start_date)` |
 | `mart.fitness_funnel_client_outcome` | `Исходы клиентов` | клиент × дата исхода × тип × source key |
 
-Старт содержит `client_key text`, `membership_start_date date`, `club_id text`,
-`tenure_type text`, возрастные/договорные срезы из mapping и `client_count = 1`.
+Старт содержит `client_key text`, `membership_start_date date`,
+`access_club_id text`, `tenure_type text` и `client_count smallint = 1`.
+Возрастные, договорные и PII-атрибуты остаются contract-detail полями и не
+могут появиться в client-start fact без отдельного доказанного grain. Полный
+admission обязан подтвердить отсутствие multi-contract конфликтов
+`access_club_id`/`tenure_type` для каждого ключа cohort.
 Исход содержит `outcome_source_key text`, `client_key text`, `outcome_date
 date`, `outcome_type text`, `club_id text`, `service_id text`,
 `outcome_count numeric`. Технические keys скрыты; подтверждённая detail
@@ -27,4 +31,5 @@ distinct клиентов и конверсии.
 
 Приёмка: уникальный cohort, source key исхода, несколько контрактов в одну
 дату схлопываются, один клиент может иметь несколько исходов, оконные границы,
-states, PII, rerun и SLA.
+states, PII, rerun и SLA. В текущем пакете PBIT read-only проверен, но
+Power BI connection, relationships и measures остаются `DESIGNED` по BR-036.

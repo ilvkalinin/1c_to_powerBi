@@ -1,6 +1,6 @@
 # ADR-0026: клиентская фитнес-воронка через cohort и события исходов
 
-- Статус: `DESIGNED / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-079 / IMPLEMENTATION DEFERRED`
+- Статус: `DESIGNED / STAGE_3 TECHNICAL SQL REVIEW VALIDATED / PHYSICAL ADMISSION DEFERRED`
 - Дата: 2026-08-03
 - Отчёт: №11 «Фитнес воронка»
 
@@ -43,3 +43,4 @@ eligible contract rows дают 98 client-start строк: две cohort-гру
 
 - [Требования](../reports/fitness_funnel.md)
 - [Mapping](../mappings/fitness_funnel.md)
+- [Stage 3 technical review](../reports/fitness_funnel_client_start_stage3_technical_review_execution_2026-08-28.md)

@@ -1,9 +1,9 @@
 # Source-to-target mapping: фитнес воронка
 
-Статус: `BUSINESS MAPPING COMPLETE / ARCHITECTURE DESIGNED — ADR-0026 / STAGE_2 SOURCE VALIDATION PARTIALLY VALIDATED — SV-079`.
-Production SQL не создаётся. Все физические имена и поля ниже подтверждены
-только текущими SQL/M; их типы, ключи, состояния и кардинальности имеют статус
-`VALIDATION_PENDING`.
+Статус: `BUSINESS MAPPING COMPLETE / STAGE_3 TECHNICAL SQL REVIEW VALIDATED / PHYSICAL ADMISSION DEFERRED`.
+Физическая delivery не разрешена. FF-S01—FF-S03 фиксируют exact current-M
+source population и обязательные full-horizon admission controls; до их
+успешного physical execution target не создаётся.
 
 ## Гранулярность
 
@@ -28,8 +28,11 @@ cohort-строке.
 
 | Целевая колонка | Бизнес-описание | Источник таблица / колонка | Преобразование | PostgreSQL тип | NULL | Grain | Статус | Доказательство | Тест |
 |---|---|---|---|---|---|---|---|---|---|
-| `client_key` | стабильный обезличенный ключ клиента | `Reference59.Fld681` | защищённое представление | UNKNOWN | нет | client-start | CONFIRMED — user decision 2026-07-30, BR-007 | V-01, V-04 |
-| `membership_start_date` | дата старта client cohort | `Reference59.Fld671` | `::date`; distinct вместе с `client_key` | date | нет | client-start | CONFIRMED — user decision 2026-07-30 | V-01, V-02 |
+| `client_key` | стабильный обезличенный ключ клиента | `Reference59.Fld681` | `encode(client_ref, 'hex')::text` | text | нет | client-start | CONFIRMED — current M, user decision 2026-07-30, BR-007; FF-S01 metadata | FF-S01, FF-S03 |
+| `membership_start_date` | дата старта client cohort | `Reference59.Fld671` | `::date`; target key вместе с `client_key` | date | нет | client-start | CONFIRMED — current M, user decision 2026-07-30; FF-S01 metadata | FF-S02, FF-S03 |
+| `access_club_id` | технический ID клуба доступа cohort | `Reference59.Fld687` | `encode(access_club_ref, 'hex')::text`; lookup name не выбирается в cohort | text | нет | client-start | CONFIRMED current source and FF-S01 metadata; full-horizon orphan control pending | FF-S01, FF-S02, FF-S03 |
+| `tenure_type` | New / Ex / Renew cohort slice | `Reference59.Fld694` | confirmed three-value GUID decode | text | нет | client-start | CONFIRMED current M and FF-S01 metadata; one value per cohort is an admission precondition | FF-S02, FF-S03 |
+| `client_count` | аддитивная единица cohort | literal | `1::smallint` | smallint | нет | client-start | CONFIRMED — user decision 2026-07-30 | FF-S03, target `CHECK (client_count = 1)` |
 | `contract_code` | код контракта для detail | `Reference59.Code` | без агрегации; не использовать в мерах | text | нет | client-start-contract detail | CONFIRMED — business description, user decision 2026-07-30 | V-02 |
 | `membership_end_date` | окончание контракта | `Reference59.Fld672` | `::date` | date | нет | client-start-contract detail | CONFIRMED source | SQL/M/DAX | V-01, V-02 |
 | `activation_date` | дата активации | `Reference59.Fld670` | `::date` | date | да | client-start-contract detail | CONFIRMED source | SQL/M | V-01 |
@@ -38,7 +41,7 @@ cohort-строке.
 | `contract_type_id` | тип контракта | `Reference59.Fld696` | исключить current GUID clip-карты | UNKNOWN | нет | client-start-contract detail | CONFIRMED current | SQL/M | V-01, V-08 |
 | `client_code` | код клиента для текущего detail | `Reference141X1.Code` | join client; не использовать как ключ | text | нет | client-start | CONFIRMED current | SQL/M/DAX | V-01, V-04 |
 | `client_name`, `client_phone` | PII detail table | `Reference141X1.Description`, `Reference141X1.Fld1531` | detail для работы с клиентом | text | да | client-start | CONFIRMED — business description, user decision 2026-07-30 | V-11 |
-| `access_club_id`, `access_club_name` | клуб доступа контракта | `Reference59.Fld687 → Reference132.ID/Description` | join | UNKNOWN, text | да | client-start-contract detail | CONFIRMED current | SQL/M | V-01, V-11 |
+| `access_club_name` | отображаемое имя клуба доступа detail | `Reference59.Fld687 → Reference132.Description` | detail lookup; не выбирать при cohort dedupe | text | да | client-start-contract detail | CONFIRMED current; вне `mart.fitness_funnel_client_start` | SQL/M, FF-S01 |
 | `outcome_client_key` | защищённый ключ клиента исхода | `InfoRg7006.Fld7008`; `AccumRg7575.Fld7576`; `AccumRg7646.Fld7648` | привести к представлению `client_key` | UNKNOWN | нет | client-outcome-event | CONFIRMED current source, BR-007 | V-01, V-04 |
 | `outcome_date` | дата квалифицированного исхода | СПТ: `Document329.Fld4306`; ДПФУ: `AccumRg7575.Period` / `AccumRg7646.Period`; ИП: `Document329.Fld4306` / `Document279.Fld3218` | `::date` | date | нет | client-outcome-event | CONFIRMED — SQL/M/DAX, user decision 2026-07-30 | V-01, V-06, V-08 |
 | `outcome_type` | СПТ, ДПФУ или Гайд | те же event sources | literal by qualified source branch | text | нет | client-outcome-event | CONFIRMED current | SQL/M/DAX | V-06, V-07 |
@@ -86,3 +89,12 @@ rows образуются 98 distinct `client × start_date` cohort: две гр
 и запрет выбора «главного» контракта. Source-state и outcome controls
 переиспользуют SV-072/SV-073/SV-078; они не подтверждают contract attribution
 и не разрешают менять current filters по BR-018.
+
+## Technical review evidence — FF-S01—FF-S03
+
+PBIT с SHA-256 `9890f4a9c7734617557ebfb4aec1d8e4d9d8b801b9b8eb0e8c67a7171b64f20a`
+повторно проверен 2026-08-28. Он подтверждает legacy contract-level detail и
+связи по `Ссылка`; это evidence current result, а не отмена принятого target
+client-start rule. Exact target extract намеренно не переносит `contract_id`,
+contract code, PII или detail attributes: они требуют отдельной child-detail
+projection и не могут выбирать «главный» contract.
