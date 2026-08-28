@@ -1,35 +1,35 @@
 # Data contract: «Использование контрактов»
 
-Статус: `DESIGNED / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-082`.
+Статус: `TECHNICAL REVIEWED / PHYSICAL ADMISSION BLOCKED BY FINALIZATION AUTHORITY`.
 Контракт относится только к PostgreSQL-обогащению отчёта `%Renew`.
 
 ## Общие параметры
 
 | Параметр | Значение | Статус |
 |---|---|---|
-| Объект PostgreSQL | `mart.contract_usage` | PROPOSED — ADR-0006 |
+| Объект PostgreSQL | `mart.contract_usage` | REVIEWED local DDL; no VM-2 object |
 | Таблица Power BI | `Использование контрактов` | CONFIRMED naming rule |
 | Назначение | сегментация контрактов по посещаемости | CONFIRMED |
 | Гранулярность | один контракт | CONFIRMED BY DESIGN |
-| Технический ключ | `contract_id` | CONFIRMED metadata / type pending |
-| Текущий ключ связи Power BI | `contract_code` | current integration / uniqueness pending |
+| Технический ключ | `contract_id` | `encode(Reference59.ID, 'hex')::text`; reviewed |
+| Текущий ключ связи Power BI | `contract_code` | 7-day uniqueness observed; full-window CU-S02 pending |
 | Режим Power BI | `Import` | CONFIRMED BY DESIGN |
 | Обновление | ежедневно | CONFIRMED user decision |
 | История | финализированные контракты подключённых Excel-снимков | CONFIRMED BY DESIGN |
 | Mutable-секция | текущие и будущие окончания | CONFIRMED user process |
 | Watermark | отсутствует | NOT APPLICABLE / hybrid close boundary |
-| SLA | данные доступны не позднее 08:30 по Москве | CONFIRMED — BR-014, решение пользователя 2026-07-30 |
+| SLA | данные доступны не позднее 08:30 по Москве | BR-014; end-to-end evidence pending physical admission |
 
 ## Колонки
 
 | PostgreSQL | Power BI | PostgreSQL тип | Power BI тип | NULL | Роль | Аддитивность | Скрыть |
 |---|---|---|---|---|---|---|---|
-| `contract_id` | `Код контракта технический` | UNKNOWN | Text | нет | PK | не мера | да |
+| `contract_id` | `Код контракта технический` | `text` | Text | нет | PK | не мера | да |
 | `contract_code` | `Код контракта` | `text` | Text | нет | ключ связи | не мера | да |
 | `membership_start_date` | `Дата начала` | `date` | Date | нет | атрибут | не мера | нет |
 | `membership_end_date` | `Дата окончания` | `date` | Date | нет | атрибут | не мера | нет |
 | `contract_end_month` | `Месяц окончания` | `date` | Date | нет | атрибут | не мера | нет |
-| `membership_term_days` | `Срок действия, дней` | UNKNOWN numeric | Whole/Decimal number | да | знаменатель | не суммировать | нет |
+| `membership_term_days` | `Срок действия, дней` | `numeric` | Whole/Decimal number | да | знаменатель | не суммировать | нет |
 | `active_calendar_months` | `Активных календарных месяцев` | `integer` | Whole number | нет | знаменатель | не суммировать | нет |
 | `visit_count` | `Количество посещений` | `bigint` | Whole number | нет | показатель контракта | не суммировать вне distinct контрактов | нет |
 | `usage_rate` | `% использования` | `numeric` | Decimal number / Percentage | да | коэффициент | неаддитивна | нет |
@@ -41,7 +41,7 @@
 
 | От | К | Кардинальность | Фильтрация | Статус |
 |---|---|---|---|---|
-| `Использование контрактов[Код контракта]` | существующие контрактные снимки `[Код контракта]` | `1:*` | однонаправленная | uniqueness pending |
+| `Использование контрактов[Код контракта]` | существующие контрактные снимки `[Код контракта]` | `1:*` | однонаправленная | source 7-day uniqueness observed; full CU-S02 and Power BI switch remain pending |
 
 Новая таблица не связывается напрямую с фактами рекарринга, планами или
 календарём. Месяц окончания в существующем контрактном снимке остаётся основной
@@ -117,7 +117,8 @@ DAX сохраняет существующие расчёты Renew, рекар
 7. Проверка контракта, пересекающего Новый год.
 8. Измерение ежедневного source-side запроса и Power BI refresh.
 
-SV-082 подтвердил bounded physical current-PBI path, но не закрывает
-unique `contract_code`, полный type-domain основания, состояния источника,
-finalization и связь с внешними Excel-снимками. Эти Excel-артефакты не
-запрашиваются и не анализируются на Stage 2.
+SV-082 и CU-TR-001 подтвердили bounded physical current-PBI path, но
+full-window CU-S01--CU-S03 остаются обязательными pre-COPY controls. Сам
+physical admission заблокирован до named authority, задающей
+`mutable_from_month`: PostgreSQL не читает и не копирует Excel-снимки для
+вывода этого boundary.

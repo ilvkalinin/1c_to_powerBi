@@ -1,6 +1,6 @@
 # ADR-0006: компактные метрики использования контрактов для %Renew
 
-- Статус: `PROPOSED / PARTIALLY VALIDATED — SV-082 / IMPLEMENTATION BLOCKED`
+- Статус: `TECHNICAL REVIEWED — CU-TR-001 / PHYSICAL ADMISSION BLOCKED BY FINALIZATION AUTHORITY`
 - Дата: 2026-07-28
 - Отчёт: № 17 «Отчет по %Renew»
 
@@ -38,9 +38,9 @@ PostgreSQL нужен только для количества посещени�
 
 > один контракт.
 
-Технический ключ:
+Технический ключ в target:
 
-> `contract_id = Reference59.ID`.
+> `contract_id = encode(Reference59.ID, 'hex')::text`.
 
 Существующая интеграция Power BI продолжает использовать `contract_code`, пока
 его уникальность не проверена либо выгрузка 1С не начнёт передавать
@@ -75,7 +75,8 @@ PostgreSQL нужен только для количества посещени�
 3. mutable-секция `mart.contract_usage` заменяется атомарно;
 4. Power BI обновляется после успешной замены.
 
-При закрытии месяца:
+При закрытии месяца (после отдельного operational decision, задающего
+`mutable_from_month`):
 
 1. выполняется последнее обновление посещений и сроков контрактов этого месяца;
 2. строки получают `is_finalized = true` и `finalized_month`;
@@ -151,6 +152,8 @@ Power BI:
 7. Порядок последнего refresh и сохранения Excel на границе месяца.
 8. Контрольный контракт через границу года и контракт с заморозкой.
 9. Фактический объём и время ежедневного source-side запроса.
+10. Named operational authority, которая передаёт runner'у
+    `mutable_from_month`; SQL не выводит его из Excel или времени сервера.
 
 ## Условия пересмотра
 
@@ -171,3 +174,18 @@ keys и 133 документами; `SUM(Fld7585)=133.00`. Для 100 контр
 2026-окна. Это подтверждает риск методического улучшения, но BR-018 сохраняет
 current `COUNT(*)` и годовой фильтр первого релиза. `Fld693` физически numeric,
 но не может быть заменён календарной разницей дат без отдельного решения.
+
+## CU-TR-001 — Stage 3 technical review
+
+Точный parameterized extract, независимые CU-S01--CU-S03, DDL, source-first
+atomic runner и target reconciliation подготовлены локально. Short actual plan
+на `[2026-08-17, 2026-08-24)` вернул 31,788 target-grain rows за 1,505.871 ms,
+shared hit 1,060,722, без read/temp I/O. CU-S01 нашёл один observed
+polymorphic pair `08/0000003b`, ноль duplicate technical keys и нулевые
+inactive/unposted/marked rows; CU-S02 нашёл ноль duplicate contract-code
+groups. Это evidence sample, не замена full fixed-window pre-COPY controls.
+
+Runner требует явные `legacy_start`, `legacy_end`, `mutable_from_month` и
+`max_transfer_bytes`; target connection, DDL/DML/COPY в этом review не
+выполнялись. `mutable_from_month` не имеет physical source marker и остаётся
+admission blocker до named operational authority.

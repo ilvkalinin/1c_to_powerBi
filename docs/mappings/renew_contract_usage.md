@@ -1,7 +1,7 @@
 # Source-to-target mapping: использование контрактов для %Renew
 
-Статус: `BUSINESS MAPPING COMPLETE / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-082; Stage 3 deferred`.
-SQL и физические объекты не создаются.
+Статус: `STAGE 3 TECHNICAL SQL REVIEW / PHYSICAL ADMISSION BLOCKED BY FINALIZATION AUTHORITY`.
+Локальный immutable SQL set подготовлен; VM-2 не изменялась.
 
 ## Гранулярность
 
@@ -9,7 +9,7 @@ SQL и физические объекты не создаются.
 
 Технический ключ:
 
-> `contract_id = Reference59.ID`.
+> `contract_id = encode(Reference59.ID, 'hex')::text` в target.
 
 `contract_code` сохраняется только как ключ связи с существующей выгрузкой 1С,
 пока та не начнёт передавать бинарный ID контракта.
@@ -18,18 +18,18 @@ SQL и физические объекты не создаются.
 
 | Целевая колонка | Бизнес-описание | Источник / преобразование | PostgreSQL тип | NULL | Статус / доказательство | Проверка |
 |---|---|---|---|---|---|---|
-| `contract_id` | стабильный ID контракта | `Reference59.ID` | UNKNOWN | нет | CONFIRMED metadata | уникальность |
-| `contract_code` | код для связи с существующей выгрузкой 1С | `Reference59.Code::text` | `text` | нет | CONFIRMED current integration | уникальность и пробелы |
-| `membership_start_date` | дата начала контракта | `Reference59.Fld671::date` | `date` | нет | CONFIRMED metadata | sentinel и timezone |
-| `membership_end_date` | дата окончания контракта | `Reference59.Fld672::date` | `date` | нет | CONFIRMED metadata | end >= start |
+| `contract_id` | стабильный ID контракта | `encode(Reference59.ID, 'hex')` | `text` | нет | CONFIRMED Stage 3 representation | CU-S01, PK |
+| `contract_code` | код для связи с существующей выгрузкой 1С | `Reference59.Code::text` | `text` | нет | VALIDATION_PENDING full legacy window; 7-day CU-S02: 0 duplicate code groups | CU-S02, UNIQUE |
+| `membership_start_date` | дата начала контракта | `Reference59.Fld671::date` | `date` | нет | CONFIRMED physical type; sentinel `0001-01-01` observed and retained | CU-S03 |
+| `membership_end_date` | дата окончания контракта | `Reference59.Fld672::date` | `date` | нет | CONFIRMED physical type; `2300-03-12` observed and retained | CU-S03 |
 | `contract_end_month` | месяц когорты окончания | первый день месяца `membership_end_date` | `date` | нет | CONFIRMED requirement | month boundary |
-| `membership_term_days` | срок действия в днях | `Reference59.Fld693` | UNKNOWN numeric | да | CONFIRMED business field / physical type pending | единица, zero, freeze |
+| `membership_term_days` | срок действия в днях | `Reference59.Fld693::numeric` | `numeric` | да | CONFIRMED physical type `numeric(5,0)`; не подменяется разницей дат | CU-S03; RU-V04 |
 | `active_calendar_months` | число затронутых календарных месяцев inclusive | `12 * (year(end)-year(start)) + month(end)-month(start) + 1` | `integer` | нет | CONFIRMED user rule | пример 13 |
-| `visit_count` | посещения, отнесённые к контракту | текущий кандидат `COUNT(*)` по `AccumRg7575` внутри интервала контракта | `bigint` | нет | CONFIRMED current rule / semantic validation pending | rows vs documents vs quantity |
+| `visit_count` | посещения, отнесённые к контракту | current-M `COUNT(*)` по `AccumRg7575` в fixed legacy window; без нового interval filter | `bigint` | нет | CONFIRMED BR-018; 7-day CU-S01: 69,562 rows = technical keys = documents | CU-S01, CU-S03 |
 | `usage_rate` | использование на один день срока | `visit_count / NULLIF(membership_term_days,0)` | `numeric` | да | CONFIRMED user formula | format and >100% |
 | `average_monthly_visits` | среднемесячные посещения | `visit_count / NULLIF(active_calendar_months,0)` | `numeric` | да | CONFIRMED user formula | example and rounding |
-| `is_finalized` | контракт относится к закрытому неизменяемому месяцу | `true` после фиксации его месяца окончания | `boolean` | нет | CONFIRMED user process / BY DESIGN | один finalization |
-| `finalized_month` | закрытый месяц, в котором зафиксированы метрики | первый день закрытого месяца; `NULL` для mutable-когорты | `date` | да | CONFIRMED BY DESIGN | соответствует end month |
+| `is_finalized` | контракт относится к закрытому неизменяемому месяцу | `membership_end_date < :mutable_from_month`, cutoff передаётся runner'у явно | `boolean` | нет | BLOCKER physical admission: нет named operational authority/процедуры, задающей cutoff | CU-R05/CU-R08 |
+| `finalized_month` | закрытый месяц, в котором зафиксированы метрики | `contract_end_month` только когда `is_finalized`; иначе `NULL` | `date` | да | BLOCKER вместе с `is_finalized` | CU-R07/CU-R08 |
 
 ## Source-фильтры
 
@@ -38,10 +38,10 @@ SQL и физические объекты не создаются.
 | `Document325.Fld4164 = GUID посещения` | CONFIRMED current query |
 | тип клиента = переданный GUID `Клиент` | CONFIRMED current query |
 | исключить ДРЦ и Управляющую компанию | CONFIRMED current query; ID pending |
-| посещение внутри интервала контракта | CONFIRMED target rule |
-| `AccumRg7575.Active` | UNKNOWN |
-| `Document325.Posted/Marked` | UNKNOWN |
-| тип полиморфного `AccumRg7575.Fld7578` = абонемент | BLOCKER before SQL |
+| посещение внутри интервала контракта | Не добавлять filter: current M его не содержит, первый релиз сохраняет exact legacy domain |
+| `AccumRg7575.Active` | Не добавлять filter; CU-S01 записывает observed inactive rows |
+| `Document325.Posted/Marked` | Не добавлять filter; CU-S01 записывает observed states |
+| тип полиморфного `AccumRg7575.Fld7578` = абонемент | 7-day CU-S01 observed только `08/0000003b`; full fixed-window control обязателен перед COPY |
 
 ## Не переносить
 
@@ -84,7 +84,7 @@ grain и объём для всех посещенческих отчётов.
 7. Контракт с заморозкой/разморозкой.
 8. Размер целевой когорты и время source-side агрегации.
 9. Один контракт не появляется в двух закрытых Excel-снимках.
-10. Порядок финального обновления usage и сохранения Excel на границе месяца.
+10. Named operational authority и порядок `mutable_from_month`; Excel не анализируется и не является источником PostgreSQL.
 
 ## Stage 2 evidence — SV-082 (2026-08-11)
 
@@ -99,3 +99,16 @@ bounded current-PBI пути 133 строк равны 133 technical keys и 133
 не включается без отдельного решения. В другой 100-contract выборке 25 сроков
 неположительны, один интервал неположителен, срок не совпал с календарной
 разницей ни в одной строке; не подменять `Fld693` вычислением по датам.
+
+## Stage 3 technical-review evidence — CU-TR-001 (2026-08-28)
+
+В fresh `REPEATABLE READ, READ ONLY` sample `[2026-08-17, 2026-08-24)`
+independent controls дали 69,562 legacy rows, столько же technical keys и
+documents, 31,788 contract IDs, ноль duplicate contract-code groups и один
+observed polymorphic pair `08/0000003b`. Наблюдаемые inactive/unposted/marked
+rows равны нулю; они не превращены в новые фильтры. Два точных short plans
+вернули 31,788 строк за 1,138.317 и 1,505.871 ms без disk/temp I/O.
+
+До admission CU-S01--CU-S03 выполняются на полном fixed legacy window.
+Physical delivery заблокирована до передачи named authority, которая задаёт
+`mutable_from_month`; runner не имеет default cutoff.

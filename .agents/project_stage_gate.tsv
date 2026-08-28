@@ -5,4 +5,4 @@
 # CLOSED_PENDING_NEXT_APPROVAL rejects all new selections until the user
 # explicitly confirms the next independent package.
 gate_id	state	allowed_stage	allowed_report_ids	reason
-global_stage_gate	CLOSED_PENDING_NEXT_APPROVAL	NONE	NONE	Promo application physical admission closed 2026-08-28. New physical source change, independent reconciliation control or methodology decision requires a new approved package; Power BI remains gated by BR-036.
+global_stage_gate	CLOSED_PENDING_NEXT_APPROVAL	NONE	NONE	Contract-usage technical review closed 2026-08-28. Physical admission requires a named `mutable_from_month` authority and a separately approved immutable delivery package; Power BI remains gated by BR-036.
