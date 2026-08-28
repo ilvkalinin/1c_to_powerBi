@@ -1,6 +1,6 @@
 # Data contract: «Загрузка сотрудников»
 
-Статус: `employee_activity_interval IMPLEMENTED / presence facts RE-PLANNING REQUIRED, physical implementation deferred`.
+Статус: `employee_activity_interval IMPLEMENTED / employee_presence_day REVIEWED, physical implementation deferred`.
 
 ## Новые объекты
 
@@ -35,7 +35,7 @@
 | `employee_id` | `ID сотрудника` | text | нет | FK сотрудника | не мера | да |
 | `presence_minutes` | `Минуты в клубе` | numeric | нет | показатель | аддитивна | нет |
 
-### Superseded `mart.employee_presence_unattributed_day`
+### Superseded `mart.employee_presence_unattributed_day` (historical only)
 
 | PostgreSQL | Power BI | Тип | NULL | Роль | Аддитивность | Скрыть |
 |---|---|---|---|---|---|---|

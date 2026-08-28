@@ -45,7 +45,7 @@ employee_id, service_id, class_start)`. Current `Table.Distinct` сокраща�
 | Часы пребывания | `Document325` + `Reference225.Fld2504` | сотрудник × день × клуб | `NEW` компактный агрегат-кандидат |
 | Порог отчислений | `_СпрСтавки` | внешний файл Power BI | `NOT_APPLICABLE`: не переносить в PostgreSQL по решению пользователя 2026-07-30 |
 
-## Компонент C: presence СКУД — re-planning required
+## Компонент C: presence СКУД — reviewed, physical implementation deferred
 
 Целевой grain — `employee × presence_date × actual club`. Посещения без любой
 `Reference225`-связи исключаются по BR-044. Для клиента с несколькими
@@ -60,7 +60,7 @@ employee-карточками BR-045 выбирает технически де�
 | `presence_date` | дата присутствия | `AccumRg7575.Period` | `Period::date` из exact current-M path | `date` | нет | CONFIRMED current | EPD-V02 |
 | `club_id` | фактический клуб | `AccumRg7575.Fld7577RRef` | стабильный ID, не название клуба | `text` | нет | CONFIRMED source | EPD-V01, EPD-V02 |
 | `employee_id` | представитель employee-link | `Reference225.ID` через `Reference225.Fld2504RRef = AccumRg7575.Fld7576RRef` | `MIN(employee_id)` для каждого client с ≥1 карточкой; 29,431 no-link visits исключены по BR-044 | `text` | нет | CONFIRMED target decision | EPD-V03/V04, BR-044, BR-045 |
-| `presence_minutes` | минуты в клубе | `Document325.Fld4172`, `Document325.Fld4174` | `effective_end - start`; sentinel/open and after-day end клиппируются концом start-day точно как current M | `numeric` | нет | CONFIRMED current formula / target decision | EPD-V02, EPD-V05, BR-043 |
+| `presence_minutes` | минуты в клубе | `Document325.Fld4172`, `Document325.Fld4174` | `effective_end - start`; sentinel/open and after-day end клиппируются концом start-day точно как current M | `numeric` | нет | CONFIRMED current formula / target decision | EPD-V02, EPD-V05, BR-044, BR-045 |
 
 Предыдущий non-personal продукт superseded по BR-045 и не проектируется.
 `attribution_status` — только явная константа `MULTIPLE_EMPLOYEES`; no-link
