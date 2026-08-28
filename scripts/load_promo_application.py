@@ -4,7 +4,7 @@
 Execution is forbidden until a separate physical-admission package is approved.
 """
 from __future__ import annotations
-import argparse, os, re, shutil, sys, tempfile
+import argparse, json, os, re, shutil, sys, tempfile, zipfile
 from datetime import date, datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -19,6 +19,7 @@ from scripts.load_children_package_sale import br003_horizon, config
 EXTRACT = ROOT / 'sql/marts/promo_application_source_extract.sql'
 DDL = ROOT / 'sql/marts/promo_application_ddl.sql'
 RECON = ROOT / 'sql/tests/promo_application_reconciliation.sql'
+PBIT = ROOT / 'Pbit_old/Отчет по промокодам.pbit'
 TABLE = 'mart.promo_application'
 COLUMNS = ('report_row_id,source_kind,application_date,client_key,club_name,membership_code,'
            'promo_name,serial_name,discount_name,discount_id,discount_method,service_name,'
@@ -42,16 +43,39 @@ def execute_ddl(cur) -> None:
     for statement in (x.strip() for x in body.split(';')):
         if statement: cur.execute(statement)
 
-def rows_from_source(start: date, end: date, transfer: Path) -> None:
+def source_expected_sql(start: date, end: date) -> str:
+    """Independent current-PBIT M path; it must not call EXTRACT."""
+    schema = json.loads(zipfile.ZipFile(PBIT).read('DataModelSchema').decode('utf-16le'))['model']
+    def pbi_query(name: str) -> str:
+        expression = '\n'.join(next(x for x in schema['expressions'] if x['name'] == name)['expression'])
+        return expression.split('Odbc.Query(', 1)[1].split(', "', 1)[1].rsplit('")', 1)[0].replace('#(lf)', '\n').replace('""', '"').strip().rstrip(';')
+    gift, discount = pbi_query('РН_ПрименениеПромокодов и РН_ПодаркиПоАбонементам'), pbi_query('РН_ПрименениеСкидок')
+    return f'''WITH output AS (
+      SELECT 'promo_gift'::text AS source_kind, "Период"::date AS application_date,
+             NULL::numeric AS discount_amount, NULL::numeric AS price_before_discount FROM ({gift}) gift
+      UNION ALL
+      SELECT 'discount', "Период"::date, "СуммаСкидки"::numeric, "ЦенаБезСкидки"::numeric FROM ({discount}) discount
+    )
+    SELECT count(*), count(*) FILTER (WHERE source_kind='promo_gift'),
+           count(*) FILTER (WHERE source_kind='discount'), min(application_date),
+           max(application_date), coalesce(sum(discount_amount),0),
+           coalesce(sum(price_before_discount),0)
+    FROM output WHERE application_date >= DATE '{start.isoformat()}'
+                    AND application_date < DATE '{end.isoformat()}' '''
+
+def rows_from_source(start: date, end: date, transfer: Path) -> tuple[object, ...]:
     source = open_db('SOURCE_', 'promo_application_source_copy')
     try:
         with source.cursor() as cur, transfer.open('wb') as out:
             cur.execute('BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY')
             cur.execute("SET LOCAL statement_timeout = '120s'")
+            cur.execute(source_expected_sql(start, end))
+            expected = cur.fetchone()
             with cur.copy('COPY (' + render(EXTRACT, start, end) +
                           ') TO STDOUT WITH (FORMAT BINARY)') as copied:
                 for block in copied: out.write(block)
             cur.execute('ROLLBACK')
+            return expected
     finally:
         source.close()
 
@@ -70,7 +94,7 @@ def run(initial: bool) -> None:
         raise RuntimeError('less than 2 GiB free for source-first temporary COPY')
     with tempfile.TemporaryDirectory(prefix='promo_application_') as folder:
         transfer = Path(folder) / 'source.copy'
-        rows_from_source(start, end, transfer)
+        expected = rows_from_source(start, end, transfer)
         target = open_db('MART_', 'promo_application_atomic_delivery')
         try:
             with target.cursor() as cur:
@@ -81,8 +105,6 @@ def run(initial: bool) -> None:
                 with transfer.open('rb') as inp, cur.copy(
                     f'COPY promo_application_stage ({COLUMNS}) FROM STDIN WITH (FORMAT BINARY)') as copied:
                     while block := inp.read(1_048_576): copied.write(block)
-                cur.execute('SELECT count(*), count(*) FILTER (WHERE source_kind=%s), count(*) FILTER (WHERE source_kind=%s), min(application_date), max(application_date), coalesce(sum(discount_amount),0), coalesce(sum(price_before_discount),0) FROM promo_application_stage', ('promo_gift','discount'))
-                expected = cur.fetchone()
                 cur.execute(sql.SQL('LOCK TABLE {} IN ACCESS EXCLUSIVE MODE').format(sql.Identifier('mart','promo_application')))
                 cur.execute('TRUNCATE mart.promo_application')
                 cur.execute(f'INSERT INTO {TABLE} ({COLUMNS}) SELECT {COLUMNS} FROM promo_application_stage')

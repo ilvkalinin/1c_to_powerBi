@@ -2,7 +2,7 @@
 -- Source: Pbit_old/Отчет по промокодам.pbit (SHA-256 79005ec09a6698887b7e341d5b2b16a902fdce7b78e992888bf2e0129a409956).
 -- Parameters: $1 inclusive date; $2 exclusive date. Preserves PBI-M branch aggregation and multiplicity.
 -- report_row_id is a full-snapshot technical ordinal, not a durable source business key.
-+-- PBI-equivalent performance candidate; no tie-break or deduplication.
+-- PBI-equivalent performance candidate; no tie-break or deduplication.
 WITH gift_base AS (
     SELECT 
         ar._Period::date AS period,

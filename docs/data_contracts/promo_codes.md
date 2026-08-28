@@ -51,3 +51,11 @@ columns are defined in `sql/marts/promo_application_ddl.sql`; client name and
 other PII remain excluded. Refresh is an atomic full rebuild only: incremental
 watermark, late changes, and deletion processing are not designed. Power BI is
 not switched by this package (BR-036).
+
+## Physical admission — 2026-08-28
+
+The physical table is VALIDATED for full rebuild. Initial load and atomic rerun
+passed with the independent exact-PBIT source control, zero reconciliation
+deviations and zero technical-key duplicates. The target remains disconnected
+from Power BI; its current connection and relationships are DESIGNED, not
+executed. Incremental refresh is not designed.
