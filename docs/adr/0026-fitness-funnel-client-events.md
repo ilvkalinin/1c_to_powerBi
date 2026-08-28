@@ -45,6 +45,12 @@ Full-horizon admission 2026-08-28 показал 32 client-date cohorts с ра�
 создать текущую таблицу до нового business-rule решения. Evidence:
 `docs/reports/fitness_funnel_client_start_stage3_product_admission_execution_2026-08-28.md`.
 
+Пользователь 2026-08-28 выбрал договор с более поздней `Reference59.Fld674`
+датой приобретения. Полный read-only control подтверждает, что поле заполнено
+и устраняет 40 из 46 ambiguous cohort, но у шести cohort максимальная дата
+совпадает при разных атрибутах. До явного правила для этой ничьей physical
+admission остаётся `DECISION_REQUIRED`.
+
 ## Доказательства
 
 - [Требования](../reports/fitness_funnel.md)

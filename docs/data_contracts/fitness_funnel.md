@@ -20,7 +20,9 @@ SV-079 подтверждает client-start dedupe bounded cohort, но не п
 admission обязан подтвердить отсутствие multi-contract конфликтов
 `access_club_id`/`tenure_type` для каждого ключа cohort. Full-horizon control
 2026-08-28 не прошёл это условие (32 multi-club, 24 multi-tenure, 46 duplicate
-target keys); новый grain или business selector требует отдельного решения.
+target keys). Пользователь подтвердил выбор более поздней `Fld674` даты
+приобретения, но у 6 conflict-cohort её максимум совпадает; нужен отдельный
+tie-break до изменения target contract.
 Исход содержит `outcome_source_key text`, `client_key text`, `outcome_date
 date`, `outcome_type text`, `club_id text`, `service_id text`,
 `outcome_count numeric`. Технические keys скрыты; подтверждённая detail

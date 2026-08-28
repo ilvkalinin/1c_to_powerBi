@@ -3,7 +3,10 @@
 Статус: `BUSINESS MAPPING COMPLETE / STAGE_3 TECHNICAL SQL REVIEW VALIDATED / PHYSICAL ADMISSION DECISION_REQUIRED`.
 Full-horizon admission 2026-08-28 выявил 32 cohort с несколькими клубами и
 24 с несколькими `tenure_type`: это создаёт 46 дубликатов логического ключа.
-До отдельного решения о таких cohort target не создаётся; evidence:
+Пользователь выбрал договор с более поздней датой приобретения
+`Reference59.Fld674`; это разрешает 40 cohort, но в шести максимальная дата
+равна при разных атрибутах. До отдельного tie-break target не создаётся;
+evidence:
 `docs/reports/fitness_funnel_client_start_stage3_product_admission_execution_2026-08-28.md`.
 
 ## Гранулярность
@@ -15,6 +18,10 @@ Full-horizon admission 2026-08-28 выявил 32 cohort с нескольким
 Логический ключ: `(client_key, membership_start_date)`. Несколько контрактов
 клиента в одну дату сворачиваются в одну cohort-строку по решению пользователя
 2026-07-30; `contract_id` не является ключом и не участвует в мерах.
+
+При нескольких договорах в одном client-start cohort кандидат выбирается по
+максимальной дате приобретения `Reference59.Fld674`. Равная максимальная дата
+не даёт права выбрать произвольный договор: остаётся `DECISION_REQUIRED`.
 
 Исходы вынесены во второй набор с grain `клиент × дата исхода × вид исхода ×
 источник`. Это позволяет одному набору мер применять периодные окна 1/2/12,

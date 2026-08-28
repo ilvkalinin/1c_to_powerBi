@@ -68,3 +68,17 @@ Each option changes the current target contract or client-count semantics and
 requires a revised immutable SQL/reconciliation set and a new physical
 admission package.  The existing target remains unchanged because it does not
 exist.
+
+## Subsequent business direction: later purchase date
+
+The user chose the contract with the later purchase date on 2026-08-28.
+Read-only source metadata confirms that `Reference59.Fld674` is a non-null
+`timestamp without time zone`; none of the 231,645 eligible contracts has a
+null or `0001-01-01` sentinel.  Ordering ambiguous client-date candidates by
+`Fld674 DESC` resolves 40 of the 46 ambiguous cohorts.
+
+This is not yet a complete deterministic selector: six cohorts still have two
+or more contracts tied on their maximum purchase timestamp and those tied rows
+retain different club and/or tenure attributes.  No SQL, DDL, DML or target
+operation was changed after this finding.  The remaining required business
+decision is the tie-break after equal maximum `Fld674`.
