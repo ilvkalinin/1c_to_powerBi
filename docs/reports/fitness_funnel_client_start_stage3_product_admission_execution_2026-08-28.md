@@ -77,8 +77,11 @@ Read-only source metadata confirms that `Reference59.Fld674` is a non-null
 null or `0001-01-01` sentinel.  Ordering ambiguous client-date candidates by
 `Fld674 DESC` resolves 40 of the 46 ambiguous cohorts.
 
-This is not yet a complete deterministic selector: six cohorts still have two
-or more contracts tied on their maximum purchase timestamp and those tied rows
-retain different club and/or tenure attributes.  No SQL, DDL, DML or target
-operation was changed after this finding.  The remaining required business
-decision is the tie-break after equal maximum `Fld674`.
+The user subsequently chose the larger `Reference59.Fld693` contract term as
+the second rank when maximum purchase timestamps are equal.  For example,
+client `И00065989` has two contracts purchased 2024-07-31 for the same
+2024-08-07 start: `Fld693` values 365 and 30 (actual intervals 364 and 29
+calendar days), so the longer contract wins.  No SQL, DDL, DML or target
+operation was changed after this finding.  Before a revised immutable set, a
+full-horizon source control must prove whether any contracts remain tied on
+both purchase date and term.
