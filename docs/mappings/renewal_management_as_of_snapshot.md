@@ -72,22 +72,26 @@ rating и tenure могут меняться после окончания до�
 
 | Поле | Local evidence | Статус / будущая проверка |
 |---|---|---|
-| tenure | `InfoRg5654.Period` и validated local precedent `client_base_snapshot_extract.sql` строят effective intervals before report date | `VALIDATION_PENDING`: tie, boundary and correction control against contract-end date |
-| rating | `InfoRg6861.Period` существует; current mart берёт latest period | `VALIDATION_PENDING`: as-of selector, ties and current no-Active behaviour |
-| interaction timestamp/type | `Reference67.Fld820` (started) и `Fld823` (created) известны в current extract | `DECISION_REQUIRED`: «known at» по created, started или обоим; task funnel/fail fields могут быть mutable current state |
-| next contract | current selector uses same-client dates and BR-050 | `DECISION_REQUIRED` + `VALIDATION_PENDING`: activation/start constraint and proof that backdated/corrected contract was known then |
+| tenure | `InfoRg5654.Period`; ASOF-V05: 0 tied `(client, period)` groups in the 151,573-client current cohort | `VALIDATED` for a deterministic effective-period order; correction/audit history is still not evidenced |
+| rating | `InfoRg6861.Period`; ASOF-V05: 0 tied `(client, period)` groups in the same cohort | `VALIDATED` for a deterministic effective-period order; current no-Active behaviour remains unchanged |
+| interaction timestamp/type | `Reference67.Fld820` (started) и `Fld823` (created); ASOF-V06: both non-null in 1,483,951 eligible rows, but 45,719 have `created > started` | `CONFIRMED` current timestamp; user says either timestamp is acceptable, so the first release preserves current-M `Fld820` (started). `BLOCKER` only for historical task funnel/fail state: no temporal state source is confirmed. |
+| next contract | current selector uses same-client dates and BR-050; ASOF-V07 confirms four current timestamp columns but no history semantics | `BLOCKER` for claiming a past known-at next contract: no creation/audit or backdating/correction history is confirmed. |
 | cohort contract attributes | `Reference59` current record | `BLOCKER` for claiming historical 2025 universe without version/source-history evidence |
 
-## Stage 2 control list (NOT_EXECUTED)
+## Stage 2 control list (executed 2026-08-29)
 
-- ASOF-V01: current mart key and selected analytic column coverage.
-- ASOF-V02: one observation per `(contract, observed_at)`, state-hash and
-  `BASELINE/CHANGED/REMOVED` transitions.
-- ASOF-V03: atomic ordering — no observation after failed parent refresh.
-- ASOF-V04: Power BI as-of selector returns the last nonremoved observation.
-- ASOF-V05: `InfoRg5654` and `InfoRg6861` effective-date cardinality/ties.
-- ASOF-V06: `Reference67` created/start timestamps and task/funnel mutability.
-- ASOF-V07: `Reference59` activation/start/backdating history and deletion/
-  correction behaviour for retrospective next-contract selection.
+- ASOF-V01: `VALIDATED` — 240,967 current rows, all unique non-null contract IDs.
+- ASOF-V02: `VALIDATED` for the upstream comparison key; the future uniqueness
+  constraint and transition tests remain Stage 3 acceptance because no object exists.
+- ASOF-V03: `VALIDATED DESIGN PREREQUISITE` — source drift (240,965 source
+  cohort vs 240,967 committed target) confirms that an observation may only read
+  the committed parent target; end-to-end failure ordering is Stage 3 acceptance.
+- ASOF-V04: `VALIDATION_PENDING` — observation relation correctly absent in
+  Stage 2; selector/`REMOVED` test requires the approved physical object.
+- ASOF-V05: `VALIDATED` — zero rating and tenure same-period ties in scope.
+- ASOF-V06: `BLOCKER` for retrospective funnel/fail state only; forward
+  observation remains valid and preserves the current-M started timestamp.
+- ASOF-V07: `BLOCKER` for retrospective next-contract/cohort claims; current
+  timestamp fields do not prove record-known-at or correction history.
 
-No SQL is created in Stage 1.
+Exact SQL and aggregate results: [Stage 2 execution](../reports/renewal_management_as_of_snapshot_stage2_execution_2026-08-29.md).

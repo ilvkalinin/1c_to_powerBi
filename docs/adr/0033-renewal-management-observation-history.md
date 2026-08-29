@@ -1,6 +1,6 @@
 # ADR-0033: наблюдаемая история «Управления продлением»
 
-- Статус: `DESIGNED / Stage 1 complete; server validation required`
+- Статус: `DESIGNED / Stage 2 forward-observation validation complete`
 - Дата: 2026-08-29
 - Потребитель: будущая историческая аналитика «Управления продлением»
 
@@ -52,7 +52,10 @@ semantics — «as observed after successful refresh», а не «непреры
 loader, scheduler, DDL/DML, retention, `observed_at` timezone и Power BI
 role-playing/as-of UX требуют отдельного Stage 2/3 пакета.
 
-Retrospective effective-date reconstruction допускается только как отдельная
-methodology decision после ASOF-V05—V07. В частности, нужно выбрать, считать
-ли next-contract/interaction known by activation, start, creation time или
-проверенным historical state.
+ASOF-V01—V07 (2026-08-29) validated the unique upstream key and no tied
+rating/tenure periods. The source cohort differed by two rows from the last
+committed mart snapshot, so observation must read the parent target only after
+its successful commit. User accepts either interaction timestamp; the first
+release keeps current-M `Reference67.Fld820` (started). Retrospective effective-
+date reconstruction remains excluded: neither a historical task funnel/fail
+state nor `Reference59` creation/backdating/correction history is confirmed.
