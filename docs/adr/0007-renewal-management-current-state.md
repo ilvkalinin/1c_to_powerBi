@@ -1,6 +1,6 @@
 # ADR-0007: текущая контрактная витрина «Управление продлением»
 
-- Статус: `PROPOSED / BLOCKED BY TECHNICAL VALIDATION`
+- Статус: `IMPLEMENTED / Stage 3 VALIDATED — RM-LOAD-001—006`
 - Дата: 2026-07-28
 - Отчёт: № 16 «Управление продлением»
 
@@ -132,3 +132,16 @@ Power BI использует:
 9. Границы когорты, типы, объём, время обновления и SLA.
 10. Права доступа к ФИО и телефону.
 
+## RM-FULL-DELIVERY-001 outcome (2026-08-29)
+
+Full-population controls confirmed the cohort key, unique cohort codes, latest
+rating/tenure cardinality, price and visit technical keys, and required types.
+They also found 93 ties at the earliest eligible next-contract start and 96
+ties at the latest eligible interaction timestamp (each up to five rows).
+Current SQL has no secondary ordering. It would be a methodology change to
+invent one, so physical delivery is prohibited pending an explicit BR-018
+decision. Evidence: [RM Stage 2 execution](../reports/renewal_management_stage2_full_validation_execution_2026-08-29.md).
+
+User decision BR-050 (2026-08-29) resolves both ties: paid next-contract wins
+at the same earliest start, then minimum technical ID; latest interaction uses
+minimum technical ID at the same timestamp.  The ID fallback is technical only.

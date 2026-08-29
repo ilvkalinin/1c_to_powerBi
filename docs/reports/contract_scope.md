@@ -33,7 +33,7 @@ data contract оформлены по 31 из 31 отчёта. Реализов�
 | 13 | Продажи | Отчет по поступлениям | COMPLETE — `membership_receipts` | COMPLETE — `membership_receipts` | DESIGNED — ADR-0017 | COMPLETE — `membership_receipts` | DEFERRED | PARTIALLY VALIDATED — SV-083; Stage 3 deferred |
 | 14 | Продажи | Отчет по промокодам | COMPLETE — `promo_codes` | COMPLETE — `promo_codes` | DESIGNED — ADR-0018 | COMPLETE — `promo_codes` | DEFERRED | PARTIALLY VALIDATED — SV-090, SV-091; joins require BR-018 decision before Stage 3; Stage 3 deferred |
 | 15 | Продажи | Продажа детских пакетов | COMPLETE | COMPLETE — `children_package_sales` | DESIGNED — ADR-0019 | COMPLETE — `children_package_sales` | DEFERRED | PARTIALLY VALIDATED — SV-085; Stage 3 deferred |
-| 16 | Продажи | Управление продлением | COMPLETE | COMPLETE | PROPOSED — ADR-0007 | COMPLETE — `renewal_management` | DEFERRED | PARTIALLY VALIDATED — SV-081; Stage 3 deferred |
+| 16 | Продажи | Управление продлением | COMPLETE | COMPLETE | IMPLEMENTED — ADR-0007 | COMPLETE — `renewal_management` | IMPLEMENTED — `mart.renewal_management_contract` | VALIDATED — RM-LOAD-001—006; Power BI unchanged |
 | 17 | Продажи | Отчет по %Renew | COMPLETE | COMPLETE | PROPOSED — ADR-0006 | COMPLETE — `renew_contract_usage` | DEFERRED | PARTIALLY VALIDATED — SV-082; Stage 3 deferred |
 | 18 | Гостеприимство | Выручка рецепции | COMPLETE | COMPLETE | PROPOSED — ADR-0005 | COMPLETE — `reception_revenue` | DEFERRED | COMPLETE — SV-050—SV-053 |
 | 19 | Гостеприимство | Записи администраторов | COMPLETE | COMPLETE | PROPOSED — ADR-0004 | COMPLETE — `administrator_bookings` | DEFERRED | PARTIALLY VALIDATED — SV-086; Stage 3 deferred |

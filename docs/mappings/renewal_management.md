@@ -1,7 +1,7 @@
 # Source-to-target mapping: «Управление продлением»
 
-Статус: `BUSINESS MAPPING COMPLETE / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-081; Stage 3 deferred`.
-SQL и физические объекты пока не создаются.
+Статус: `IMPLEMENTED / Stage 3 VALIDATED — RM-LOAD-001—006`.
+Reviewed SQL, physical target, final source-to-target reconciliation and clean timed rerun are validated.
 
 ## Гранулярность
 
@@ -18,16 +18,16 @@ SQL и физические объекты пока не создаются.
 
 | Целевая колонка | Бизнес-описание | Источник / преобразование | Тип PostgreSQL | NULL | Статус | Проверка |
 |---|---|---|---|---|---|---|
-| `expiring_contract_id` | стабильный ID исходного контракта | `Reference59.ID` | UNKNOWN | нет | CONFIRMED metadata | уникальность |
+| `expiring_contract_id` | стабильный ID исходного контракта | `Reference59.ID`, hex rendered | `text` | нет | CONFIRMED RM-S2-01/08 | uniqueness |
 | `expiring_contract_code` | код для текущей Power BI-модели | `Reference59.Code` | `text` | нет | CONFIRMED current | уникальность |
-| `client_id` | клиент контракта | `Reference59.Fld681` | UNKNOWN | нет | CONFIRMED metadata | orphan |
+| `client_id` | клиент контракта | `Reference59.Fld681`, hex rendered | `text` | нет | CONFIRMED RM-S2-08 | orphan |
 | `membership_start_date` | дата начала | `Reference59.Fld671::date` | `date` | нет | CONFIRMED | sentinel |
 | `membership_end_date` | дата окончания и дата когорты | `Reference59.Fld672::date` | `date` | нет | CONFIRMED | end >= start |
 | `contract_end_month` | месяц окончания | первый день `membership_end_date` | `date` | нет | CONFIRMED requirement | month boundary |
-| `membership_term_days` | длительность | `Reference59.Fld693` | UNKNOWN numeric | нет | CONFIRMED field | единица |
-| `access_club_id` | клуб доступа | `Reference59.Fld687` | UNKNOWN | нет | CONFIRMED metadata | orphan |
-| `purchase_price` | цена покупки исходного контракта | текущий `SUM(AccumRg7739.Fld7749)` по контракту | `numeric` | да | CONFIRMED current / semantics pending | Active, sign, states |
-| `visit_count` | посещения по исходному контракту | переиспользовать mapping и source-side агрегацию `AccumRg7575 → contract`, но считать по текущему состоянию | `bigint` | нет | CONFIRMED logical reuse / technical pending | rows vs documents |
+| `membership_term_days` | длительность | `Reference59.Fld693` | `numeric` | нет | CONFIRMED RM-S2-08 | unit semantics preserved |
+| `access_club_id` | клуб доступа | `Reference59.Fld687`, hex rendered | `text` | нет | CONFIRMED RM-S2-08 | orphan |
+| `purchase_price` | цена покупки исходного контракта | current `SUM(AccumRg7739.Fld7749)` by contract, `Period > 2015-01-01`, `RecordKind=0`; no Active filter | `numeric` | да | CONFIRMED current / RM-S2-06 | active/sign observations preserved BR-018 |
+| `visit_count` | посещения по исходному контракту | current 2026 `AccumRg7575 → Reference59` path grouped by contract code, rendered to confirmed unique contract ID | `bigint` | нет | CONFIRMED current / RM-S2-07 | `COUNT(*)`, no state filter |
 | `usage_rate` | использование по сроку | `visit_count / Reference59.Fld693` | `numeric` | да | CONFIRMED formula | no sum |
 | `average_monthly_visits` | среднемесячные посещения | `visit_count / inclusive active calendar months` | `numeric` | да | CONFIRMED formula | no sum |
 
@@ -37,11 +37,11 @@ SQL и физические объекты пока не создаются.
 |---|---|---|---|---|---|---|
 | `renewed_by_month_close_flag` | продлён не позднее 1-го числа после месяца окончания | `renewal_activation_date <= contract_end_month + interval '1 month'` | `boolean` | нет | CONFIRMED requirement | boundary date |
 | `renewed_current_flag` | продлён не позднее текущей даты | `renewal_activation_date <= current_date` | `boolean` | нет | CONFIRMED requirement | future activation |
-| `next_contract_id` | ID выбранного следующего контракта | `Reference59` того же клиента; текущий lateral rule | UNKNOWN | да | ASSUMPTION current implementation | доказать связь |
+| `next_contract_id` | ID выбранного следующего контракта | same client → earliest start → paid before free → min technical ID | `text` | да | CONFIRMED BR-050 | RM-S2-02 |
 | `next_contract_code` | код нового контракта | `next.Reference59.Code` | `text` | да | CONFIRMED current | unique |
 | `renewal_activation_date` | отображаемая дата продления | `next.Reference59.Fld670::date` | `date` | да | CONFIRMED report definition | sentinel/backfill |
 | `next_contract_start_date` | дата начала нового контракта | `next.Reference59.Fld671::date` | `date` | да | CONFIRMED source | overlap |
-| `next_contract_term_days` | длительность нового контракта | `next.Reference59.Fld693` | UNKNOWN numeric | да | CONFIRMED | unit |
+| `next_contract_term_days` | длительность нового контракта | `next.Reference59.Fld693` | `numeric` | да | CONFIRMED RM-S2-08 | unit semantics preserved |
 | `renewal_type` | платное / бесплатное короткое / бесплатное длинное / нет | `next.Fld699 + next.Fld693` | `text`/code | нет | CONFIRMED current CASE | numerator decision |
 | `renewal_lead_lag_days` | дней до/после окончания | `renewal_activation_date - membership_end_date` | `integer` | да | PROPOSED | negative/positive controls |
 | `return_days` | дней возврата после разрыва | `greatest(renewal_lead_lag_days,0)` для продлённых | `integer` | да | PROPOSED | not renewed = NULL |
@@ -57,12 +57,12 @@ SQL и физические объекты пока не создаются.
 |---|---|---|
 | `client_name`, `client_phone` | `Reference141.Description/Fld1531` | CONFIRMED consumer; PII |
 | `birth_date` | `Reference141.Fld1507` | CONFIRMED source |
-| `current_rating` | latest active `InfoRg6861` | current query / Active and ties pending |
-| `current_tenure` | latest `InfoRg5654` | current query / ties pending |
-| `last_interaction_at` | latest eligible `Reference67.Fld820` | current query / tie-break pending |
-| `last_interaction_type` | `Reference67.Fld831` mapping | current query |
-| `current_funnel_stage` | `Reference106.Fld1205 → Reference264` | current query |
-| `current_fail_reason` | `Reference106.Fld1201 → Reference201` | current query |
+| `current_rating` | latest period `InfoRg6861`; current CASE mapping | `text` | CONFIRMED RM-S2-04/current M; no Active predicate |
+| `current_tenure` | latest period `InfoRg5654`; current CASE mapping | `text` | CONFIRMED RM-S2-04/current M; no Active predicate |
+| `last_interaction_at` | latest eligible `Reference67.Fld820`; min technical ID at same timestamp | `timestamp` | да | CONFIRMED BR-050 | RM-S2-05 |
+| `last_interaction_type` | `Reference67.Fld831` mapping on selected row | `text` | да | CONFIRMED BR-050 | RM-S2-05 |
+| `current_funnel_stage` | `Reference106.Fld1205 → Reference264` on selected row | `text` | да | CONFIRMED BR-050 | RM-S2-05 |
+| `current_fail_reason` | `Reference106.Fld1201 → Reference201` on selected row | `text` | да | CONFIRMED BR-050 | RM-S2-05 |
 
 Эти поля являются текущим состоянием клиента и обновляются ежедневно; они не
 описывают состояние на дату окончания.
@@ -96,13 +96,8 @@ SQL и физические объекты пока не создаются.
 
 ## Решения и блокеры
 
-1. `VALIDATION_PENDING — implementation blocker`: связь старого и нового контракта и tie-break.
-2. `VALIDATION_PENDING — implementation blocker`: состояния исходного/нового контракта и возврата.
-3. `VALIDATION_PENDING — implementation blocker`: уникальность кода контракта.
-4. `VALIDATION_PENDING — implementation blocker`: кардинальности последних rating/tenure/interaction.
-5. `VALIDATION_PENDING — implementation blocker`: цена покупки и знаки движений.
-6. `UNKNOWN`: фактические типы, размеры и планы. Данные должны быть доступны
-   не позднее 08:30 по Москве (`CONFIRMED`, BR-014).
+1. `CONFIRMED BR-050`: 93 next-start and 96 interaction ties have an explicit deterministic selection; no new source-state filter is introduced.
+2. `CONFIRMED RM-S2-01/03/04/06/07/08`: cohort key/code, rating/tenure cardinality, price and visit technical keys, and physical types are evidenced. Current no-state predicates and price `RecordKind=0` remain preserved under BR-018.
 
 ## Stage 2 evidence — SV-081 (2026-08-11)
 

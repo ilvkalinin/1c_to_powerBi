@@ -1,28 +1,28 @@
 # Data contract: «Управление продлением»
 
-Статус: `DESIGNED / IMPLEMENTATION DEFERRED / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-081`.
+Статус: `IMPLEMENTED / Stage 3 VALIDATED — RM-LOAD-001—006`.
 
 ## Общие параметры
 
 | Параметр | Значение | Статус |
 |---|---|---|
-| Объект PostgreSQL | `mart.renewal_management_contract` | PROPOSED — ADR-0007 |
+| Объект PostgreSQL | `mart.renewal_management_contract` | IMPLEMENTED / full rebuild and rerun validated |
 | Таблица Power BI | `Управление продлением` | CONFIRMED |
 | Гранулярность | один текущий исходный абонемент | CONFIRMED |
-| Ключ | `expiring_contract_id` | metadata confirmed / type pending |
+| Ключ | `expiring_contract_id` | `text`; type confirmed RM-S2-08 |
 | Режим | `Import` | CONFIRMED BY DESIGN |
 | Обновление | ежедневно | CONFIRMED |
 | История | общая календарная политика проекта | CONFIRMED |
 | Снимки | отсутствуют | CONFIRMED |
-| Watermark | отсутствует | UNKNOWN |
+| Watermark | отсутствует | NOT_APPLICABLE: only full atomic rebuild is designed |
 
 ## Основные колонки
 
 | PostgreSQL | Power BI | Тип PostgreSQL | Power BI | NULL | Роль | Скрыть |
 |---|---|---|---|---|---|---|
-| `expiring_contract_id` | `Технический код абонемента` | UNKNOWN | Text | нет | PK | да |
+| `expiring_contract_id` | `Технический код абонемента` | `text` | Text | нет | PK | да |
 | `expiring_contract_code` | `Код абонемента` | `text` | Text | нет | бизнес-код | нет |
-| `client_id` | `Технический код клиента` | UNKNOWN | Text | нет | ключ клиента | да |
+| `client_id` | `Технический код клиента` | `text` | Text | нет | ключ клиента | да |
 | `client_code` | `Код клиента` | `text` | Text | нет | атрибут | нет |
 | `client_name` | `Клиент` | `text` | Text | нет | PII | нет |
 | `client_phone` | `Телефон` | `text` | Text | да | PII | нет |
@@ -30,23 +30,26 @@
 | `membership_start_date` | `Дата начала` | `date` | Date | нет | атрибут | нет |
 | `membership_end_date` | `Дата окончания` | `date` | Date | нет | активная дата | нет |
 | `contract_end_month` | `Месяц окончания` | `date` | Date | нет | когорта | нет |
-| `membership_term_days` | `Длительность` | UNKNOWN numeric | Whole number | нет | атрибут | нет |
-| `access_club_id` | `Код клуба доступа` | UNKNOWN | Text | нет | FK клуба | да |
+| `membership_term_days` | `Длительность` | `numeric` | Whole number | нет | атрибут | нет |
+| `access_club_id` | `Код клуба доступа` | `text` | Text | нет | FK клуба | да |
 | `purchase_price` | `Цена покупки` | `numeric` | Fixed decimal | да | показатель | нет |
 | `visit_count` | `Количество посещений` | `bigint` | Whole number | нет | показатель | нет |
 | `usage_rate` | `% использования` | `numeric` | Percentage | да | неаддитивный атрибут | нет |
 | `average_monthly_visits` | `Среднемесячные посещения` | `numeric` | Decimal number | да | неаддитивный атрибут | нет |
 | `renewed_by_month_close_flag` | `Продлен на 1-е` | `boolean` | True/False | нет | флаг | нет |
 | `renewed_current_flag` | `Продлен на сегодня` | `boolean` | True/False | нет | флаг | нет |
+| `next_contract_id` | `Технический код нового абонемента` | `text` | Text | да | технический атрибут | да |
 | `next_contract_code` | `Код нового` | `text` | Text | да | атрибут | нет |
 | `renewal_activation_date` | `Дата продления` | `date` | Date | да | role date | нет |
-| `next_contract_term_days` | `Длительность нового` | UNKNOWN numeric | Whole number | да | атрибут | нет |
+| `next_contract_start_date` | `Дата начала нового` | `date` | Date | да | атрибут | нет |
+| `next_contract_term_days` | `Длительность нового` | `numeric` | Whole number | да | атрибут | нет |
 | `renewal_type` | `Тип продления` | `text`/code | Text | нет | атрибут | нет |
 | `renewal_lead_lag_days` | `Дней до или после окончания` | `integer` | Whole number | да | атрибут | нет |
 | `return_days` | `Дней возврата` | `integer` | Whole number | да | атрибут | нет |
 | `current_rating` | `Текущий рейтинг` | `text`/code | Text | да | атрибут | нет |
 | `current_tenure` | `Текущий стаж` | `text`/code | Text | да | атрибут | нет |
 | `last_interaction_at` | `Дата последнего взаимодействия` | `timestamp` | Date/Time | да | атрибут | нет |
+| `last_interaction_type` | `Вид последнего взаимодействия` | `text` | Text | да | атрибут | нет |
 | `current_funnel_stage` | `Этап воронки` | `text` | Text | да | атрибут | нет |
 | `current_fail_reason` | `Причина неуспешного завершения` | `text` | Text | да | атрибут | нет |
 

@@ -1,7 +1,7 @@
 # Требования отчёта: «Управление продлением»
 
-Статус: `BUSINESS LOGIC COMPLETE / TECHNICAL VALIDATION PARTIALLY VALIDATED — SV-081; Stage 3 deferred`.
-Договорный отчёт № 16. SQL, таблицы и проверки на БД не создаются.
+Статус: `BUSINESS LOGIC COMPLETE / IMPLEMENTED — RM-LOAD-001—006; Power BI unchanged`.
+Договорный отчёт № 16. Физическая current-state таблица создана и валидирована; Power BI остаётся вне пакета.
 
 ## Назначение
 
@@ -199,6 +199,16 @@ current rating/tenure/interaction. Эти controls не заменяются п�
 
 Показатели `%Renew через 30/60/90 дней` не включены в контракт и могут быть
 добавлены позднее как DAX-меры без изменения grain.
+
+## RM-FULL-DELIVERY-001 (2026-08-29)
+
+Full-population read-only controls closed the previous bounded key, code,
+rating/tenure, price and visits checks. They found 93 same-client earliest
+next-start ties and 96 latest-interaction timestamp ties. Current PBI queries
+provide no secondary ordering. BR-050 fixed a paid-first/minimum-ID selector
+for next-contract and minimum-ID selector for interaction; Stage 3 then
+completed. See the [Stage 2 record](renewal_management_stage2_full_validation_execution_2026-08-29.md)
+and [Stage 3 execution](renewal_management_stage3_product_admission_execution_2026-08-29.md).
 
 ## Проектные артефакты
 
