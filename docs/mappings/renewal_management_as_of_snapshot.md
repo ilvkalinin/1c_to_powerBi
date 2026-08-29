@@ -1,6 +1,6 @@
 # Source-to-target mapping: `renewal_management_as_of_snapshot`
 
-Статус: `STAGE 1 COMPLETE / local temporal design; server validation NOT_EXECUTED`.
+Статус: `IMPLEMENTED / forward physical admission validated`.
 
 ## Назначение и граница смысла
 
@@ -21,10 +21,10 @@ history до проверки первичных исторических пол
 
 Логический key: `(expiring_contract_id, observed_at)`.
 
-`observed_at` — момент успешного refresh snapshot-продукта в московском
-времени; точный PostgreSQL type и timezone policy — `VALIDATION_PENDING` для
-следующего технического пакета. Для одного договора за один observation run
-допускается не более одной строки.
+`observed_at` — один `timestamptz` from `clock_timestamp()` на успешную atomic
+append transaction. Для одного договора за один observation run допускается не
+более одной строки. Power BI renders the instant in the report timezone; no
+naive local timestamp is persisted.
 
 ## Reuse review
 
@@ -38,16 +38,33 @@ history до проверки первичных исторических пол
 
 ## Колонки observation fact
 
-| Target | Бизнес-смысл / преобразование | Source | Status | Проверка перед SQL |
-|---|---|---|---|---|
-| `expiring_contract_id` | stable исходный договор | current mart PK | CONFIRMED | non-null, one current row |
-| `observed_at` | момент, когда состояние было замечено | controlled successful observation run | ASSUMPTION | timezone, monotonicity, one run timestamp |
-| `observation_kind` | `BASELINE`, `CHANGED`, `REMOVED` | comparison current mart ↔ latest observation | DESIGNED | allowed values, no duplicate key |
-| `state_hash` | hash only analytic fields ниже; PII не включается | deterministic target expression | DESIGNED | unchanged rows do not append |
-| `membership_end_date`, `contract_end_month`, `client_id`, `access_club_id` | cohort and slice keys на момент наблюдения | current mart | CONFIRMED upstream | NULL/key consistency |
-| `next_contract_id`, `next_contract_code`, `renewal_activation_date`, `next_contract_start_date`, `next_contract_term_days`, `renewal_type`, two Renew flags, lag/return fields | current selected renewal outcome | current mart / BR-050 | CONFIRMED upstream current-state | comparison/hash and flag controls |
-| `last_interaction_at`, `last_interaction_type`, `current_funnel_stage`, `current_fail_reason` | current latest eligible interaction outcome | current mart / BR-050 | CONFIRMED upstream current-state | comparison/hash and NULL semantics |
-| `current_rating`, `current_tenure` | current client attributes | current mart | CONFIRMED upstream current-state | comparison/hash and domain coverage |
+| Target / type | Source / transformation | NULL policy | Status / control |
+|---|---|---|---|
+| `expiring_contract_id text` | parent PK | never | CONFIRMED; PK and RMO-R01/R02 |
+| `observed_at timestamptz` | one runner `clock_timestamp()` | never | CONFIRMED design; composite PK |
+| `observation_kind text` | delta comparison | never | CONFIRMED design; enum check/RMO-R03 |
+| `state_hash text` | MD5 of ordered PII-free JSON array | never | CONFIRMED design; format/RMO-R02/RMO-R04 |
+| `membership_end_date date` | parent `membership_end_date` | never except permitted tombstone | CONFIRMED; RMO-R02/RMO-R05 |
+| `contract_end_month date` | parent `contract_end_month` | never except tombstone | CONFIRMED; RMO-R02/RMO-R03 |
+| `client_id text` | parent `client_id` | never except tombstone | CONFIRMED; RMO-R02 |
+| `access_club_id text` | parent `access_club_id` | never except tombstone | CONFIRMED; RMO-R02 |
+| `next_contract_id text` | parent selected next ID / BR-050 | allowed | CONFIRMED current-state; RMO-R04 |
+| `next_contract_code text` | parent selected next code | allowed | CONFIRMED current-state; RMO-R04 |
+| `renewal_activation_date date` | parent renewal activation | allowed | CONFIRMED current-state; RMO-R04 |
+| `next_contract_start_date date` | parent selected next start | allowed | CONFIRMED current-state; RMO-R04 |
+| `next_contract_term_days numeric` | parent selected next term | allowed | CONFIRMED current-state; RMO-R04 |
+| `renewal_type text` | parent type / BR-050 | never except tombstone | CONFIRMED; RMO-R02/RMO-R04 |
+| `renewed_by_month_close_flag boolean` | parent flag | never except tombstone | CONFIRMED; RMO-R02/RMO-R04 |
+| `renewed_current_flag boolean` | parent flag | never except tombstone | CONFIRMED; RMO-R02/RMO-R04 |
+| `renewal_lead_lag_days integer` | parent metric | allowed | CONFIRMED current-state; RMO-R04 |
+| `return_days integer` | parent metric | allowed | CONFIRMED current-state; RMO-R04 |
+| `return_bucket text` | parent bucket | allowed | CONFIRMED current-state; RMO-R04 |
+| `current_rating text` | parent current rating | allowed | CONFIRMED current-state; RMO-R04 |
+| `current_tenure text` | parent current tenure | allowed | CONFIRMED current-state; RMO-R04 |
+| `last_interaction_at timestamp` | parent `Fld820` started / BR-051 | allowed | CONFIRMED current-state; RMO-R04 |
+| `last_interaction_type text` | parent latest eligible type | allowed | CONFIRMED current-state; RMO-R04 |
+| `current_funnel_stage text` | parent task stage | allowed | CONFIRMED current-state; RMO-R04 |
+| `current_fail_reason text` | parent task failure reason | allowed | CONFIRMED current-state; RMO-R04 |
 
 PII (`client_name`, `client_phone`, birth date) и raw visits/prices в history
 не переносятся: они не нужны для temporal renewal outcome и повышают risk

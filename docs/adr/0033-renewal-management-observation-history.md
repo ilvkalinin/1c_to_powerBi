@@ -1,6 +1,6 @@
 # ADR-0033: наблюдаемая история «Управления продлением»
 
-- Статус: `DESIGNED / Stage 2 forward-observation validation complete`
+- Статус: `ACCEPTED / Stage 3 forward-observation initial load validated`
 - Дата: 2026-08-29
 - Потребитель: будущая историческая аналитика «Управления продлением»
 
@@ -59,3 +59,10 @@ its successful commit. User accepts either interaction timestamp; the first
 release keeps current-M `Reference67.Fld820` (started). Retrospective effective-
 date reconstruction remains excluded: neither a historical task funnel/fail
 state nor `Reference59` creation/backdating/correction history is confirmed.
+
+Initial baseline loaded 240,967 PII-free observation rows at
+`2026-08-29 15:51:34+03`; the immediate atomic append rerun inserted zero rows
+and reconciled. For an as-of read the reviewed `MAX(observed_at)` plus primary-
+key join is result-equal to `DISTINCT ON ... DESC` and measured 460.592 ms
+versus 2,755.651 ms. No additional index is required or created in this
+package. Retention, scheduling and all Power BI changes remain separate work.
