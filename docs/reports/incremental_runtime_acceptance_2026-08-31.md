@@ -67,3 +67,9 @@ runners must not be represented as a one-minute SLA until this evidence exists.
 
   The measured temporary spill means that a full-horizon plan remains
   `NOT_MEASURED`; it is not a performance conclusion or SLA result.
+
+- `administrator_bookings_daily`: exact source extract, one-month window
+  `2026-08-01 .. 2026-09-01`, measured 620 rows in 4,839.994 ms with
+  3,927,335 shared hits, 4,800 shared reads and no temporary I/O. This is
+  source-only evidence; transport, target diff and reconciliation remain
+  `NOT_EXECUTED`.
