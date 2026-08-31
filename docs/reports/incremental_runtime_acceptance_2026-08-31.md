@@ -158,3 +158,17 @@ runners must not be represented as a one-minute SLA until this evidence exists.
   correctness-preserving mode is the documented bounded full rebuild, not a
   scheduled incremental refresh. The local `work_mem` observation is not a
   server-default recommendation and does not establish an SLA.
+
+  `DECISION_REQUIRED — rolling two-month alternative`: a separate
+  `bounded_sliding_window` runner can source-rebuild only checkpoint dates in
+  `[first day of current month - 1 month, tomorrow)`, atomically delete and
+  reinsert only that target window, preserve older BR-003 rows, and derive
+  source membership starts up to 30 days before the window when needed for the
+  five checkpoints. The measured two-month exact extract is the
+  `2026-07-01 .. 2026-09-01` ladder step above (33,305 rows, 19,946.811 ms,
+  no temp I/O). This alternative is **not** a permanent incremental: it is
+  correct only if an approved business rule bounds corrections and deletions
+  to two months, or if a separate rare full rebuild remains the documented
+  history-reconciliation operation. No runner/configuration was changed for
+  this candidate, and its target-side time, reconciliation and Power BI time
+  are still `NOT_EXECUTED`.
