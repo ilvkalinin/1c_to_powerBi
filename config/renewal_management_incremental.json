@@ -1,0 +1,10 @@
+{
+  "objects": ["mart.renewal_management_contract", "mart.renewal_management_contract_observation"],
+  "mode": "current_state_row_diff_then_append_observation",
+  "timezone": "Europe/Moscow",
+  "change_detection": "current_state_source_snapshot_to_target_exact_row_multiset_diff",
+  "deletion_policy": "delete_current_target_rows_absent_or_different_in_source_snapshot",
+  "no_change_policy": "no_parent_target_dml; observation_append_remains_authoritative",
+  "watermark": null,
+  "incremental_sla": null
+}
