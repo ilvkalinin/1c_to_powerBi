@@ -1,0 +1,10 @@
+{
+  "object": "mart.contract_usage",
+  "mode": "target_fingerprint_diff",
+  "timezone": "Europe/Moscow",
+  "change_detection": "source_target_double_md5_by_contract_id",
+  "deletion_policy": "delete_source_absent_contract_keys",
+  "no_change_policy": "no_target_dml",
+  "watermark": null,
+  "incremental_sla": null
+}
