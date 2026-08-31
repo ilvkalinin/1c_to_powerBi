@@ -7,6 +7,11 @@ Execution boundary: задача запускается **только на VM-2
 scheduler host. Project checkout, Python environment, ACL-защищённый `.env` и
 log directory должны находиться на VM-2; пути в XML относятся только к VM-2.
 
+Операторский режим: команды установки/проверки выполняет пользователь в
+администраторской PowerShell/RDP-сессии на VM-2. Codex не получает RDP, пароль
+или Windows account и только формирует reviewable команды по безопасному
+не-секретному выводу.
+
 Подготовлены:
 
 - `scripts/run_unconfirmed_service_debt_movement_incremental_scheduled.ps1`;
