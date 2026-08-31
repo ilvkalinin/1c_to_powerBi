@@ -1,0 +1,11 @@
+{
+  "object": "mart.club_attendance_hourly",
+  "mode": "target_fingerprint_diff",
+  "timezone": "Europe/Moscow",
+  "change_detection": "source_target_double_md5_by_visit_date",
+  "changed_date_policy": "replace_contiguous_min_to_max",
+  "deletion_policy": "detected_as_source_target_fingerprint_difference",
+  "no_change_policy": "no_target_dml",
+  "watermark": null,
+  "incremental_sla": null
+}
