@@ -1,0 +1,10 @@
+{
+  "objects": ["mart.client_base_snapshot", "mart.client_base_retention"],
+  "mode": "two_month_sliding_window",
+  "timezone": "Europe/Moscow",
+  "late_change_months": 2,
+  "deletion_policy": "atomic_replace_inside_window",
+  "outside_window_policy": "preserve_inside_br003_horizon",
+  "watermark": null,
+  "incremental_sla": null
+}
