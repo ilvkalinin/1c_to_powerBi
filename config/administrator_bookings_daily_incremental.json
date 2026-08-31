@@ -1,0 +1,1 @@
+{"objects":["mart.administrator_bookings_daily"],"mode":"target_row_diff","timezone":"Europe/Moscow","change_detection":"source_snapshot_to_target_exact_row_multiset_diff","deletion_policy":"delete_target_rows_absent_or_different_in_source_snapshot","no_change_policy":"no_final_target_dml","watermark":null,"incremental_sla":null}
