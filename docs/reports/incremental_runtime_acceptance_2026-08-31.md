@@ -173,4 +173,12 @@ runners must not be represented as a one-minute SLA until this evidence exists.
   A separate runner/configuration now implements this candidate; it keeps
   `late_change_evidence = ASSUMPTION`, `watermark = null`, `incremental_sla =
   null`, and the manifest's `scheduling_status = BLOCKED`. Its target-side
-  time, reconciliation and Power BI time are still `NOT_EXECUTED`.
+  runtime, reconciliation and Power BI time are still `NOT_EXECUTED`. A
+  read-only target plan was additionally captured for the same two-month
+  window: `SELECT count(*)` took 704.528 ms and read 20,131 shared blocks.
+  The target has only its primary-key index `(contract_id, client_id,
+  checkpoint_day)`, not a `checkpoint_date` index. The non-executing
+  `EXPLAIN (FORMAT JSON)` of the runner's exact window `DELETE` is a
+  `ModifyTable → Seq Scan`, estimating 31,293 affected rows. It is planning
+  evidence only: the `DELETE`, `INSERT`, atomic commit and target
+  reconciliation have not been executed.
