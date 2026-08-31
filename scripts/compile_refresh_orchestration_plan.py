@@ -59,14 +59,24 @@ def validate(manifest: dict[str, object]) -> tuple[list[dict[str, object]], list
         raise RuntimeError("Manifest job is not an object")
     targets: list[str] = []
     for job in typed_jobs:
-        for key in ("id", "entrypoint", "refresh_class", "scheduling_status"):
+        for key in ("id", "refresh_class", "scheduling_status"):
             if not isinstance(job.get(key), str) or not job[key]:
                 raise RuntimeError(f"Job lacks non-empty {key}")
         if job["scheduling_status"] not in ALLOWED_STATUSES:
             raise RuntimeError(f"{job['id']} has invalid scheduling status")
-        entrypoint = ROOT / str(job["entrypoint"])
-        if not entrypoint.is_file():
-            raise RuntimeError(f"{job['id']} entrypoint is absent: {entrypoint}")
+        entrypoint = job.get("entrypoint")
+        entrypoint_status = job.get("entrypoint_status", "VERSIONED")
+        if entrypoint_status == "VERSIONED":
+            if not isinstance(entrypoint, str) or not entrypoint:
+                raise RuntimeError(f"{job['id']} lacks a versioned entrypoint")
+            path = ROOT / entrypoint
+            if not path.is_file():
+                raise RuntimeError(f"{job['id']} entrypoint is absent: {path}")
+        elif entrypoint_status == "UNVERSIONED_BLOCKED":
+            if entrypoint is not None or job["scheduling_status"] != "BLOCKED":
+                raise RuntimeError(f"{job['id']} has invalid unversioned entrypoint state")
+        else:
+            raise RuntimeError(f"{job['id']} has invalid entrypoint status")
         if not isinstance(job.get("dependencies"), list) or not isinstance(job.get("targets"), list):
             raise RuntimeError(f"{job['id']} has invalid targets/dependencies")
         targets.extend(str(target) for target in job["targets"])
