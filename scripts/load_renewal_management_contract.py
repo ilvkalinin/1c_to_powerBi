@@ -38,6 +38,7 @@ COLUMNS = (
 )
 MIN_FREE_BYTES = 1 << 30
 MAX_COPY_BYTES = 1 << 30
+SOURCE_STATEMENT_TIMEOUT_SECONDS = 300
 
 
 def config(prefix: str) -> dict[str, str]:
@@ -146,7 +147,13 @@ def load(mode: str, start: date, end: date) -> None:
             try:
                 with source.cursor() as source_cursor:
                     source_cursor.execute("BEGIN ISOLATION LEVEL REPEATABLE READ, READ ONLY")
-                    source_cursor.execute("SET LOCAL statement_timeout='180s'")
+                    # The source control and COPY are separate statements.  The
+                    # 180-second limit observed during the operational rerun was
+                    # below the measured end-to-end source phase, while the
+                    # reviewed transport remains bounded by the wrapper timeout.
+                    source_cursor.execute(
+                        f"SET LOCAL statement_timeout='{SOURCE_STATEMENT_TIMEOUT_SECONDS}s'"
+                    )
                     expected = source_controls(source_cursor, start, end)
                     source_rows = copy_source(source_cursor, extract, path)
                     if source_rows != expected[0]:
