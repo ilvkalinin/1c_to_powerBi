@@ -28,8 +28,8 @@
 | `employee_activity_interval` | 798,604 | `activity_date` | 2026-08-27 | ACCEPTED | current refresh; full rebuild is not daily SLA |
 | `employee_presence_day` | 351,327 | `presence_date` | 2026-08-28 | ACCEPTED | current refresh and PBI contract |
 | `feedback_interaction` | 154,741 | `created_at` | 2026-08-20 23:50 | ACCEPTED | refresh CRM chain and PBI reconciliation |
-| `fitness_funnel_client_outcome` | 1,037,064 | `outcome_date` | 2026-08-28 | PRESENT, acceptance evidence absent | source key/outcome rules, admission and reconciliation before PBI |
-| `fitness_funnel_client_start` | 231,490 | `membership_start_date` | 2026-08-27 | PRESENT, acceptance evidence absent | admission, full-horizon controls and reconciliation before PBI |
+| `fitness_funnel_client_outcome` | 1,037,064 | `outcome_date` | 2026-08-28 | ACCEPTED | current refresh and fitness-funnel PBI package |
+| `fitness_funnel_client_start` | 231,490 | `membership_start_date` | 2026-08-27 | ACCEPTED | current refresh and fitness-funnel PBI package |
 | `fitness_leads_funnel_task` | 166,722 | `task_date` | 2026-08-24 | ACCEPTED | current refresh and bridge-safe PBI model |
 | `fitness_leads_funnel_task_service` | 27,131 | `service_date` | 2026-08-24 | ACCEPTED | current refresh and bridge-safe PBI model |
 | `group_lesson` | 297,280 | `lesson_start_at` | 2026-08-26 21:30 | ACCEPTED | current refresh and PBI contract |
@@ -60,13 +60,12 @@
 
 ## Итог
 
-- На VM-2 присутствуют все 42 каталожные позиции. 40 имеют закрытое acceptance
-  evidence; две физические витрины фитнес-воронки существуют, но не имеют
-  подтверждённого admission/reconciliation в текущем каталоге.
+- На VM-2 присутствуют все 42 каталожные позиции; для каждой найдены
+  подтверждённые acceptance-evidence.  В частности, обе физические витрины
+  фитнес-воронки приняты 2026-08-28; старые статусы каталога были исправлены.
 - Данные большинства текущих витрин заканчиваются 14–29 августа. Это не
   дефект самой витрины, но исключает заявление о текущей ежедневной свежести.
 - Общий следующий проектный шаг: один операционно-BI пакет, который сначала
   фиксирует допустимую свежесть и порядок refresh зависимостей, затем создаёт
   ограниченные reader roles, проверяет contracts/relationships/M-DAX и только
-  после этого переключает отчёты. Физические acceptance двух фитнес-витрин
-  должны быть самостоятельным отдельным пакетом.
+  после этого переключает отчёты.
