@@ -23,6 +23,9 @@
 5. Добавить результат в versioned readiness matrix и dependency/concurrency
    plan. Measurements выполняет текущая рабочая машина; VM-2 не используется
    для source plan.
+6. Для каждой job, только после подтверждённого incremental design, создать
+   отдельные incremental runner и config. Existing full-rebuild runner не
+   изменяется и не используется как fallback автоматического обновления.
 
 ## Explicit exclusions
 
