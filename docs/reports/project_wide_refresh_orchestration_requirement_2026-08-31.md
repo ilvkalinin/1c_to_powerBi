@@ -54,3 +54,9 @@ Task Scheduler не исполняет Python-код напрямую из GitHu
 GitHub или release bundle и создаётся локально на VM-2 после определения
 service account и ACL. До публикации финального release проводится audit
 локальной ветки: её нельзя публиковать вместе с чужими dirty files.
+
+Подтверждённый deployment root на VM-2:
+`C:\Users\a.tolstikov\Desktop\Fitness\_dwh`. В нём размещаются только
+`release`, `config`, `logs` и `state`. Плановая task должна запускаться от
+`a.tolstikov` либо от service account с явно предоставленными NTFS правами к
+этому root; размещение в `C:\Windows\System32` запрещено.

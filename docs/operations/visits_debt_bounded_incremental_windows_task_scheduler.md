@@ -7,6 +7,10 @@ Execution boundary: задача запускается **только на VM-2
 scheduler host. Project checkout, Python environment, ACL-защищённый `.env` и
 log directory должны находиться на VM-2; пути в XML относятся только к VM-2.
 
+Подтверждённый VM-2 root: `C:\Users\a.tolstikov\Desktop\Fitness\_dwh`.
+Deployment bundle размещается в `release`, локальный `.env` — в `config`,
+логи — в `logs`, state/journal — в `state`.
+
 Операторский режим: команды установки/проверки выполняет пользователь в
 администраторской PowerShell/RDP-сессии на VM-2. Codex не получает RDP, пароль
 или Windows account и только формирует reviewable команды по безопасному
