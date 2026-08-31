@@ -83,3 +83,9 @@ runners must not be represented as a one-minute SLA until this evidence exists.
   `2026-08-01 .. 2026-09-01`, measured 1,821 rows in 232.356 ms with 100,255
   shared hits, 59 shared reads and no temporary I/O. This is source-only
   evidence; transport, target diff and reconciliation remain `NOT_EXECUTED`.
+
+- `visit_client_day`: exact source extract, one-month window
+  `2026-08-01 .. 2026-09-01`, measured 301,084 rows in 3,727.149 ms with
+  2,724,236 shared hits, 7,951 shared reads and no temporary I/O. This is
+  source-only evidence; transport, target diff and reconciliation remain
+  `NOT_EXECUTED`.
