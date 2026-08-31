@@ -73,3 +73,8 @@ runners must not be represented as a one-minute SLA until this evidence exists.
   3,927,335 shared hits, 4,800 shared reads and no temporary I/O. This is
   source-only evidence; transport, target diff and reconciliation remain
   `NOT_EXECUTED`.
+
+- `administrator_card_gymmy_daily`: exact source extract, one-month window
+  `2026-08-01 .. 2026-09-01`, measured 348 rows in 1,877.649 ms with 76,270
+  shared hits, 4,714 shared reads and no temporary I/O. This is source-only
+  evidence; transport, target diff and reconciliation remain `NOT_EXECUTED`.
