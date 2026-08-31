@@ -196,3 +196,19 @@ runners must not be represented as a one-minute SLA until this evidence exists.
   confirmed current child-package semantics, so it must not be done as a
   performance-only edit. This mart remains on the current item until an
   evidence-preserving source reduction or an approved business rule exists.
+
+  A non-executing plan isolates a possible evidence-preserving optimisation
+  candidate, but does not validate it: the root cost is `734,931.53` for an
+  estimated 25 output rows; `child_sales` costs `263,162.96`, all
+  `tenure_history` costs `116,823.63` for an estimated 1,088,113 rows, and
+  `spt_pairs` costs `195,588.43`. The final child output is already filtered
+  before tenure is joined. An incremental-specific extract may therefore
+  restrict tenure history to those surviving child client keys, but it needs
+  exact result-set equality evidence against the current extract before it
+  can replace the source query.
+
+  The candidate was measured read-only for `2026-07-01 .. 2026-09-01` with
+  `work_mem = 512MB`: it returned 11,025 rows in 15,192.413 ms with
+  4,208,483 shared hits, 24,472 shared reads and no temporary I/O. The
+  original full query remains the equality baseline; result-set reconciliation
+  is still required before the candidate enters the runner.
