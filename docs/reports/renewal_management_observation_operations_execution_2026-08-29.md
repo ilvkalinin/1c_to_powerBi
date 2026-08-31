@@ -1,6 +1,6 @@
 # RM-ASOF-OPS-001—005: execution record
 
-Статус: `BLOCKED / full-wrapper zero-delta control is unavailable on the live source`.
+Статус: `CLOSED`.
 
 ## Completed local and VM-2 actions
 
@@ -74,23 +74,16 @@ current rows.  Their measured target plans are `DISTINCT ON` 4,140.104 ms
 (6,241/6,241 temp blocks).  No index is created because it is outside this
 package.
 
-## Current technical blocker
+## Closure decision — 2026-08-31
 
-The package's literal full-wrapper zero-delta control cannot be obtained from
-the currently live source without waiting for a source-stable interval: each
-full parent rebuild observed new real changes (`6904/16`, then `13/0`).  The
-zero-row direct append proves idempotence once the parent is unchanged, but it
-is not presented as a full parent-refresh rerun.  Repeating full rebuilds until
-the live source happens to be quiet would create unbounded operational load and
-does not improve the reconciliation already performed against each run's own
-snapshot.  No synthetic parent mutation, Power BI change, scheduler
-installation, raw replication, retention deletion or index is authorized.
+The user confirmed that no further full rebuild is needed merely to seek a
+zero-delta window after all data had already loaded.  The zero-row direct append
+is accepted as the idempotence control: it exercises the reviewed historical
+write path against an unchanged parent and passed every RMO control in its
+atomic transaction.  The successful live-snapshot chains separately prove
+correct capture of real `CHANGED` and `REMOVED` events; their per-run
+reconciliation uses each run's own parent snapshot.
 
-## Exact resume sequence
-
-1. At a confirmed source-stable interval, confirm no stale own parent/wrapper
-   process exists and run `python3 scripts/run_renewal_management_observation_chain.py` once.
-2. Require journal `SUCCEEDED`, both exit codes `0`, and zero appended rows.
-3. Re-run OPS-R01 and RMO-R01—RMO-R05 against that run's own snapshot, then
-   close the package.  A real later parent change remains the only permitted
-   proof of `CHANGED`/`REMOVED` capture.
+This closes RM-ASOF-OPS-001—005.  The prepared Windows Task Scheduler handoff
+remains intentionally uninstalled, and no synthetic parent mutation, Power BI
+change, raw replication, retention deletion or index was performed.
