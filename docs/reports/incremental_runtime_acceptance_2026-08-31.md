@@ -169,8 +169,8 @@ runners must not be represented as a one-minute SLA until this evidence exists.
   no temp I/O). This alternative is **not** a permanent incremental: it is
   correct only if an approved business rule bounds corrections and deletions
   to two months, or if a separate rare full rebuild remains the documented
-  history-reconciliation operation. No runner/configuration was changed for
-  A separate runner/configuration now implements this candidate; it keeps
+  history-reconciliation operation. A separate runner/configuration now
+  implements this candidate; it keeps
   `late_change_evidence = ASSUMPTION`, `watermark = null`, `incremental_sla =
   null`, and the manifest's `scheduling_status = BLOCKED`. Its target-side
   runtime, reconciliation and Power BI time are still `NOT_EXECUTED`. A
@@ -182,3 +182,17 @@ runners must not be represented as a one-minute SLA until this evidence exists.
   `ModifyTable → Seq Scan`, estimating 31,293 affected rows. It is planning
   evidence only: the `DELETE`, `INSERT`, atomic commit and target
   reconciliation have not been executed.
+
+- `newcomer_engagement_second_month`: `BLOCKER` for the same rolling-window
+  strategy. Its current separate runner is still `target_row_diff` over the
+  full BR-003 horizon. The exact two-month source extract
+  `2026-07-01 .. 2026-09-01` did not return an `EXPLAIN (ANALYZE, BUFFERS)`
+  result in the available 30-second observation window, even with
+  `SET LOCAL work_mem = '512MB'`; no DML was run. SQL review identifies the
+  cause before the output month boundary: `child_raw` always reads check rows
+  from `2023-01-01`, then `child_sales`, the latest-start/rank sequence,
+  all tenure history and the SPT branch are computed before the `$1/$2`
+  `month_of_engagement` filter. Moving that boundary earlier can change the
+  confirmed current child-package semantics, so it must not be done as a
+  performance-only edit. This mart remains on the current item until an
+  evidence-preserving source reduction or an approved business rule exists.
