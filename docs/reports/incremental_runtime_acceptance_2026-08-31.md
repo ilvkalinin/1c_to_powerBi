@@ -144,8 +144,11 @@ runners must not be represented as a one-minute SLA until this evidence exists.
   3,131,217 rows but 23 (`0..53`). The three movement registers used by the
   extract do not expose `_version`. The read-only catalogue search found no
   change-log/audit relation by name and no non-internal trigger on the eleven
-  participating source relations. `_marked` alone cannot reveal changed or
-  deleted movement rows.
+  participating source relations. The source PostgreSQL instance reports
+  `wal_level = replica` and has neither publications nor replication slots;
+  therefore logical-replication CDC is not available from this connection
+  without source-infrastructure changes. `_marked` alone cannot reveal changed
+  or deleted movement rows.
 
   Therefore a bounded output-date window would miss unbounded late
   corrections and deletions under the confirmed current rule. Required input
