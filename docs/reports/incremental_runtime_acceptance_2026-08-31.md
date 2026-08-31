@@ -108,15 +108,50 @@ runners must not be represented as a one-minute SLA until this evidence exists.
   history, price/freeze auxiliary queries, transport, target diff and
   reconciliation remain `NOT_EXECUTED`.
 
-- `newcomer_engagement_milestone`: a one-month exact source plan did not
-  return in the local 30-second observation window. The reduced exact window
-  `2026-08-24 .. 2026-09-01` returned 5,538 rows in 18,609.011 ms with
-  2,483,196 shared hits, no shared reads and substantial temporary I/O
-  (40,343 read / 68,876 written blocks). The current full-horizon source
-  snapshot is therefore not accepted as a fast incremental SLA candidate.
-  Full range, transport, target diff and reconciliation remain `NOT_EXECUTED`.
-  Plan-level cause: even the weekly predicate still scanned approximately
-  4.9m rows from `_accumrg7646`, 1.3m from `_accumrg7478`, 1.54m from
-  `_inforg5859` and 876k from `_reference141x1`; downstream hash/unique sorts
-  spilled up to 49,144 temporary blocks. This is a measured blocker for a fast
-  source-snapshot incremental design, not a target-runner timeout setting.
+- `newcomer_engagement_milestone`: `BLOCKER` for a **true incremental
+  refresh**. The currently committed `_incremental.py` is a separate runner,
+  but its `target_row_diff` algorithm still reads the complete BR-003 source
+  snapshot (`2025-01-01 .. current date`) and must not be called an
+  incremental design. It remains schedule-blocked.
+
+  Read-only source-plan evidence was captured in separate `REPEATABLE READ,
+  READ ONLY` sessions. The same exact weekly extract
+  `2026-08-24 .. 2026-09-01` first returned 5,538 rows in 18,609.011 ms with
+  40,343/68,876 temporary read/write blocks. Changing only the query-local
+  setting to `SET LOCAL work_mem = '512MB'` preserved the 5,538 output rows,
+  reduced elapsed time to 16,936.208 ms and eliminated temporary I/O. The
+  progressive source ladder with that same session-local setting was:
+
+  | Window | Rows | Execution time | Shared hit/read | Temp read/write |
+  |---|---:|---:|---:|---:|
+  | 2026-08-01 .. 2026-09-01 | 18,673 | 17,398.474 ms | 2,189,216 / 0 | 0 / 0 |
+  | 2026-07-01 .. 2026-09-01 | 33,305 | 19,946.811 ms | 2,311,789 / 2,242 | 0 / 0 |
+  | 2026-06-01 .. 2026-09-01 | 46,766 | 16,856.798 ms | 2,433,739 / 0 | 0 / 0 |
+  | 2026-03-01 .. 2026-09-01 | 105,957 | 26,426.329 ms | 2,936,463 / 9,242 | 0 / 0 |
+
+  The complete current BR-003 source snapshot did not return a plan result in
+  the available 30-second observation window even with `work_mem = '512MB'`.
+  No target DML, transport, target diff, target reconciliation or Power BI
+  refresh was run.
+
+  A source-watermark inventory was then performed before narrowing the
+  extract. The fact depends on `Reference59`, `Reference141X1`, `Document346`
+  and two document tabular sections, three accumulation registers, an
+  information register, and employee sources. The three reference/document
+  tables expose `_version`, but it is not a global monotonic change cursor:
+  `Reference59` has 2,088,773 rows but only 155 distinct values (`0..449`),
+  `Reference141X1` has 876,888 rows but 58 (`0..81`), and `Document346` has
+  3,131,217 rows but 23 (`0..53`). The three movement registers used by the
+  extract do not expose `_version`. The read-only catalogue search found no
+  change-log/audit relation by name and no non-internal trigger on the eleven
+  participating source relations. `_marked` alone cannot reveal changed or
+  deleted movement rows.
+
+  Therefore a bounded output-date window would miss unbounded late
+  corrections and deletions under the confirmed current rule. Required input
+  for a real incremental design is one of: an authoritative source change
+  feed/watermark covering every dependency and deletions; or an explicitly
+  approved finite late-correction retention rule. Until then the only
+  correctness-preserving mode is the documented bounded full rebuild, not a
+  scheduled incremental refresh. The local `work_mem` observation is not a
+  server-default recommendation and does not establish an SLA.
