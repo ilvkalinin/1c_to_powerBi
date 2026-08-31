@@ -49,3 +49,13 @@ Acceptance units, in deterministic manifest order:
 
 No unit has runtime acceptance yet. The existing full-horizon target-diff
 runners must not be represented as a one-minute SLA until this evidence exists.
+
+## Local read-only plan attempts
+
+- `unconfirmed_service_debt_movement`: source plan ladder measured separately
+  in `unconfirmed_service_debt_movement_incremental_performance_2026-08-31.md`.
+- `client_base_daily`: the current runner's full-horizon source fingerprint
+  `EXPLAIN (ANALYZE, BUFFERS)` did not return within the local 30-second
+  observation window. The source session was no longer active afterwards. This
+  is `NOT_MEASURED`, not a performance conclusion; use a bounded progressive
+  horizon on VM2 before attempting the full range.
