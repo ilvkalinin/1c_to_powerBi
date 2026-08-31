@@ -56,6 +56,14 @@ runners must not be represented as a one-minute SLA until this evidence exists.
   in `unconfirmed_service_debt_movement_incremental_performance_2026-08-31.md`.
 - `client_base_daily`: the current runner's full-horizon source fingerprint
   `EXPLAIN (ANALYZE, BUFFERS)` did not return within the local 30-second
-  observation window. The source session was no longer active afterwards. This
-  is `NOT_MEASURED`, not a performance conclusion; use a bounded progressive
-  horizon on VM2 before attempting the full range.
+  observation window. The source session was no longer active afterwards.
+  A safe progressive ladder was then measured with the exact fingerprint:
+
+  | Window | Rows | Execution time | Shared hit/read | Temp read/write |
+  |---|---:|---:|---:|---:|
+  | 2026-08-01 .. 2026-09-01 | 31 | 7,483.035 ms | 1,395,311 / 0 | 1,285 / 2,887 |
+  | 2026-07-01 .. 2026-09-01 | 62 | 8,585.290 ms | 1,437,436 / 0 | 1,885 / 7,569 |
+  | 2026-06-01 .. 2026-09-01 | 92 | 9,761.552 ms | 1,477,770 / 1 | 2,981 / 8,664 |
+
+  The measured temporary spill means that a full-horizon plan remains
+  `NOT_MEASURED`; it is not a performance conclusion or SLA result.
