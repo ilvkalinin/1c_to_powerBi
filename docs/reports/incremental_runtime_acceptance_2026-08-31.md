@@ -184,8 +184,10 @@ runners must not be represented as a one-minute SLA until this evidence exists.
   reconciliation have not been executed.
 
 - `newcomer_engagement_second_month`: `BLOCKER` for the same rolling-window
-  strategy. Its current separate runner is still `target_row_diff` over the
-  full BR-003 horizon. The exact two-month source extract
+  strategy until its bounded runner is runtime-accepted. Its separate runner
+  now uses `bounded_sliding_window` over two months, preserves older BR-003
+  target rows, and keeps `late_change_evidence = ASSUMPTION`; the full loader
+  and shared extract were not changed. The exact two-month source extract
   `2026-07-01 .. 2026-09-01` did not return an `EXPLAIN (ANALYZE, BUFFERS)`
   result in the available 30-second observation window, even with
   `SET LOCAL work_mem = '512MB'`; no DML was run. SQL review identifies the
@@ -195,7 +197,7 @@ runners must not be represented as a one-minute SLA until this evidence exists.
   `month_of_engagement` filter. Moving that boundary earlier can change the
   confirmed current child-package semantics, so it must not be done as a
   performance-only edit. This mart remains on the current item until an
-  evidence-preserving source reduction or an approved business rule exists.
+  end-to-end target execution is accepted.
 
   A non-executing plan isolates a possible evidence-preserving optimisation
   candidate, but does not validate it: the root cost is `734,931.53` for an
