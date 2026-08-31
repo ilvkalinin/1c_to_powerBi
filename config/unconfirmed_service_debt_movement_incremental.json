@@ -1,7 +1,7 @@
 {
   "object": "mart.unconfirmed_service_debt_movement",
   "mode": "bounded_sliding_window",
-  "as_of_date": "2026-08-30",
+  "as_of_date": "runtime_today_moscow",
   "months_in_window": 3,
   "timezone": "Europe/Moscow",
   "late_change_evidence": "ASSUMPTION",

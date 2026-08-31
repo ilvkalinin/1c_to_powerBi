@@ -8,9 +8,10 @@ import json
 import sys
 import tempfile
 import time
-from datetime import date
+from datetime import date, datetime
 from decimal import Decimal
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 import psycopg
 
@@ -50,11 +51,13 @@ def subtract_months(month_start: date, months: int) -> date:
     return date(absolute // 12, absolute % 12 + 1, 1)
 
 
-def load_config(path: Path) -> tuple[date, int]:
+def load_config(path: Path, runtime_date: date) -> tuple[date, int]:
     payload = json.loads(path.read_text(encoding="utf-8"))
     if payload.get("object") != TABLE or payload.get("mode") != "bounded_sliding_window":
         raise RuntimeError("Incremental config does not target the reviewed mart/mode")
-    as_of_date = date.fromisoformat(payload["as_of_date"])
+    if payload.get("as_of_date") != "runtime_today_moscow":
+        raise RuntimeError("Incremental as_of_date must be runtime_today_moscow")
+    as_of_date = runtime_date
     months = int(payload["months_in_window"])
     if months < 1 or months > 12:
         raise RuntimeError("months_in_window must be in 1..12")
@@ -189,7 +192,7 @@ def main() -> None:
     mode.add_argument("--plan-only", action="store_true")
     mode.add_argument("--run", action="store_true")
     args = parser.parse_args()
-    as_of_date, months = load_config(args.config)
+    as_of_date, months = load_config(args.config, datetime.now(ZoneInfo("Europe/Moscow")).date())
     horizon_start, window_start, window_end = boundaries(as_of_date, months)
     print(f"CONFIG as_of_date={as_of_date} horizon={horizon_start}..{window_end} window={window_start}..{window_end}")
     if args.plan_only:
