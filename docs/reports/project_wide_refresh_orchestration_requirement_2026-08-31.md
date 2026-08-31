@@ -44,3 +44,13 @@ runtimes, advisory-lock names и текущие Task Scheduler definitions. За
 Codex на VM-2, передавать интерактивный удалённый доступ или пароль. Временный
 SSH-channel, подготовленный для альтернативного варианта, удаляется и не
 используется.
+
+## Deployment model — уточнение пользователя 2026-08-31
+
+GitHub хранит итоговую versioned версию проекта. VM-2 не получает полный
+development checkout: для исполнения нужен только локальный minimal release
+bundle (runner/config/SQL/dependencies) в выделенной папке, потому что Windows
+Task Scheduler не исполняет Python-код напрямую из GitHub. `.env` не входит в
+GitHub или release bundle и создаётся локально на VM-2 после определения
+service account и ACL. До публикации финального release проводится audit
+локальной ветки: её нельзя публиковать вместе с чужими dirty files.
