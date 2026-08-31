@@ -1,10 +1,13 @@
 {
   "objects": ["mart.newcomer_engagement_milestone"],
-  "mode": "target_row_diff",
+  "mode": "bounded_sliding_window",
   "timezone": "Europe/Moscow",
-  "change_detection": "source_snapshot_to_target_exact_row_multiset_diff",
-  "deletion_policy": "delete_target_rows_absent_or_different_in_source_snapshot",
-  "no_change_policy": "no_final_target_dml",
+  "months_in_window": 2,
+  "change_detection": "source_snapshot_inside_late_change_window",
+  "deletion_policy": "atomic_replace_inside_window",
+  "outside_window_policy": "preserve_inside_br003_horizon",
+  "late_change_evidence": "ASSUMPTION",
+  "no_change_policy": "window_replace_even_when_row_counts_match",
   "watermark": null,
   "incremental_sla": null
 }

@@ -170,5 +170,7 @@ runners must not be represented as a one-minute SLA until this evidence exists.
   correct only if an approved business rule bounds corrections and deletions
   to two months, or if a separate rare full rebuild remains the documented
   history-reconciliation operation. No runner/configuration was changed for
-  this candidate, and its target-side time, reconciliation and Power BI time
-  are still `NOT_EXECUTED`.
+  A separate runner/configuration now implements this candidate; it keeps
+  `late_change_evidence = ASSUMPTION`, `watermark = null`, `incremental_sla =
+  null`, and the manifest's `scheduling_status = BLOCKED`. Its target-side
+  time, reconciliation and Power BI time are still `NOT_EXECUTED`.
