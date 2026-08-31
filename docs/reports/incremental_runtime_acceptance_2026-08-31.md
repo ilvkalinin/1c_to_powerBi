@@ -115,3 +115,8 @@ runners must not be represented as a one-minute SLA until this evidence exists.
   (40,343 read / 68,876 written blocks). The current full-horizon source
   snapshot is therefore not accepted as a fast incremental SLA candidate.
   Full range, transport, target diff and reconciliation remain `NOT_EXECUTED`.
+  Plan-level cause: even the weekly predicate still scanned approximately
+  4.9m rows from `_accumrg7646`, 1.3m from `_accumrg7478`, 1.54m from
+  `_inforg5859` and 876k from `_reference141x1`; downstream hash/unique sorts
+  spilled up to 49,144 temporary blocks. This is a measured blocker for a fast
+  source-snapshot incremental design, not a target-runner timeout setting.
