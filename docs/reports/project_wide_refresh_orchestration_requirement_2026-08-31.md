@@ -1,0 +1,37 @@
+# Требование: единое автоматическое обновление всех витрин
+
+- Дата решения: 2026-08-31
+- Статус: `CONFIRMED USER DECISION`
+- Execution host: только VM-2
+- Scope: все 40 физических витрин проекта
+
+## Требование
+
+Автоматизация не ограничивается `mart.unconfirmed_service_debt_movement`.
+Нужно настроить обновление всех 40 физических витрин на VM-2 одним
+операционным контуром. Запрещены 40 независимых daily-trigger с одинаковым
+стартом и глобальная последовательность по фиксированным 15-минутным slots.
+
+Целевая схема:
+
+1. каждая витрина имеет on-demand job и same-object overlap guard;
+2. один VM-2 orchestrator хранит dependency graph и запускает только готовые
+   независимые ветки;
+3. timeout каждой job основан на измеренном runtime и stop policy, а не на
+   общем значении;
+4. heavy source plan/transport не выполняются параллельно; лёгкие независимые
+   ветки получают ограниченный concurrency budget после измерения;
+5. цепочка fail-closed: downstream не запускается после failure dependency;
+6. logs/journal не содержат credentials; `.env` остаётся ACL-защищённым на
+   VM-2; Power BI и source 1С не изменяются;
+7. критический путь должен завершать питающие витрины до BR-014 08:30 МСК.
+
+## Entry evidence
+
+До установки выполнить на VM-2 read-only inventory: реальные relations,
+runner/config presence, dependencies, latest acceptance evidence, фактические
+runtimes, advisory-lock names и текущие Task Scheduler definitions. Затем
+подготовить reviewed DAG/schedule и только после его одобрения устанавливать
+общий orchestrator и задачи.
+
+Текущее состояние: `BLOCKED` до появления управляемого remote channel к VM-2.
