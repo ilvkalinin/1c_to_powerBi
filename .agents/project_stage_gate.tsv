@@ -5,4 +5,4 @@
 # CLOSED_PENDING_NEXT_APPROVAL rejects all new selections until the user
 # explicitly confirms the next independent package.
 gate_id	state	allowed_stage	allowed_report_ids	reason
-global_stage_gate	CLOSED_PENDING_NEXT_APPROVAL	-	-	Visits-debt bounded sliding-window package closed 2026-08-31: atomic refresh through 2026-08-30 passed in 92.673s; a new independent package requires explicit approval.
+global_stage_gate	CLOSED_PENDING_NEXT_APPROVAL	-	-	Visits-debt on-demand job package closed 2026-08-31 with external install BLOCKED; fixed per-mart daily triggers rejected because 40 marts require project-wide dependency/concurrency orchestration.
