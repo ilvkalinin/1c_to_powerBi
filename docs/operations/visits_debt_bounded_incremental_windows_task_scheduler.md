@@ -31,7 +31,7 @@ Deployment bundle размещается в `release`, локальный `.env`
    не записывать в XML, repository или command history.
 3. Разместить reviewed project revision на VM-2. В копии XML заменить
    `__TASK_USER_SID__`, `__PROJECT_ROOT__`, `__PYTHON_EXE__`,
-   `__LOG_DIRECTORY__` только на абсолютные VM-2 значения.
+   `__LOG_DIRECTORY__`, `__ENV_FILE__` только на абсолютные VM-2 значения.
 4. Импортировать XML через Task Scheduler UI с вводом пароля account в
    защищённом диалоге. Имя задачи:
    `NFG\VisitsDebtBoundedRefresh`.
@@ -44,8 +44,9 @@ Deployment bundle размещается в `release`, локальный `.env`
    `LastTaskResult` означает fail-closed failure; не запускать current full
    loader как автоматический fallback.
 
-`.env` не копируется в XML и не выводится в лог. Wrapper передаёт наружу exit
-code runner, а runner уже использует тот же transaction advisory lock, поэтому
+`.env` не копируется в XML и не выводится в лог. XML хранит только путь к
+ACL-защищённому `config\.env`; wrapper передаёт этот путь процессу через
+`NFG_ENV_FILE`, а runner уже использует тот же transaction advisory lock, поэтому
 параллельный DML одного объекта не принимается.
 
 `IgnoreNew` не означает глобальную последовательность 40 витрин. Общий график

@@ -1,7 +1,8 @@
 param(
     [Parameter(Mandatory = $true)][string]$ProjectRoot,
     [Parameter(Mandatory = $true)][string]$PythonExe,
-    [Parameter(Mandatory = $true)][string]$LogDirectory
+    [Parameter(Mandatory = $true)][string]$LogDirectory,
+    [Parameter(Mandatory = $true)][string]$EnvFile
 )
 
 $ErrorActionPreference = 'Stop'
@@ -16,12 +17,16 @@ try {
     if (-not (Test-Path -LiteralPath $PythonExe -PathType Leaf)) {
         throw "PythonExe does not exist"
     }
+    if (-not (Test-Path -LiteralPath $EnvFile -PathType Leaf)) {
+        throw "EnvFile does not exist"
+    }
     New-Item -ItemType Directory -Path $LogDirectory -Force | Out-Null
     $logPath = Join-Path $LogDirectory "visits_debt_$stamp.log"
     $runner = Join-Path $ProjectRoot 'scripts\load_unconfirmed_service_debt_movement_incremental.py'
 
     Push-Location $ProjectRoot
     try {
+        $env:NFG_ENV_FILE = $EnvFile
         & $PythonExe $runner --run *>&1 | Tee-Object -FilePath $logPath
         $runnerExit = $LASTEXITCODE
     }

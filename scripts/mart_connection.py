@@ -18,13 +18,19 @@ T = TypeVar("T")
 
 
 def load_project_env() -> None:
-    """Make the repository's ignored .env authoritative for DB credentials.
+    """Load an explicitly configured or repository-local ignored .env file.
 
     It deliberately does not print values or evaluate shell syntax.  Loading
     happens when any shared connection helper is imported, before its first
     database socket can be opened.
     """
-    environment_file = Path(__file__).resolve().parents[1] / ".env"
+    configured_file = os.environ.get("NFG_ENV_FILE")
+    if configured_file:
+        environment_file = Path(configured_file).expanduser()
+        if not environment_file.is_absolute():
+            raise RuntimeError("NFG_ENV_FILE must be an absolute path")
+    else:
+        environment_file = Path(__file__).resolve().parents[1] / ".env"
     if not environment_file.is_file():
         raise RuntimeError(f"Required credential file is absent: {environment_file}")
     for raw_line in environment_file.read_text(encoding="utf-8").splitlines():

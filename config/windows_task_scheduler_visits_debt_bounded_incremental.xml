@@ -24,7 +24,7 @@
   <Actions Context="Author">
     <Exec>
       <Command>powershell.exe</Command>
-      <Arguments>-NoProfile -NonInteractive -ExecutionPolicy Bypass -File "__PROJECT_ROOT__\scripts\run_unconfirmed_service_debt_movement_incremental_scheduled.ps1" -ProjectRoot "__PROJECT_ROOT__" -PythonExe "__PYTHON_EXE__" -LogDirectory "__LOG_DIRECTORY__"</Arguments>
+      <Arguments>-NoProfile -NonInteractive -ExecutionPolicy Bypass -File "__PROJECT_ROOT__\scripts\run_unconfirmed_service_debt_movement_incremental_scheduled.ps1" -ProjectRoot "__PROJECT_ROOT__" -PythonExe "__PYTHON_EXE__" -LogDirectory "__LOG_DIRECTORY__" -EnvFile "__ENV_FILE__"</Arguments>
       <WorkingDirectory>__PROJECT_ROOT__</WorkingDirectory>
     </Exec>
   </Actions>
