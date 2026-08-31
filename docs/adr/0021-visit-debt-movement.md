@@ -29,6 +29,12 @@ SLA. PostgreSQL хранит движения и report-specific
 detail; DAX считает остаток на начало/конец, погашение, новые долги и distinct
 клиентов в выбранной когорте. PII выдаётся по BR-017.
 
+Read-only validation `VD-INC-001—005` от 2026-08-31 не нашла у
+`_accumrg7509` change timestamp/version или отдельный change feed. `_active`
+не предоставляет tombstones, а event date `_period` не доказывает время
+исправления. Поэтому отдельная incremental-настройка имеет статус `BLOCKED`;
+текущий loader и full-rebuild решение не меняются.
+
 ## Риски
 
 Физические relations, `RecordKind`, ключ/state/sign регистра, полиморфные
@@ -40,3 +46,4 @@ detail; DAX считает остаток на начало/конец, пога
 
 - [Требования](../reports/visits_debt.md)
 - [Mapping](../mappings/visits_debt.md)
+- [Incremental validation](../reports/visits_debt_incremental_validation_execution_2026-08-31.md)
