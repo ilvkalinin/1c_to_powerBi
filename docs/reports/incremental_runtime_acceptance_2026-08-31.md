@@ -207,8 +207,10 @@ runners must not be represented as a one-minute SLA until this evidence exists.
   exact result-set equality evidence against the current extract before it
   can replace the source query.
 
-  The candidate was measured read-only for `2026-07-01 .. 2026-09-01` with
-  `work_mem = 512MB`: it returned 11,025 rows in 15,192.413 ms with
-  4,208,483 shared hits, 24,472 shared reads and no temporary I/O. The
-  original full query remains the equality baseline; result-set reconciliation
-  is still required before the candidate enters the runner.
+  The candidate was rejected. It returned 11,025 rows in 15,192.413 ms, but
+  exact `EXCEPT ALL` comparison with the current extract found 10 different
+  rows. After the same source pages were warm, the unchanged exact extract
+  returned the same 11,025 rows in 10,145.841 ms without temporary I/O.
+  Therefore no source-SQL optimisation is adopted: a rolling two-month runner
+  must use the unchanged extract and still needs a cold-run measurement before
+  scheduling.
