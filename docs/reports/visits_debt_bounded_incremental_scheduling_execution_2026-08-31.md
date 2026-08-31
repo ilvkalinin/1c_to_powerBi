@@ -23,6 +23,11 @@ credentials, WinRM client authority и TLS channel; SSH недоступен. П
 Task Scheduler не изменялся. Это не выдаётся за установленное расписание.
 Точная процедура: [operator handoff](../operations/visits_debt_bounded_incremental_windows_task_scheduler.md).
 
+По уточнению пользователя execution boundary зафиксирована однозначно:
+автоматический refresh запускается только Windows Task Scheduler/orchestrator
+на VM-2. Текущая машина не является scheduler host; на ней задача не создавалась
+и запуск по расписанию отсутствует.
+
 Текущий full loader, bounded SQL/config, target data, Power BI и source 1С этим
 пакетом не изменялись.
 

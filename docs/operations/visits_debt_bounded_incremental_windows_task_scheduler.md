@@ -2,6 +2,11 @@
 
 Статус: `BLOCKED — external installation authority required`.
 
+Execution boundary: задача запускается **только на VM-2**. Текущая рабочая
+машина используется лишь для versioned deploy-артефактов и не является
+scheduler host. Project checkout, Python environment, ACL-защищённый `.env` и
+log directory должны находиться на VM-2; пути в XML относятся только к VM-2.
+
 Подготовлены:
 
 - `scripts/run_unconfirmed_service_debt_movement_incremental_scheduled.ps1`;
@@ -9,13 +14,15 @@
 
 ## Установка оператором на VM-2
 
-1. Проверить `Get-TimeZone`: локальная зона VM-2 должна соответствовать Moscow
-   Standard Time, потому что Task Scheduler интерпретирует 07:30 как local time.
+1. Выполнять все следующие действия в интерактивной/operator-сессии **на
+   VM-2**. Проверить `Get-TimeZone`: локальная зона VM-2 должна соответствовать
+   Moscow Standard Time, потому что общий orchestrator использует local time.
 2. Выбрать отдельную service account с read/execute к project, Python и `.env`,
    write только к log directory и необходимыми PostgreSQL permissions. Пароль
    не записывать в XML, repository или command history.
-3. В копии XML заменить `__TASK_USER_SID__`, `__PROJECT_ROOT__`,
-   `__PYTHON_EXE__`, `__LOG_DIRECTORY__` на абсолютные VM-2 значения.
+3. Разместить reviewed project revision на VM-2. В копии XML заменить
+   `__TASK_USER_SID__`, `__PROJECT_ROOT__`, `__PYTHON_EXE__`,
+   `__LOG_DIRECTORY__` только на абсолютные VM-2 значения.
 4. Импортировать XML через Task Scheduler UI с вводом пароля account в
    защищённом диалоге. Имя задачи:
    `NFG\VisitsDebtBoundedRefresh`.
