@@ -101,3 +101,9 @@ runners must not be represented as a one-minute SLA until this evidence exists.
   1,424,912 shared hits, 3,842 shared reads and no temporary I/O. This is
   source-only evidence; transport, target diff and reconciliation remain
   `NOT_EXECUTED`.
+
+- `membership_receipts`: primary exact source extract, one-month window
+  `2026-08-01 .. 2026-09-01`, measured 16,314 rows in 1,984.152 ms with
+  517,902 shared hits, 9,126 shared reads and no temporary I/O. Contract
+  history, price/freeze auxiliary queries, transport, target diff and
+  reconciliation remain `NOT_EXECUTED`.
