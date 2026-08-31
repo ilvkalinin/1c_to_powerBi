@@ -5,4 +5,4 @@
 # CLOSED_PENDING_NEXT_APPROVAL rejects all new selections until the user
 # explicitly confirms the next independent package.
 gate_id	state	allowed_stage	allowed_report_ids	reason
-global_stage_gate	CLOSED_PENDING_NEXT_APPROVAL	-	-	Project-wide orchestration planning closed 2026-08-31: 40 physical objects map to 29 atomic jobs and 5 views-not-jobs, but all jobs are fail-closed BLOCKED because full-rebuild/entrypoint/dynamic-as-of/runtime evidence does not establish an automatic schedule. A future installation package requires an explicit frequency decision or reviewed per-job incremental designs plus measured runtime, timeout and concurrency evidence.
+global_stage_gate	READONLY_REVIEW_AUTHORIZED	STAGE_3_INCREMENTAL_DESIGN	project_refresh_incremental_design	User approved 2026-08-31 sequential incremental-refresh design for every job in config/project_refresh_orchestration.json. Only exact read-only source/target metadata, approved controls and source EXPLAIN (ANALYZE, BUFFERS) are allowed; DDL/DML, COPY, loader execution and VM-2 Task Scheduler changes remain blocked.
