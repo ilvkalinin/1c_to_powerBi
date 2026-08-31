@@ -1,0 +1,1 @@
+{"objects":["mart.ancillary_revenue_movement","mart.ip_revenue_daily","mart.revenue_group_summary_daily"],"mode":"ordered_scoped_diffs_then_summary_diff","timezone":"Europe/Moscow","watermark":null,"incremental_sla":null}
