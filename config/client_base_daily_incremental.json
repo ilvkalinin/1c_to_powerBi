@@ -1,0 +1,12 @@
+{
+  "object": "mart.client_base_daily",
+  "mode": "target_fingerprint_diff",
+  "timezone": "Europe/Moscow",
+  "horizon": "br003_current",
+  "change_detection": "source_target_double_md5_by_report_date",
+  "changed_date_policy": "replace_contiguous_min_to_max",
+  "deletion_policy": "detected_as_source_target_fingerprint_difference",
+  "no_change_policy": "no_target_dml",
+  "watermark": null,
+  "incremental_sla": null
+}

@@ -12,7 +12,7 @@
   ],
   "jobs": [
     {"id": "client_base_snapshot_retention", "targets": ["mart.client_base_snapshot", "mart.client_base_retention"], "entrypoint": "scripts/load_client_base_snapshot_retention.py", "arguments": ["--rerun"], "dependencies": [], "refresh_class": "composite_full_rebuild", "scheduling_status": "BLOCKED"},
-    {"id": "client_base_daily", "targets": ["mart.client_base_daily"], "entrypoint": "scripts/load_client_base_daily.py", "arguments": ["--rebuild"], "dependencies": [], "refresh_class": "full_rebuild", "scheduling_status": "BLOCKED"},
+    {"id": "client_base_daily", "targets": ["mart.client_base_daily"], "entrypoint": "scripts/load_client_base_daily_incremental.py", "arguments": ["--run"], "dependencies": [], "refresh_class": "target_fingerprint_diff", "scheduling_status": "BLOCKED"},
     {"id": "visit_client_day", "targets": ["mart.visit_client_day"], "entrypoint": "scripts/load_visit_client_day.py", "arguments": ["--apply"], "dependencies": [], "refresh_class": "full_rebuild", "scheduling_status": "BLOCKED"},
     {"id": "crm_br032", "targets": ["mart.crm_interaction", "mart.crm_interaction_phone", "mart.feedback_interaction", "mart.club_day_metrics"], "entrypoint": "scripts/load_crm_br032.py", "arguments": ["--rebuild"], "dependencies": [], "refresh_class": "composite_full_rebuild", "scheduling_status": "BLOCKED"},
     {"id": "club_attendance_hourly", "targets": ["mart.club_attendance_hourly"], "entrypoint": "scripts/load_club_attendance_hourly.py", "arguments": ["--rebuild"], "dependencies": [], "refresh_class": "full_rebuild", "scheduling_status": "BLOCKED"},
