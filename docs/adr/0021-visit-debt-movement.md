@@ -35,6 +35,12 @@ Read-only validation `VD-INC-001—005` от 2026-08-31 не нашла у
 исправления. Поэтому отдельная incremental-настройка имеет статус `BLOCKED`;
 текущий loader и full-rebuild решение не меняются.
 
+Явным решением пользователя 2026-08-31 отдельно принят bounded
+sliding-window: новый config/runner полностью заменяет текущий и два предыдущих
+месяца, сохраняя более раннюю BR-003 историю. Это обрабатывает исчезнувшие
+ключи только внутри окна и не снимает `BLOCKED` для настоящего change
+watermark. Первый прогон до 2026-08-30 прошёл за 92.673 s.
+
 ## Риски
 
 Физические relations, `RecordKind`, ключ/state/sign регистра, полиморфные
@@ -47,3 +53,4 @@ Read-only validation `VD-INC-001—005` от 2026-08-31 не нашла у
 - [Требования](../reports/visits_debt.md)
 - [Mapping](../mappings/visits_debt.md)
 - [Incremental validation](../reports/visits_debt_incremental_validation_execution_2026-08-31.md)
+- [Bounded refresh execution](../reports/visits_debt_bounded_incremental_execution_2026-08-31.md)

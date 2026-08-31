@@ -1,0 +1,12 @@
+{
+  "object": "mart.unconfirmed_service_debt_movement",
+  "mode": "bounded_sliding_window",
+  "as_of_date": "2026-08-30",
+  "months_in_window": 3,
+  "timezone": "Europe/Moscow",
+  "late_change_evidence": "ASSUMPTION",
+  "deletion_policy": "atomic_replace_inside_window",
+  "outside_window_policy": "preserve_inside_br003_horizon",
+  "watermark": null,
+  "incremental_sla": null
+}

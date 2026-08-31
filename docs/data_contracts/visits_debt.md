@@ -14,6 +14,7 @@ evidence — `visits_debt_stage3_execution_2026-08-27.md`. Power BI в этом
 |---|---|
 | Объект | `mart.unconfirmed_service_debt_movement` |
 | Incremental refresh | `BLOCKED`: нет change watermark/feed, deletion capture и измеренного late-change lag; VD-INC-001—005 |
+| Bounded refresh | отдельный config/runner; current + two previous months atomic replace; accepted methodology risk, не incremental SLA; первый прогон 92.673 s |
 | Таблица Power BI | `Движения задолженности` |
 | Grain / key | движение регистра / `(debt_event_at, recorder_type, recorder_id, recorder_line_no)` |
 
