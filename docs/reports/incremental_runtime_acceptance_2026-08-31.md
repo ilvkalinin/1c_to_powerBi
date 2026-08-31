@@ -89,3 +89,9 @@ runners must not be represented as a one-minute SLA until this evidence exists.
   2,724,236 shared hits, 7,951 shared reads and no temporary I/O. This is
   source-only evidence; transport, target diff and reconciliation remain
   `NOT_EXECUTED`.
+
+- `group_lesson`: exact base source extract, one-month window
+  `2026-08-01 .. 2026-09-01`, measured 14,990 rows in 84.208 ms with 19,866
+  shared hits, 964 shared reads and no temporary I/O. The dependent target-side
+  lookup of `mart.prebooking_state_event`, transport, diff and reconciliation
+  remain `NOT_EXECUTED`.
