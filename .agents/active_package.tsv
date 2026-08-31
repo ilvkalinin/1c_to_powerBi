@@ -4,7 +4,7 @@
 # package_status must be ACTIVE or CLOSED; report_status must be PENDING, IN_PROGRESS, COMPLETE, or BLOCKED.
 # approval_evidence must link to the user-approved full scope and closure criterion.
 package_id	stage	package_status	approved_at	approval_evidence
-project_wide_refresh_orchestration_planning_2026-08-31	STAGE_3_ORCHESTRATION_PLANNING	ACTIVE	2026-08-31	docs/reports/project_wide_refresh_orchestration_planning_authorization_2026-08-31.md
+project_wide_refresh_orchestration_planning_2026-08-31	STAGE_3_ORCHESTRATION_PLANNING	CLOSED	2026-08-31	docs/reports/project_wide_refresh_orchestration_planning_authorization_2026-08-31.md
 
 report_id	report_status	completion_commit
-project_refresh_orchestration	IN_PROGRESS	-
+project_refresh_orchestration	COMPLETE	SELF
