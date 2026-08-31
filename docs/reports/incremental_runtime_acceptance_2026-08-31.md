@@ -107,3 +107,11 @@ runners must not be represented as a one-minute SLA until this evidence exists.
   517,902 shared hits, 9,126 shared reads and no temporary I/O. Contract
   history, price/freeze auxiliary queries, transport, target diff and
   reconciliation remain `NOT_EXECUTED`.
+
+- `newcomer_engagement_milestone`: a one-month exact source plan did not
+  return in the local 30-second observation window. The reduced exact window
+  `2026-08-24 .. 2026-09-01` returned 5,538 rows in 18,609.011 ms with
+  2,483,196 shared hits, no shared reads and substantial temporary I/O
+  (40,343 read / 68,876 written blocks). The current full-horizon source
+  snapshot is therefore not accepted as a fast incremental SLA candidate.
+  Full range, transport, target diff and reconciliation remain `NOT_EXECUTED`.
